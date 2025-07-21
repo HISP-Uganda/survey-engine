@@ -122,7 +122,7 @@ body {
 
 /* Ensure table cells don't break layout */
 .table th, .table td {
-    padding: 15px;
+    padding: 10px;
     text-align: left;
     word-wrap: break-word;
     white-space: normal; /* Prevent text from overflowing */
