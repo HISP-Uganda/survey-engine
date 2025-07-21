@@ -1,0 +1,24 @@
+{
+  "UiO": {
+    "url": "https://tests.dhis2.hispuganda.org/hmis",
+    "username": "hisp.edwin",
+    "password": ""
+  },
+  "eHMIS": {
+    "url": "https://hmis.moh.go.ug",
+    "username": "admin",
+    "password": "district"
+  },
+  "EPIVAC": {
+    "url": "https://epivac.moh.go.ug",
+    "username": "admin",
+    "password": "district"
+  },"STEP":{
+    "url": "https://step.moh.go.ug",
+    "username": "admin",
+    "password": "district"
+  }
+}
+
+
+
