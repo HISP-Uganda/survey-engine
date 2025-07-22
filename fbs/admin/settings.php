@@ -180,9 +180,9 @@ if ($selectedInstance && isset($_POST['fetch_orgunits'])) {
         
         $orgUnits = dhis2_get($apiPath, $selectedInstance);
         
-        if (empty($orgUnits['organisationUnits'])) {
-            throw new Exception("No units found with current filters");
-        }
+        // if (empty($orgUnits['organisationUnits'])) {
+        //     throw new Exception("No units found with current filters");
+        // }
         
     } catch (Exception $e) {
         $message = ['type' => 'error', 'text' => $e->getMessage()];
