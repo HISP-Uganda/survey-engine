@@ -1,6 +1,20 @@
 <?php
 session_start();
 
+// Enable full error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Include the database connection file.
+// Since it's in the same directory, a direct filename is sufficient.
+require_once 'connect.php';
+
+// Check if the PDO object is available from connect.php
+if (!isset($pdo)) {
+    error_log("Database connection failed in thank_you_page.php. Please check connect.php.");
+    die("Database connection failed. Please try again later.");
+}
+
 // Check if the user has submitted the form
 // This line needs to be aware of the survey ID to ensure correct context
 if (!isset($_SESSION['submitted_uid'])) {
@@ -14,30 +28,20 @@ if (!isset($_SESSION['submitted_uid'])) {
 $uid = $_SESSION['submitted_uid'];
 $surveyIdFromSession = $_SESSION['submitted_survey_id'] ?? null; // Get survey_id from session as well
 
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "fbtv3";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
 // Get basic submission data
-// Using prepared statement for safety
-$stmt = $conn->prepare("
-    SELECT id, age, sex, period, service_unit_id, location_id, ownership_id, survey_id
-    FROM submission
-    WHERE uid = ?
-");
-$stmt->bind_param("s", $uid);
-$stmt->execute();
-$result = $stmt->get_result();
-$submission = $result->fetch_assoc();
-$stmt->close(); // Close the statement after use
+$submission = null; // Initialize to null
+try {
+    $stmt = $pdo->prepare("
+        SELECT id, age, sex, period, service_unit_id, location_id, ownership_id, survey_id
+        FROM submission
+        WHERE uid = ?
+    ");
+    $stmt->execute([$uid]);
+    $submission = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Database error fetching submission details: " . $e->getMessage());
+    die("Error retrieving submission details.");
+}
 
 // If no submission found with this UID
 if (!$submission) {
@@ -47,96 +51,101 @@ if (!$submission) {
 // IMPORTANT: Get survey_id directly from the submission if possible
 $surveyId = $submission['survey_id'] ?? $surveyIdFromSession;
 
-// Initialize facility name to a default that will be used for checking if it's "specified"
-$facilityName = null; // Changed to null for stricter check
-$facilityId = $submission['location_id']; // Get location_id from submission
+// Initialize facility name
+$facilityName = null;
+$facilityId = $submission['location_id'];
 
 // Conditionally fetch facility name ONLY if facilityId is not null
 if ($facilityId !== null) {
-    $stmt = $conn->prepare("SELECT name FROM location WHERE id = ?");
-    $stmt->bind_param("i", $facilityId);
-    $stmt->execute();
-    $facilityResult = $stmt->get_result();
-    $facility = $facilityResult->fetch_assoc();
-    $stmt->close();
-
-    if ($facility) {
-        $facilityName = $facility['name'];
+    try {
+        $stmt = $pdo->prepare("SELECT name FROM location WHERE id = ?");
+        $stmt->execute([$facilityId]);
+        $facility = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($facility) {
+            $facilityName = $facility['name'];
+        }
+    } catch (PDOException $e) {
+        error_log("Database error fetching facility name: " . $e->getMessage());
+        // $facilityName remains null
     }
 }
-
 
 // Check survey type before fetching service unit and ownership
 $surveyType = 'local'; // Default to local
-
 if ($surveyId) {
-    $stmt = $conn->prepare("SELECT type FROM survey WHERE id = ?");
-    $stmt->bind_param("i", $surveyId);
-    $stmt->execute();
-    $surveyTypeResult = $stmt->get_result();
-    $surveyTypeRow = $surveyTypeResult->fetch_assoc();
-    $stmt->close();
-    if ($surveyTypeRow && isset($surveyTypeRow['type'])) {
-        $surveyType = $surveyTypeRow['type'];
+    try {
+        $stmt = $pdo->prepare("SELECT type FROM survey WHERE id = ?");
+        $stmt->execute([$surveyId]);
+        $surveyTypeRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($surveyTypeRow && isset($surveyTypeRow['type'])) {
+            $surveyType = $surveyTypeRow['type'];
+        }
+    } catch (PDOException $e) {
+        error_log("Database error fetching survey type: " . $e->getMessage());
+        // $surveyType remains 'local'
     }
 }
 
-$serviceUnitName = null; // Changed to null for stricter check
-$ownershipName = null; // Changed to null for stricter check
-
-$age = $submission['age'] ?? null; // Changed to null for stricter check
-$sex = $submission['sex'] ?? null; // Changed to null for stricter check
-$period = $submission['period'] ?? null; // Changed to null for stricter check
+$serviceUnitName = null;
+$ownershipName = null;
+$age = $submission['age'] ?? null;
+$sex = $submission['sex'] ?? null;
+$period = $submission['period'] ?? null;
 
 // Only fetch these specific details if the survey type is 'local' AND the IDs are not null
 if ($surveyType === 'local') {
     // Get service unit name
     $serviceUnitId = $submission['service_unit_id'] ?? null;
     if ($serviceUnitId !== null) {
-        $stmt = $conn->prepare("SELECT name FROM service_unit WHERE id = ?");
-        $stmt->bind_param("i", $serviceUnitId);
-        $stmt->execute();
-        $serviceUnitResult = $stmt->get_result();
-        $serviceUnit = $serviceUnitResult->fetch_assoc();
-        $stmt->close();
-        if ($serviceUnit) {
-            $serviceUnitName = $serviceUnit['name'];
+        try {
+            $stmt = $pdo->prepare("SELECT name FROM service_unit WHERE id = ?");
+            $stmt->execute([$serviceUnitId]);
+            $serviceUnit = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($serviceUnit) {
+                $serviceUnitName = $serviceUnit['name'];
+            }
+        } catch (PDOException $e) {
+            error_log("Database error fetching service unit name: " . $e->getMessage());
+            // $serviceUnitName remains null
         }
     }
 
     // Get ownership name
     $ownershipId = $submission['ownership_id'] ?? null;
     if ($ownershipId !== null) {
-        $stmt = $conn->prepare("SELECT name FROM owner WHERE id = ?");
-        $stmt->bind_param("i", $ownershipId);
-        $stmt->execute();
-        $ownershipResult = $stmt->get_result();
-        $ownership = $ownershipResult->fetch_assoc();
-        $stmt->close();
-        if ($ownership) {
-            $ownershipName = $ownership['name'];
+        try {
+            $stmt = $pdo->prepare("SELECT name FROM owner WHERE id = ?");
+            $stmt->execute([$ownershipId]);
+            $ownership = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($ownership) {
+                $ownershipName = $ownership['name'];
+            }
+        } catch (PDOException $e) {
+            error_log("Database error fetching ownership name: " . $e->getMessage());
+            // $ownershipName remains null
         }
     }
 }
 
 // Get responses
-$submissionId = $submission['id'];
-// Using prepared statement for responses as well
-$stmt = $conn->prepare("
-    SELECT sr.question_id, sr.response_value, q.label
-    FROM submission_response sr
-    JOIN question q ON sr.question_id = q.id
-    WHERE sr.submission_id = ?
-");
-$stmt->bind_param("i", $submissionId);
-$stmt->execute();
-$responsesResult = $stmt->get_result();
-
 $responses = [];
-while ($row = $responsesResult->fetch_assoc()) {
-    $responses[] = $row;
+$submissionId = $submission['id'];
+try {
+    $stmt = $pdo->prepare("
+        SELECT sr.question_id, sr.response_value, q.label
+        FROM submission_response sr
+        JOIN question q ON sr.question_id = q.id
+        WHERE sr.submission_id = ?
+    ");
+    $stmt->execute([$submissionId]);
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $responses[] = $row;
+    }
+} catch (PDOException $e) {
+    error_log("Database error fetching submission responses: " . $e->getMessage());
+    // $responses remains empty
 }
-$stmt->close(); // Close the statement after use
 
 
 // Clear the session variable to prevent refreshing the page and resubmitting
@@ -144,8 +153,9 @@ unset($_SESSION['submitted_uid']);
 unset($_SESSION['submitted_survey_id']);
 
 
-// Close database connection
-$conn->close();
+// No explicit $pdo->close() needed; PDO connection closes automatically at script end.
+
+// --- HTML / Display part of the thank you page would go here ---
 ?>
 
 <!DOCTYPE html>

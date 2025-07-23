@@ -17,41 +17,46 @@ if ($activeTab == 'load') :
                     <div class="col-md-8">
                         <div class="form-group">
                             <label class="form-control-label">Select DHIS2 Instance</label>
-                            <select name="dhis2_instance" class="form-control" id="dhis2InstanceSelect" onchange="this.form.submit()">
-                                <option value="">-- Select Instance --</option>
-                                <?php
-                                // Establish database connection within the scope of load.php
-                                // This assumes you have a database connection setup that can be reused
-                                // or you establish a new one here. For simplicity, I'm using
-                                // the connection details from dhis2_shared.php.
-                                $dbHost = 'localhost';
-                                $dbUser = 'root';
-                                $dbPass = 'root';
-                                $dbName = 'fbtv3';
+                           <select name="dhis2_instance" class="form-control" id="dhis2InstanceSelect" onchange="this.form.submit()">
+                                    <option value="">-- Select Instance --</option>
+                                    <?php
+                                    // Include the database connection file from the parent directory
+                                    // Assuming this file is in admin/dhis2/ and connect.php is in admin/
+                                    require_once __DIR__ . '/../connect.php';
 
-                                $mysqli = @new mysqli($dbHost, $dbUser, $dbPass, $dbName);
-
-                                if ($mysqli->connect_errno) {
-                                    echo "<option value=\"\" disabled>Error connecting to database: " . $mysqli->connect_error . "</option>";
-                                } else {
-                                    $sql = "SELECT `key`, description FROM dhis2_instances WHERE status = 1 ORDER BY `key` ASC";
-                                    $result = $mysqli->query($sql);
-
-                                    if ($result) {
-                                        while ($row = $result->fetch_assoc()) {
-                                            $instanceKey = htmlspecialchars($row['key']);
-                                            $instanceDescription = htmlspecialchars($row['description']);
-                                            $selected = ($selectedInstance == $instanceKey) ? 'selected' : '';
-                                            echo "<option value=\"{$instanceKey}\" {$selected}>{$instanceDescription} ({$instanceKey})</option>";
-                                        }
-                                        $result->free();
+                                    // Check if $pdo object is available from connect.php
+                                    if (!isset($pdo)) {
+                                        echo "<option value=\"\" disabled>Error: Database connection not available.</option>";
+                                        // Log the error for debugging purposes
+                                        error_log("PDO connection not established in DHIS2 instance select dropdown.");
                                     } else {
-                                        echo "<option value=\"\" disabled>Error fetching instances: " . $mysqli->error . "</option>";
+                                        try {
+                                            $sql = "SELECT `key`, description FROM dhis2_instances WHERE status = 1 ORDER BY `key` ASC";
+                                            $stmt = $pdo->query($sql); // Use query() for simple SELECT without parameters
+
+                                            if ($stmt) {
+                                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                                    $instanceKey = htmlspecialchars($row['key']);
+                                                    $instanceDescription = htmlspecialchars($row['description']);
+                                                    // $selectedInstance should be defined elsewhere in this file,
+                                                    // typically from a GET/POST parameter or a default.
+                                                    // Make sure $selectedInstance is available in this scope.
+                                                    $selected = (isset($selectedInstance) && $selectedInstance == $instanceKey) ? 'selected' : '';
+                                                    echo "<option value=\"{$instanceKey}\" {$selected}>{$instanceDescription} ({$instanceKey})</option>";
+                                                }
+                                            } else {
+                                                echo "<option value=\"\" disabled>Error fetching instances.</option>";
+                                                error_log("PDO: Error preparing/executing query for dhis2_instances.");
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "<option value=\"\" disabled>Error loading instances from database.</option>";
+                                            // Log the detailed error message
+                                            error_log("Database error fetching DHIS2 instances: " . $e->getMessage());
+                                        }
                                     }
-                                    $mysqli->close();
-                                }
-                                ?>
-                            </select>
+                                    // The PDO connection established in connect.php will automatically close when the script finishes.
+                                    ?>
+                                </select>
                         </div>
                     </div>
                 </div>

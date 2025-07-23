@@ -1,16 +1,12 @@
 <?php
 session_start();
 
-// Database connection using mysqli
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "fbtv3";
+// Include the database connection file
+require_once 'connect.php'; // Make sure the path is correct relative to this file
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Check if $pdo object is available from connect.php
+if (!isset($pdo)) {
+    die("Database connection failed. Please check connect.php.");
 }
 
 // Get survey_id from the URL
@@ -20,176 +16,212 @@ if (!$surveyId) {
     die("Survey ID is missing.");
 }
 
-
-
 // Fetch survey details including survey name AND TYPE
-$surveyStmt = $conn->prepare("SELECT id, type, name FROM survey WHERE id = ?");
-$surveyStmt->bind_param("i", $surveyId);
-$surveyStmt->execute();
-$surveyResult = $surveyStmt->get_result();
-$survey = $surveyResult->fetch_assoc();
+try {
+    $surveyStmt = $pdo->prepare("SELECT id, type, name FROM survey WHERE id = ?");
+    $surveyStmt->execute([$surveyId]);
+    $survey = $surveyStmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$survey) {
-    die("Survey not found.");
+    if (!$survey) {
+        die("Survey not found.");
+    }
+} catch (PDOException $e) {
+    error_log("Database error fetching survey details: " . $e->getMessage());
+    die("Error fetching survey details.");
 }
 
 // Set the default survey title from the database
-// THIS IS LINE 48 IN YOUR ORIGINAL CODE IF THE ERROR WAS THERE,
-// SO THE INSERT LOGIC SHOULD COME *AFTER* THIS LINE.
 $defaultSurveyTitle = htmlspecialchars($survey['name'] ?? 'Ministry of Health Client Satisfaction Feedback Tool');
 
 // Fetch translations for the selected language
 $language = isset($_GET['language']) ? $_GET['language'] : 'en'; // Default to English
 $translations = [];
-$query = "SELECT key_name, translations FROM default_text";
-$translations_result = $conn->query($query);
-while ($row = $translations_result->fetch_assoc()) {
-    $decoded_translations = json_decode($row['translations'], true);
-    $translations[$row['key_name']] = $decoded_translations[$language] ?? $row['key_name'];
+
+try {
+    $query = "SELECT key_name, translations FROM default_text";
+    $translations_stmt = $pdo->query($query); // Use query for simple selects without parameters
+    while ($row = $translations_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $decoded_translations = json_decode($row['translations'], true);
+        $translations[$row['key_name']] = $decoded_translations[$language] ?? $row['key_name'];
+    }
+} catch (PDOException $e) {
+    error_log("Database error fetching translations: " . $e->getMessage());
+    // Continue with empty translations if fetch fails
 }
+
 
 // Fetch survey settings from the database
 $surveySettings = [];
-$settingsStmt = $conn->prepare("SELECT * FROM survey_settings WHERE survey_id = ?");
-$settingsStmt->bind_param("i", $surveyId);
-$settingsStmt->execute();
-$settingsResult = $settingsStmt->get_result();
-$existingSettings = $settingsResult->fetch_assoc();
+try {
+    $settingsStmt = $pdo->prepare("SELECT * FROM survey_settings WHERE survey_id = ?");
+    $settingsStmt->execute([$surveyId]);
+    $existingSettings = $settingsStmt->fetch(PDO::FETCH_ASSOC);
 
-if ($existingSettings) {
-    // If settings exist, use them
-    $surveySettings = $existingSettings;
-} else {
-    // If no settings exist for this survey, insert default values
-    // This handles new surveys or surveys created before this feature
-    $insertStmt = $conn->prepare("
-        INSERT INTO survey_settings (
-            survey_id, logo_path, show_logo, flag_black_color, flag_yellow_color, flag_red_color, show_flag_bar,
-            title_text, show_title, subheading_text, show_subheading, show_submit_button,
-            rating_instruction1_text, rating_instruction2_text, show_rating_instructions,
-            show_facility_section, show_location_row_general, show_location_row_period_age, show_ownership_section,
-            republic_title_text, show_republic_title_share, ministry_subtitle_text, show_ministry_subtitle_share,
-            qr_instructions_text, show_qr_instructions_share, footer_note_text, show_footer_note_share
-        ) VALUES (
-            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-        )
-    ");
-
-    $defaultLogoPath = 'asets/asets/img/loog.jpg';
-    $defaultShowLogo = 1;
-    $defaultFlagBlackColor = '#000000';
-    $defaultFlagYellowColor = '#FCD116';
-    $defaultFlagRedColor = '#D21034';
-    $defaultShowFlagBar = 1;
-    $defaultTitleText = $defaultSurveyTitle; // Now $defaultSurveyTitle is defined!
-    $defaultShowTitle = 1;
-    $defaultSubheadingText = $translations['subheading'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.';
-    $defaultShowSubheading = 1;
-    $defaultShowSubmitButton = 1;
-    $defaultRatingInstruction1Text = $translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.';
-    $defaultRatingInstruction2Text = $translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent';
-    $defaultShowRatingInstructions = 1;
-    $defaultShowFacilitySection = 1;
-    $defaultShowLocationRowGeneral = 1;
-    $defaultShowLocationRowPeriodAge = 1;
-    $defaultShowOwnershipSection = 1;
-    $defaultRepublicTitleText = 'THE REPUBLIC OF UGANDA';
-    $defaultShowRepublicTitleShare = 1;
-    $defaultMinistrySubtitleText = 'MINISTRY OF HEALTH';
-    $defaultShowMinistrySubtitleShare = 1;
-    $defaultQrInstructionsText = 'Scan this QR Code to Give Your Feedback on Services Received';
-    $defaultShowQrInstructionsShare = 1;
-    $defaultFooterNoteText = 'Thank you for helping us improve our services.';
-    $defaultShowFooterNoteShare = 1;
-
-   $type_string = "sisssisissiisssiiiiiisssisi"; // Confirmed 27 characters
-
-$insertStmt->bind_param($type_string,
-    $surveyId, $defaultLogoPath, $defaultShowLogo, $defaultFlagBlackColor, $defaultFlagYellowColor, $defaultFlagRedColor, $defaultShowFlagBar,
-    $defaultTitleText, $defaultShowTitle, $defaultSubheadingText, $defaultShowSubheading, $defaultShowSubmitButton,
-    $defaultRatingInstruction1Text, $defaultRatingInstruction2Text, $defaultShowRatingInstructions,
-    $defaultShowFacilitySection, $defaultShowLocationRowGeneral, $defaultShowLocationRowPeriodAge, $defaultShowOwnershipSection,
-    $defaultRepublicTitleText, $defaultShowRepublicTitleShare, $defaultMinistrySubtitleText, $defaultShowMinistrySubtitleShare,
-    $defaultQrInstructionsText, $defaultShowQrInstructionsShare, $defaultFooterNoteText, $defaultShowFooterNoteShare
-);
-
-    if ($insertStmt->execute()) {
-        // After successful insert, re-fetch to populate $surveySettings
-        $settingsResult = $conn->query("SELECT * FROM survey_settings WHERE survey_id = $surveyId");
-        $surveySettings = $settingsResult->fetch_assoc();
+    if ($existingSettings) {
+        // If settings exist, use them
+        $surveySettings = $existingSettings;
     } else {
-        error_log("Error inserting default survey settings: " . $insertStmt->error);
-        // Fallback: use hardcoded defaults if DB insert fails
-        $surveySettings = [
-            'logo_path' => $defaultLogoPath,
-            'show_logo' => $defaultShowLogo,
-            'flag_black_color' => $defaultFlagBlackColor,
-            'flag_yellow_color' => $defaultFlagYellowColor,
-            'flag_red_color' => $defaultFlagRedColor,
-            'show_flag_bar' => $defaultShowFlagBar,
-            'title_text' => $defaultTitleText,
-            'show_title' => $defaultShowTitle,
-            'subheading_text' => $defaultSubheadingText,
-            'show_subheading' => $defaultShowSubheading,
-            'show_submit_button' => $defaultShowSubmitButton,
-            'rating_instruction1_text' => $defaultRatingInstruction1Text,
-            'rating_instruction2_text' => $defaultRatingInstruction2Text,
-            'show_rating_instructions' => $defaultShowRatingInstructions,
-            'show_facility_section' => $defaultShowFacilitySection,
-            'show_location_row_general' => $defaultShowLocationRowGeneral,
-            'show_location_row_period_age' => $defaultShowLocationRowPeriodAge,
-            'show_ownership_section' => $defaultShowOwnershipSection,
-            'republic_title_text' => $defaultRepublicTitleText,
-            'show_republic_title_share' => $defaultShowRepublicTitleShare,
-            'ministry_subtitle_text' => $defaultMinistrySubtitleText,
-            'show_ministry_subtitle_share' => $defaultMinistrySubtitleShare,
-            'qr_instructions_text' => $defaultQrInstructionsText,
-            'show_qr_instructions_share' => $defaultShowQrInstructionsShare,
-            'footer_note_text' => $defaultFooterNoteText,
-            'show_footer_note_share' => $defaultShowFooterNoteShare,
-        ];
-    }
-    $insertStmt->close();
-}
-$settingsStmt->close();
-
-// Fetch questions and options for the selected survey, ordered by position
-$questions = $conn->query("
-    SELECT q.id, q.label, q.question_type, q.is_required, q.translations, q.option_set_id, sq.position
-    FROM question q
-    JOIN survey_question sq ON q.id = sq.question_id
-    WHERE sq.survey_id = $surveyId
-    ORDER BY sq.position ASC
-");
-
-$questionsArray = [];
-while ($question = $questions->fetch_assoc()) {
-    $question['options'] = [];
-
-    // Fetch options for the question with original order
-    if ($question['option_set_id']) {
-        $options = $conn->query("
-            SELECT * FROM option_set_values
-            WHERE option_set_id = " . $conn->real_escape_string($question['option_set_id']) . "
-            ORDER BY id ASC
+        // If no settings exist for this survey, insert default values
+        // This handles new surveys or surveys created before this feature
+        $insertStmt = $pdo->prepare("
+            INSERT INTO survey_settings (
+                survey_id, logo_path, show_logo, flag_black_color, flag_yellow_color, flag_red_color, show_flag_bar,
+                title_text, show_title, subheading_text, show_subheading, show_submit_button,
+                rating_instruction1_text, rating_instruction2_text, show_rating_instructions,
+                show_facility_section, show_location_row_general, show_location_row_period_age, show_ownership_section,
+                republic_title_text, show_republic_title_share, ministry_subtitle_text, show_ministry_subtitle_share,
+                qr_instructions_text, show_qr_instructions_share, footer_note_text, show_footer_note_share
+            ) VALUES (
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            )
         ");
 
-        if ($options) {
-            while ($option = $options->fetch_assoc()) {
+        $defaultLogoPath = 'asets/asets/img/loog.jpg';
+        $defaultShowLogo = 1;
+        $defaultFlagBlackColor = '#000000';
+        $defaultFlagYellowColor = '#FCD116';
+        $defaultFlagRedColor = '#D21034';
+        $defaultShowFlagBar = 1;
+        $defaultTitleText = $defaultSurveyTitle;
+        $defaultShowTitle = 1;
+        $defaultSubheadingText = $translations['subheading'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.';
+        $defaultShowSubheading = 1;
+        $defaultShowSubmitButton = 1;
+        $defaultRatingInstruction1Text = $translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.';
+        $defaultRatingInstruction2Text = $translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent';
+        $defaultShowRatingInstructions = 1;
+        $defaultShowFacilitySection = 1;
+        $defaultShowLocationRowGeneral = 1;
+        $defaultShowLocationRowPeriodAge = 1;
+        $defaultShowOwnershipSection = 1;
+        $defaultRepublicTitleText = 'THE REPUBLIC OF UGANDA';
+        $defaultShowRepublicTitleShare = 1;
+        $defaultMinistrySubtitleText = 'MINISTRY OF HEALTH';
+        $defaultShowMinistrySubtitleShare = 1;
+        $defaultQrInstructionsText = 'Scan this QR Code to Give Your Feedback on Services Received';
+        $defaultShowQrInstructionsShare = 1;
+        $defaultFooterNoteText = 'Thank you for helping us improve our services.';
+        $defaultShowFooterNoteShare = 1;
+
+        // PDO automatically infers types, no need for type string like "sisssi..."
+        $insertData = [
+            $surveyId, $defaultLogoPath, $defaultShowLogo, $defaultFlagBlackColor, $defaultFlagYellowColor, $defaultFlagRedColor, $defaultShowFlagBar,
+            $defaultTitleText, $defaultShowTitle, $defaultSubheadingText, $defaultShowSubheading, $defaultShowSubmitButton,
+            $defaultRatingInstruction1Text, $defaultRatingInstruction2Text, $defaultShowRatingInstructions,
+            $defaultShowFacilitySection, $defaultShowLocationRowGeneral, $defaultShowLocationRowPeriodAge, $defaultShowOwnershipSection,
+            $defaultRepublicTitleText, $defaultShowRepublicTitleShare, $defaultMinistrySubtitleText, $defaultShowMinistrySubtitleShare,
+            $defaultQrInstructionsText, $defaultShowQrInstructionsShare, $defaultFooterNoteText, $defaultShowFooterNoteShare
+        ];
+
+        if ($insertStmt->execute($insertData)) {
+            // After successful insert, re-fetch to populate $surveySettings
+            $settingsStmt->execute([$surveyId]); // Re-execute the settings select statement
+            $surveySettings = $settingsStmt->fetch(PDO::FETCH_ASSOC);
+        } else {
+            error_log("Error inserting default survey settings: " . json_encode($insertStmt->errorInfo()));
+            // Fallback: use hardcoded defaults if DB insert fails
+            $surveySettings = [
+                'logo_path' => $defaultLogoPath,
+                'show_logo' => $defaultShowLogo,
+                'flag_black_color' => $defaultFlagBlackColor,
+                'flag_yellow_color' => $defaultFlagYellowColor,
+                'flag_red_color' => $defaultFlagRedColor,
+                'show_flag_bar' => $defaultShowFlagBar,
+                'title_text' => $defaultTitleText,
+                'show_title' => $defaultShowTitle,
+                'subheading_text' => $defaultSubheadingText,
+                'show_subheading' => $defaultShowSubheading,
+                'show_submit_button' => $defaultShowSubmitButton,
+                'rating_instruction1_text' => $defaultRatingInstruction1Text,
+                'rating_instruction2_text' => $defaultRatingInstruction2Text,
+                'show_rating_instructions' => $defaultShowRatingInstructions,
+                'show_facility_section' => $defaultShowFacilitySection,
+                'show_location_row_general' => $defaultShowLocationRowGeneral,
+                'show_location_row_period_age' => $defaultShowLocationRowPeriodAge,
+                'show_ownership_section' => $defaultShowOwnershipSection,
+                'republic_title_text' => $defaultRepublicTitleText,
+                'show_republic_title_share' => $defaultShowRepublicTitleShare,
+                'ministry_subtitle_text' => $defaultMinistrySubtitleText,
+                'show_ministry_subtitle_share' => $defaultMinistrySubtitleShare,
+                'qr_instructions_text' => $defaultQrInstructionsText,
+                'show_qr_instructions_share' => $defaultShowQrInstructionsShare,
+                'footer_note_text' => $defaultFooterNoteText,
+                'show_footer_note_share' => $defaultShowFooterNoteShare,
+            ];
+        }
+    }
+} catch (PDOException $e) {
+    error_log("Database error fetching or inserting survey settings: " . $e->getMessage());
+    // Fallback: use hardcoded defaults if DB operation fails
+    $surveySettings = [
+        'logo_path' => 'asets/asets/img/loog.jpg',
+        'show_logo' => 1,
+        'flag_black_color' => '#000000',
+        'flag_yellow_color' => '#FCD116',
+        'flag_red_color' => '#D21034',
+        'show_flag_bar' => 1,
+        'title_text' => $defaultSurveyTitle,
+        'show_title' => 1,
+        'subheading_text' => $translations['subheading'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.',
+        'show_subheading' => 1,
+        'show_submit_button' => 1,
+        'rating_instruction1_text' => $translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.',
+        'rating_instruction2_text' => $translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent',
+        'show_rating_instructions' => 1,
+        'show_facility_section' => 1,
+        'show_location_row_general' => 1,
+        'show_location_row_period_age' => 1,
+        'show_ownership_section' => 1,
+        'republic_title_text' => 'THE REPUBLIC OF UGANDA',
+        'show_republic_title_share' => 1,
+        'ministry_subtitle_text' => 'MINISTRY OF HEALTH',
+        'show_ministry_subtitle_share' => 1,
+        'qr_instructions_text' => 'Scan this QR Code to Give Your Feedback on Services Received',
+        'show_qr_instructions_share' => 1,
+        'footer_note_text' => 'Thank you for helping us improve our services.',
+        'show_footer_note_share' => 1,
+    ];
+}
+
+// Fetch questions and options for the selected survey, ordered by position
+$questionsArray = [];
+try {
+    $questionsStmt = $pdo->prepare("
+        SELECT q.id, q.label, q.question_type, q.is_required, q.translations, q.option_set_id, sq.position
+        FROM question q
+        JOIN survey_question sq ON q.id = sq.question_id
+        WHERE sq.survey_id = ?
+        ORDER BY sq.position ASC
+    ");
+    $questionsStmt->execute([$surveyId]);
+
+    while ($question = $questionsStmt->fetch(PDO::FETCH_ASSOC)) {
+        $question['options'] = [];
+
+        // Fetch options for the question with original order
+        if ($question['option_set_id']) {
+            $optionsStmt = $pdo->prepare("
+                SELECT * FROM option_set_values
+                WHERE option_set_id = ?
+                ORDER BY id ASC
+            ");
+            $optionsStmt->execute([$question['option_set_id']]);
+
+            while ($option = $optionsStmt->fetch(PDO::FETCH_ASSOC)) {
                 $question['options'][] = $option;
             }
         }
+        $questionsArray[] = $question;
     }
-    $questionsArray[] = $question;
+} catch (PDOException $e) {
+    error_log("Database error fetching questions and options: " . $e->getMessage());
+    // $questionsArray will remain empty if fetch fails
 }
 
+// No need for unset($question) and unset($option) with PDO fetch methods unless you
+// explicitly used references, which is not the case here.
 
-
-unset($question); // Break the reference with the last element
-unset($option);   // Break the reference with the last element
-
-
-
+// The PDO connection established in connect.php will automatically close when the script finishes.
 
 ?>
 

@@ -8,14 +8,14 @@ error_reporting(E_ALL);
 
 session_start();
 
-// Database connection
-try {
-    $pdo = new PDO("mysql:host=localhost;dbname=fbtv3;charset=utf8", "root", "root");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    // echo "PDO connection successful!"; // Comment out for production
-} catch (PDOException $e) {
+// Include the centralized database connection file
+// Assuming this file is in /api/ and connect.php is in /admin/
+require_once __DIR__ . '/../admin/connect.php'; // Adjust path if connect.php is elsewhere
+
+// Check if the centralized PDO object is available
+if (!isset($pdo)) {
     http_response_code(500);
-    echo "Database connection failed: " . $e->getMessage();
+    echo "Database connection failed: Central PDO object not found.";
     exit;
 }
 
@@ -48,6 +48,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'surveys') {
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Error fetching surveys: ' . $e->getMessage()]);
+        error_log("API Error (surveys): " . $e->getMessage()); // Log error
     }
     exit;
 }
@@ -58,25 +59,25 @@ if (isset($_GET['api']) && $_GET['api'] === 'submission_responses') {
     header('Content-Type: application/json');
     try {
         $params = [];
-       $sql = "SELECT sr.*, s.uid as submission_uid, s.survey_id, q.label as question_label, q.question_type 
-        FROM submission_response sr 
-        JOIN submission s ON sr.submission_id = s.id 
-        JOIN question q ON sr.question_id = q.id
-        WHERE 1=1";
+        $sql = "SELECT sr.*, s.uid as submission_uid, s.survey_id, q.label as question_label, q.question_type
+                FROM submission_response sr
+                JOIN submission s ON sr.submission_id = s.id
+                JOIN question q ON sr.question_id = q.id
+                WHERE 1=1";
 
-// Optional filtering by submission_id
-if (isset($_GET['submission_id'])) {
-    $submission_id = intval($_GET['submission_id']);
-    $sql .= " AND sr.submission_id = :submission_id";
-    $params[':submission_id'] = $submission_id;
-}
+        // Optional filtering by submission_id
+        if (isset($_GET['submission_id'])) {
+            $submission_id = intval($_GET['submission_id']);
+            $sql .= " AND sr.submission_id = :submission_id";
+            $params[':submission_id'] = $submission_id;
+        }
 
-// Optional filtering by survey_id
-if (isset($_GET['survey_id'])) {
-    $survey_id = intval($_GET['survey_id']);
-    $sql .= " AND s.survey_id = :survey_id";
-    $params[':survey_id'] = $survey_id;
-}
+        // Optional filtering by survey_id
+        if (isset($_GET['survey_id'])) {
+            $survey_id = intval($_GET['survey_id']);
+            $sql .= " AND s.survey_id = :survey_id";
+            $params[':survey_id'] = $survey_id;
+        }
 
         $sql .= " ORDER BY sr.created DESC";
 
@@ -91,6 +92,7 @@ if (isset($_GET['survey_id'])) {
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Error fetching submission responses: ' . $e->getMessage()]);
+        error_log("API Error (submission_responses): " . $e->getMessage()); // Log error
     }
     exit;
 }
@@ -132,6 +134,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'submissions_all') {
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Error fetching all submissions: ' . $e->getMessage()]);
+        error_log("API Error (submissions_all): " . $e->getMessage()); // Log error
     }
     exit;
 }
@@ -150,6 +153,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'questions') {
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Error fetching questions: ' . $e->getMessage()]);
+        error_log("API Error (questions): " . $e->getMessage()); // Log error
     }
     exit;
 }
@@ -204,6 +208,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'submissions_with_responses') {
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Error fetching submissions with responses: ' . $e->getMessage()]);
+        error_log("API Error (submissions_with_responses): " . $e->getMessage()); // Log error
     }
     exit;
 }
@@ -235,22 +240,31 @@ if ($end_date) {
 $sql .= " ORDER BY created DESC";
 
 // Fetch data
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$submissions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+try {
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $submissions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Output as JSON if requested (for this specific survey_id focused query)
-if ($format === 'json') {
-    header('Content-Type: application/json');
-    echo json_encode([
-        'success' => true,
-        'count' => count($submissions),
-        'submissions' => $submissions
-    ]);
+    // Output as JSON if requested (for this specific survey_id focused query)
+    if ($format === 'json') {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'count' => count($submissions),
+            'submissions' => $submissions
+        ]);
+        exit;
+    }
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo "Error fetching submissions: " . $e->getMessage();
+    error_log("General Submissions Fetch Error: " . $e->getMessage()); // Log error
     exit;
 }
 
-// Otherwise, output as HTML
+// Otherwise, if not 'json' and not exited, it means format is 'html' or default.
+// The HTML output would typically follow here.
+// For example:
 ?>
 <!DOCTYPE html>
 <html>
