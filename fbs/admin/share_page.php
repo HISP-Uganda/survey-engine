@@ -1,18 +1,8 @@
 <?php
 session_start();
 
-// Database connection using mysqli
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "fbtv3";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    // Log error, but allow the page to load with default values
-    error_log("Database Connection failed in share_page.php: " . $conn->connect_error);
-}
+// Include the database connection file
+require_once 'connect.php'; // Make sure the path is correct
 
 // Get survey_id from the URL
 $surveyId = $_GET['survey_id'] ?? null;
@@ -24,55 +14,88 @@ if (!$surveyId) {
 
 // Fetch survey details (just 'name' for default title)
 $defaultSurveyTitle = 'Ministry of Health Client Satisfaction Feedback Tool';
-if ($conn->connect_error === null) { // Only attempt if DB connection is successful
-    $surveyStmt = $conn->prepare("SELECT name FROM survey WHERE id = ?");
-    if ($surveyStmt) {
-        $surveyStmt->bind_param("i", $surveyId);
-        $surveyStmt->execute();
-        $result = $surveyStmt->get_result();
-        if ($row = $result->fetch_assoc()) {
-            $defaultSurveyTitle = htmlspecialchars($row['name']);
+
+// Use the $pdo object from connect.php
+// Check if $pdo was successfully created in connect.php
+if (isset($pdo)) {
+    try {
+        $surveyStmt = $pdo->prepare("SELECT name FROM survey WHERE id = ?");
+        if ($surveyStmt) {
+            $surveyStmt->execute([$surveyId]); // Use array for prepared statement parameters with PDO
+            $row = $surveyStmt->fetch(PDO::FETCH_ASSOC);
+            if ($row) {
+                $defaultSurveyTitle = htmlspecialchars($row['name']);
+            }
         }
-        $surveyStmt->close();
+    } catch (PDOException $e) {
+        // Log the error, but allow the page to load with default values
+        error_log("Database Query failed in share_page.php (survey name fetch): " . $e->getMessage());
     }
 }
 
-
 // Fetch survey settings from the database
 $surveySettings = [];
-if ($conn->connect_error === null) { // Only attempt if DB connection is successful
-    $settingsStmt = $conn->prepare("SELECT * FROM survey_settings WHERE survey_id = ?");
-    if ($settingsStmt) {
-        $settingsStmt->bind_param("i", $surveyId);
-        $settingsStmt->execute();
-        $settingsResult = $settingsStmt->get_result();
-        $existingSettings = $settingsResult->fetch_assoc();
 
-        if ($existingSettings) {
-            $surveySettings = $existingSettings;
-        } else {
-            // Fallback to hardcoded defaults if no settings found (should be rare)
-            $surveySettings = [
-                'logo_path' => 'asets/asets/img/loog.jpg',
-                'show_logo' => 1,
-                'flag_black_color' => '#000000', // Default colors for share page too
-                'flag_yellow_color' => '#FFCE00',
-                'flag_red_color' => '#FF0000',
-                'show_flag_bar' => 1,
-                'republic_title_text' => 'THE REPUBLIC OF UGANDA',
-                'show_republic_title_share' => 1,
-                'ministry_subtitle_text' => 'MINISTRY OF HEALTH',
-                'show_ministry_subtitle_share' => 1,
-                'qr_instructions_text' => 'Scan this QR Code to Give Your Feedback on Services Received',
-                'show_qr_instructions_share' => 1,
-                'footer_note_text' => 'Thank you for helping us improve our services.',
-                'show_footer_note_share' => 1,
-                'title_text' => $defaultSurveyTitle, // Use default survey title if no custom title in settings
-            ];
+// Ensure $pdo is set before attempting to use it for settings
+if (isset($pdo)) {
+    try {
+        $settingsStmt = $pdo->prepare("SELECT * FROM survey_settings WHERE survey_id = ?");
+        if ($settingsStmt) {
+            $settingsStmt->execute([$surveyId]); // Use array for prepared statement parameters with PDO
+            $existingSettings = $settingsStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($existingSettings) {
+                $surveySettings = $existingSettings;
+                // Ensure 'title_text' is set, default to $defaultSurveyTitle if not in settings
+                if (!isset($surveySettings['title_text'])) {
+                    $surveySettings['title_text'] = $defaultSurveyTitle;
+                }
+            } else {
+                // Fallback to hardcoded defaults if no settings found
+                $surveySettings = [
+                    'logo_path' => 'asets/asets/img/loog.jpg',
+                    'show_logo' => 1,
+                    'flag_black_color' => '#000000',
+                    'flag_yellow_color' => '#FFCE00',
+                    'flag_red_color' => '#FF0000',
+                    'show_flag_bar' => 1,
+                    'republic_title_text' => 'THE REPUBLIC OF UGANDA',
+                    'show_republic_title_share' => 1,
+                    'ministry_subtitle_text' => 'MINISTRY OF HEALTH',
+                    'show_ministry_subtitle_share' => 1,
+                    'qr_instructions_text' => 'Scan this QR Code to Give Your Feedback on Services Received',
+                    'show_qr_instructions_share' => 1,
+                    'footer_note_text' => 'Thank you for helping us improve our services.',
+                    'show_footer_note_share' => 1,
+                    'title_text' => $defaultSurveyTitle, // Use default survey title if no custom title in settings
+                ];
+            }
         }
-        $settingsStmt->close();
+    } catch (PDOException $e) {
+        // Log the error for debugging
+        error_log("Database Query failed in share_page.php (survey settings fetch): " . $e->getMessage());
+        // If DB query fails, fall back to basic defaults
+        $surveySettings = [
+            'logo_path' => 'asets/asets/img/loog.jpg',
+            'show_logo' => 1,
+            'flag_black_color' => '#000000',
+            'flag_yellow_color' => '#FFCE00',
+            'flag_red_color' => '#FF0000',
+            'show_flag_bar' => 1,
+            'republic_title_text' => 'THE REPUBLIC OF UGANDA',
+            'show_republic_title_share' => 1,
+            'ministry_subtitle_text' => 'MINISTRY OF HEALTH',
+            'show_ministry_subtitle_share' => 1,
+            'qr_instructions_text' => 'Scan this QR Code to Give Your Feedback on Services Received',
+            'show_qr_instructions_share' => 1,
+            'footer_note_text' => 'Thank you for helping us improve our services.',
+            'show_footer_note_share' => 1,
+            'title_text' => $defaultSurveyTitle,
+        ];
     }
-} else { // If DB connection failed, use basic defaults
+} else {
+    // If $pdo was not even set (meaning connect.php failed), use basic defaults
+    error_log("PDO connection not established in share_page.php. Using default settings.");
     $surveySettings = [
         'logo_path' => 'asets/asets/img/loog.jpg',
         'show_logo' => 1,
@@ -92,9 +115,6 @@ if ($conn->connect_error === null) { // Only attempt if DB connection is success
     ];
 }
 // Close the connection after all fetches are done
-if ($conn->connect_error === null) {
-    $conn->close();
-}
 
 
 // // --- DEBUGGING START ---

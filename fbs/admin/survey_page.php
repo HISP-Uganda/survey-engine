@@ -1,16 +1,14 @@
 <?php
 session_start();
 
-// Database connection using mysqli
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "fbtv3";
+// Include the database connection file
+require_once 'connect.php'; // Make sure the path is correct relative to this file
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Check if $pdo object is available from connect.php
+if (!isset($pdo)) {
+    // Log error for debugging, but stop execution as DB connection is critical here
+    error_log("Database connection failed in survey_page.php. Please check connect.php.");
+    die("Database connection failed. Please try again later.");
 }
 
 // Get survey_id from the URL
@@ -21,12 +19,15 @@ if (!$surveyId) {
 }
 
 // Fetch survey details (id, type, name)
-$surveyStmt = $conn->prepare("SELECT id, type, name FROM survey WHERE id = ?");
-$surveyStmt->bind_param("i", $surveyId);
-$surveyStmt->execute();
-$surveyResult = $surveyStmt->get_result();
-$survey = $surveyResult->fetch_assoc();
-$surveyStmt->close();
+$survey = null; // Initialize to null
+try {
+    $surveyStmt = $pdo->prepare("SELECT id, type, name FROM survey WHERE id = ?");
+    $surveyStmt->execute([$surveyId]);
+    $survey = $surveyStmt->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Database error fetching survey details in survey_page.php: " . $e->getMessage());
+    die("Error fetching survey details.");
+}
 
 if (!$survey) {
     die("Survey not found.");
@@ -41,25 +42,61 @@ $defaultSurveyTitle = htmlspecialchars($survey['name'] ?? 'Ministry of Health Cl
 // Fetch translations for the selected language
 $language = isset($_GET['language']) ? $_GET['language'] : 'en'; // Default to English
 $translations = [];
-$query = "SELECT key_name, translations FROM default_text";
-$translations_result = $conn->query($query);
-while ($row = $translations_result->fetch_assoc()) {
-    $decoded_translations = json_decode($row['translations'], true);
-    $translations[$row['key_name']] = $decoded_translations[$language] ?? $row['key_name'];
+try {
+    $query = "SELECT key_name, translations FROM default_text";
+    $translations_stmt = $pdo->query($query);
+    while ($row = $translations_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $decoded_translations = json_decode($row['translations'], true);
+        $translations[$row['key_name']] = $decoded_translations[$language] ?? $row['key_name'];
+    }
+} catch (PDOException $e) {
+    error_log("Database error fetching translations in survey_page.php: " . $e->getMessage());
+    // Continue with empty translations if fetch fails
 }
 
 // Fetch survey settings from the database
 $surveySettings = [];
-$settingsStmt = $conn->prepare("SELECT * FROM survey_settings WHERE survey_id = ?");
-$settingsStmt->bind_param("i", $surveyId);
-$settingsStmt->execute();
-$settingsResult = $settingsStmt->get_result();
-$existingSettings = $settingsResult->fetch_assoc();
+try {
+    $settingsStmt = $pdo->prepare("SELECT * FROM survey_settings WHERE survey_id = ?");
+    $settingsStmt->execute([$surveyId]);
+    $existingSettings = $settingsStmt->fetch(PDO::FETCH_ASSOC);
 
-if ($existingSettings) {
-    $surveySettings = $existingSettings;
-} else {
-    // Fallback defaults if no settings exist (should have been created by preview_form.php)
+    if ($existingSettings) {
+        $surveySettings = $existingSettings;
+    } else {
+        // Fallback to hardcoded defaults if no settings found (should be rare if preview_form.php works)
+        $surveySettings = [
+            'logo_path' => 'asets/asets/img/loog.jpg',
+            'show_logo' => 1,
+            'flag_black_color' => '#000000',
+            'flag_yellow_color' => '#FCD116',
+            'flag_red_color' => '#D21034',
+            'show_flag_bar' => 1,
+            'title_text' => $defaultSurveyTitle,
+            'show_title' => 1,
+            'subheading_text' => $translations['subheading'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.',
+            'show_subheading' => 1,
+            'show_submit_button' => 1,
+            'rating_instruction1_text' => $translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.',
+            'rating_instruction2_text' => $translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent',
+            'show_rating_instructions' => 1,
+            'show_facility_section' => 1,
+            'show_location_row_general' => 1,
+            'show_location_row_period_age' => 1,
+            'show_ownership_section' => 1,
+            'republic_title_text' => 'THE REPUBLIC OF UGANDA',
+            'show_republic_title_share' => 1,
+            'ministry_subtitle_text' => 'MINISTRY OF HEALTH',
+            'show_ministry_subtitle_share' => 1,
+            'qr_instructions_text' => 'Scan this QR Code to Give Your Feedback on Services Received',
+            'show_qr_instructions_share' => 1,
+            'footer_note_text' => 'Thank you for helping us improve our services.',
+            'show_footer_note_share' => 1,
+        ];
+    }
+} catch (PDOException $e) {
+    error_log("Database error fetching survey settings in survey_page.php: " . $e->getMessage());
+    // Fallback to hardcoded defaults if DB fetch fails
     $surveySettings = [
         'logo_path' => 'asets/asets/img/loog.jpg',
         'show_logo' => 1,
@@ -89,7 +126,6 @@ if ($existingSettings) {
         'show_footer_note_share' => 1,
     ];
 }
-$settingsStmt->close();
 
 
 // echo '<pre style="background: lightyellow; padding: 10px; border: 1px solid orange;">';
@@ -98,32 +134,36 @@ $settingsStmt->close();
 // echo '</pre>';
 
 // Fetch questions and options
-$questions = $conn->query("
-    SELECT q.id, q.label, q.question_type, q.is_required, q.translations, q.option_set_id, sq.position
-    FROM question q
-    JOIN survey_question sq ON q.id = sq.question_id
-    WHERE sq.survey_id = $surveyId
-    ORDER BY sq.position ASC
-");
-
 $questionsArray = [];
-if ($questions) {
-    while ($question = $questions->fetch_assoc()) {
+try {
+    $questionsStmt = $pdo->prepare("
+        SELECT q.id, q.label, q.question_type, q.is_required, q.translations, q.option_set_id, sq.position
+        FROM question q
+        JOIN survey_question sq ON q.id = sq.question_id
+        WHERE sq.survey_id = ?
+        ORDER BY sq.position ASC
+    ");
+    $questionsStmt->execute([$surveyId]);
+
+    while ($question = $questionsStmt->fetch(PDO::FETCH_ASSOC)) {
         $question['options'] = [];
         if ($question['option_set_id']) {
-            $options = $conn->query("
+            $optionsStmt = $pdo->prepare("
                 SELECT * FROM option_set_values
-                WHERE option_set_id = " . $conn->real_escape_string($question['option_set_id']) . "
+                WHERE option_set_id = ?
                 ORDER BY id ASC
             ");
-            if ($options) {
-                while ($option = $options->fetch_assoc()) {
-                    $question['options'][] = $option;
-                }
+            $optionsStmt->execute([$question['option_set_id']]);
+
+            while ($option = $optionsStmt->fetch(PDO::FETCH_ASSOC)) {
+                $question['options'][] = $option;
             }
         }
         $questionsArray[] = $question;
     }
+} catch (PDOException $e) {
+    error_log("Database error fetching questions and options in survey_page.php: " . $e->getMessage());
+    // $questionsArray will remain empty if fetch fails
 }
 
 // Apply translations to questions and options
@@ -135,12 +175,13 @@ foreach ($questionsArray as &$question) {
         $option['option_value'] = $optionTranslations[$language] ?? $option['option_value'];
     }
 }
+// Remove references after loop, good practice
 unset($question);
 unset($option);
 
-$conn->close(); // Close DB connection
-?>
+// No explicit $pdo->close() needed; PDO connection closes automatically at script end.
 
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

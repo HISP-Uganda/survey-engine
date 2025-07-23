@@ -9,13 +9,14 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 require 'connect.php'; // Ensure this file establishes $conn
 
-try {
-    $conn = new PDO("mysql:host=localhost;dbname=fbtv3;charset=utf8", "root", "root");
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Set error mode to exception
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
-}
+// try {
+//     $conn = new PDO("mysql:host=localhost;dbname=fbtv3;charset=utf8", "root", "root");
+//     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Set error mode to exception
+// } catch (PDOException $e) {
+//     die("Database connection failed: " . $e->getMessage());
+// }
 
+$conn = $pdo; // Use the PDO connection from connect.php
 
 // Handle Create
 if (isset($_POST['create'])) {
