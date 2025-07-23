@@ -612,6 +612,7 @@ $optionSets = $pdo->query("
                                         <option value="radio">Radio</option>
                                         <option value="checkbox">Checkbox</option>
                                         <option value="select">Dropdown</option>
+                                          <option value="rating">Rating</option>
                                         <option value="textarea">Text Area</option>
                                     </select>
                                 </div>
@@ -800,7 +801,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Toggle options section based on question type
         function toggleOptionsSection(type) {
             const optionsSection = document.getElementById('optionsSection');
-            if (['radio', 'checkbox', 'select'].includes(type)) {
+            if (['radio', 'checkbox', 'select', 'rating'].includes(type)) {
                 optionsSection.style.display = 'block';
             } else {
                 optionsSection.style.display = 'none';

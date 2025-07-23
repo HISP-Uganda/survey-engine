@@ -363,7 +363,7 @@ $conn->close(); // Close DB connection
 
             <div class="facility-section" id="facility-section" style="display: <?php echo ($surveySettings['show_facility_section'] ?? true) ? 'block' : 'none'; ?>;">
                 <div class="form-group">
-                    <label for="facility-search">Health Facility:</label>
+                    <label for="facility-search">Locations:</label>
                     <div class="searchable-dropdown">
                         <input type="text" id="facility-search" placeholder="Type to search facilities..." autocomplete="off">
                         <div class="dropdown-results" id="facility-results"></div>
