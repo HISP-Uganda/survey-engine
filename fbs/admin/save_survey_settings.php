@@ -1,21 +1,19 @@
 <?php
-ob_start();
+ob_start(); // Start output buffering
 session_start();
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "fbtv3";
+// Include the centralized database connection file
+// Since it's in the same directory, a direct filename is sufficient.
+require_once 'connect.php';
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
+// Check if the PDO object is available from connect.php
+if (!isset($pdo)) {
     http_response_code(500);
-    ob_clean();
-    echo json_encode(['success' => false, 'message' => 'Database connection failed: ' . $conn->connect_error]);
+    ob_clean(); // Clean any previous output before sending JSON
+    echo json_encode(['success' => false, 'message' => 'Database connection failed: Central PDO object not found.']);
     exit();
 }
 
@@ -47,16 +45,18 @@ if (!$surveyId || !is_numeric($surveyId)) {
 
 // Fetch survey name for default title handling
 $surveyName = '';
-$surveyNameStmt = $conn->prepare("SELECT name FROM survey WHERE id = ?");
-if ($surveyNameStmt) {
-    $surveyNameStmt->bind_param("i", $surveyId);
-    $surveyNameStmt->execute();
-    $surveyNameResult = $surveyNameStmt->get_result();
-    if ($row = $surveyNameResult->fetch_assoc()) {
+try {
+    $surveyNameStmt = $pdo->prepare("SELECT name FROM survey WHERE id = ?");
+    $surveyNameStmt->execute([$surveyId]);
+    $row = $surveyNameStmt->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
         $surveyName = $row['name'];
     }
-    $surveyNameStmt->close();
+} catch (PDOException $e) {
+    error_log("Database error fetching survey name: " . $e->getMessage());
+    // Continue with empty surveyName, default title will be used
 }
+
 
 $uploadDir = __DIR__ . '/uploads/survey_logos/';
 $uploadWebPath = 'uploads/survey_logos/';
@@ -155,9 +155,8 @@ $footerNoteText = $settings['footerNoteText'] ?? 'Thank you for helping us impro
 $showFooterNoteShare = (int)($settings['showFooterNoteShare'] ?? 1); // Default to true
 
 // Prepare UPDATE statement
-// Count the number of ? placeholders in the SQL query:
-// There are 26 columns being updated and 1 WHERE clause condition. Total 27 parameters.
-$stmt = $conn->prepare("
+// PDO handles type binding automatically, no explicit type string is needed
+$sql = "
     UPDATE survey_settings SET
         logo_path = ?,
         show_logo = ?,
@@ -186,61 +185,47 @@ $stmt = $conn->prepare("
         footer_note_text = ?,
         show_footer_note_share = ?
     WHERE survey_id = ?
-");
+";
 
-if (!$stmt) {
-    error_log('Failed to prepare statement: ' . $conn->error);
+try {
+    $stmt = $pdo->prepare($sql);
+
+    // No type string needed for PDO bindValue/execute
+    $params = [
+        $logoPath, $showLogo,
+        $flagBlackColor, $flagYellowColor, $flagRedColor, $showFlagBar,
+        $titleText, $showTitle,
+        $subheadingText, $showSubheading,
+        $showSubmitButton,
+        $ratingInstruction1Text, $ratingInstruction2Text, $showRatingInstructions,
+        $showFacilitySection, $showLocationRowGeneral, $showLocationRowPeriodAge, $showOwnershipSection,
+        $republicTitleText, $showRepublicTitleShare,
+        $ministrySubtitleText, $showMinistrySubtitleShare,
+        $qrInstructionsText, $showQrInstructionsShare,
+        $footerNoteText, $showFooterNoteShare,
+        (int)$surveyId // Ensure surveyId is correctly cast for the WHERE clause
+    ];
+
+    if ($stmt->execute($params)) {
+        ob_clean(); // Ensure no prior output before JSON
+        echo json_encode(['success' => true, 'message' => 'Survey settings saved successfully.']);
+    } else {
+        // Log the PDO error information
+        error_log('Failed to execute statement: ' . json_encode($stmt->errorInfo()));
+        http_response_code(500);
+        ob_clean(); // Ensure no prior output before JSON
+        echo json_encode(['success' => false, 'message' => 'Failed to save survey settings due to a database error.']);
+    }
+
+} catch (PDOException $e) {
+    error_log('Database error during settings update: ' . $e->getMessage());
     http_response_code(500);
-    ob_clean();
-    echo json_encode(['success' => false, 'message' => 'Internal server error: Failed to prepare database statement.']);
-    exit();
+    ob_clean(); // Ensure no prior output before JSON
+    echo json_encode(['success' => false, 'message' => 'Internal server error during settings update.']);
 }
 
-// 26 fields to update + 1 WHERE clause = 27 parameters
-// s = string, i = integer. The type string must have 27 characters.
-$type_string = "sisssisisiissiiiiisisiisiii"; // Corrected to 27 characters
+// PDO connections automatically close when the script finishes.
+// No explicit $stmt->close() or $pdo->close() needed here.
 
-$params = [
-    $logoPath, (int)$showLogo, // Ensure int casting for boolean-like values
-    $flagBlackColor, $flagYellowColor, $flagRedColor, (int)$showFlagBar,
-    $titleText, (int)$showTitle,
-    $subheadingText, (int)$showSubheading,
-    (int)$showSubmitButton,
-    $ratingInstruction1Text, $ratingInstruction2Text, (int)$showRatingInstructions,
-    (int)$showFacilitySection, (int)$showLocationRowGeneral, (int)$showLocationRowPeriodAge, (int)$showOwnershipSection,
-    $republicTitleText, (int)$showRepublicTitleShare,
-    $ministrySubtitleText, (int)$showMinistrySubtitleShare,
-    $qrInstructionsText, (int)$showQrInstructionsShare,
-    $footerNoteText, (int)$showFooterNoteShare,
-    (int)$surveyId // Ensure surveyId is an integer
-];
-
-// Double-check: Parameter count must exactly match the type string length
-if (strlen($type_string) !== count($params)) {
-    error_log("Critical Error: Type string length (" . strlen($type_string) . ") does not match parameter count (" . count($params) . ") for bind_param. This indicates a developer mistake.");
-    http_response_code(500);
-    ob_clean();
-    echo json_encode([
-        'success' => false,
-        'message' => 'Internal server error: Configuration mismatch. Please contact support.'
-    ]);
-    exit();
-}
-
-// Use call_user_func_array to bind parameters as bind_param does not accept an array directly
-// The '...' operator in PHP 5.6+ can unpack the array for bind_param, which is cleaner.
-$stmt->bind_param($type_string, ...$params);
-
-if ($stmt->execute()) {
-    ob_clean();
-    echo json_encode(['success' => true, 'message' => 'Survey settings saved successfully.']);
-} else {
-    error_log('Failed to execute statement: ' . $stmt->error);
-    http_response_code(500);
-    ob_clean();
-    echo json_encode(['success' => false, 'message' => 'Failed to save survey settings due to a database error: ' . $stmt->error]);
-}
-
-$stmt->close();
-$conn->close();
+exit(); // Ensure no further code is executed after JSON response
 ?>

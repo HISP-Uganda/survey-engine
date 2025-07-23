@@ -3,49 +3,45 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Include the database connection file from the parent directory
-require_once __DIR__ . '/../connect.php'; // Adjust path based on your exact file structure
-
 /**
  * Gets DHIS2 configuration for a specific instance
- *
+ * 
  * @param string $key The instance key to look up
  * @return array|null Configuration array or null if not found
  */
 function getDhis2Config(string $key): ?array {
-    global $pdo; // Access the global PDO object from connect.php
-
     // Try to load from database first
-    if (isset($pdo)) {
-        try {
-            // Using PDO prepared statements
-            $stmt = $pdo->prepare("SELECT url, username, password, `key`, description, status FROM dhis2_instances WHERE `key` = ? AND status = 1 LIMIT 1");
-            if ($stmt) {
-                $stmt->execute([$key]); // Pass parameters as an array
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($row) {
-                    return [
-                        'url' => $row['url'],
-                        'username' => $row['username'],
-                        'password' => base64_decode($row['password']),
-                        'key' => $row['key'],
-                        'description' => $row['description'],
-                        'status' => (int)$row['status']
-                    ];
-                }
+    $dbHost = 'localhost';
+    $dbUser = 'root';
+    $dbPass = 'root';
+    $dbName = 'fbtv3'; 
+
+    $mysqli = @new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+    if (!$mysqli->connect_errno) {
+        $stmt = $mysqli->prepare("SELECT url, username, password, `key`, description, status FROM dhis2_instances WHERE `key` = ? AND status = 1 LIMIT 1");
+        if ($stmt) {
+            $stmt->bind_param('s', $key);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $stmt->close();
+                $mysqli->close();
+                return [
+                    'url' => $row['url'],
+                    'username' => $row['username'],
+                    'password' => base64_decode($row['password']),
+                    'key' => $row['key'],
+                    'description' => $row['description'],
+                    'status' => (int)$row['status']
+                ];
             }
-        } catch (PDOException $e) {
-            error_log("Database error fetching DHIS2 config: " . $e->getMessage());
-            // Continue to try JSON file if DB fails
+            $stmt->close();
         }
-    } else {
-        error_log("PDO connection not available in getDhis2Config. Trying JSON fallback.");
+        $mysqli->close();
     }
 
-
-    // Fallback to JSON file if not found in DB or DB connection failed
-    // Assuming dhis2.json is in the same directory as this script (admin/dhis2/)
-    $jsonFilePath = __DIR__ . "/dhis2.json";
+    // Fallback to JSON file if not found in DB
+    $jsonFilePath = "dhis2/dhis2.json";
     if (!file_exists($jsonFilePath)) {
         error_log("DHIS2 config file not found at: " . realpath($jsonFilePath));
         return null;
@@ -61,16 +57,18 @@ function getDhis2Config(string $key): ?array {
         return null;
     }
     if (isset($configs[$key])) {
-        // Decode password from JSON config as well
         $configs[$key]['password'] = base64_decode($configs[$key]['password']);
         return $configs[$key];
     }
     return null;
 }
 
+//load dhis2 instances from databases (table is dhis2_instances) to serve as above from dhis2.json
+
+
 /**
  * Creates an authentication string for DHIS2 API
- *
+ * 
  * @param string $instance The instance key
  * @return string|null Base64 encoded auth string or null if config not found
  */
@@ -81,32 +79,19 @@ function dhis2auth($instance) {
         return null;
     }
     $authString = base64_encode($config['username'] . ':' . $config['password']);
-    // error_log("Generated Auth Header: Basic " . $authString); // Keep this commented unless deep debugging
+    error_log("Generated Auth Header: Basic " . $authString);
     return $authString;
 }
 
-/**
- * Executes a cURL request to the DHIS2 API
- *
- * @param string $url The relative DHIS2 API path (e.g., 'api/dataElements')
- * @param string $instance The instance key for DHIS2 configuration
- * @param string $method The HTTP method (GET, POST, PUT, DELETE)
- * @param array|null $data Data for POST/PUT requests
- * @return array|null Decoded JSON response or null on failure
- */
 function dhis2Curl($url, $instance, $method = 'GET', $data = null) {
-    $config = getDhis2Config($instance);
-    if (!$config) {
-        error_log("No DHIS2 configuration found for instance: " . $instance);
-        return null;
-    }
-
-    $fullUrl = rtrim($config['url'], '/') . '/' . ltrim($url, '/');
-    error_log("DHIS2 API call: $method $fullUrl"); // Log the full URL
+    // $config = getDhis2Config($instance);  // Uncomment when config is available
+    // $fullUrl = rtrim($config['url'], '/') . '/' . ltrim($url, '/');
+    
+    error_log("DHIS2 API call: $method $url");
 
     $ch = curl_init();
     $options = [
-        CURLOPT_URL => $fullUrl, // Use the constructed full URL
+        CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST => strtoupper($method),
         CURLOPT_HTTPHEADER => [
@@ -114,21 +99,14 @@ function dhis2Curl($url, $instance, $method = 'GET', $data = null) {
             'Accept: application/json',
             'Content-Type: application/json'
         ],
-        CURLOPT_VERBOSE => true, // Enable verbose logging
-        CURLOPT_STDERR => fopen('php://temp', 'w+'), // Capture verbose log
-        // Temporarily disable SSL verification - FOR DEVELOPMENT ONLY!
-        // In production, configure proper SSL certificate validation.
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_SSL_VERIFYHOST => 0
+        CURLOPT_VERBOSE => true,
+        CURLOPT_STDERR => fopen('php://temp', 'w+'),
+        CURLOPT_SSL_VERIFYPEER => false, // Remove in production
+        CURLOPT_SSL_VERIFYHOST => 0  // Remove in production
     ];
 
-    if ($method === 'POST' || $method === 'PUT' || $method === 'PATCH') { // Add PATCH if used
-        if ($data) {
-            $options[CURLOPT_POSTFIELDS] = json_encode($data);
-        } else {
-            // For POST/PUT with no data, ensure content-length is 0
-            $options[CURLOPT_HTTPHEADER][] = 'Content-Length: 0';
-        }
+    if ($method === 'POST' && $data) {
+        $options[CURLOPT_POSTFIELDS] = json_encode($data);
     }
 
     curl_setopt_array($ch, $options);
@@ -138,38 +116,67 @@ function dhis2Curl($url, $instance, $method = 'GET', $data = null) {
     if ($response === false) {
         rewind($options[CURLOPT_STDERR]);
         $verboseLog = stream_get_contents($options[CURLOPT_STDERR]);
-        error_log("CURL Error: " . curl_error($ch) . "\nHTTP Code: $httpCode\nVerbose log: " . $verboseLog);
-        fclose($options[CURLOPT_STDERR]);
-        curl_close($ch);
-        return null;
+        error_log("CURL Error: " . curl_error($ch) . "\nVerbose log: " . $verboseLog);
     }
 
-    rewind($options[CURLOPT_STDERR]);
-    $verboseLog = stream_get_contents($options[CURLOPT_STDERR]);
     fclose($options[CURLOPT_STDERR]);
     curl_close($ch);
-
+    
     error_log("HTTP Status: $httpCode");
-    error_log("DHIS2 Response (first 500 chars): " . substr($response, 0, 500)); // Log part of response
-    return json_decode($response, true);
+    return $response ? json_decode($response, true) : null;
 }
 
-// You can test the functions here, for example:
-// $instanceKey = 'your_dhis2_instance_key'; // Replace with a key from your dhis2_instances table or dhis2.json
-// $config = getDhis2Config($instanceKey);
-// if ($config) {
-//     echo "Config loaded for " . $config['key'] . ": " . $config['url'] . "<br>";
-//     // Example usage of dhis2Curl (uncomment to test, adjust URL/data as needed)
-//     // $orgUnits = dhis2Curl('api/organisationUnits.json?fields=id,name&paging=false', $instanceKey);
-//     // if ($orgUnits) {
-//     //     echo "<pre>";
-//     //     print_r($orgUnits);
-//     //     echo "</pre>";
-//     // } else {
-//     //     echo "Failed to fetch organization units.<br>";
-//     // }
-// } else {
-//     echo "Failed to load config for " . $instanceKey . "<br>";
-// }
 
+// function dhis2Curl($url, $instance, $method = 'GET', $data = null) {
+//     // $config = getDhis2Config($instance);
+//     // if (!$config) {
+//     //     error_log("No config found for instance: " . $instance);
+//     //     return null;
+//     // }
+    
+//     // Construct the full URL
+//     // $fullUrl = rtrim($config['url'], '/') . '/' . ltrim($url, '/');
+//     error_log("Attempting to call DHIS2 API at: " . $url);
+
+//     $ch = curl_init($url);
+//     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+//     if($method === 'POST') {
+//         curl_setopt($ch, CURLOPT_POST, true);
+//         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+//     }
+
+//     curl_setopt($ch, CURLOPT_HTTPHEADER, [
+//         'Authorization: Basic ' . dhis2auth($instance),
+//         'Accept: application/json',
+//     ]);
+    
+//     // Enable verbose output for debugging
+//     curl_setopt($ch, CURLOPT_VERBOSE, true);
+//     $verbose = fopen('php://temp', 'w+');
+//     curl_setopt($ch, CURLOPT_STDERR, $verbose);
+    
+//     // Temporarily disable SSL verification (for testing only)
+//     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+//     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    
+//     $response = curl_exec($ch);
+
+//     if ($response === false) {
+//         rewind($verbose);
+//         $verboseLog = stream_get_contents($verbose);
+//         error_log("CURL Error: " . curl_error($ch) . "\nVerbose log: " . $verboseLog);
+//         fclose($verbose);
+//         curl_close($ch);
+//         return null;
+//     }
+    
+//     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+//     error_log("HTTP Status Code: " . $httpCode);
+    
+//     fclose($verbose);
+//     curl_close($ch);
+    
+//     return json_decode($response, true);
+// }
 ?>
