@@ -1,0 +1,31 @@
+[24-Jul-2025 18:01:01 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[24-Jul-2025 18:01:01 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[24-Jul-2025 18:01:01 UTC] Binding parameter :key with value: 'UiO'
+[24-Jul-2025 18:01:01 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[24-Jul-2025 18:01:01 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[24-Jul-2025 18:01:01 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[24-Jul-2025 18:01:01 UTC] Binding parameter :key with value: 'UiO'
+[24-Jul-2025 18:01:01 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[24-Jul-2025 18:01:01 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[24-Jul-2025 18:01:01 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[24-Jul-2025 18:01:01 UTC] Binding parameter :key with value: 'UiO'
+[24-Jul-2025 18:01:01 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[24-Jul-2025 18:01:01 UTC] DHIS2 API call: GET https://tests.dhis2.hispuganda.org/hmis/api/dataSets?fields=id,name
+[24-Jul-2025 18:01:01 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[24-Jul-2025 18:01:01 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[24-Jul-2025 18:01:01 UTC] Binding parameter :key with value: 'UiO'
+[24-Jul-2025 18:01:01 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[24-Jul-2025 18:01:02 UTC] HTTP Status: 200
+[24-Jul-2025 18:01:02 UTC] DHIS2 Response (first 500 chars): {"pager":{"page":1,"total":45,"pageSize":50,"pageCount":1},"dataSets":[{"name":"Beta Testing Data Set","id":"MxmzmlAdki6"},{"name":"CCH - Climate/Weather","id":"mck6wRvBafz"},{"name":"CHAP test dataset","id":"GwIRyi44faA"},{"name":"District CC DATA Template","id":"FjddpUSKKW1"},{"name":"ETDataset","id":"rmaYTmNPkVA"},{"name":"HMIS 033b - Weekly Epidemiological Surveillance Report","id":"C4oUitImBPK"},{"name":"HMIS 097b - VHT/ICCM Quarterly Report","id":"onFoQ4ko74y"},{"name":"HMIS 104 - NTDS MDA

@@ -9,7 +9,6 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 require 'connect.php';
 require 'dhis2/dhis2_shared.php';
-require 'dhis2/dhis2_get_function.php';
 
 ?>
 

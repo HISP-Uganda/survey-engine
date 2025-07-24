@@ -1,558 +1,220 @@
 <?php
-// Ensure dhis2_shared.php is included as it contains the database logic for instances
-// This is already stated as being included in settings.php, so no explicit include here
-// is necessary if settings.php handles it. If not, add:
-// require_once 'dhis2_shared.php';
+require_once __DIR__ . '/dhis2_shared.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-if ($activeTab == 'load') :
+$instances = getAllDhis2Configs();
+// Preserve selected values from GET parameters for initial JS state
+$selectedInstance = $_GET['dhis2_instance'] ?? '';
+$selectedLevel = $_GET['org_level'] ?? '';
+
+// The orgUnits and orgUnitsFetched logic is now handled by AJAX,
+// so these variables are no longer directly needed for initial rendering.
+$orgUnits = [];
+$orgUnitsFetched = false; // Always false on initial load, AJAX will handle
+
 ?>
-    <div class="tab-header">
-        <h3><i class="fas fa-sync-alt me-2"></i> Load from DHIS2</h3>
+
+<style>
+    /* Add specific styles for the load.php components here if needed,
+       or rely on the global styles from settings.php which are already futuristic. */
+
+    /* Adjust checkbox background color to be darker */
+    .form-check-input.bg-dark {
+        background-color: #3b4556 !important; /* Darker grey for checkboxes */
+        border-color: #4a5568 !important;
+    }
+    .form-check-input.bg-dark:checked {
+        background-color: #ffd700 !important; /* Gold when checked */
+        border-color: #ffd700 !important;
+    }
+
+    /* Sticky table header for scrollable area */
+    .table-responsive thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2; /* Ensure it's above other content in the scrollable div */
+        background-color: #1a202c !important; /* Re-apply background color for sticky header */
+        border-bottom: 1px solid #4a5568 !important; /* Ensure border is visible */
+    }
+
+    /* Adjust button size further if "btn-lg" is not enough */
+    .btn.btn-lg {
+        padding: 0.75rem 2rem; /* More generous padding */
+        font-size: 1.15rem; /* Slightly larger text */
+    }
+
+</style>
+
+<div class="container-fluid py-4"> <h4 class="mb-4 text-white"><i class="fas fa-globe-africa me-2 text-primary"></i> Load Locations from DHIS2</h4>
+
+    <div class="card futuristic-card card-body mb-4 shadow-lg">
+        <div class="mb-3 text-white"><strong>Step 1:</strong> Select DHIS2 Instance</div>
+        <select name="dhis2_instance" id="dhis2_instance_select" class="form-select" required>
+            <option value="">-- Select Instance --</option>
+            <?php foreach ($instances as $inst): ?>
+                <option value="<?= htmlspecialchars($inst['instance_key']) ?>" <?= ($selectedInstance === $inst['instance_key']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($inst['description']) ?> (<?= htmlspecialchars($inst['instance_key']) ?>)
+                </option>
+            <?php endforeach; ?>
+        </select>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <form method="post" action="?tab=load" id="dhis2LoadForm">
-                <div class="row mb-4">
-                    <div class="col-md-8">
-                        <div class="form-group">
-                            <label class="form-control-label">Select DHIS2 Instance</label>
-                           <select name="dhis2_instance" class="form-control" id="dhis2InstanceSelect" onchange="this.form.submit()">
-                                    <option value="">-- Select Instance --</option>
-                                    <?php
-                                    // Include the database connection file from the parent directory
-                                    // Assuming this file is in admin/dhis2/ and connect.php is in admin/
-                                    require_once __DIR__ . '/../connect.php';
-
-                                    // Check if $pdo object is available from connect.php
-                                    if (!isset($pdo)) {
-                                        echo "<option value=\"\" disabled>Error: Database connection not available.</option>";
-                                        // Log the error for debugging purposes
-                                        error_log("PDO connection not established in DHIS2 instance select dropdown.");
-                                    } else {
-                                        try {
-                                            $sql = "SELECT `key`, description FROM dhis2_instances WHERE status = 1 ORDER BY `key` ASC";
-                                            $stmt = $pdo->query($sql); // Use query() for simple SELECT without parameters
-
-                                            if ($stmt) {
-                                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                                    $instanceKey = htmlspecialchars($row['key']);
-                                                    $instanceDescription = htmlspecialchars($row['description']);
-                                                    // $selectedInstance should be defined elsewhere in this file,
-                                                    // typically from a GET/POST parameter or a default.
-                                                    // Make sure $selectedInstance is available in this scope.
-                                                    $selected = (isset($selectedInstance) && $selectedInstance == $instanceKey) ? 'selected' : '';
-                                                    echo "<option value=\"{$instanceKey}\" {$selected}>{$instanceDescription} ({$instanceKey})</option>";
-                                                }
-                                            } else {
-                                                echo "<option value=\"\" disabled>Error fetching instances.</option>";
-                                                error_log("PDO: Error preparing/executing query for dhis2_instances.");
-                                            }
-                                        } catch (PDOException $e) {
-                                            echo "<option value=\"\" disabled>Error loading instances from database.</option>";
-                                            // Log the detailed error message
-                                            error_log("Database error fetching DHIS2 instances: " . $e->getMessage());
-                                        }
-                                    }
-                                    // The PDO connection established in connect.php will automatically close when the script finishes.
-                                    ?>
-                                </select>
-                        </div>
-                    </div>
-                </div>
-
-                <?php if ($selectedInstance) : ?>
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <h5>Select Org Unit By</h5>
-                        </div>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="form-check">
-                                <input class="form-check-input filter-option" type="checkbox" id="useOrgLevel" name="use_org_level" <?= $useOrgLevel ? 'checked' : '' ?> onchange="handleFilterChange('org_level')">
-                                <label class="form-check-label" for="useOrgLevel">Use Org Level</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-4" id="orgLevelSection" style="display: <?= $useOrgLevel ? 'block' : 'none' ?>;">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-control-label">Select Level</label>
-                                <select name="org_level" class="form-control">
-                                    <option value="">-- Select Level --</option>
-                                    <?php
-                                    // $orgUnitLevels would need to be populated from the selected DHIS2 instance
-                                    // This typically involves an API call to the DHIS2 instance, which would be handled
-                                    // in your settings.php or a dedicated processing script before load.php is rendered.
-                                    // For this refactor, we assume $orgUnitLevels is already available if $selectedInstance is set.
-                                    if (!empty($orgUnitLevels)) :
-                                        foreach ($orgUnitLevels as $level => $name) : ?>
-                                            <option value="<?= $level ?>" <?= ($selectedLevel == $level) ? 'selected' : '' ?>>
-                                                <?= htmlspecialchars($name) ?> (Level <?= $level ?>)
-                                            </option>
-                                        <?php endforeach;
-                                    endif; ?>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-primary" name="fetch_orgunits" id="fetchOrgUnitsBtn">
-                            <i class="fas fa-search me-2"></i> Fetch Org Units
-                        </button>
-                    </div>
-                <?php endif; ?>
-            </form>
-
-            <?php if (!empty($orgUnits) && isset($_POST['fetch_orgunits'])) : ?>
-                <div class="mt-5">
-                    <h4 class="mb-3">ORGANISATION UNITS</h4>
-                    <form method="post" action="?tab=load" id="orgUnitsForm">
-                        <input type="hidden" name="dhis2_instance" value="<?= $selectedInstance ?>">
-                        <input type="hidden" name="total_units" id="totalUnits" value="<?= count($orgUnits['organisationUnits']) ?>">
-                        <input type="hidden" name="selection_type" id="selectionType" value="page">
-                        <?php if ($useOrgLevel && $selectedLevel) : ?>
-                            <input type="hidden" name="org_level" value="<?= $selectedLevel ?>">
-                        <?php endif; ?>
-
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <div>
-                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectCurrentGroup()">
-                                            Select Group
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="selectAllGroups()">
-                                            Select All Groups
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="deselectAll()">
-                                            Deselect All
-                                        </button>
-                                    </div>
-                                    <div class="text-muted">
-                                        <span id="totalCount"><?= count($orgUnits['organisationUnits']) ?></span> total units
-                                    </div>
-                                </div>
-
-                                <div class="table-responsive">
-                                    <table class="table table-striped" id="orgUnitsTable">
-                                        <thead>
-                                            <tr>
-                                                <th width="40">
-                                                    <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)">
-                                                </th>
-                                                <th>Name</th>
-                                                <th>UID</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            // Display first 500 units initially
-                                            $unitsPerPage = 500;
-                                            $totalUnits = count($orgUnits['organisationUnits']);
-                                            $totalPages = ceil($totalUnits / $unitsPerPage);
-                                            $currentPage = 1;
-
-                                            // Just display first 10 for initial view - will be replaced by JS
-                                            $displayUnits = array_slice($orgUnits['organisationUnits'], 0, 10);
-
-                                            foreach ($displayUnits as $unit) : ?>
-                                                <tr>
-                                                    <td>
-                                                        <input type="checkbox" name="selected_orgunits[]" value="<?= $unit['id'] ?>" class="org-unit-checkbox">
-                                                    </td>
-                                                    <td><?= htmlspecialchars($unit['name']) ?></td>
-                                                    <td><?= $unit['id'] ?></td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <div class="text-muted">
-                                        Showing <span id="itemsPerPage">10</span> of <span id="currentGroupSize">500</span> units in group
-                                    </div>
-
-                                    <div id="paginationControls">
-                                        <div class="d-flex align-items-center">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="changePage(1)" id="firstPageBtn" disabled>
-                                                << </button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="previousPage()" id="prevPageBtn" disabled>
-                                                        < </button>
-                                                            <span class="mx-2" id="currentPage">Group 1 of <?= $totalPages ?></span>
-                                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="nextPage()" id="nextPageBtn" <?= $totalPages <= 1 ? 'disabled' : '' ?>>
-                                                                > </button>
-                                                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="changePage(<?= $totalPages ?>)" id="lastPageBtn" <?= $totalPages <= 1 ? 'disabled' : '' ?>>
-                                                                        >>
-                                                                    </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="text-center mt-4">
-                            <button type="submit" name="sync_locations" class="btn btn-success btn-lg">
-                                <i class="fas fa-upload me-2"></i> Load Location Table
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <script>
-                    // Store all org units in JavaScript for pagination
-                    const allOrgUnits = <?= json_encode($orgUnits['organisationUnits']) ?>;
-                    const unitsPerGroup = 500; // 500 units per group
-                    const unitsToDisplay = 10; // Show 10 units on screen at a time for performance
-                    let currentPage = 1;
-                    const totalPages = Math.ceil(allOrgUnits.length / unitsPerGroup);
-
-                    // Track which units are selected (by ID)
-                    let selectedUnits = new Set();
-                    let selectionType = "none"; // "none", "group", "all"
-
-                    function updateTable(page) {
-                        const startGroupIndex = (page - 1) * unitsPerGroup;
-                        const endGroupIndex = Math.min(startGroupIndex + unitsPerGroup, allOrgUnits.length);
-                        const currentGroupUnits = allOrgUnits.slice(startGroupIndex, endGroupIndex);
-
-                        // For display, just show the first few units of this group
-                        const displayUnits = currentGroupUnits.slice(0, unitsToDisplay);
-
-                        // Update table body
-                        const tbody = document.querySelector('#orgUnitsTable tbody');
-                        tbody.innerHTML = '';
-
-                        displayUnits.forEach(unit => {
-                            const row = document.createElement('tr');
-                            const isSelected = selectedUnits.has(unit.id);
-                            row.innerHTML = `
-                                <td>
-                                    <input type="checkbox" name="selected_orgunits[]"
-                                           value="${unit.id}" class="org-unit-checkbox"
-                                           ${isSelected ? 'checked' : ''}>
-                                </td>
-                                <td>${escapeHtml(unit.name)}</td>
-                                <td>${unit.id}</td>
-                            `;
-                            tbody.appendChild(row);
-                        });
-
-                        // Update pagination controls
-                        document.getElementById('currentPage').textContent = `Group ${page} of ${totalPages}`;
-                        document.getElementById('firstPageBtn').disabled = page <= 1;
-                        document.getElementById('prevPageBtn').disabled = page <= 1;
-                        document.getElementById('nextPageBtn').disabled = page >= totalPages;
-                        document.getElementById('lastPageBtn').disabled = page >= totalPages;
-
-                        // Update items count text
-                        document.getElementById('itemsPerPage').textContent = displayUnits.length;
-                        document.getElementById('currentGroupSize').textContent = currentGroupUnits.length;
-
-                        currentPage = page;
-
-                        // Update the select all checkbox based on current group selection status
-                        updateSelectAllCheckbox();
-                    }
-
-                    function escapeHtml(text) {
-                        const div = document.createElement('div');
-                        div.textContent = text;
-                        return div.innerHTML;
-                    }
-
-                    function changePage(page) {
-                        if (page < 1 || page > totalPages) return;
-                        updateTable(page);
-                    }
-
-                    function nextPage() {
-                        changePage(currentPage + 1);
-                    }
-
-                    function previousPage() {
-                        changePage(currentPage - 1);
-                    }
-
-                    function toggleSelectAll(checkbox) {
-                        const startIndex = (currentPage - 1) * unitsPerGroup;
-                        const endIndex = Math.min(startIndex + unitsPerGroup, allOrgUnits.length);
-
-                        // Get all checkboxes in the table
-                        const checkboxes = document.querySelectorAll('.org-unit-checkbox');
-
-                        // Set all visible checkboxes to the same state
-                        checkboxes.forEach(cb => {
-                            cb.checked = checkbox.checked;
-                        });
-
-                        // Update the selection state for all units in this group
-                        for (let i = startIndex; i < endIndex; i++) {
-                            const unitId = allOrgUnits[i].id;
-                            if (checkbox.checked) {
-                                selectedUnits.add(unitId);
-                            } else {
-                                selectedUnits.delete(unitId);
-                            }
-                        }
-
-                        // Update selection type if needed
-                        if (checkbox.checked) {
-                            selectionType = "group";
-                            document.getElementById('selectionType').value = "group";
-                        } else if (selectionType === "group") {
-                            selectionType = "none";
-                            document.getElementById('selectionType').value = "none";
-                        }
-                    }
-
-                    function updateSelectAllCheckbox() {
-                        const startIndex = (currentPage - 1) * unitsPerGroup;
-                        const endIndex = Math.min(startIndex + unitsPerGroup, allOrgUnits.length);
-
-                        let allSelected = true;
-                        for (let i = startIndex; i < endIndex; i++) {
-                            if (!selectedUnits.has(allOrgUnits[i].id)) {
-                                allSelected = false;
-                                break;
-                            }
-                        }
-
-                        document.getElementById('selectAllCheckbox').checked = allSelected;
-                    }
-
-                    function selectCurrentGroup() {
-                        const startIndex = (currentPage - 1) * unitsPerGroup;
-                        const endIndex = Math.min(startIndex + unitsPerGroup, allOrgUnits.length);
-
-                        // Select all units in this group
-                        for (let i = startIndex; i < endIndex; i++) {
-                            selectedUnits.add(allOrgUnits[i].id);
-                        }
-
-                        // Update checkboxes in the visible table
-                        const checkboxes = document.querySelectorAll('.org-unit-checkbox');
-                        checkboxes.forEach(cb => {
-                            cb.checked = true;
-                        });
-
-                        // Update the select all checkbox
-                        document.getElementById('selectAllCheckbox').checked = true;
-
-                        // Set selection type
-                        selectionType = "group";
-                        document.getElementById('selectionType').value = "group";
-
-                        // Create hidden inputs for all IDs in this group (for form submission)
-                        createHiddenInputs(startIndex, endIndex);
-                    }
-
-                    function selectAllGroups() {
-                        // Select all units across all groups
-                        allOrgUnits.forEach(unit => {
-                            selectedUnits.add(unit.id);
-                        });
-
-                        // Update checkboxes in the visible table
-                        const checkboxes = document.querySelectorAll('.org-unit-checkbox');
-                        checkboxes.forEach(cb => {
-                            cb.checked = true;
-                        });
-
-                        // Update the select all checkbox
-                        document.getElementById('selectAllCheckbox').checked = true;
-
-                        // Set selection type
-                        selectionType = "all";
-                        document.getElementById('selectionType').value = "all";
-
-                        // Create hidden inputs for all IDs (for form submission)
-                        createHiddenInputs(0, allOrgUnits.length);
-                    }
-
-                    function deselectAll() {
-                        // Clear all selections
-                        selectedUnits.clear();
-
-                        // Update checkboxes in the visible table
-                        const checkboxes = document.querySelectorAll('.org-unit-checkbox');
-                        checkboxes.forEach(cb => {
-                            cb.checked = false;
-                        });
-
-                        // Update the select all checkbox
-                        document.getElementById('selectAllCheckbox').checked = false;
-
-                        // Set selection type
-                        selectionType = "none";
-                        document.getElementById('selectionType').value = "none";
-
-                        // Remove any hidden inputs for selection
-                        removeHiddenInputs();
-                    }
-
-
-                    // Event listener for form submission
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const orgUnitsForm = document.getElementById('orgUnitsForm');
-                        if (orgUnitsForm) {
-                            orgUnitsForm.addEventListener('submit', function(e) {
-                                e.preventDefault();
-
-                                // Show loading spinner
-                                const loadBtn = document.querySelector('button[name="sync_locations"]');
-                                const originalBtnText = loadBtn.innerHTML;
-                                loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Creating Sync Job...';
-                                loadBtn.disabled = true;
-
-                                // Create form data
-                                const formData = new FormData(orgUnitsForm);
-
-                                // Send AJAX request to create sync job
-                                fetch('create_sync_job.php', {
-                                        method: 'POST',
-                                        body: formData
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.status === 'success') {
-                                            // Redirect to monitor page
-                                            window.location.href = 'sync_monitor.php?job_id=' + data.job_id;
-                                        } else {
-                                            // Show error message
-                                            alert('Error: ' + data.message);
-                                            loadBtn.innerHTML = originalBtnText;
-                                            loadBtn.disabled = false;
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error creating sync job:', error);
-                                        alert('An error occurred. Please try again.');
-                                        loadBtn.innerHTML = originalBtnText;
-                                        loadBtn.disabled = false;
-                                    });
-                            });
-                        }
-                    });
-                    // Function to create hidden inputs for selected units
-                    function createHiddenInputs(startIndex, endIndex) {
-                        // Remove existing hidden inputs first
-                        removeHiddenInputs();
-
-                        // Create a hidden input container if one doesn't exist
-                        let container = document.getElementById('hiddenInputsContainer');
-                        if (!container) {
-                            container = document.createElement('div');
-                            container.id = 'hiddenInputsContainer';
-                            container.style.display = 'none';
-                            document.getElementById('orgUnitsForm').appendChild(container);
-                        }
-
-                        // Create hidden inputs for unit IDs
-                        for (let i = startIndex; i < endIndex; i++) {
-                            if (i >= allOrgUnits.length) break;
-
-                            const input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = 'selected_orgunits[]';
-                            input.value = allOrgUnits[i].id;
-                            container.appendChild(input);
-                        }
-                    }
-
-                    // Function to remove hidden inputs
-                    function removeHiddenInputs() {
-                        const container = document.getElementById('hiddenInputsContainer');
-                        if (container) {
-                            container.innerHTML = '';
-                        }
-                    }
-
-
-
-                    // Handle individual checkbox changes
-                    document.addEventListener('change', function(e) {
-                        if (e.target && e.target.classList.contains('org-unit-checkbox')) {
-                            const unitId = e.target.value;
-
-                            if (e.target.checked) {
-                                selectedUnits.add(unitId);
-                            } else {
-                                selectedUnits.delete(unitId);
-                            }
-
-                            // Update the "Select All" checkbox
-                            updateSelectAllCheckbox();
-                        }
-                    });
-
-                    // Initialize the table and selection handling
-                    document.addEventListener('DOMContentLoaded', function() {
-                        updateTable(1);
-
-                        // Add form submit handler to process selections
-                        document.getElementById('orgUnitsForm').addEventListener('submit', function(e) {
-                            // Ensure proper handling of selection type before submission
-                            const selectionTypeInput = document.getElementById('selectionType');
-
-                            if (selectionType === "all") {
-                                // Create hidden inputs for all units
-                                createHiddenInputs(0, allOrgUnits.length);
-                            } else if (selectionType === "group") {
-                                const startIndex = (currentPage - 1) * unitsPerGroup;
-                                const endIndex = Math.min(startIndex + unitsPerGroup, allOrgUnits.length);
-                                createHiddenInputs(startIndex, endIndex);
-                            } else {
-                                // For individual selections, ensure each selected unit has a hidden input
-                                removeHiddenInputs();
-                                let container = document.getElementById('hiddenInputsContainer');
-                                if (!container) {
-                                    container = document.createElement('div');
-                                    container.id = 'hiddenInputsContainer';
-                                    container.style.display = 'none';
-                                    document.getElementById('orgUnitsForm').appendChild(container);
-                                }
-
-                                selectedUnits.forEach(unitId => {
-                                    const input = document.createElement('input');
-                                    input.type = 'hidden';
-                                    input.name = 'selected_orgunits[]';
-                                    input.value = unitId;
-                                    container.appendChild(input);
-                                });
-                            }
-                        });
-                    });
-                    // Submit handler for the form
-                    document.getElementById('orgUnitsForm').addEventListener('submit', function(e) {
-                        // Prepare for submission based on selection type
-                        const selectionType = document.getElementById('selectionType').value;
-
-                        if (selectionType === "all") {
-                            // Create hidden inputs for all units
-                            createHiddenInputs(0, allOrgUnits.length);
-                        } else if (selectionType === "group") {
-                            // Create hidden inputs for current group
-                            const startIndex = (currentPage - 1) * unitsPerGroup;
-                            const endIndex = Math.min(startIndex + unitsPerGroup, allOrgUnits.length);
-                            createHiddenInputs(startIndex, endIndex);
-                        } else if (selectionType === "none") {
-                            // Only submit selected units which are currently checked
-                            const checkboxes = document.querySelectorAll('.org-unit-checkbox:checked');
-                            if (checkboxes.length === 0) {
-                                alert('Please select at least one organization unit');
-                                e.preventDefault();
-                                return false;
-                            }
-                        }
-                    });
-                </script>
-            <?php endif; ?>
+    <div id="levelSelectionContainer" class="card futuristic-card card-body mb-4 shadow-lg" style="display:none;">
+        <div class="mb-3 text-white"><strong>Step 2:</strong> Select OrgUnit Level</div>
+        <select name="org_level" id="org_level_select" class="form-select" required>
+            <option value="">-- Select Level --</option>
+            </select>
+        <div id="levelLoadingSpinner" class="text-center mt-2" style="display:none;">
+            <i class="fas fa-spinner fa-spin fa-lg text-primary"></i>
+        </div>
+        <div class="mt-4">
+            <button type="button" class="btn btn-primary btn-lg" id="fetchOrgUnitsBtn">
+                <i class="fas fa-search me-2"></i> Fetch Org Units
+            </button>
         </div>
     </div>
-<?php endif; ?>
+
+    <div id="orgUnitsTableContainer">
+        <?php if ($selectedInstance && $selectedLevel): // Show initial spinner if instance and level are pre-selected ?>
+            <div class="text-center text-white py-4">
+                <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                <p class="mt-2">Loading organisation units...</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var dhis2Select = document.getElementById('dhis2_instance_select');
+    var levelSelectionContainer = document.getElementById('levelSelectionContainer');
+    var orgLevelSelect = document.getElementById('org_level_select');
+    var levelLoadingSpinner = document.getElementById('levelLoadingSpinner');
+    var fetchOrgUnitsBtn = document.getElementById('fetchOrgUnitsBtn');
+    var orgUnitsTableContainer = document.getElementById('orgUnitsTableContainer');
+
+    // Initial selected values from PHP for JS use (if page was loaded with GET params)
+    const initialInstance = "<?= htmlspecialchars($selectedInstance) ?>";
+    const initialLevel = "<?= htmlspecialchars($selectedLevel) ?>";
+
+    // Helper function to show loading spinner in a given element
+    function showLoading(element, message = 'Loading...') {
+        element.innerHTML = `<div class="text-center text-white py-4">
+                                <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                                <p class="mt-2">${message}</p>
+                             </div>`;
+    }
+
+    // Function to load OrgUnit Levels into Step 2 dropdown via AJAX
+    function loadOrgUnitLevels() {
+        var instanceKey = dhis2Select.value;
+        orgLevelSelect.innerHTML = '<option value="">-- Loading --</option>'; // Show loading in dropdown
+        orgLevelSelect.disabled = true;
+        levelLoadingSpinner.style.display = 'block'; // Show spinner next to dropdown
+        fetchOrgUnitsBtn.disabled = true; // Disable "Fetch Org Units" button
+
+        levelSelectionContainer.style.display = 'none'; // Initially hide Step 2 container
+        orgUnitsTableContainer.innerHTML = ''; // Clear Step 3 content
+
+        if (!instanceKey) { // If no instance is selected, reset and hide
+            orgLevelSelect.innerHTML = '<option value="">-- Select Level --</option>';
+            levelLoadingSpinner.style.display = 'none';
+            return;
+        }
+
+        // Fetch levels from the AJAX endpoint
+        fetch('dhis2/ajax_get_orgunit_levels.php?instance=' + encodeURIComponent(instanceKey))
+        .then(resp => {
+            if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+            return resp.json();
+        })
+        .then(data => {
+            orgLevelSelect.innerHTML = '<option value="">-- Select Level --</option>'; // Reset dropdown
+            levelLoadingSpinner.style.display = 'none'; // Hide spinner
+
+            if (data.success && Array.isArray(data.levels) && data.levels.length) {
+                data.levels.forEach(function(lvl) {
+                    var opt = document.createElement('option');
+                    opt.value = lvl.level;
+                    opt.textContent = lvl.displayName + " (Level " + lvl.level + ")";
+                    orgLevelSelect.appendChild(opt);
+                });
+                orgLevelSelect.disabled = false;
+                fetchOrgUnitsBtn.disabled = false; // Enable "Fetch Org Units" button
+
+                // If an initial level was set (e.g., from URL), select it and trigger unit fetch
+                if (initialInstance === instanceKey && initialLevel) {
+                    orgLevelSelect.value = initialLevel;
+                    fetchOrganisationUnits(); // Automatically trigger Step 3
+                }
+
+            } else {
+                orgLevelSelect.innerHTML = '<option value="">-- No levels found --</option>';
+                fetchOrgUnitsBtn.disabled = true;
+                // Display error/info directly in container
+                orgUnitsTableContainer.innerHTML = `<div class="alert alert-warning futuristic-alert text-white">No org unit levels found for this instance.</div>`;
+            }
+            levelSelectionContainer.style.display = 'block'; // Show Step 2 container
+        })
+        .catch(function(err) {
+            console.error("AJAX error loading levels: ", err);
+            orgLevelSelect.innerHTML = '<option value="">-- Error loading --</option>';
+            levelLoadingSpinner.style.display = 'none';
+            fetchOrgUnitsBtn.disabled = true;
+            orgUnitsTableContainer.innerHTML = `<div class="alert alert-danger futuristic-alert text-white">Network error loading levels: ${err}</div>`;
+        });
+    }
+
+    // Function to fetch Organisation Units and display the table via AJAX
+    function fetchOrganisationUnits() {
+        var instanceKey = dhis2Select.value;
+        var orgLevel = orgLevelSelect.value;
+
+        if (!instanceKey || !orgLevel) {
+            alert("Please select both a DHIS2 instance and an OrgUnit level.");
+            return;
+        }
+
+        showLoading(orgUnitsTableContainer, 'Fetching Organisation Units...'); // Show spinner in results area
+
+        const formData = new FormData();
+        formData.append('dhis2_instance', instanceKey);
+        formData.append('org_level', orgLevel);
+
+        // Fetch HTML content from the new endpoint
+        fetch('dhis2/ajax_fetch_orgunits.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(resp => {
+            if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+            return resp.text(); // Expect HTML snippet
+        })
+        .then(html => {
+            orgUnitsTableContainer.innerHTML = html; // Inject HTML
+            // Re-execute any scripts embedded in the loaded HTML (e.g., toggleSelectAll, orgUnitsForm submit listener)
+            const scripts = orgUnitsTableContainer.querySelectorAll('script');
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                newScript.textContent = script.textContent;
+                document.body.appendChild(newScript).remove(); // Execute and remove
+            });
+        })
+        .catch(function(err) {
+            console.error("AJAX error fetching org units: ", err);
+            orgUnitsTableContainer.innerHTML = `<div class="alert alert-danger futuristic-alert">Network error fetching organisation units: ${err}</div>`;
+        });
+    }
+
+    // Event Listeners for main dropdowns and button
+    dhis2Select.addEventListener('change', loadOrgUnitLevels);
+    fetchOrgUnitsBtn.addEventListener('click', fetchOrganisationUnits);
+
+    // Initial page load: If an instance is pre-selected (e.g., from a URL parameter),
+    // trigger the level loading process.
+    if (initialInstance) {
+        loadOrgUnitLevels();
+    }
+});
+</script>

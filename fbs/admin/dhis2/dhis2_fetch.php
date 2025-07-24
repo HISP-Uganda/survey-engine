@@ -1,6 +1,5 @@
 <?php
 require_once 'dhis2_shared.php';
-require_once 'dhis2_get_function.php';
 
 header('Content-Type: application/json');
 
