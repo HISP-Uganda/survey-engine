@@ -1,6 +1,5 @@
 <?php
 require_once 'dhis2_shared.php';
-require_once 'dhis2_post_function.php';
 
 class DHIS2SubmissionHandler {
     private $conn;

@@ -28,7 +28,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
 }
 
 // --- CHANGE 2: Include centralized PDO connection and check for $pdo object ---
-require 'connect.php'; // This line is already present and correct.
+require_once 'connect.php'; // This line is already present and correct.
 
 // Add a check to ensure $pdo object is available from connect.php
 if (!isset($pdo)) {
@@ -38,8 +38,7 @@ if (!isset($pdo)) {
 }
 // --- END CHANGE 2 ---
 
-require 'dhis2/dhis2_shared.php'; // Ensure this provides getDhis2Config() and dhis2_get()
-require 'dhis2/dhis2_get_function.php'; // Ensure this has necessary DHIS2 API call functions
+require_once 'dhis2/dhis2_shared.php'; // Ensure this provides getDhis2Config() and dhis2_get()
 
 $success_message = null;
 $error_message = null;
@@ -348,38 +347,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  * Get all active DHIS2 instances using getDhis2Config from dhis2_shared.php.
  * Returns an array of instance configs keyed by their 'key'.
  */
-function getLocalDHIS2Config()
-{
-    global $pdo;
+// function getLocalDHIS2Config()
+// {
+//     global $pdo;
 
-    $instances = [];
-    if (!isset($pdo)) {
-        error_log("ERROR: getLocalDHIS2Config: PDO object not available. Returning empty instances.");
-        throw new Exception("Database connection not established for DHIS2 instance lookup."); // Throw exception to halt if critical
-    }
+//     $instances = [];
+//     if (!isset($pdo)) {
+//         error_log("ERROR: getLocalDHIS2Config: PDO object not available. Returning empty instances.");
+//         throw new Exception("Database connection not established for DHIS2 instance lookup."); // Throw exception to halt if critical
+//     }
 
-    try {
-        $stmt = $pdo->query("SELECT `key` FROM dhis2_instances WHERE status = 1 ORDER BY `key` ASC"); // ORDER BY added for consistent dropdown order
-        if ($stmt) {
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $config = getDhis2Config($row['key']); // Calls the function in dhis2_shared.php
-                if ($config) {
-                    $instances[$row['key']] = $config;
-                } else {
-                    error_log("WARNING: getLocalDHIS2Config: getDhis2Config returned null for key: " . $row['key']); // Log if getDhis2Config failed for a key
-                }
-            }
-        } else {
-            error_log("ERROR: getLocalDHIS2Config: Failed to prepare or execute query for dhis2_instances table - " . json_encode($pdo->errorInfo()));
-            throw new Exception("Failed to query active DHIS2 instances from database.");
-        }
-    } catch (PDOException $e) {
-        error_log("ERROR: getLocalDHIS2Config: Database error: " . $e->getMessage());
-        throw new Exception("Error fetching DHIS2 instances from database: " . $e->getMessage());
-    }
-    error_log("DEBUG: getLocalDHIS2Config: Successfully returning " . count($instances) . " DHIS2 instances."); // LOG THE FINAL COUNT
-    return $instances;
-}
+//     try {
+//         $stmt = $pdo->query("SELECT key,description FROM dhis2_instances WHERE status = 1 ORDER BY `key` ASC"); // ORDER BY added for consistent dropdown order
+//         if ($stmt) {
+//             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+//                 $config = getDhis2Config($row['key']); // Calls the function in dhis2_shared.php
+//                 if ($config) {
+//                     $instances[$row['key']] = $config;
+//                 } else {
+//                     error_log("WARNING: getLocalDHIS2Config: getDhis2Config returned null for key: " . $row['key']); // Log if getDhis2Config failed for a key
+//                 }
+//             }
+//         } else {
+//             error_log("ERROR: getLocalDHIS2Config: Failed to prepare or execute query for dhis2_instances table - " . json_encode($pdo->errorInfo()));
+//             throw new Exception("Failed to query active DHIS2 instances from database.");
+//         }
+//     } catch (PDOException $e) {
+//         error_log("ERROR: getLocalDHIS2Config: Database error: " . $e->getMessage());
+//         throw new Exception("Error fetching DHIS2 instances from database: " . $e->getMessage());
+//     }
+//     error_log("DEBUG: getLocalDHIS2Config: Successfully returning " . count($instances) . " DHIS2 instances."); // LOG THE FINAL COUNT
+//     return $instances;
+// }
 
 /**
  * Fetches programs from DHIS2 based on program type.
@@ -396,7 +395,7 @@ function getPrograms($instance, $programType = null)
     } elseif ($programType === 'tracker') {
         $filter = '&filter=programType:eq:WITH_REGISTRATION';
     }
-    $programs = dhis2_get('/api/programs?fields=id,name,programType' . $filter, $instance);
+    $programs = dhis2_get('programs?fields=id,name,programType' . $filter, $instance);
     return $programs['programs'] ?? [];
 }
 
@@ -407,7 +406,7 @@ function getPrograms($instance, $programType = null)
 function getDatasets($instance)
 {
     // dhis2_get is assumed to be defined in dhis2_shared.php or dhis2_get_function.php
-    $datasets = dhis2_get('/api/dataSets?fields=id,name', $instance);
+    $datasets = dhis2_get('dataSets?fields=id,name', $instance);
     return $datasets['dataSets'] ?? [];
 }
 
@@ -421,7 +420,7 @@ function getCategoryComboDetails($instance, $categoryComboId)
         return null;
     }
 
-    $categoryCombo = dhis2_get('/api/categoryCombos/' . $categoryComboId . '?fields=id,name,categoryOptionCombos[id,name]', $instance);
+    $categoryCombo = dhis2_get('categoryCombos/' . $categoryComboId . '?fields=id,name,categoryOptionCombos[id,name]', $instance);
     return $categoryCombo;
 }
 
@@ -442,7 +441,7 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
     if ($domain === 'tracker') {
         if ($programType === 'tracker') { // This is a WITH_REGISTRATION program
             // Fetch program details including tracked entity attributes and category combination
-            $programInfo = dhis2_get('/api/programs/' . $programId . '?fields=id,name,programType,categoryCombo[id,name],programTrackedEntityAttributes[trackedEntityAttribute[id,name,optionSet[id,name]]]', $instance);
+            $programInfo = dhis2_get('programs/' . $programId . '?fields=id,name,programType,categoryCombo[id,name],programTrackedEntityAttributes[trackedEntityAttribute[id,name,optionSet[id,name]]]', $instance);
 
             $result['program'] = [
                 'id' => $programInfo['id'],
@@ -471,7 +470,7 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
 
         } elseif ($programType === 'event') { // This is a WITHOUT_REGISTRATION program
             // Fetch program details for event program including category combination
-            $programInfo = dhis2_get('/api/programs/' . $programId . '?fields=id,name,programType,categoryCombo[id,name],programStages[id,name,programStageDataElements[dataElement[id,name,optionSet[id,name]]]]', $instance);
+            $programInfo = dhis2_get('programs/' . $programId . '?fields=id,name,programType,categoryCombo[id,name],programStages[id,name,programStageDataElements[dataElement[id,name,optionSet[id,name]]]]', $instance);
 
             $result['program'] = [
                 'id' => $programInfo['id'],
@@ -506,7 +505,7 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
         }
     } elseif ($domain === 'aggregate') {
       // Get dataset details with category combination
-      $datasetInfo = dhis2_get('/api/dataSets/' . $programId . '?fields=id,name,categoryCombo[id,name,categoryOptionCombos[id,name]],dataSetElements[dataElement[id,name,categoryCombo[id,name,categoryOptionCombos[id,name]]]]', $instance);
+      $datasetInfo = dhis2_get('dataSets/' . $programId . '?fields=id,name,categoryCombo[id,name,categoryOptionCombos[id,name]],dataSetElements[dataElement[id,name,categoryCombo[id,name,categoryOptionCombos[id,name]]]]', $instance);
       $result['program'] = [
         'id' => $datasetInfo['id'],
         'name' => $datasetInfo['name']
@@ -561,7 +560,7 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
 
     // Fetch option values for all option sets (for tracker/event programs)
     foreach ($result['optionSets'] as $optionSetId => &$optionSet) {
-        $optionSetDetails = dhis2_get('/api/optionSets/' . $optionSetId . '?fields=id,name,options[id,name,code]', $instance);
+        $optionSetDetails = dhis2_get('optionSets/' . $optionSetId . '?fields=id,name,options[id,name,code]', $instance);
         if (!empty($optionSetDetails['options'])) {
             $optionSet['options'] = $optionSetDetails['options'];
 
@@ -598,12 +597,16 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
               <option value="">-- Select Instance --</option>
                             <?php
                 try {
-                    $availableDhis2Instances = getLocalDHIS2Config(); // This calls the function defined above
+                    // $availableDhis2Instances = getLocalDHIS2Config(); // This calls the function defined above
                     // Add a log here to see what's actually passed to the HTML loop
+                    
+                    $availableDhis2Instances = getAllDhis2Configs(); // Ensure this returns an array of available instances
+                    print_r($availableDhis2Instances); // Debugging line to see the structure
+                    
                     error_log("DEBUG: create_survey.php dropdown loop: " . json_encode(array_keys($availableDhis2Instances)));
-                    foreach ($availableDhis2Instances as $key => $config) : ?>
-                    <option value="<?= htmlspecialchars($key) ?>" <?= (isset($_GET['dhis2_instance']) && $_GET['dhis2_instance'] == $key) ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($config['description'] . ' (' . $key . ')') ?> 
+                    foreach ($availableDhis2Instances as $config) : ?>
+                    <option value="<?= htmlspecialchars($config['instance_key']) ?>" <?= (isset($_GET['dhis2_instance']) && $_GET['dhis2_instance'] == $config['instance_key']) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($config['description'] . ' (' . $config['instance_key'] . ')') ?> 
                         <?php // USE $config['description'] for display if available, fallback to $key ?>
                     </option>
                     <?php endforeach;
@@ -776,7 +779,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
                                             // For aggregate, fetch and show the category combo for each data element (not the dataset's)
                                             $deCategoryCombo = null;
                                             try {
-                                                $deDetails = dhis2_get('/api/dataElements/' . $deId . '?fields=categoryCombo[id,name,categoryOptionCombos[id,name]]', $_GET['dhis2_instance']);
+                                                $deDetails = dhis2_get('dataElements/' . $deId . '?fields=categoryCombo[id,name,categoryOptionCombos[id,name]]', $_GET['dhis2_instance']);
                                                 if (!empty($deDetails['categoryCombo'])) {
                                                     $deCategoryCombo = $deDetails['categoryCombo'];
                                                 }

@@ -1,7 +1,11 @@
 <?php
 // create_sync_job.php - Creates a sync job from the form submission
 session_start();
-require 'connect.php';
+require 'connect.php'; // Ensure this connects to your database
+
+header('Content-Type: application/json');
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
 // Initialize response
 $response = [
@@ -16,18 +20,39 @@ if (!isset($_POST['dhis2_instance']) || empty($_POST['dhis2_instance'])) {
     outputResponse($response);
 }
 
-// Get instance
-$instance = $_POST['dhis2_instance'];
+// Get instance and org level
+$instanceKey = $_POST['dhis2_instance']; // Renamed to instanceKey for clarity
+$org_level = $_POST['org_level'] ?? null;
 
 // Determine selection type
-$selectionType = $_POST['selection_type'] ?? 'none';
+$selectionType = $_POST['selection_type'] ?? 'manual';
 
-// Get selected organization units
-$selectedUnits = $_POST['selected_orgunits'] ?? [];
+// Get selected organization units as JSON-encoded objects
+$selectedUnitsRaw = $_POST['selected_orgunits'] ?? [];
 
-// Check if any units are selected
-if (empty($selectedUnits)) {
+if (empty($selectedUnitsRaw) || !is_array($selectedUnitsRaw)) {
     $response['message'] = 'No organization units selected';
+    outputResponse($response);
+}
+
+// Parse and validate orgunit objects
+$selectedUnits = [];
+foreach ($selectedUnitsRaw as $jsonStr) {
+    $unit = json_decode($jsonStr, true);
+    if (json_last_error() === JSON_ERROR_NONE && isset($unit['uid'], $unit['name'])) {
+        // Accept only if at least uid and name are present
+        $selectedUnits[] = [
+            'uid'        => $unit['uid'],
+            'name'       => $unit['name'],
+            'path'       => $unit['path'] ?? '',
+            'level'      => $unit['level'] ?? '',
+            'parent_uid' => $unit['parent_uid'] ?? ''
+        ];
+    }
+}
+
+if (empty($selectedUnits)) {
+    $response['message'] = 'No valid organisation units found in selection';
     outputResponse($response);
 }
 
@@ -40,34 +65,48 @@ if (!is_dir($storageDir)) {
     mkdir($storageDir, 0755, true);
 }
 
-// Store job data
+// Store job data (for processor and monitor)
 $_SESSION['sync_jobs'][$jobId] = [
-    'id' => $jobId,
-    'instance' => $instance,
-    'total' => count($selectedUnits),
-    'processed' => 0,
-    'inserted' => 0,
-    'updated' => 0,
-    'errors' => 0,
-    'status' => 'ready',
+    'id'           => $jobId,
+    'instance_key' => $instanceKey, // Store instance_key in session job data
+    'org_level'    => $org_level,
+    'total'        => count($selectedUnits),
+    'processed'    => 0,
+    'inserted'     => 0,
+    'updated'      => 0,
+    'errors'       => 0,
+    'status'       => 'ready',
     'selection_type' => $selectionType,
-    'created_at' => date('Y-m-d H:i:s')
+    'created_at'   => date('Y-m-d H:i:s'),
+    'start_time' => date('Y-m-d H:i:s') 
+
 ];
 
-// Store units list in a file for processing
-$jobData = [
-    'instance' => $instance,
-    'units' => $selectedUnits,
-    'selection_type' => $selectionType
-];
+// Store units list in a file for processing (save as JSON for sync_processor)
+// We no longer need this as `sync_processor.php` will read from CSV directly
+// $jobData = [
+//     'instance' => $instanceKey,
+//     'units' => $selectedUnits,
+//     'selection_type' => $selectionType,
+//     'org_level' => $org_level
+// ];
+// $unitsFile = $storageDir . '/' . $jobId . '_units.json';
+// file_put_contents($unitsFile, json_encode($jobData));
 
-$unitsFile = $storageDir . '/' . $jobId . '_units.json';
-file_put_contents($unitsFile, json_encode($jobData));
-
-// Create empty CSV file for data
+// Write to CSV for processing, INCLUDING the instance_key
 $csvFile = $storageDir . '/' . $jobId . '_data.csv';
 $fp = fopen($csvFile, 'w');
-fputcsv($fp, ['uid', 'name', 'path', 'level', 'parent_uid']);
+fputcsv($fp, ['instance_key', 'uid', 'name', 'path', 'level', 'parent_uid']); // Add instance_key to header
+foreach ($selectedUnits as $unit) {
+    fputcsv($fp, [
+        $instanceKey, // Add the instance_key here
+        $unit['uid'],
+        $unit['name'],
+        $unit['path'],
+        $unit['level'],
+        $unit['parent_uid']
+    ]);
+}
 fclose($fp);
 
 // Return success response
@@ -78,8 +117,7 @@ outputResponse($response);
 
 /**
  * Output JSON response and exit
- * 
- * @param array $response Response data
+ * * @param array $response Response data
  * @return void
  */
 function outputResponse($response) {
