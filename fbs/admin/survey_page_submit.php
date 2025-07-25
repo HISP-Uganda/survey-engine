@@ -1,22 +1,36 @@
 <?php
 session_start();
-require_once 'dhis2/dhis2_submit.php';
+// The path for dhis2_submit.php needs to be correct relative to this file.
+// If dhis2 is a folder inside fbs, and this file is in fbs/admin, then this path is wrong.
+// It should probably be something like:
+// require_once '../dhis2/dhis2_submit.php'; // If dhis2 is a sibling of admin
+require_once 'dhis2/dhis2_submit.php'; // Adjust this path if dhis2/dhis2_submit.php is in a different location.
+                                        // For example, if dhis2 is inside fbs, and survey_page_submit.php
+                                        // is in fbs/admin, then '../dhis2/' would navigate up to fbs/ then down to dhis2/
 
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "fbtv3";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// Include the connect.php file which provides the $pdo object
+// Since survey_page_submit.php is in fbs/admin, and connect.php is also in fbs/admin,
+// the path is simply 'connect.php'.
+require_once 'connect.php'; // This will make the $pdo variable available
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// You no longer need these mysqli connection details and object creation
+// $servername = "localhost";
+// $username = "root";
+// $password = "root";
+// $dbname = "fbtv3";
+// $conn = new mysqli($servername, $username, $password, $dbname);
+// if ($conn->connect_error) {
+//     die("Connection failed: " . $conn->connect_error);
+// }
 
-// Function to sanitize input data
-function sanitize($conn, $data) {
-    return $conn->real_escape_string(trim($data));
+// Function to sanitize input data - Refactored for PDO
+// For PDO, prepare statements handle most of the "sanitization" against SQL injection.
+// For general string cleaning (like trimming whitespace), you don't need the connection object.
+// If you absolutely need to escape a string *outside* of a prepared statement (rarely needed with PDO),
+// you would use $pdo->quote(). But for user input in prepared statements, this is not needed.
+function sanitize($data) { // Removed $conn parameter as it's not needed for basic trim
+    return trim($data);
 }
 
 // Function to generate a unique identifier (UID)
@@ -33,38 +47,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Get the submission language
-    $submissionLanguage = isset($_POST['submission_language']) ? sanitize($conn, $_POST['submission_language']) : 'en';
+    // Use the refactored sanitize function without $conn (or $pdo) parameter
+    $submissionLanguage = isset($_POST['submission_language']) ? sanitize($_POST['submission_language']) : 'en';
 
     // Generate a unique identifier (UID)
     $uid = generateUID();
 
     // --- Fetch survey type (still useful for local logic) ---
     $surveyType = 'local'; // Default to 'local'
-    $stmt = $conn->prepare("SELECT type FROM survey WHERE id = ?");
-    $stmt->bind_param("i", $surveyId);
-    $stmt->execute();
-    $stmt->bind_result($fetchedType);
-    if ($stmt->fetch()) {
+    // Use $pdo for prepare and execute
+    $stmt = $pdo->prepare("SELECT type FROM survey WHERE id = ?");
+    $stmt->execute([$surveyId]);
+    $fetchedType = $stmt->fetchColumn(); // Fetches single column value
+    if ($fetchedType) {
         $surveyType = $fetchedType;
     }
-    $stmt->close();
+    $stmt = null; // Close statement by setting to null
     // --- End fetch survey type ---
 
     // Initialize optional variables. They will be null if not provided in POST.
     // Ensure these columns are set to NULLABLE in your database schema.
     $age = isset($_POST['age']) && $_POST['age'] !== '' ? intval($_POST['age']) : null;
-    $sex = isset($_POST['sex']) && $_POST['sex'] !== '' ? sanitize($conn, $_POST['sex']) : null;
-    $reportingPeriod = isset($_POST['reporting_period']) && $_POST['reporting_period'] !== '' ? sanitize($conn, $_POST['reporting_period']) : null;
+    $sex = isset($_POST['sex']) && $_POST['sex'] !== '' ? sanitize($_POST['sex']) : null; // Use refactored sanitize
+    $reportingPeriod = isset($_POST['reporting_period']) && $_POST['reporting_period'] !== '' ? sanitize($_POST['reporting_period']) : null; // Use refactored sanitize
     $serviceUnitId = isset($_POST['serviceUnit']) && $_POST['serviceUnit'] !== '' ? intval($_POST['serviceUnit']) : null;
     $ownershipId = isset($_POST['ownership']) && $_POST['ownership'] !== '' ? intval($_POST['ownership']) : null;
     $locationId = isset($_POST['facility_id']) && $_POST['facility_id'] !== '' ? intval($_POST['facility_id']) : null;
 
-    // Begin transaction
-    $conn->begin_transaction();
+    // Begin transaction using $pdo
+    $pdo->beginTransaction();
 
     try {
-        // Insert into submission table
-        $insertSubmission = $conn->prepare("
+        // Insert into submission table using $pdo
+        $insertSubmission = $pdo->prepare("
             INSERT INTO submission (
                 uid,
                 age,
@@ -77,10 +92,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
-        // The 'bind_param' function handles NULL values correctly for corresponding database types
-        // as long as the database columns are set to NULLABLE.
-        $insertSubmission->bind_param(
-            "sissiiii",
+        // Execute with an array of parameters. PDO handles types automatically.
+        $insertSubmission->execute([
             $uid,
             $age,
             $sex,
@@ -89,23 +102,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $locationId,
             $ownershipId,
             $surveyId
-        );
+        ]);
 
-        $insertSubmission->execute();
+        // Get the submission ID using $pdo
+        $submissionId = $pdo->lastInsertId();
 
-        // Get the submission ID
-        $submissionId = $conn->insert_id;
-
-        // Get questions for this survey
-        $questions = $conn->query("
+        // Get questions for this survey using $pdo
+        $questionsStmt = $pdo->prepare("
             SELECT q.id, q.question_type
             FROM question q
             JOIN survey_question sq ON q.id = sq.question_id
-            WHERE sq.survey_id = $surveyId
+            WHERE sq.survey_id = ?
         ");
+        $questionsStmt->execute([$surveyId]);
+        $questions = $questionsStmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all results
 
-        // Prepare statement for inserting responses
-        $insertResponse = $conn->prepare("
+        // Prepare statement for inserting responses using $pdo
+        $insertResponse = $pdo->prepare("
             INSERT INTO submission_response (
                 submission_id,
                 question_id,
@@ -114,7 +127,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ");
 
         // Process each question response
-        while ($question = $questions->fetch_assoc()) {
+        foreach ($questions as $question) { // Iterate over fetched array
             $questionId = $question['id'];
             $questionType = $question['question_type'];
             $responseKey = "question_" . $questionId;
@@ -124,42 +137,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if ($questionType == 'checkbox' && is_array($_POST[$responseKey])) {
                     // For checkboxes, we might have multiple values
                     foreach ($_POST[$responseKey] as $value) {
-                        $sanitizedValue = sanitize($conn, $value);
-                        $insertResponse->bind_param("iis", $submissionId, $questionId, $sanitizedValue);
-                        $insertResponse->execute();
+                        $sanitizedValue = sanitize($value); // Use refactored sanitize
+                        $insertResponse->execute([$submissionId, $questionId, $sanitizedValue]);
                     }
                 } else {
                     // For other question types
                     $responseValue = is_array($_POST[$responseKey]) ?
-                                     implode(", ", array_map(function($item) use ($conn) {
-                                         return sanitize($conn, $item);
+                                     implode(", ", array_map(function($item) { // No $conn or $pdo needed in closure
+                                         return sanitize($item);
                                      }, $_POST[$responseKey])) :
-                                     sanitize($conn, $_POST[$responseKey]);
+                                     sanitize($_POST[$responseKey]); // Use refactored sanitize
 
-                    $insertResponse->bind_param("iis", $submissionId, $questionId, $responseValue);
-                    $insertResponse->execute();
+                    $insertResponse->execute([$submissionId, $questionId, $responseValue]);
                 }
             }
-            // If the response key is not set or empty, we simply skip inserting a response for it,
-            // effectively making it optional.
         }
 
-        // Commit transaction
-        $conn->commit();
+        // Commit transaction using $pdo
+        $pdo->commit();
 
         // Store UID in session to prevent resubmission
         $_SESSION['submitted_uid'] = $uid;
 
         // --- DHIS2 Submission Logic (Now applies to all types, but checks for config) ---
         try {
-            $dhis2Submitter = new DHIS2SubmissionHandler($conn, $surveyId); // Instantiate unconditionally
+            // Ensure DHIS2SubmissionHandler can accept $pdo
+            // You might need to adjust the DHIS2SubmissionHandler constructor if it was expecting a mysqli object.
+            $dhis2Submitter = new DHIS2SubmissionHandler($pdo, $surveyId); // Pass $pdo
 
-            if ($dhis2Submitter->isReadyForSubmission()) { // Check if configuration was successful
+            if ($dhis2Submitter->isReadyForSubmission()) {
                 $result = $dhis2Submitter->processSubmission($submissionId);
 
                 if (!$result['success']) {
                     error_log("DHIS2 submission failed for submission ID $submissionId (Survey ID: $surveyId): " . $result['message']);
-                    // You might want to log this to a separate table for failed DHIS2 submissions
                 } else {
                     error_log("DHIS2 submission successful or already processed for submission ID $submissionId (Survey ID: $surveyId): " . $result['message']);
                 }
@@ -167,7 +177,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 error_log("Skipping DHIS2 submission for survey ID $surveyId: No valid DHIS2 configuration found in the database (dhis2_instance or program_dataset is missing/empty).");
             }
         } catch (Exception $e) {
-            // Catch any exceptions specifically from the DHIS2 handler (e.g., if determineProgramType fails)
             error_log("Caught DHIS2 handler exception for survey ID $surveyId, submission ID $submissionId: " . $e->getMessage());
         }
         // --- End DHIS2 Submission Logic ---
@@ -176,22 +185,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: thank_you.php?uid=$uid");
         exit;
     } catch (Exception $e) {
-        // Roll back transaction on error
-        $conn->rollback();
+        // Roll back transaction on error using $pdo
+        $pdo->rollBack();
         echo "Error: " . $e->getMessage();
-        // It's good to log the actual submission ID if available, but here it might not be.
         error_log("Caught main submission exception for survey ID $surveyId: " . $e->getMessage());
     }
 
-    // Close prepared statements
-    if (isset($insertSubmission)) $insertSubmission->close();
-    if (isset($insertResponse)) $insertResponse->close();
+    // PDO statements are closed when they go out of scope or explicitly set to null.
+    // No explicit close calls needed like mysqli.
 } else {
     // If not a POST request, redirect to the survey page
     header("Location: survey_page.php");
     exit;
 }
 
-// Close database connection
-$conn->close();
+// PDO connection doesn't need explicit close. It closes automatically when script ends.
+// $conn->close(); // No longer needed
 ?>

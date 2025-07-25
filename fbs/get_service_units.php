@@ -1,5 +1,5 @@
 <?php
-require 'db.php';
+require_once './admin/connect.php';
 
 $query = "SELECT * FROM service_unit"; // Fetch service units
 $stmt = $pdo->query($query);
