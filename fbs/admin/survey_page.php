@@ -802,7 +802,7 @@ function validateCurrentPage() {
 
     </script>
 
-    <script defer src="./survey_page.js"></script>
+    <script defer src="survey_page.js"></script>
 
     <script defer src="../translations.js"></script>
 </body>

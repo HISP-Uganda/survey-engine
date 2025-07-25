@@ -1,5 +1,5 @@
 <?php
-require 'db.php'; // Ensure this path is correct
+require_once './admin/connect.php';
 
 $query = "SELECT * FROM owner"; // Fetch all ownership options
 $stmt = $pdo->query($query);

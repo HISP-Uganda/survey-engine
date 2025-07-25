@@ -2,7 +2,8 @@
 require_once 'dhis2_shared.php';
 
 class DHIS2SubmissionHandler {
-    private $conn;
+    // CHANGE 1: Change $conn to $pdo here
+    private $pdo; // Changed from private $conn;
     private $instance;
     private $programUID;
     private $programType;
@@ -14,12 +15,12 @@ class DHIS2SubmissionHandler {
      * Constructor for DHIS2SubmissionHandler.
      * Fetches DHIS2 configuration from the database based on surveyId.
      *
-     * @param mysqli $conn The database connection.
+     * @param PDO $pdo The database connection (CHANGED FROM mysqli $conn).
      * @param int $surveyId The ID of the survey to get configuration for.
      * @throws Exception If the survey configuration is found but invalid (e.g., empty instance/program UID).
      */
-   public function __construct(mysqli $conn, int $surveyId) {
-        $this->conn = $conn;
+   public function __construct(PDO $pdo, int $surveyId) { // CHANGE 2: Type hint from mysqli to PDO, and parameter name to $pdo
+        $this->pdo = $pdo; // CHANGE 3: Assign to $this->pdo
         $this->surveyId = $surveyId;
         
         $surveyConfig = $this->getSurveyConfig($surveyId);
@@ -66,17 +67,18 @@ class DHIS2SubmissionHandler {
     private function getSurveyConfig(int $surveyId): ?array {
         // Changed query: Removed 'type = dhis2' and 'is_active = 1' to fetch all survey types.
         // We will now rely on dhis2_instance and program_dataset being present.
-        $stmt = $this->conn->prepare("
+        // CHANGE 4: Use $this->pdo for prepare
+        $stmt = $this->pdo->prepare("
             SELECT dhis2_instance, program_dataset 
             FROM survey 
             WHERE id = ? 
         ");
         
-        $stmt->bind_param("i", $surveyId);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        // CHANGE 5: Use PDO execute with array for parameters
+        $stmt->execute([$surveyId]);
         
-        return $result->fetch_assoc();
+        // CHANGE 6: Use PDO fetch method
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
 
@@ -107,10 +109,11 @@ class DHIS2SubmissionHandler {
         return 'event';
     }
     private function loadFieldMappings(): void {
-        $stmt = $this->conn->prepare("SELECT field_name, dhis2_dataelement_id, dhis2_option_set_id FROM dhis2_system_field_mapping");
+        // CHANGE 7: Use $this->pdo for prepare
+        $stmt = $this->pdo->prepare("SELECT field_name, dhis2_dataelement_id, dhis2_option_set_id FROM dhis2_system_field_mapping");
         $stmt->execute();
-        $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
+        // CHANGE 8: Use PDO fetch methods
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $this->fieldMappingCache[$row['field_name']] = [
                 'data_element' => $row['dhis2_dataelement_id'],
                 'option_set' => $row['dhis2_option_set_id'],
@@ -175,27 +178,29 @@ class DHIS2SubmissionHandler {
     }
 
     private function isAlreadySubmitted(int $submissionId): bool {
-        $stmt = $this->conn->prepare("
+        // CHANGE 9: Use $this->pdo for prepare
+        $stmt = $this->pdo->prepare("
             SELECT id FROM dhis2_submission_log
             WHERE submission_id = ? AND status = 'SUCCESS'
         ");
 
-        $stmt->bind_param("i", $submissionId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        return $result->num_rows > 0;
+        // CHANGE 10: Use PDO execute with array
+        $stmt->execute([$submissionId]);
+        
+        // CHANGE 11: Use PDO fetch to check for existence
+        return $stmt->fetch(PDO::FETCH_ASSOC) !== false;
     }
 
     private function markAsSubmitted(int $submissionId): void {
-        $stmt = $this->conn->prepare("
+        // CHANGE 12: Use $this->pdo for prepare
+        $stmt = $this->pdo->prepare("
             INSERT INTO dhis2_submission_log (submission_id, status, submitted_at)
             VALUES (?, 'SUCCESS', NOW())
             ON DUPLICATE KEY UPDATE status = 'SUCCESS', submitted_at = NOW()
         ");
 
-        $stmt->bind_param("i", $submissionId);
-        $stmt->execute();
+        // CHANGE 13: Use PDO execute with array
+        $stmt->execute([$submissionId]);
     }
 
     private function generateUniqueUID(int $submissionId, array $submissionData): string {
@@ -214,7 +219,8 @@ class DHIS2SubmissionHandler {
     }
 
     private function getSubmissionData(int $submissionId): ?array {
-        $stmt = $this->conn->prepare("
+        // CHANGE 14: Use $this->pdo for prepare
+        $stmt = $this->pdo->prepare("
             SELECT
                 s.*,
                 l.uid as location_uid,
@@ -229,10 +235,10 @@ class DHIS2SubmissionHandler {
             WHERE s.id = ?
         ");
 
-        $stmt->bind_param("i", $submissionId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $data = $result->fetch_assoc();
+        // CHANGE 15: Use PDO execute with array
+        $stmt->execute([$submissionId]);
+        // CHANGE 16: Use PDO fetch method
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data) {
             error_log("Submission data: " . json_encode($data, JSON_PRETTY_PRINT));
@@ -243,17 +249,18 @@ class DHIS2SubmissionHandler {
 
     private function getSubmissionResponses(int $submissionId): array {
         $responses = [];
-        $stmt = $this->conn->prepare("
+        // CHANGE 17: Use $this->pdo for prepare
+        $stmt = $this->pdo->prepare("
             SELECT sr.question_id, sr.response_value
             FROM submission_response sr
             WHERE sr.submission_id = ?
         ");
 
-        $stmt->bind_param("i", $submissionId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        while ($row = $result->fetch_assoc()) {
+        // CHANGE 18: Use PDO execute with array
+        $stmt->execute([$submissionId]);
+        
+        // CHANGE 19: Use PDO fetch methods
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $responses[$row['question_id']] = [
                 'value' => $row['response_value']
             ];
@@ -434,17 +441,18 @@ private function prepareDatasetPayload(array $submissionData, array $dataValues,
         if (is_null($attributeOptionCombo)) {
             $attributeAOC_DE = $this->getMappedUID('attribute_option_combo');
             if ($attributeAOC_DE) {
-                $stmt = $this->conn->prepare("
+                // CHANGE 20: Use $this->pdo for prepare
+                $stmt = $this->pdo->prepare("
                     SELECT sr.response_value, qm.dhis2_option_set_id
                     FROM submission_response sr
                     JOIN question_dhis2_mapping qm ON sr.question_id = qm.question_id
                     WHERE sr.submission_id = ? AND qm.dhis2_dataelement_id = ?
                     LIMIT 1
                 ");
-                $stmt->bind_param("is", $submissionData['id'], $attributeAOC_DE);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                if ($row = $result->fetch_assoc()) {
+                // CHANGE 21: Use PDO execute with array
+                $stmt->execute([$submissionData['id'], $attributeAOC_DE]);
+                // CHANGE 22: Use PDO fetch method
+                if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     $derivedAttributeOptionCombo = $this->getOptionCode($row['response_value'], $row['dhis2_option_set_id']);
                     if ($derivedAttributeOptionCombo) {
                         $attributeOptionCombo = $derivedAttributeOptionCombo;
@@ -573,21 +581,22 @@ private function prepareDatasetPayload(array $submissionData, array $dataValues,
         
         if (!empty($responses)) {
             $questionIds = array_keys($responses);
+            // PDO uses named or positional placeholders (?), no need for string repeat + implode for types
             $placeholders = implode(',', array_fill(0, count($questionIds), '?'));
 
-            $stmt = $this->conn->prepare("
+            // CHANGE 23: Use $this->pdo for prepare
+            $stmt = $this->pdo->prepare("
                 SELECT qm.question_id, qm.dhis2_dataelement_id, qm.dhis2_option_set_id
                 FROM question_dhis2_mapping qm
                 WHERE qm.question_id IN ($placeholders)
             ");
 
-            $bindTypes = str_repeat('i', count($questionIds));
-            $stmt->bind_param($bindTypes, ...$questionIds);
-            $stmt->execute();
-            $result = $stmt->get_result();
-
+            // No bind_types string needed for PDO execute
+            // CHANGE 24: Use PDO execute with array (unpacking $questionIds)
+            $stmt->execute($questionIds);
+            // CHANGE 25: Use PDO fetch methods
             $questionMappings = [];
-            while ($row = $result->fetch_assoc()) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $questionMappings[$row['question_id']] = $row;
             }
 
@@ -632,30 +641,32 @@ private function prepareDatasetPayload(array $submissionData, array $dataValues,
             return $localValue;
         }
         
-        $stmt = $this->conn->prepare("
+        // CHANGE 26: Use $this->pdo for prepare
+        $stmt = $this->pdo->prepare("
             SELECT dhis2_option_code
             FROM dhis2_option_set_mapping
             WHERE local_value = ? AND dhis2_option_set_id = ?
         ");
 
-        $stmt->bind_param("ss", $localValue, $optionSetId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
+        // CHANGE 27: Use PDO execute with array
+        $stmt->execute([$localValue, $optionSetId]);
+        // CHANGE 28: Use PDO fetch method
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$row) {
             error_log("Option lookup failed: Local value '$localValue' not found in option set '$optionSetId'");
 
             // Try case-insensitive lookup as fallback
-            $stmt = $this->conn->prepare("
+            // CHANGE 29: Use $this->pdo for prepare
+            $stmt = $this->pdo->prepare("
                 SELECT dhis2_option_code
                 FROM dhis2_option_set_mapping
                 WHERE LOWER(local_value) = LOWER(?) AND dhis2_option_set_id = ?
             ");
-            $stmt->bind_param("ss", $localValue, $optionSetId);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $row = $result->fetch_assoc();
+            // CHANGE 30: Use PDO execute with array
+            $stmt->execute([$localValue, $optionSetId]);
+            // CHANGE 31: Use PDO fetch method
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$row) {
                 return null;

@@ -1,5 +1,5 @@
 <?php
-require 'db.php';
+require_once './admin/connect.php';
 
 $language = $_GET['language'] ?? 'en'; // Default to English
 
