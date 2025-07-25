@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Jul 23, 2025 at 12:45 PM
+-- Generation Time: Jul 25, 2025 at 05:33 AM
 -- Server version: 8.0.40
 -- PHP Version: 8.3.14
 
@@ -43,7 +43,7 @@ CREATE TABLE `admin_users` (
 -- Dumping data for table `admin_users`
 --
 
-INSERT IGNORE INTO `admin_users` (`id`, `username`, `password`, `email`, `created`, `updated`) VALUES
+INSERT INTO `admin_users` (`id`, `username`, `password`, `email`, `created`, `updated`) VALUES
 (7, 'User1', '$2y$10$EG6dVCUEWkZPKp9b/Ix0ce7otTCC.TvQtvakuGJTAEtlKxdj3t/oy', 'user01@gmail.com', '2025-02-24 05:53:47', '2025-02-24 05:53:47'),
 (8, 'Jack', '$2y$10$CNb43M8WAXllwE7D7eIsDOfMKaywQ0f6iRk.j8kiZ45EeL1wtcjq2', 'jack@gmail.com', '2025-03-06 10:23:14', '2025-03-06 10:23:14'),
 (9, 'Jim', '$2y$10$BSy0.Nu4cV7k0HNFnnlqb.bz1RQDeqRfuRsEwaKEBTAx36gWfWYC.', 'jim@gmail.com', '2025-03-31 05:57:17', '2025-03-31 05:57:17'),
@@ -69,7 +69,7 @@ CREATE TABLE `default_text` (
 -- Dumping data for table `default_text`
 --
 
-INSERT IGNORE INTO `default_text` (`id`, `key_name`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `default_text` (`id`, `key_name`, `translations`, `created`, `updated`) VALUES
 (1, 'select_language', '{\"en\": \"Select Language\", \"lg\": \"Yingira Olulimi\", \"rn\": \"Hitamo Ururimi\"}', '2025-02-18 08:42:03', '2025-02-18 08:42:03'),
 (2, 'Ministry of Health Client Satisfaction Feedback Tool', '{\"en\": \"Ministry of Health Client Satisfaction Feedback Tool\"}', '2025-02-18 08:42:03', '2025-03-14 09:02:14'),
 (3, 'client_satisfaction_tool', '{\"ac\": \"Buk me yot tic pa jami\", \"at\": \"Aikujak lo epuroi aijarakin\", \"en\": \"Client Satisfaction Feedback Tool\", \"lg\": \"Ekitabo ky’okwekebejja okw’Abalwadde ku buweereza\", \"ls\": \"Ekitabo ky’okwekebejja okw’Abalwadde ku buweereza\", \"rk\": \"Ekitabo ky’okunyeterwa kw’abarwarwa ahabw’obusya\", \"rn\": \"Ekitabo ky’okunyeterwa kw’abarwarwa ahabw’obusya\"}', '2025-02-18 08:42:03', '2025-02-19 10:20:57'),
@@ -100,7 +100,7 @@ CREATE TABLE `dhis2_instances` (
   `url` text NOT NULL,
   `username` text NOT NULL,
   `password` text NOT NULL,
-  `key` varchar(100) NOT NULL,
+  `instance_key` varchar(255) NOT NULL,
   `description` text,
   `status` int DEFAULT '1',
   `created` datetime DEFAULT CURRENT_TIMESTAMP
@@ -110,8 +110,8 @@ CREATE TABLE `dhis2_instances` (
 -- Dumping data for table `dhis2_instances`
 --
 
-INSERT IGNORE INTO `dhis2_instances` (`id`, `url`, `username`, `password`, `key`, `description`, `status`, `created`) VALUES
-(1, 'https://tests.dhis2.hispuganda.org/hmis', 'hisp.edwin', 'RWR3MW5AMjAyNQ==', 'UiO', 'Development instance for DHIS2', 1, '2025-05-14 14:41:40'),
+INSERT INTO `dhis2_instances` (`id`, `url`, `username`, `password`, `instance_key`, `description`, `status`, `created`) VALUES
+(1, 'https://tests.dhis2.hispuganda.org/hmis/', 'hisp.edwin', 'RWR3MW5AMjAyNQ==', 'UiO', 'Development instance for DHIS2', 1, '2025-05-14 14:41:40'),
 (2, 'https://hmis.moh.go.ug', 'admin', 'Vm0wd2QyUXlVWGxXYTJoV1YwZG9WbFl3WkZOVU1WcHpXa2M1VjFKc2JETlhhMUpUVmpKS1IySkVUbGhoTVVwVVZqQmFTMlJIVmtWUmJVWlhWbXhzTTFadGNFSmxSbVJJVm10a1dHSkdjRTlaYlhSTFZsWmFkR05GWkZwV01VcEpWbTEwVjFWdFNsWlhiRkpYWWxob2VsUlVSbUZqVms1eFZXeHdWMDFFUlRCV2EyTXhWREZrU0ZOclpHcFRSVXBZVkZWYWQxUkdiSEZTYlVacVRWWndNRlZ0ZUd0VWJGcDFVV3hvVjFKc2NGaFdha3BIVTBaYWRWSnNTbGRTTTAwMQ==', 'eHMIS', 'National HMIS system', 1, '2025-05-14 14:41:40'),
 (3, 'https://epivac.moh.go.ug', 'admin', 'VmpKMGEyTXlWblJWYTJ4VVltdEtZVlJVUmtaUFVUMDk=', 'EPIVAC', 'National Immunization Registry', 0, '2025-05-14 14:41:40'),
 (4, 'https://emisuganda.org/emis', 'hisp.albert', 'RW1pc0AyMDIy', 'EMIS', 'Emis System', 1, '2025-05-14 14:41:40');
@@ -135,7 +135,7 @@ CREATE TABLE `dhis2_option_set_mapping` (
 -- Dumping data for table `dhis2_option_set_mapping`
 --
 
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (1, 'OPD', 'OPD', 'RISjMt3IGAH', '2025-04-23 11:59:36'),
 (2, 'Medical Ward', 'Medical Ward', 'RISjMt3IGAH', '2025-04-23 11:59:36'),
 (3, 'Maternity', 'Maternity', 'RISjMt3IGAH', '2025-04-23 11:59:36'),
@@ -754,7 +754,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (26183, 'Unknown', 'Unknown', 'tJLpxB3nPGA', '2025-06-12 08:51:57'),
 (26184, 'Uraemia', 'Uraemia', 'tJLpxB3nPGA', '2025-06-12 08:51:57'),
 (26185, 'Vertigo', 'Vertigo', 'tJLpxB3nPGA', '2025-06-12 08:51:57');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (26186, 'Worries', 'Worries', 'tJLpxB3nPGA', '2025-06-12 08:51:57'),
 (26187, 'Xdr Ptb', 'Xdr Ptb', 'tJLpxB3nPGA', '2025-06-12 08:51:57'),
 (26188, 'Abortion', 'Abortion', 'tJLpxB3nPGA', '2025-06-12 08:51:57'),
@@ -1413,7 +1413,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (26841, 'Osteodystrophy', 'Osteodystrophy', 'tJLpxB3nPGA', '2025-06-12 08:51:58'),
 (26842, 'Ovarian Tumour', 'Ovarian Tumour', 'tJLpxB3nPGA', '2025-06-12 08:51:58'),
 (26843, 'Pernicious Tbc', 'Pernicious Tbc', 'tJLpxB3nPGA', '2025-06-12 08:51:58');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (26844, 'Pilonidal Cyst', 'Pilonidal Cyst', 'tJLpxB3nPGA', '2025-06-12 08:51:58'),
 (26845, 'Pinhole Meatus', 'Pinhole Meatus', 'tJLpxB3nPGA', '2025-06-12 08:51:58'),
 (26846, 'Pinta [Carate]', 'Pinta [Carate]', 'tJLpxB3nPGA', '2025-06-12 08:51:58'),
@@ -1999,7 +1999,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (27426, 'Congestive Failure', 'Congestive Failure', 'tJLpxB3nPGA', '2025-06-12 08:51:58'),
 (27427, 'Coronary Occlusion', 'Coronary Occlusion', 'tJLpxB3nPGA', '2025-06-12 08:51:58'),
 (27428, 'Curvature Of Spine', 'Curvature Of Spine', 'tJLpxB3nPGA', '2025-06-12 08:51:58');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (27429, 'Degenerative Joint', 'Degenerative Joint', 'tJLpxB3nPGA', '2025-06-12 08:51:58'),
 (27430, 'Dehydration/Anemic', 'Dehydration/Anemic', 'tJLpxB3nPGA', '2025-06-12 08:51:58'),
 (27431, 'Diphyllobothriasis', 'Diphyllobothriasis', 'tJLpxB3nPGA', '2025-06-12 08:51:58'),
@@ -2546,7 +2546,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (27972, 'Vertiginous Syndrome', 'Vertiginous Syndrome', 'tJLpxB3nPGA', '2025-06-12 08:51:59'),
 (27973, 'Viral Conjunctivitis', 'Viral Conjunctivitis', 'tJLpxB3nPGA', '2025-06-12 08:51:59'),
 (27974, 'White Matter Disease', 'White Matter Disease', 'tJLpxB3nPGA', '2025-06-12 08:51:59');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (27975, 'Yellow Liver Atrophy', 'Yellow Liver Atrophy', 'tJLpxB3nPGA', '2025-06-12 08:51:59'),
 (27976, 'Acute Anteroseptal Mi', 'Acute Anteroseptal Mi', 'tJLpxB3nPGA', '2025-06-12 08:51:59'),
 (27977, 'Acute Gastroenteritis', 'Acute Gastroenteritis', 'tJLpxB3nPGA', '2025-06-12 08:51:59'),
@@ -3062,7 +3062,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (28487, 'Multi Parietal Lobe Cva', 'Multi Parietal Lobe Cva', 'tJLpxB3nPGA', '2025-06-12 08:52:00'),
 (28488, 'Multi Temporal Lobe Cva', 'Multi Temporal Lobe Cva', 'tJLpxB3nPGA', '2025-06-12 08:52:00'),
 (28489, 'Multiple Apoplectic Fit', 'Multiple Apoplectic Fit', 'tJLpxB3nPGA', '2025-06-12 08:52:00');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (28490, 'Multiple Basilar Stroke', 'Multiple Basilar Stroke', 'tJLpxB3nPGA', '2025-06-12 08:52:00'),
 (28491, 'Multiple Brain Apoplexy', 'Multiple Brain Apoplexy', 'tJLpxB3nPGA', '2025-06-12 08:52:00'),
 (28492, 'Multiple Brain Episodes', 'Multiple Brain Episodes', 'tJLpxB3nPGA', '2025-06-12 08:52:00'),
@@ -3554,7 +3554,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (28978, 'Severe Cardiac Deficiency', 'Severe Cardiac Deficiency', 'tJLpxB3nPGA', '2025-06-12 08:52:02'),
 (28979, 'Severe Cervical Dysplasia', 'Severe Cervical Dysplasia', 'tJLpxB3nPGA', '2025-06-12 08:52:02'),
 (28980, 'Severe Congestive Failure', 'Severe Congestive Failure', 'tJLpxB3nPGA', '2025-06-12 08:52:02');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (28981, 'Severe Immuno Suppression', 'Severe Immuno Suppression', 'tJLpxB3nPGA', '2025-06-12 08:52:02'),
 (28982, 'Severe Leg Osteoarthritis', 'Severe Leg Osteoarthritis', 'tJLpxB3nPGA', '2025-06-12 08:52:02'),
 (28983, 'Severe Metabolic Acidosis', 'Severe Metabolic Acidosis', 'tJLpxB3nPGA', '2025-06-12 08:52:02'),
@@ -4024,7 +4024,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (29447, 'Chronic Diagnostic Pneumonia', 'Chronic Diagnostic Pneumonia', 'tJLpxB3nPGA', '2025-06-12 08:52:03'),
 (29448, 'Chronic Lower Lobe Pneumonia', 'Chronic Lower Lobe Pneumonia', 'tJLpxB3nPGA', '2025-06-12 08:52:03'),
 (29449, 'Chronic Lung Field Pneumonia', 'Chronic Lung Field Pneumonia', 'tJLpxB3nPGA', '2025-06-12 08:52:03');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (29450, 'Chronic Lung Lobar Pneumonia', 'Chronic Lung Lobar Pneumonia', 'tJLpxB3nPGA', '2025-06-12 08:52:03'),
 (29451, 'Chronic Mini Stroke Syndrome', 'Chronic Mini Stroke Syndrome', 'tJLpxB3nPGA', '2025-06-12 08:52:03'),
 (29452, 'Chronic Multilobar Pneumonia', 'Chronic Multilobar Pneumonia', 'tJLpxB3nPGA', '2025-06-12 08:52:03'),
@@ -4474,7 +4474,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (29896, 'Ruptured Intercranial Aneurysm', 'Ruptured Intercranial Aneurysm', 'tJLpxB3nPGA', '2025-06-12 08:52:05'),
 (29897, 'Ruptured Intracranial Aneurysm', 'Ruptured Intracranial Aneurysm', 'tJLpxB3nPGA', '2025-06-12 08:52:05'),
 (29898, 'Ruptured Intracranium Aneurysm', 'Ruptured Intracranium Aneurysm', 'tJLpxB3nPGA', '2025-06-12 08:52:05');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (29899, 'Ruptured Myocardial Infarction', 'Ruptured Myocardial Infarction', 'tJLpxB3nPGA', '2025-06-12 08:52:05'),
 (29900, 'Ruptured Myocardium Infarction', 'Ruptured Myocardium Infarction', 'tJLpxB3nPGA', '2025-06-12 08:52:05'),
 (29901, 'Severe Acute Exacerbation Copd', 'Severe Acute Exacerbation Copd', 'tJLpxB3nPGA', '2025-06-12 08:52:05'),
@@ -4903,7 +4903,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (30324, 'Congenital Malformation Of Palate', 'Congenital Malformation Of Palate', 'tJLpxB3nPGA', '2025-06-12 08:52:07'),
 (30325, 'Congenital Malformation Of Vagina', 'Congenital Malformation Of Vagina', 'tJLpxB3nPGA', '2025-06-12 08:52:07'),
 (30326, 'Congenstive Cardiac Failure Years', 'Congenstive Cardiac Failure Years', 'tJLpxB3nPGA', '2025-06-12 08:52:07');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (30327, 'Congestive Cardiovascular Failure', 'Congestive Cardiovascular Failure', 'tJLpxB3nPGA', '2025-06-12 08:52:07'),
 (30328, 'Congestive Heart Failure Syndrome', 'Congestive Heart Failure Syndrome', 'tJLpxB3nPGA', '2025-06-12 08:52:07'),
 (30329, 'Contact Dermatitis (Occupational)', 'Contact Dermatitis (Occupational)', 'tJLpxB3nPGA', '2025-06-12 08:52:07'),
@@ -5317,7 +5317,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (30737, 'Lacunar Cerebral Vascular Accidents', 'Lacunar Cerebral Vascular Accidents', 'tJLpxB3nPGA', '2025-06-12 08:52:09'),
 (30738, 'Lacunar Cerebrum Vascular Accidents', 'Lacunar Cerebrum Vascular Accidents', 'tJLpxB3nPGA', '2025-06-12 08:52:09'),
 (30739, 'Low Output Congestive Heart Failure', 'Low Output Congestive Heart Failure', 'tJLpxB3nPGA', '2025-06-12 08:52:09');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (30740, 'Malignant Metastatic Liver Melanoma', 'Malignant Metastatic Liver Melanoma', 'tJLpxB3nPGA', '2025-06-12 08:52:09'),
 (30741, 'Metastatic Subarachnoid Haemorrhage', 'Metastatic Subarachnoid Haemorrhage', 'tJLpxB3nPGA', '2025-06-12 08:52:09'),
 (30742, 'Metastic Hepatis Cellular Carcinoma', 'Metastic Hepatis Cellular Carcinoma', 'tJLpxB3nPGA', '2025-06-12 08:52:09'),
@@ -5715,7 +5715,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (31134, 'Anteriolateral A Myocardium Infarction', 'Anteriolateral A Myocardium Infarction', 'tJLpxB3nPGA', '2025-06-12 08:52:11'),
 (31135, 'Anterior Lateral Myocardial Infarction', 'Anterior Lateral Myocardial Infarction', 'tJLpxB3nPGA', '2025-06-12 08:52:11'),
 (31136, 'Anterior Lateral Myocardium Infarction', 'Anterior Lateral Myocardium Infarction', 'tJLpxB3nPGA', '2025-06-12 08:52:11');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (31137, 'Atheromatous Coronary Artery Occlusion', 'Atheromatous Coronary Artery Occlusion', 'tJLpxB3nPGA', '2025-06-12 08:52:11'),
 (31138, 'Avian Type Tbc Mycobacterial Infection', 'Avian Type Tbc Mycobacterial Infection', 'tJLpxB3nPGA', '2025-06-12 08:52:11'),
 (31139, 'Biventricular Congestive Heart Failure', 'Biventricular Congestive Heart Failure', 'tJLpxB3nPGA', '2025-06-12 08:52:11'),
@@ -6096,7 +6096,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (31514, 'Advanced Congestive Cardiovascular Oedema', 'Advanced Congestive Cardiovascular Oedema', 'tJLpxB3nPGA', '2025-06-12 08:52:13'),
 (31515, 'Advanced Congestive Heart Failure Disease', 'Advanced Congestive Heart Failure Disease', 'tJLpxB3nPGA', '2025-06-12 08:52:13'),
 (31516, 'Advanced Crippling Degenerative Arthritis', 'Advanced Crippling Degenerative Arthritis', 'tJLpxB3nPGA', '2025-06-12 08:52:13');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (31517, 'Advanced Degenerative Hands Joint Disease', 'Advanced Degenerative Hands Joint Disease', 'tJLpxB3nPGA', '2025-06-12 08:52:13'),
 (31518, 'Advanced Knees Degenerative Joint Disease', 'Advanced Knees Degenerative Joint Disease', 'tJLpxB3nPGA', '2025-06-12 08:52:13'),
 (31519, 'Anomaly Of Vena Cava (Inferior)(Superior)', 'Anomaly Of Vena Cava (Inferior)(Superior)', 'tJLpxB3nPGA', '2025-06-12 08:52:13'),
@@ -6460,7 +6460,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (31877, 'Inferior Anterioseptal Myocardium Infarction', 'Inferior Anterioseptal Myocardium Infarction', 'tJLpxB3nPGA', '2025-06-12 08:52:15'),
 (31878, 'Intraventricular Central Nervous Haemorrhage', 'Intraventricular Central Nervous Haemorrhage', 'tJLpxB3nPGA', '2025-06-12 08:52:15'),
 (31879, 'Multi Central Nervous System Infarct Disease', 'Multi Central Nervous System Infarct Disease', 'tJLpxB3nPGA', '2025-06-12 08:52:15');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (31880, 'Multi Cerebrum Intra Ventricular Haemorrhage', 'Multi Cerebrum Intra Ventricular Haemorrhage', 'tJLpxB3nPGA', '2025-06-12 08:52:15'),
 (31881, 'Multi Haemorrhaging Parietal Lobe Infarction', 'Multi Haemorrhaging Parietal Lobe Infarction', 'tJLpxB3nPGA', '2025-06-12 08:52:15'),
 (31882, 'Multi Hemispheric Cerebral Vascular Accident', 'Multi Hemispheric Cerebral Vascular Accident', 'tJLpxB3nPGA', '2025-06-12 08:52:15'),
@@ -6800,7 +6800,7 @@ INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_optio
 (32216, 'Chronic Frontal Hemisphere Cerebrum Vascular Accident', 'Chronic Frontal Hemisphere Cerebrum Vascular Accident', 'tJLpxB3nPGA', '2025-06-12 08:52:17'),
 (32217, 'Complications Of Procedures, Not Elsewhere Classified', 'Complications Of Procedures, Not Elsewhere Classified', 'tJLpxB3nPGA', '2025-06-12 08:52:17'),
 (32218, 'Congenital Absence, Atresia And Stenosis Of Intestine', 'Congenital Absence, Atresia And Stenosis Of Intestine', 'tJLpxB3nPGA', '2025-06-12 08:52:17');
-INSERT IGNORE INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `dhis2_option_set_mapping` (`id`, `local_value`, `dhis2_option_code`, `dhis2_option_set_id`, `created`) VALUES
 (32219, 'Multiple Cerebral Hemisphere Haemorrhaging Infarction', 'Multiple Cerebral Hemisphere Haemorrhaging Infarction', 'tJLpxB3nPGA', '2025-06-12 08:52:17'),
 (32220, 'Multiple Cerebrum Hemisphere Haemorrhaging Infarction', 'Multiple Cerebrum Hemisphere Haemorrhaging Infarction', 'tJLpxB3nPGA', '2025-06-12 08:52:17'),
 (32221, 'Multiple Intraventricular Central Nervous Haemorrhage', 'Multiple Intraventricular Central Nervous Haemorrhage', 'tJLpxB3nPGA', '2025-06-12 08:52:17'),
@@ -7000,7 +7000,7 @@ CREATE TABLE `dhis2_submission_log` (
 -- Dumping data for table `dhis2_submission_log`
 --
 
-INSERT IGNORE INTO `dhis2_submission_log` (`id`, `submission_id`, `status`, `submitted_at`) VALUES
+INSERT INTO `dhis2_submission_log` (`id`, `submission_id`, `status`, `submitted_at`) VALUES
 (1, 208, 'SUCCESS', '2025-06-02 13:19:16'),
 (2, 214, 'SUCCESS', '2025-06-04 15:03:52'),
 (3, 231, 'SUCCESS', '2025-06-04 16:16:35'),
@@ -7042,7 +7042,7 @@ CREATE TABLE `dhis2_system_field_mapping` (
 -- Dumping data for table `dhis2_system_field_mapping`
 --
 
-INSERT IGNORE INTO `dhis2_system_field_mapping` (`id`, `field_name`, `dhis2_dataelement_id`, `dhis2_option_set_id`, `description`, `created`) VALUES
+INSERT INTO `dhis2_system_field_mapping` (`id`, `field_name`, `dhis2_dataelement_id`, `dhis2_option_set_id`, `description`, `created`) VALUES
 (1, 'age', 'HAwbH2Njoae', NULL, 'individuals_age', '2025-04-23 12:03:08'),
 (2, 'sex', 'CYPiKh6JXxM', 'bPyha4zYoL8', 'person_gender', '2025-04-23 12:03:08'),
 (3, 'service_unit', 'tlMvcgWoRPD', 'RISjMt3IGAH', 'service_unit', '2025-04-23 12:03:08'),
@@ -7078,7 +7078,7 @@ CREATE TABLE `health_facility_level` (
 -- Dumping data for table `health_facility_level`
 --
 
-INSERT IGNORE INTO `health_facility_level` (`id`, `name`, `created`, `updated`) VALUES
+INSERT INTO `health_facility_level` (`id`, `name`, `created`, `updated`) VALUES
 (1, 'National Referral Hospital', '2025-02-05 15:29:40', '2025-02-05 15:29:40'),
 (2, 'Regional Referral Hospital', '2025-02-05 15:29:40', '2025-02-05 15:29:40'),
 (3, 'General Hospital', '2025-02-05 15:29:40', '2025-02-05 15:29:40'),
@@ -7109,8 +7109,7 @@ CREATE TABLE `location` (
 -- Dumping data for table `location`
 --
 
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
-(1, 'UiO', 'akV6429SUqu', 'MOH - Uganda', '/akV6429SUqu', 1, NULL, '2025-04-05 12:30:39', '2025-07-22 09:05:50'),
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (2, 'UiO', 'SUvODYOcaVf', 'Acholi', '/akV6429SUqu/SUvODYOcaVf', 2, 1, '2025-04-05 12:33:07', '2025-07-22 09:05:50'),
 (3, 'UiO', 'F1o6qBSx783', 'Ankole', '/akV6429SUqu/F1o6qBSx783', 2, 1, '2025-04-05 12:33:09', '2025-07-22 09:05:50'),
 (4, 'UiO', 'Dt6qdenPX1E', 'Bugisu', '/akV6429SUqu/Dt6qdenPX1E', 2, 1, '2025-04-05 12:33:10', '2025-07-22 09:05:50'),
@@ -7452,7 +7451,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (417, 'UiO', 'HLymn5haKX6', 'Budadiri Town Council', '/akV6429SUqu/Dt6qdenPX1E/wJ2a6YKDFZW/HLymn5haKX6', 4, 232, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (418, 'UiO', 'kcStNQ2LDcH', 'Budaka Subcounty', '/akV6429SUqu/QBPg7KKCeoA/kb7iUQISRlx/kcStNQ2LDcH', 4, 105, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (419, 'UiO', 'KMVmXiFpKHe', 'Budaka Town Council', '/akV6429SUqu/QBPg7KKCeoA/kb7iUQISRlx/KMVmXiFpKHe', 4, 105, '2025-04-05 18:09:35', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (420, 'UiO', 'BA5mnJAevwO', 'Budde Subcounty', '/akV6429SUqu/IEU0FjDAhBP/a3LMKP8z8Xj/BA5mnJAevwO', 4, 121, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (421, 'UiO', 'aI77OsoVVCX', 'Budhaya Subcounty', '/akV6429SUqu/Wd1lV9Qdj4o/gUaoj8Geuao/aI77OsoVVCX', 4, 107, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (422, 'UiO', 'roMYQLqzYzR', 'Budomero Subcounty', '/akV6429SUqu/Wd1lV9Qdj4o/kJCEJnXLgnh/roMYQLqzYzR', 4, 145, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
@@ -7772,7 +7771,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (736, 'UiO', 'afAjPIjW0D3', 'Erussi Subcounty', '/akV6429SUqu/BD3XaQ7cQAp/Xjc0LDFa5gW/afAjPIjW0D3', 4, 211, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (737, 'UiO', 'gj1Omw1FJCo', 'Etam Subcounty', '/akV6429SUqu/DWPnYhoqza0/ZuQHWOaFQVM/gj1Omw1FJCo', 4, 98, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (738, 'UiO', 'y6lJEw3cXSx', 'Etam Town Council', '/akV6429SUqu/DWPnYhoqza0/ZuQHWOaFQVM/y6lJEw3cXSx', 4, 98, '2025-04-05 18:09:35', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (739, 'UiO', 'GNckQhzgWH9', 'Ewafa Subcounty', '/akV6429SUqu/BD3XaQ7cQAp/uTMUclQ5bi6/GNckQhzgWH9', 4, 216, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (740, 'UiO', 'oSihrX3HDlz', 'Ewanga Subcounty', '/akV6429SUqu/BD3XaQ7cQAp/bLoH4VbxCGI/oSihrX3HDlz', 4, 185, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (741, 'UiO', 'acHyc4nCqAg', 'Gadumire Subcounty', '/akV6429SUqu/Wd1lV9Qdj4o/kJCEJnXLgnh/acHyc4nCqAg', 4, 145, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
@@ -8092,7 +8091,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (1055, 'UiO', 'joyz7BH8DXG', 'Kayonza Kayunga Subcounty', '/akV6429SUqu/Dl9WvtvDs5V/ykxQEnZGXkj/joyz7BH8DXG', 4, 157, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1056, 'UiO', 'K0e77mVF7y6', 'Kayonza Subcounty (Kayunga District)', '/akV6429SUqu/Dl9WvtvDs5V/ykxQEnZGXkj/K0e77mVF7y6', 4, 157, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1057, 'UiO', 'ZXKYB8MLZ0N', 'Kayonza Subcounty (Ntungamo District)', '/akV6429SUqu/F1o6qBSx783/hAoe9dhZh9V/ZXKYB8MLZ0N', 4, 214, '2025-04-05 18:09:35', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (1058, 'UiO', 'yOVRzFIuYGT', 'Kayoro Subcounty', '/akV6429SUqu/QBPg7KKCeoA/KhT80mlwJ3Y/yOVRzFIuYGT', 4, 236, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1059, 'UiO', 'wXKdvmz0nrv', 'Kayunga Subcounty', '/akV6429SUqu/Dl9WvtvDs5V/ykxQEnZGXkj/wXKdvmz0nrv', 4, 157, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1060, 'UiO', 'CDtQkwtnyAH', 'Kayunga Town Council', '/akV6429SUqu/Dl9WvtvDs5V/ykxQEnZGXkj/CDtQkwtnyAH', 4, 157, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
@@ -8412,7 +8411,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (1374, 'UiO', 'cYeWg82r4fI', 'Lwengo Subcounty', '/akV6429SUqu/IEU0FjDAhBP/aqpd0Y9eXZ2/cYeWg82r4fI', 4, 183, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1375, 'UiO', 'P3WJNMdmdVa', 'Lwengo Town Council', '/akV6429SUqu/IEU0FjDAhBP/aqpd0Y9eXZ2/P3WJNMdmdVa', 4, 183, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1376, 'UiO', 's8nACUgQgH0', 'Lwongon Subcounty', '/akV6429SUqu/Dt6qdenPX1E/e8m9ZYMRoeR/s8nACUgQgH0', 4, 113, '2025-04-05 18:09:35', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (1377, 'UiO', 'PzNdBxpQfiV', 'Lyabaana Subcounty', '/akV6429SUqu/Dl9WvtvDs5V/aZLZPPjqft0/PzNdBxpQfiV', 4, 123, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1378, 'UiO', 'ZhtaUlIs3fU', 'Lyakahungu Town Council', '/akV6429SUqu/JZhJ50nOirX/uCVQXAdKqL9/ZhtaUlIs3fU', 4, 149, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1379, 'UiO', 'RnEo7YyaqK6', 'Lyakajura Subcounty', '/akV6429SUqu/IEU0FjDAhBP/aPRNSGUR3vk/RnEo7YyaqK6', 4, 184, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
@@ -8731,7 +8730,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (1692, 'UiO', 'PFmDufIDfGB', 'Nyabuhikye Subcounty', '/akV6429SUqu/F1o6qBSx783/r8WLxW9JwsS/PFmDufIDfGB', 4, 132, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1693, 'UiO', 'VUNuIUcflYo', 'Nyabushenyi Subcounty', '/akV6429SUqu/F1o6qBSx783/hAoe9dhZh9V/VUNuIUcflYo', 4, 214, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1694, 'UiO', 'Nc5nlJywn4F', 'Nyabwishenya Subcounty', '/akV6429SUqu/G0rlphd2tcD/aPhSZRinfbg/Nc5nlJywn4F', 4, 165, '2025-04-05 18:09:35', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (1695, 'UiO', 'CfZb0LARKRM', 'Nyadri South Subcounty', '/akV6429SUqu/BD3XaQ7cQAp/WyR8Eetj7Uw/CfZb0LARKRM', 4, 187, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1696, 'UiO', 'NFhTAn0f77V', 'Nyadri Subcounty', '/akV6429SUqu/BD3XaQ7cQAp/WyR8Eetj7Uw/NFhTAn0f77V', 4, 187, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
 (1697, 'UiO', 'YRxg8b8P3CN', 'Nyahuka Town Council', '/akV6429SUqu/JZhJ50nOirX/g8M1cWRJZV6/YRxg8b8P3CN', 4, 116, '2025-04-05 18:09:35', '2025-07-22 09:05:50'),
@@ -9050,7 +9049,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (2010, 'UiO', 'UjUroihV9AC', 'Wakiso Subcounty', '/akV6429SUqu/IEU0FjDAhBP/aIahLLmtvgT/UjUroihV9AC', 4, 237, '2025-04-05 18:09:36', '2025-07-22 09:05:50'),
 (2011, 'UiO', 'PaitbhdeU8f', 'Wakiso Town Council', '/akV6429SUqu/IEU0FjDAhBP/aIahLLmtvgT/PaitbhdeU8f', 4, 237, '2025-04-05 18:09:36', '2025-07-22 09:05:50'),
 (2012, 'UiO', 'GSj56KTqJRQ', 'Wakyato Subcounty', '/akV6429SUqu/Dl9WvtvDs5V/aSbgVKaeCP0/GSj56KTqJRQ', 4, 205, '2025-04-05 18:09:36', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (2013, 'UiO', 'a8JmSlpZNZp', 'Walukuba Masese Division', '/akV6429SUqu/Wd1lV9Qdj4o/wRApaxY2zJf/a8JmSlpZNZp', 4, 135, '2025-04-05 18:09:36', '2025-07-22 09:05:50'),
 (2014, 'UiO', 'xfJuqAwolQi', 'Wanale Division', '/akV6429SUqu/Dt6qdenPX1E/ALFFOStwtqW/xfJuqAwolQi', 4, 192, '2025-04-05 18:09:36', '2025-07-22 09:05:50'),
 (2015, 'UiO', 'KIukjQefWsY', 'Wanale Subcounty', '/akV6429SUqu/Dt6qdenPX1E/yuo5ielNL7W/KIukjQefWsY', 4, 193, '2025-04-05 18:09:36', '2025-07-22 09:05:50'),
@@ -9340,7 +9339,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (2471, 'UiO', 'abhWtHxtxlG', 'Wansalangi Health Centre II', '/akV6429SUqu/Dl9WvtvDs5V/aSbgVKaeCP0/GSj56KTqJRQ/abhWtHxtxlG', 5, 2012, '2025-04-09 09:09:50', '2025-07-22 09:05:50'),
 (2472, 'UiO', 'iE8EHTPUZ76', 'Wansimba Health Centre II', '/akV6429SUqu/Wd1lV9Qdj4o/aJR2ZxSH7g4/a92Lyf8Vnrg/iE8EHTPUZ76', 5, 602, '2025-04-09 09:09:50', '2025-07-22 09:05:50'),
 (2473, 'UiO', 'EEQf2mLM09R', 'Wansolo Health Centre II', '/akV6429SUqu/DWPnYhoqza0/JyZJhGXKeEq/cTWnZgdmqWB/EEQf2mLM09R', 5, 333, '2025-04-09 09:09:50', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (2474, 'UiO', 'H9PD4tw7GUE', 'Warr Health Centre IV', '/akV6429SUqu/BD3XaQ7cQAp/A4aGXEfdb8P/hZfMXAdeV00/H9PD4tw7GUE', 5, 2018, '2025-04-09 09:09:50', '2025-07-22 09:05:50'),
 (2475, 'UiO', 'Q2JZnH5wQT0', 'Warr Islamic Health Centre II', '/akV6429SUqu/BD3XaQ7cQAp/A4aGXEfdb8P/hZfMXAdeV00/Q2JZnH5wQT0', 5, 2018, '2025-04-09 09:09:50', '2025-07-22 09:05:50'),
 (2476, 'UiO', 'S3ohatkswyg', 'Wataba Medical Centre', '/akV6429SUqu/Dl9WvtvDs5V/a0DfYpC2Rwl/tecfO3gvavj/S3ohatkswyg', 5, 692, '2025-04-09 09:09:50', '2025-07-22 09:05:50'),
@@ -9623,7 +9622,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (3463, 'UiO', 'WQeSLV9txxP', 'Rick Medical Centre', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/oweSpFBNbmi/WQeSLV9txxP', 5, 1883, '2025-04-09 20:24:16', '2025-07-22 09:05:50'),
 (3464, 'UiO', 'LSpLSwpaM71', 'Rift Valley Medical Centre', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/FbuhMjEaMXt/LSpLSwpaM71', 5, 1408, '2025-04-09 20:24:16', '2025-07-22 09:05:50'),
 (3465, 'UiO', 'h3Vg6HpRGmB', 'Riki Health Centre III', '/akV6429SUqu/BD3XaQ7cQAp/iQTVPmAJPkr/y5VwP02ADlq/h3Vg6HpRGmB', 5, 1782, '2025-04-09 20:24:16', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (3466, 'UiO', 'yVTRbVMt2h7', 'Rikitae Health Centre II', '/akV6429SUqu/jdlbNUwJiKX/aPZzL4CyBTg/jAd3Yz8eWoM/yVTRbVMt2h7', 5, 1847, '2025-04-09 20:24:16', '2025-07-22 09:05:50'),
 (3467, 'UiO', 'uqCJV33AgrW', 'Rinah medical centre', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/oweSpFBNbmi/uqCJV33AgrW', 5, 1883, '2025-04-09 20:24:16', '2025-07-22 09:05:50'),
 (3468, 'UiO', 'g2P698W0wtC', 'Rinamo Clinic', '/akV6429SUqu/yx0ieyZNF0l/Lnewt3iIJaK/QNIbFbx1aVK/g2P698W0wtC', 5, 1168, '2025-04-09 20:24:16', '2025-07-22 09:05:50'),
@@ -9908,7 +9907,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (3747, 'UiO', 'nPrvP99mWan', 'Save Life Orthopaedic Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/FbuhMjEaMXt/nPrvP99mWan', 5, 1408, '2025-04-09 20:24:16', '2025-07-22 09:05:50'),
 (3748, 'UiO', 'NtwxKup5q97', 'Save Live Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/FbuhMjEaMXt/NtwxKup5q97', 5, 1408, '2025-04-09 20:24:16', '2025-07-22 09:05:50'),
 (3749, 'UiO', 'gxpqLAdym0H', 'Savio Medical Centre', '/akV6429SUqu/IEU0FjDAhBP/a3LMKP8z8Xj/lBaXWVG0uKY/gxpqLAdym0H', 5, 894, '2025-04-09 20:24:16', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (3750, 'UiO', 'Q480CuJCylI', 'Saviour Medical Centre', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/FbuhMjEaMXt/Q480CuJCylI', 5, 1408, '2025-04-09 20:24:16', '2025-07-22 09:05:50'),
 (3751, 'UiO', 'K87qlHUOEaJ', 'School of Field Artilery and Air Defence Health Centre III', '/akV6429SUqu/r0GhWtmPHDj/cSrCFjPKqcG/B4c4U2wA0w0/K87qlHUOEaJ', 5, 1840, '2025-04-09 20:24:16', '2025-07-22 09:05:50'),
 (3752, 'UiO', 'NupBKuiHbOv', 'Schore Medical Centre', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/LYuMx5oPsR5/NupBKuiHbOv', 5, 1049, '2025-04-09 20:24:16', '2025-07-22 09:05:50'),
@@ -10192,7 +10191,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (4079, 'UiO', 'cqExOqLOqNY', 'Ori Health Centre II', '/akV6429SUqu/BD3XaQ7cQAp/W0kQBddyGyh/ZwFndnaVAaf/cqExOqLOqNY', 5, 1755, '2025-04-10 07:30:22', '2025-07-22 09:05:50'),
 (4080, 'UiO', 'i1htH9vJSlc', 'Oriajini Hospital', '/akV6429SUqu/BD3XaQ7cQAp/bJgx6UjvyoP/Tm9sPGt31dl/i1htH9vJSlc', 5, 1040, '2025-04-10 07:30:22', '2025-07-22 09:05:50'),
 (4081, 'UiO', 'ea1Bvu4qzmW', 'Orient Medical Centre', '/akV6429SUqu/Dl9WvtvDs5V/tr9XWtYsL5P/eYw6xfpMCpt/ea1Bvu4qzmW', 5, 2036, '2025-04-10 07:30:22', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (4082, 'UiO', 'CYCMFtMgnfI', 'Orina Health Centre II', '/akV6429SUqu/SUvODYOcaVf/ztIyIYAzFKp/FihNC5KfGJV/CYCMFtMgnfI', 5, 260, '2025-04-10 07:30:22', '2025-07-22 09:05:50'),
 (4083, 'UiO', 'aM3UfhNrS2W', 'Orivu Health Centre III', '/akV6429SUqu/BD3XaQ7cQAp/iQTVPmAJPkr/IfprxlrKiKL/aM3UfhNrS2W', 5, 709, '2025-04-10 07:30:22', '2025-07-22 09:05:50'),
 (4084, 'UiO', 'bRt4VDvHDPQ', 'Oroko Health Centre II', '/akV6429SUqu/SUvODYOcaVf/Gwk4wkLz7EW/N00GWUvXv52/bRt4VDvHDPQ', 5, 1841, '2025-04-10 07:30:22', '2025-07-22 09:05:50'),
@@ -10476,7 +10475,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (4424, 'UiO', 'adrhWWGz3jT', 'Nakwakwa Health Centre II', '/akV6429SUqu/jdlbNUwJiKX/aPZzL4CyBTg/FsrPvHIMo4j/adrhWWGz3jT', 5, 1874, '2025-04-10 18:55:06', '2025-07-22 09:05:50'),
 (4425, 'UiO', 'YEgOR0cGGnF', 'Nakwasi Health Centre III', '/akV6429SUqu/QBPg7KKCeoA/MtpE3CH6vq3/aDPJkOqtFvR/YEgOR0cGGnF', 5, 604, '2025-04-10 18:55:06', '2025-07-22 09:05:50'),
 (4426, 'UiO', 'z9om4HbUuYl', 'Nakyere Health Centre II', '/akV6429SUqu/Wd1lV9Qdj4o/esIUe2tQAtL/AAXO2IZq70L/z9om4HbUuYl', 5, 1071, '2025-04-10 18:55:06', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (4427, 'UiO', 'qgt3hJNBRKa', 'Nakyesa Health Centre II', '/akV6429SUqu/Dl9WvtvDs5V/ykxQEnZGXkj/joyz7BH8DXG/qgt3hJNBRKa', 5, 1055, '2025-04-10 18:55:06', '2025-07-22 09:05:50'),
 (4428, 'UiO', 'lZHbUJPtorQ', 'Nalinaibi Health Centre II', '/akV6429SUqu/Wd1lV9Qdj4o/aJR2ZxSH7g4/a1BUAxYwQ1t/lZHbUJPtorQ', 5, 575, '2025-04-10 18:55:06', '2025-07-22 09:05:50'),
 (4429, 'UiO', 'RXMQeaZcjjG', 'Nalinya Ndagire Health Centre III', '/akV6429SUqu/Dl9WvtvDs5V/IVuiLJYABw6/akmhIvDeUc3/RXMQeaZcjjG', 5, 1506, '2025-04-10 18:55:06', '2025-07-22 09:05:50'),
@@ -10759,7 +10758,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (4706, 'UiO', 'bKzZqsPr8zk', 'Niye Health Centre II', '/akV6429SUqu/SUvODYOcaVf/aBrjuZk0W31/jPjIMFeR7aI/bKzZqsPr8zk', 5, 1829, '2025-04-10 18:55:06', '2025-07-22 09:05:50'),
 (4707, 'UiO', 'a44ThMBCFdi', 'Njeru Clinic (Kawempe) HC II', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/LYuMx5oPsR5/a44ThMBCFdi', 5, 1049, '2025-04-10 18:55:06', '2025-07-22 09:05:50'),
 (4708, 'UiO', 'ONt4TJmcw1L', 'Njeru Clinic (Rubaga) HC II', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/oweSpFBNbmi/ONt4TJmcw1L', 5, 1883, '2025-04-10 18:55:06', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (4709, 'UiO', 'Xks9aASahbX', 'Njeru Health Centre II', '/akV6429SUqu/Dl9WvtvDs5V/aUcYGQCK9ub/zGdzg5hNpYO/Xks9aASahbX', 5, 1571, '2025-04-10 18:55:06', '2025-07-22 09:05:50'),
 (4710, 'UiO', 'OiuyBahpmGI', 'Njeru Town Council Health Centre III', '/akV6429SUqu/Dl9WvtvDs5V/x75Yh65MaUa/D6apc5s4Bwt/OiuyBahpmGI', 5, 694, '2025-04-10 18:55:06', '2025-07-22 09:05:50'),
 (4711, 'UiO', 'bw1P79ZCDKF', 'Njovu Ismalic Medical Centre', '/akV6429SUqu/Dl9WvtvDs5V/tr9XWtYsL5P/eYw6xfpMCpt/bw1P79ZCDKF', 5, 2036, '2025-04-10 18:55:06', '2025-07-22 09:05:50'),
@@ -11042,7 +11041,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (4998, 'UiO', 'OPysuvktrqH', 'Mubende Gayaza Health Centre III', '/akV6429SUqu/Dl9WvtvDs5V/lzWuB6bCQeV/aaCfJhBmGNy/OPysuvktrqH', 5, 369, '2025-04-10 19:02:58', '2025-07-22 09:05:50'),
 (4999, 'UiO', 'GIh6CqfNzgM', 'Mubende Kasaana Health Centre II', '/akV6429SUqu/Dl9WvtvDs5V/Pvl4FVXO0RD/x2N6BwYSFr8/GIh6CqfNzgM', 5, 1527, '2025-04-10 19:02:58', '2025-07-22 09:05:50'),
 (5000, 'UiO', 'asPYa4kd1vo', 'Mubende Kasambya Health Centre III', '/akV6429SUqu/Dl9WvtvDs5V/lzWuB6bCQeV/gTr4gM81jn5/asPYa4kd1vo', 5, 992, '2025-04-10 19:02:58', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (5001, 'UiO', 'FNdivgAtKyR', 'Mubende People\'s Clinic', '/akV6429SUqu/Dl9WvtvDs5V/lzWuB6bCQeV/DnkV0z5v0MS/FNdivgAtKyR', 5, 1488, '2025-04-10 19:02:58', '2025-07-22 09:05:50'),
 (5002, 'UiO', 'dJVAxcfHq5Z', 'Mubende Police Health Centre II', '/akV6429SUqu/Dl9WvtvDs5V/lzWuB6bCQeV/AgiJUzMaGYS/dJVAxcfHq5Z', 5, 2028, '2025-04-10 19:02:58', '2025-07-22 09:05:50'),
 (5003, 'UiO', 'VLclxVcJh5v', 'Mubende Regional Referral Hospital', '/akV6429SUqu/Dl9WvtvDs5V/lzWuB6bCQeV/gozR97R4Khm/VLclxVcJh5v', 5, 723, '2025-04-10 19:02:58', '2025-07-22 09:05:50'),
@@ -11322,7 +11321,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (5277, 'UiO', 'YHyfR8qUYnj', 'Mwanjari Health Centre II', '/akV6429SUqu/G0rlphd2tcD/zBIpPzKYFLp/DiPNrbcTMu7/YHyfR8qUYnj', 5, 1969, '2025-04-10 19:02:58', '2025-07-22 09:05:50'),
 (5278, 'UiO', 'pJCbDtCHlE8', 'Mwatu Dental Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/zNdkt1W9dcu/pJCbDtCHlE8', 5, 682, '2025-04-10 19:02:58', '2025-07-22 09:05:50'),
 (5279, 'UiO', 'lWqNeOfmurK', 'Mwebaza Clinic', '/akV6429SUqu/IEU0FjDAhBP/aIahLLmtvgT/nLs3FmRSZhO/lWqNeOfmurK', 5, 1018, '2025-04-10 19:02:58', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (5280, 'UiO', 'UjBIv3oF9PN', 'Mwebaza Domiciliary', '/akV6429SUqu/IEU0FjDAhBP/Ame30QOwuX6/NgU6GKFkUU4/UjBIv3oF9PN', 5, 1084, '2025-04-10 19:02:58', '2025-07-22 09:05:50'),
 (5281, 'UiO', 'dImKFSj5cqK', 'Mwebaza Domicilliary', '/akV6429SUqu/IEU0FjDAhBP/KJkbK1YhjFb/unv8Mf3d1rl/dImKFSj5cqK', 5, 1504, '2025-04-10 19:02:58', '2025-07-22 09:05:50'),
 (5282, 'UiO', 'hcjpFVlBZSD', 'Mwebaza Medical Clinic (Bwaise III)', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/LYuMx5oPsR5/hcjpFVlBZSD', 5, 1049, '2025-04-10 19:02:58', '2025-07-22 09:05:50'),
@@ -11605,7 +11604,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (5569, 'UiO', 'k1M0fgnxHgR', 'Marie Stopes Uganda (Kawempe)', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/LYuMx5oPsR5/k1M0fgnxHgR', 5, 1049, '2025-04-10 19:12:42', '2025-07-22 09:05:50'),
 (5570, 'UiO', 'f64lQG4l274', 'Marie Stopes Uganda (Lugogo)', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/kKEBeO1LL7S/f64lQG4l274', 5, 1568, '2025-04-10 19:12:42', '2025-07-22 09:05:50'),
 (5571, 'UiO', 'XE0Ucndg8ym', 'Marie Stopes Uganda (Namuwongo)', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/FbuhMjEaMXt/XE0Ucndg8ym', 5, 1408, '2025-04-10 19:12:42', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (5572, 'UiO', 'pXcZqab74kh', 'Marie Stopes Uganda Arua Health Centre II', '/akV6429SUqu/BD3XaQ7cQAp/iQTVPmAJPkr/BJc6aAKfEdk/pXcZqab74kh', 5, 344, '2025-04-10 19:12:42', '2025-07-22 09:05:50'),
 (5573, 'UiO', 'uxOQ8aiwSFp', 'Marie Stopes Uganda Bweyogerere Health Centre II', '/akV6429SUqu/IEU0FjDAhBP/aIahLLmtvgT/RQ4bTHOso6m/uxOQ8aiwSFp', 5, 667, '2025-04-10 19:12:42', '2025-07-22 09:05:50'),
 (5574, 'UiO', 'VQWekIHP4qP', 'Marie Stopes Uganda Fort Portal Health Centre II', '/akV6429SUqu/JZhJ50nOirX/R1x33oSVR1M/ELU3iXYKacy/VQWekIHP4qP', 5, 677, '2025-04-10 19:12:42', '2025-07-22 09:05:50'),
@@ -11888,7 +11887,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (5851, 'UiO', 'ELoK6BN0Tbo', 'Mirambi Health Centre II', '/akV6429SUqu/JZhJ50nOirX/g8M1cWRJZV6/MZPstrhbA2g/ELoK6BN0Tbo', 5, 1461, '2025-04-10 19:12:42', '2025-07-22 09:05:50'),
 (5852, 'UiO', 'RWEo3tF0K1h', 'Mirambi Health Centre III', '/akV6429SUqu/IEU0FjDAhBP/Ame30QOwuX6/NgU6GKFkUU4/RWEo3tF0K1h', 5, 1084, '2025-04-10 19:12:42', '2025-07-22 09:05:50'),
 (5853, 'UiO', 'UYmlNJzKbed', 'Mirembe (Bukulula) Health Centre III', '/akV6429SUqu/IEU0FjDAhBP/ahyi8Uq4vaj/BXbTY29PWlG/UYmlNJzKbed', 5, 502, '2025-04-10 19:12:42', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (5854, 'UiO', 'zgl8cvTUMji', 'Mirembe (Nangabo) Health Centre III', '/akV6429SUqu/IEU0FjDAhBP/aIahLLmtvgT/oyIJV2TSFLe/zgl8cvTUMji', 5, 993, '2025-04-10 19:12:42', '2025-07-22 09:05:50'),
 (5855, 'UiO', 'CuIJdsdisfp', 'Mirembe Clinic', '/akV6429SUqu/yx0ieyZNF0l/xr8EMirOASp/NYb019QWhPQ/CuIJdsdisfp', 5, 690, '2025-04-10 19:12:42', '2025-07-22 09:05:50'),
 (5856, 'UiO', 'S6BIC2MogkB', 'Mirembe Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/LYuMx5oPsR5/S6BIC2MogkB', 5, 1049, '2025-04-10 19:12:42', '2025-07-22 09:05:50'),
@@ -12171,7 +12170,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (6143, 'UiO', 'ZP5rDXzdob4', 'Life Centre Dormicilliary Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/oweSpFBNbmi/ZP5rDXzdob4', 5, 1883, '2025-04-10 19:21:18', '2025-07-22 09:05:50'),
 (6144, 'UiO', 'doDJxqHUdxG', 'Life Consult and Diagnostic Medical Care Mulago', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/LYuMx5oPsR5/doDJxqHUdxG', 5, 1049, '2025-04-10 19:21:18', '2025-07-22 09:05:50'),
 (6145, 'UiO', 'Z70DgwBA14g', 'Life Consult Medical', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/LYuMx5oPsR5/Z70DgwBA14g', 5, 1049, '2025-04-10 19:21:18', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (6146, 'UiO', 'Y7dBwHO0Oti', 'Life For All Doctor\'s Clinic', '/akV6429SUqu/IEU0FjDAhBP/aPRNSGUR3vk/BSIgbcTVHu7/Y7dBwHO0Oti', 5, 1383, '2025-04-10 19:21:18', '2025-07-22 09:05:50'),
 (6147, 'UiO', 'VUVY3G8UPvZ', 'Life Fountain Medical Centre', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/LYuMx5oPsR5/VUVY3G8UPvZ', 5, 1049, '2025-04-10 19:21:18', '2025-07-22 09:05:50'),
 (6148, 'UiO', 'olqibmTariV', 'Life Front Medical Centre', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/FbuhMjEaMXt/olqibmTariV', 5, 1408, '2025-04-10 19:21:18', '2025-07-22 09:05:50'),
@@ -12454,7 +12453,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (6435, 'UiO', 'WiDK75EptX5', 'Kihihi Health Centre IV', '/akV6429SUqu/G0rlphd2tcD/aphcy5JTnd6/i6UwRGRlTe6/WiDK75EptX5', 5, 1115, '2025-04-10 19:28:36', '2025-07-22 09:05:50'),
 (6436, 'UiO', 'ccCk8yDgf6O', 'Kihihi Prisons Health Centre II', '/akV6429SUqu/G0rlphd2tcD/aphcy5JTnd6/i6UwRGRlTe6/ccCk8yDgf6O', 5, 1115, '2025-04-10 19:28:36', '2025-07-22 09:05:50'),
 (6437, 'UiO', 'PPFplmPcIK1', 'Kihiihi Health Centre II', '/akV6429SUqu/F1o6qBSx783/UaR7OHycj8c/C8KGSaxhXaQ/PPFplmPcIK1', 5, 1711, '2025-04-10 19:28:36', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (6438, 'UiO', 'i3bG7edqA5u', 'Kihumuro People\'s Clinic', '/akV6429SUqu/JZhJ50nOirX/qKmESX5Owwr/kisFgxvHQ0b/i3bG7edqA5u', 5, 453, '2025-04-10 19:28:36', '2025-07-22 09:05:50'),
 (6439, 'UiO', 'BfumzskZzcA', 'Kihunda Health Centre III', '/akV6429SUqu/F1o6qBSx783/xAJgEKKAeRA/Rwjn2kDDgwf/BfumzskZzcA', 5, 852, '2025-04-10 19:28:36', '2025-07-22 09:05:50'),
 (6440, 'UiO', 'xgls2u6zF4m', 'Kihunde Hospital', '/akV6429SUqu/yx0ieyZNF0l/ZqJ9w7mzitv/lBnbvnvhNf8/xgls2u6zF4m', 5, 2033, '2025-04-10 19:28:36', '2025-07-22 09:05:50'),
@@ -12736,7 +12735,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (6716, 'UiO', 'SpgaxP49ODY', 'Kiteredde Health Centre II', '/akV6429SUqu/Dl9WvtvDs5V/Q7PaNIbyZII/P5yisXF3Zpg/SpgaxP49ODY', 5, 895, '2025-04-10 19:28:36', '2025-07-22 09:05:50'),
 (6717, 'UiO', 'z2LfysbyF9U', 'Kitgum General Hospital', '/akV6429SUqu/SUvODYOcaVf/pnTVIF5v27r/mdLZLcMudPe/z2LfysbyF9U', 5, 686, '2025-04-10 19:28:36', '2025-07-22 09:05:50'),
 (6718, 'UiO', 'f7pQNP83wd9', 'Kitgum Maternity and Medical Centre', '/akV6429SUqu/SUvODYOcaVf/pnTVIF5v27r/mdLZLcMudPe/f7pQNP83wd9', 5, 686, '2025-04-10 19:28:36', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (6719, 'UiO', 'v3S6pvqS63U', 'Kitgum Police Health Centre II', '/akV6429SUqu/SUvODYOcaVf/pnTVIF5v27r/mdLZLcMudPe/v3S6pvqS63U', 5, 686, '2025-04-10 19:28:36', '2025-07-22 09:05:50'),
 (6720, 'UiO', 'MvWfNbmsyfy', 'Kitgum Prisons Health Centre II', '/akV6429SUqu/SUvODYOcaVf/pnTVIF5v27r/mdLZLcMudPe/MvWfNbmsyfy', 5, 686, '2025-04-10 19:28:36', '2025-07-22 09:05:50'),
 (6721, 'UiO', 'JEOnniXpbdj', 'Kitgum Youth Centre Clinic', '/akV6429SUqu/SUvODYOcaVf/pnTVIF5v27r/KVTbja9X7lA/JEOnniXpbdj', 5, 1846, '2025-04-10 19:28:36', '2025-07-22 09:05:50'),
@@ -13019,7 +13018,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (7081, 'UiO', 'xjlzfFpQMEP', 'Kasese Police Health Centre II', '/akV6429SUqu/JZhJ50nOirX/aa8xVDzSpte/Lrz2RTu4m7z/xjlzfFpQMEP', 5, 684, '2025-04-10 19:52:02', '2025-07-22 09:05:50'),
 (7082, 'UiO', 'GaS3yxqjv5Q', 'Kasessenge Health Centre II', '/akV6429SUqu/JZhJ50nOirX/m77oR1YJESj/RYtKj9UvR3g/GaS3yxqjv5Q', 5, 813, '2025-04-10 19:52:02', '2025-07-22 09:05:50'),
 (7083, 'UiO', 'K97Ta0zw1QG', 'Kashaka Health Centre II', '/akV6429SUqu/F1o6qBSx783/fS71jg1WYPk/EaYP1A2wyvE/K97Ta0zw1QG', 5, 1042, '2025-04-10 19:52:02', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (7084, 'UiO', 'tbnRIEGuscu', 'Kashambya (Bushenyi) Health Centre III', '/akV6429SUqu/F1o6qBSx783/It5UGwdHAPF/AgYgZ65N9vd/tbnRIEGuscu', 5, 401, '2025-04-10 19:52:02', '2025-07-22 09:05:50'),
 (7085, 'UiO', 'jtrHsubBsqd', 'Kashambya Health Centre III', '/akV6429SUqu/G0rlphd2tcD/fsP0Wxie1UW/A2UOcJadqvg/jtrHsubBsqd', 5, 1002, '2025-04-10 19:52:02', '2025-07-22 09:05:50'),
 (7193, 'UiO', 'FAlqwkwODjt', 'Kashangura Health Centre II', '/akV6429SUqu/F1o6qBSx783/r8WLxW9JwsS/vuUCvVvETWp/FAlqwkwODjt', 5, 856, '2025-04-10 19:52:02', '2025-07-22 09:05:50'),
@@ -13304,7 +13303,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (7593, 'UiO', 'anyDKTZmVPh', 'Kabaganda Health Centre II', '/akV6429SUqu/Wd1lV9Qdj4o/aJR2ZxSH7g4/fyRAZd94Iko/anyDKTZmVPh', 5, 642, '2025-04-10 20:07:24', '2025-07-22 09:05:50'),
 (7594, 'UiO', 'D2qwnO0egnU', 'Kabahango Health Centre III', '/akV6429SUqu/JZhJ50nOirX/iTfbtn6JUsN/lkTLhQNgq5O/D2qwnO0egnU', 5, 456, '2025-04-10 20:07:24', '2025-07-22 09:05:50'),
 (7595, 'UiO', 'mlbkqdNpleV', 'Kabakedi Health Centre II', '/akV6429SUqu/Dl9WvtvDs5V/tr9XWtYsL5P/wboIhZcZzoD/mlbkqdNpleV', 5, 1358, '2025-04-10 20:07:24', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (7596, 'UiO', 'mErpRZrtmz8', 'Kabala Health Centre II', '/akV6429SUqu/SUvODYOcaVf/ztIyIYAzFKp/gqlcWIrj9J3/mErpRZrtmz8', 5, 1850, '2025-04-10 20:07:24', '2025-07-22 09:05:50'),
 (7597, 'UiO', 'MYW6CCYGe2A', 'Kabalagala Police Health Centre II', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/FbuhMjEaMXt/MYW6CCYGe2A', 5, 1408, '2025-04-10 20:07:24', '2025-07-22 09:05:50'),
 (7598, 'UiO', 'SSNUnjUxUtc', 'Kabale Clinic (Kampala)', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/zNdkt1W9dcu/SSNUnjUxUtc', 5, 682, '2025-04-10 20:07:24', '2025-07-22 09:05:50'),
@@ -13588,7 +13587,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (8008, 'UiO', 'qyKtNN6rJVc', 'God\'s Will Clinic', '/akV6429SUqu/JZhJ50nOirX/a9tQqo1rSj7/ai2RrlY9Fcd/qyKtNN6rJVc', 5, 759, '2025-04-10 20:21:59', '2025-07-22 09:05:50'),
 (8009, 'UiO', 'paNfnARuPo1', 'God\'s Will Medical Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/zNdkt1W9dcu/paNfnARuPo1', 5, 682, '2025-04-10 20:21:59', '2025-07-22 09:05:50'),
 (8010, 'UiO', 'h3qVL1tnCKb', 'Godnet Medical Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/FbuhMjEaMXt/h3qVL1tnCKb', 5, 1408, '2025-04-10 20:21:59', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (8011, 'UiO', 'sChjcj6HW9w', 'Gods Care', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/FbuhMjEaMXt/sChjcj6HW9w', 5, 1408, '2025-04-10 20:21:59', '2025-07-22 09:05:50'),
 (8012, 'UiO', 'o0EYejjTjr1', 'Gods Grace Drugshop', '/akV6429SUqu/DWPnYhoqza0/Y4LV8xqkv6J/DTtuY2aAGcc/o0EYejjTjr1', 5, 285, '2025-04-10 20:21:59', '2025-07-22 09:05:50'),
 (8013, 'UiO', 'hE7RkkZzIHB', 'Gods Mercy Clinic (Kabowa)', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/oweSpFBNbmi/hE7RkkZzIHB', 5, 1883, '2025-04-10 20:21:59', '2025-07-22 09:05:50'),
@@ -13873,7 +13872,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (8327, 'UiO', 'q4GStVhMP0Z', 'Ibuga Refugee Health Centre II', '/akV6429SUqu/JZhJ50nOirX/aa8xVDzSpte/DHWHrDD2bPf/q4GStVhMP0Z', 5, 1194, '2025-04-10 20:21:59', '2025-07-22 09:05:50'),
 (8328, 'UiO', 'YuUpqfwLsis', 'Ibugwe Health Centre II', '/akV6429SUqu/G0rlphd2tcD/fsP0Wxie1UW/anYY2nbOTA5/YuUpqfwLsis', 5, 1925, '2025-04-10 20:21:59', '2025-07-22 09:05:50'),
 (8329, 'UiO', 'M6qnxgpeCA4', 'Iganga Town Council Health Centre III', '/akV6429SUqu/Wd1lV9Qdj4o/oNxpMjveyZt/HzudJ19fruU/M6qnxgpeCA4', 5, 1663, '2025-04-10 20:21:59', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (8330, 'UiO', 'jrCQHd9oRg6', 'Iganga Ug. Prisons Health Centre II', '/akV6429SUqu/Wd1lV9Qdj4o/oNxpMjveyZt/TW0y96F73kX/jrCQHd9oRg6', 5, 679, '2025-04-10 20:21:59', '2025-07-22 09:05:50'),
 (8331, 'UiO', 'Osw7UTwSksE', 'Igara Tea Factory Health Centre II', '/akV6429SUqu/F1o6qBSx783/It5UGwdHAPF/XKmky62jOBX/Osw7UTwSksE', 5, 1251, '2025-04-10 20:21:59', '2025-07-22 09:05:50'),
 (8332, 'UiO', 'QP3xbv4C32B', 'Igayaza Health Centre III', '/akV6429SUqu/yx0ieyZNF0l/Lnewt3iIJaK/iy2MisX1Twa/QP3xbv4C32B', 5, 774, '2025-04-10 20:21:59', '2025-07-22 09:05:50'),
@@ -14158,7 +14157,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (8658, 'UiO', 'ZFsnMSiOxfW', 'Dona Clinic', '/akV6429SUqu/r0GhWtmPHDj/saT18HClZoz/fbPAuvlJO2x/ZFsnMSiOxfW', 5, 1669, '2025-04-10 20:34:55', '2025-07-22 09:05:50'),
 (8659, 'UiO', 'j4Qv5EEcMuU', 'Dormain Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/oweSpFBNbmi/j4Qv5EEcMuU', 5, 1883, '2025-04-10 20:34:55', '2025-07-22 09:05:50'),
 (8660, 'UiO', 'aOHWQc76Dvu', 'Double Cure Health Centre', '/akV6429SUqu/IEU0FjDAhBP/YMMexeHFUay/abHXswMdUC4/aOHWQc76Dvu', 5, 1481, '2025-04-10 20:34:55', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (8661, 'UiO', 'tZ3koXe3d9L', 'Downland Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/FbuhMjEaMXt/tZ3koXe3d9L', 5, 1408, '2025-04-10 20:34:55', '2025-07-22 09:05:50'),
 (8662, 'UiO', 'wvZjKQtykpw', 'Downtown Medical Health Centre III', '/akV6429SUqu/DWPnYhoqza0/ullSvMrkHdi/UNiDU0Y3r2i/wvZjKQtykpw', 5, 1768, '2025-04-10 20:34:55', '2025-07-22 09:05:50'),
 (8663, 'UiO', 'yOdVxTrce8V', 'Dr Agarwal\'s Eye Hospital', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/zNdkt1W9dcu/yOdVxTrce8V', 5, 682, '2025-04-10 20:34:55', '2025-07-22 09:05:50'),
@@ -14442,7 +14441,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (9003, 'UiO', 'kwX8AJb1QLp', 'Bulyansime Health Centre II', '/akV6429SUqu/Wd1lV9Qdj4o/AIonX4LaJeU/sAOvU6xz6rg/kwX8AJb1QLp', 5, 775, '2025-04-10 20:46:12', '2025-07-22 09:05:50'),
 (9004, 'UiO', 'OlaVEDuSn6W', 'Bumadanda Health Centre III', '/akV6429SUqu/Dt6qdenPX1E/yuo5ielNL7W/hO6qi1vSbQa/OlaVEDuSn6W', 5, 416, '2025-04-10 20:46:12', '2025-07-22 09:05:50'),
 (9005, 'UiO', 'LLs45lStr4N', 'Bumageni Health Centre II', '/akV6429SUqu/Dt6qdenPX1E/auLatLbcOxf/QxHGHhger7q/LLs45lStr4N', 5, 482, '2025-04-10 20:46:12', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (9006, 'UiO', 'Zd4l6BoQjP5', 'Bumalenge Health Centre II', '/akV6429SUqu/Wd1lV9Qdj4o/Ut0ysYGEipO/aifNCvFFHYu/Zd4l6BoQjP5', 5, 1956, '2025-04-10 20:46:12', '2025-07-22 09:05:50'),
 (9007, 'UiO', 'dZSLpFo3Ow2', 'Bumanya Health Centre IV', '/akV6429SUqu/Wd1lV9Qdj4o/kJCEJnXLgnh/nBZk2ugBiwx/dZSLpFo3Ow2', 5, 536, '2025-04-10 20:46:12', '2025-07-22 09:05:50'),
 (9008, 'UiO', 'R90HHFvhh7u', 'Bumasikye Health Centre III', '/akV6429SUqu/Dt6qdenPX1E/yuo5ielNL7W/DyPcdfPhNdS/R90HHFvhh7u', 5, 539, '2025-04-10 20:46:12', '2025-07-22 09:05:50'),
@@ -14725,7 +14724,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (9285, 'UiO', 'ScJudq9evei', 'Bwanda (Kalungu) Health Centre II', '/akV6429SUqu/IEU0FjDAhBP/ahyi8Uq4vaj/jXtChmPP7Nj/ScJudq9evei', 5, 909, '2025-04-10 20:46:13', '2025-07-22 09:05:50'),
 (9286, 'UiO', 'PUUsBLjRd6C', 'Bwanda (Rukungiri) Health Centre II', '/akV6429SUqu/G0rlphd2tcD/tugqr4dY6wq/adH5G8EstWj/PUUsBLjRd6C', 5, 465, '2025-04-10 20:46:13', '2025-07-22 09:05:50'),
 (9287, 'UiO', 'aORNRKO8Y00', 'Bwanga Health Centre II', '/akV6429SUqu/G0rlphd2tcD/tugqr4dY6wq/rVlOahJhyvJ/aORNRKO8Y00', 5, 1737, '2025-04-10 20:46:13', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (9288, 'UiO', 'puXxeWK8WhK', 'Bwanika Health Centre II', '/akV6429SUqu/JZhJ50nOirX/m77oR1YJESj/jTDRA7XUQLH/puXxeWK8WhK', 5, 1092, '2025-04-10 20:46:13', '2025-07-22 09:05:50'),
 (9289, 'UiO', 'tGuQlKqJo5R', 'Bwase Health Centre II', '/akV6429SUqu/Wd1lV9Qdj4o/aJR2ZxSH7g4/vhabQS0hUcP/tGuQlKqJo5R', 5, 643, '2025-04-10 20:46:13', '2025-07-22 09:05:50'),
 (9290, 'UiO', 'rLXGEUiPF7o', 'Bwaziba Health Centre II', '/akV6429SUqu/Dl9WvtvDs5V/tr9XWtYsL5P/wboIhZcZzoD/rLXGEUiPF7o', 5, 1358, '2025-04-10 20:46:13', '2025-07-22 09:05:50'),
@@ -15011,7 +15010,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (9632, 'UiO', 'GGpmrGLkcJi', 'Better Life Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/LYuMx5oPsR5/GGpmrGLkcJi', 5, 1049, '2025-04-10 21:00:09', '2025-07-22 09:05:50'),
 (9633, 'UiO', 's4Qgr3LiCaK', 'Better Ling Domicilliary Clinic', '/akV6429SUqu/F1o6qBSx783/r8WLxW9JwsS/vuUCvVvETWp/s4Qgr3LiCaK', 5, 856, '2025-04-10 21:00:09', '2025-07-22 09:05:50'),
 (9634, 'UiO', 'kR6RZOJffVY', 'Beverly Health Centre II', '/akV6429SUqu/F1o6qBSx783/sWoNWQZ9qrD/LyMEqtUjGHn/kR6RZOJffVY', 5, 1887, '2025-04-10 21:00:09', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (9635, 'UiO', 'ulATjcYo55p', 'Bf Family Medical Clinic', '/akV6429SUqu/IEU0FjDAhBP/aIahLLmtvgT/Qplf7b6Ktzu/ulATjcYo55p', 5, 1545, '2025-04-10 21:00:09', '2025-07-22 09:05:50'),
 (9636, 'UiO', 'dJaNcyPPwbM', 'Bfk Care Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/oweSpFBNbmi/dJaNcyPPwbM', 5, 1883, '2025-04-10 21:00:09', '2025-07-22 09:05:50'),
 (9656, 'UiO', 'ai4gKqwJDeC', 'Biashara Health Centre II', '/akV6429SUqu/DWPnYhoqza0/JyZJhGXKeEq/psOsA1V6rNt/ai4gKqwJDeC', 5, 286, '2025-04-10 21:00:09', '2025-07-22 09:05:50'),
@@ -15295,7 +15294,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (10000, 'UiO', 'Ppyz6vwPpKi', 'AAR Clinic Bweyogerere', '/akV6429SUqu/IEU0FjDAhBP/aIahLLmtvgT/RQ4bTHOso6m/Ppyz6vwPpKi', 5, 667, '2025-04-10 21:12:14', '2025-07-22 09:05:50'),
 (10001, 'UiO', 'H9VMaF4vdmM', 'AAR Clinic Freedom', '/akV6429SUqu/IEU0FjDAhBP/aIahLLmtvgT/MmY9teDWcvb/H9VMaF4vdmM', 5, 1431, '2025-04-10 21:12:14', '2025-07-22 09:05:50'),
 (10002, 'UiO', 'b2LlvIFGc5U', 'AAR Gulu Clinic', '/akV6429SUqu/SUvODYOcaVf/szlrGpmFlu9/LllQ7wFfkGG/b2LlvIFGc5U', 5, 752, '2025-04-10 21:12:14', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (10003, 'UiO', 'pLkoHnX3Ukn', 'AAR Kabalagala Clinic', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/FbuhMjEaMXt/pLkoHnX3Ukn', 5, 1408, '2025-04-10 21:12:14', '2025-07-22 09:05:50'),
 (10004, 'UiO', 'KFEyDFAf0wm', 'AAR Nateete Health Centre', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/oweSpFBNbmi/KFEyDFAf0wm', 5, 1883, '2025-04-10 21:12:14', '2025-07-22 09:05:50'),
 (10005, 'UiO', 'j1gpp563TOQ', 'AAR Ntinda Health Centre', '/akV6429SUqu/GIpyzaSuEgM/aXmBzv61LbM/kKEBeO1LL7S/j1gpp563TOQ', 5, 1568, '2025-04-10 21:12:14', '2025-07-22 09:05:50'),
@@ -15578,7 +15577,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (10300, 'UiO', 'wz2IJXrulbx', 'Amilmil Health Centre II', '/akV6429SUqu/r0GhWtmPHDj/TM6ccNxawqy/OVrhhkOMbwS/wz2IJXrulbx', 5, 2035, '2025-04-10 21:12:15', '2025-07-22 09:05:50'),
 (10301, 'UiO', 'L9Z2oBwbonf', 'Amilo Bioswa Drugshop', '/akV6429SUqu/DWPnYhoqza0/JyZJhGXKeEq/FEIP4B06TTS/L9Z2oBwbonf', 5, 768, '2025-04-10 21:12:15', '2025-07-22 09:05:50'),
 (10302, 'UiO', 'DEr5sDrC7T2', 'Amilobo Health Centre II', '/akV6429SUqu/SUvODYOcaVf/aBrjuZk0W31/HSBjlZdFpWn/DEr5sDrC7T2', 5, 281, '2025-04-10 21:12:15', '2025-07-22 09:05:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (10303, 'UiO', 'ENClXCYzfxf', 'Aminit Health Centre II', '/akV6429SUqu/r0GhWtmPHDj/tdZbtg9sZkO/FGtmEAmv5AJ/ENClXCYzfxf', 5, 311, '2025-04-10 21:12:15', '2025-07-22 09:05:50'),
 (10304, 'UiO', 'Owvv3PbIrZ2', 'Amita Prisons Health Centre II', '/akV6429SUqu/jdlbNUwJiKX/NREoMszwQZW/A8Xv1XbkdrA/Owvv3PbIrZ2', 5, 246, '2025-04-10 21:12:15', '2025-07-22 09:05:50'),
 (10305, 'UiO', 'mxp4izBy2a8', 'Amola Drugshop', '/akV6429SUqu/DWPnYhoqza0/JyZJhGXKeEq/fXF5EXLOSdC/mxp4izBy2a8', 5, 326, '2025-04-10 21:12:15', '2025-07-22 09:05:50'),
@@ -15885,7 +15884,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (10607, 'EMIS', 'bLoH4VbxCGI', 'Madi-Okollo District', '/KJPN4PduBWe/ToANlYyRiKb/bLoH4VbxCGI', 3, 10510, '2025-07-22 13:14:07', '2025-07-22 13:14:08'),
 (10608, 'EMIS', 'JIZDvNlIhXS', 'Manafwa District', '/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS', 3, 10504, '2025-07-22 13:14:07', '2025-07-22 13:14:08'),
 (10609, 'EMIS', 'WyR8Eetj7Uw', 'Maracha District', '/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw', 3, 10510, '2025-07-22 13:14:07', '2025-07-22 13:14:08');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (10610, 'EMIS', 'bIONCoCnt3Q', 'Masaka District', '/KJPN4PduBWe/HOjHt8pjWWH/bIONCoCnt3Q', 3, 10500, '2025-07-22 13:14:07', '2025-07-22 13:14:08'),
 (10611, 'EMIS', 'xr8EMirOASp', 'Masindi District', '/KJPN4PduBWe/uUGeUQZ5nI4/xr8EMirOASp', 3, 10502, '2025-07-22 13:14:07', '2025-07-22 13:14:08'),
 (10612, 'EMIS', 'mv4gKtY0qW8', 'Mayuge District', '/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8', 3, 10503, '2025-07-22 13:14:07', '2025-07-22 13:14:08'),
@@ -16201,7 +16200,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (10922, 'EMIS', 'lAjO1iKNkPK', '_ND Subcounty - Busia DLG', '/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/lAjO1iKNkPK', 5, 10696, '2025-07-22 13:18:11', '2025-07-22 13:18:11'),
 (10923, 'EMIS', 'jbuUnjukfGj', '_ND Subcounty - Butaleja DLG', '/KJPN4PduBWe/DmeAF6ZFSzz/MtpE3CH6vq3/Y5bcujoUkwE/jbuUnjukfGj', 5, 10698, '2025-07-22 13:18:11', '2025-07-22 13:18:11'),
 (10924, 'EMIS', 'JG2qf3LLpni', '_ND Subcounty - Butambala DLG', '/KJPN4PduBWe/HOjHt8pjWWH/a3LMKP8z8Xj/qNEhw0Y6RTu/JG2qf3LLpni', 5, 10699, '2025-07-22 13:18:11', '2025-07-22 13:18:11');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (10925, 'EMIS', 'dEO9pHFnyFw', '_ND Subcounty - Butebo DLG', '/KJPN4PduBWe/DmeAF6ZFSzz/FDPqRvcW3NN/wZkfS846pSU/dEO9pHFnyFw', 5, 10700, '2025-07-22 13:18:11', '2025-07-22 13:18:11'),
 (10926, 'EMIS', 'U0lLG5dpgsd', '_ND Subcounty - Buvuma DLG', '/KJPN4PduBWe/HOjHt8pjWWH/aZLZPPjqft0/pULiLDfzpCp/U0lLG5dpgsd', 5, 10701, '2025-07-22 13:18:11', '2025-07-22 13:18:11'),
 (10927, 'EMIS', 'QeeW2l3lt88', '_ND Subcounty - Buyende DLG', '/KJPN4PduBWe/GdYvXsZ4rB6/F3ccON3OCsL/eEjiTDMCNZl/QeeW2l3lt88', 5, 10702, '2025-07-22 13:18:11', '2025-07-22 13:18:11'),
@@ -16487,7 +16486,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (11207, 'EMIS', 'Vzfp8g62doJ', 'Bugadde Town Council', '/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/Vzfp8g62doJ', 5, 10785, '2025-07-22 13:18:11', '2025-07-22 13:18:14'),
 (11208, 'EMIS', 'xnnc4qsoul2', 'Bugamba Subcounty', '/KJPN4PduBWe/LCiSfhGKLEU/tsugXWRXwGu/tGvXodWgT2c/xnnc4qsoul2', 5, 10831, '2025-07-22 13:18:11', '2025-07-22 13:18:14'),
 (11209, 'EMIS', 'pLtAU0fZNav', 'Bugambe Subcounty', '/KJPN4PduBWe/uUGeUQZ5nI4/L5WBetpBpY3/qqknBMoNlV9/pLtAU0fZNav', 5, 10747, '2025-07-22 13:18:11', '2025-07-22 13:18:14');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (11210, 'EMIS', 'zlYNPre8OdH', 'Bugangari Subcounty', '/KJPN4PduBWe/YPWYLd0d3k3/tugqr4dY6wq/lCwMeapfpzt/zlYNPre8OdH', 5, 10829, '2025-07-22 13:18:11', '2025-07-22 13:18:14'),
 (11211, 'EMIS', 'olvMjWKwojt', 'Buganikere Town Council', '/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/olvMjWKwojt', 5, 10692, '2025-07-22 13:18:11', '2025-07-22 13:18:14'),
 (11212, 'EMIS', 'BJS2nh09sjQ', 'Bugaya Subcounty(Buvuma District)', '/KJPN4PduBWe/HOjHt8pjWWH/aZLZPPjqft0/pULiLDfzpCp/BJS2nh09sjQ', 5, 10701, '2025-07-22 13:18:11', '2025-07-22 13:18:14'),
@@ -16775,7 +16774,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (11494, 'EMIS', 'RXplh6k0uA0', 'Eastern Divison Subcounty', '/KJPN4PduBWe/YPWYLd0d3k3/tugqr4dY6wq/lCwMeapfpzt/RXplh6k0uA0', 5, 10829, '2025-07-22 13:20:59', '2025-07-22 13:21:01'),
 (11495, 'EMIS', 'u0ITN2SJllG', 'Endiizi Subcounty', '/KJPN4PduBWe/LCiSfhGKLEU/UaR7OHycj8c/wY01hFv321X/u0ITN2SJllG', 5, 10715, '2025-07-22 13:20:59', '2025-07-22 13:21:01'),
 (11496, 'EMIS', 'TKU6Jjg7lhj', 'Endiizi Town Council', '/KJPN4PduBWe/LCiSfhGKLEU/UaR7OHycj8c/wY01hFv321X/TKU6Jjg7lhj', 5, 10715, '2025-07-22 13:20:59', '2025-07-22 13:21:01');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (11497, 'EMIS', 'akkeB3FxQrI', 'Engaju Subcounty', '/KJPN4PduBWe/LCiSfhGKLEU/sWoNWQZ9qrD/dX7S5qCW1Jp/akkeB3FxQrI', 5, 10685, '2025-07-22 13:20:59', '2025-07-22 13:21:01'),
 (11498, 'EMIS', 'sv7N7kK4Cjv', 'Engari Subcounty', '/KJPN4PduBWe/LCiSfhGKLEU/AS2Seq1grGE/itkqnx06qk9/sv7N7kK4Cjv', 5, 10743, '2025-07-22 13:20:59', '2025-07-22 13:21:01'),
 (11499, 'EMIS', 'sLBLFPmx0Ki', 'Erussi Subcounty', '/KJPN4PduBWe/ToANlYyRiKb/Xjc0LDFa5gW/GDfVHitWE3g/sLBLFPmx0Ki', 5, 10810, '2025-07-22 13:20:59', '2025-07-22 13:21:01'),
@@ -17064,7 +17063,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (11782, 'EMIS', 'bDKJ4zqjUZh', 'Kibaale Subcounty', '/KJPN4PduBWe/GdYvXsZ4rB6/esIUe2tQAtL/S5i69hf3We0/bDKJ4zqjUZh', 5, 10807, '2025-07-22 13:21:00', '2025-07-22 13:21:03'),
 (11783, 'EMIS', 'MrU2jB6gAAH', 'Kibaale Town Council', '/KJPN4PduBWe/uUGeUQZ5nI4/tM3DsJxMaMX/s0mATIPXTLz/MrU2jB6gAAH', 5, 10744, '2025-07-22 13:21:00', '2025-07-22 13:21:03'),
 (11784, 'EMIS', 'IXIlEM2ilPu', 'Kibale Subcounty', '/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/IXIlEM2ilPu', 5, 10824, '2025-07-22 13:21:00', '2025-07-22 13:21:03');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (11785, 'EMIS', 'Oova1EA2IWw', 'Kibalinga Subcounty', '/KJPN4PduBWe/HOjHt8pjWWH/lzWuB6bCQeV/n7bSmWC3q7e/Oova1EA2IWw', 5, 10797, '2025-07-22 13:21:00', '2025-07-22 13:21:03'),
 (11786, 'EMIS', 'SxMKY6JULJc', 'Kibanda Subcounty(Kyotera District)', '/KJPN4PduBWe/HOjHt8pjWWH/REJuxCmTwXG/dDf4awxjIgP/SxMKY6JULJc', 5, 10768, '2025-07-22 13:21:00', '2025-07-22 13:21:03'),
 (11787, 'EMIS', 'Jo688SFiDPC', 'Kibanda Subcounty(Rakai District)', '/KJPN4PduBWe/HOjHt8pjWWH/P8iz90eiIrW/W0g7xrcRykI/Jo688SFiDPC', 5, 10825, '2025-07-22 13:21:00', '2025-07-22 13:21:03'),
@@ -17354,7 +17353,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (12071, 'EMIS', 'OZ3anp1NikK', 'Maddu Subcounty', '/KJPN4PduBWe/HOjHt8pjWWH/lQj3yMM1lI7/hqED5VkFfjC/OZ3anp1NikK', 5, 10706, '2025-07-22 13:23:11', '2025-07-22 13:23:13'),
 (12072, 'EMIS', 'it8T3nVKZMr', 'Madi Opei Subcounty', '/KJPN4PduBWe/yXncUmqtQYF/xy0M4HhjXtD/StQcQsGYdz1/it8T3nVKZMr', 5, 10769, '2025-07-22 13:23:11', '2025-07-22 13:23:13'),
 (12073, 'EMIS', 'pX9HAED0EvK', 'Madudu Subcounty', '/KJPN4PduBWe/HOjHt8pjWWH/lzWuB6bCQeV/n7bSmWC3q7e/pX9HAED0EvK', 5, 10797, '2025-07-22 13:23:11', '2025-07-22 13:23:13');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (12074, 'EMIS', 'We5g476kbUM', 'Mafubira Subcounty', '/KJPN4PduBWe/GdYvXsZ4rB6/aJR2ZxSH7g4/RUhu2wZ92uR/We5g476kbUM', 5, 10716, '2025-07-22 13:23:11', '2025-07-22 13:23:13'),
 (12075, 'EMIS', 'ErDl3kd3num', 'Magada Subcounty', '/KJPN4PduBWe/GdYvXsZ4rB6/esIUe2tQAtL/S5i69hf3We0/ErDl3kd3num', 5, 10807, '2025-07-22 13:23:11', '2025-07-22 13:23:13'),
 (12076, 'EMIS', 'iSv7vvhnxkc', 'Magale Subcounty', '/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/iSv7vvhnxkc', 5, 10806, '2025-07-22 13:23:11', '2025-07-22 13:23:13'),
@@ -17643,7 +17642,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (12359, 'EMIS', 'paXoFzmK65o', 'Nyadri Subcounty', '/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw/bAeEQRpZomY/paXoFzmK65o', 5, 10780, '2025-07-22 13:23:11', '2025-07-22 13:23:16'),
 (12360, 'EMIS', 'ZYaGDBVnyHG', 'Nyahuka Town Council', '/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/ZYaGDBVnyHG', 5, 10692, '2025-07-22 13:23:11', '2025-07-22 13:23:16'),
 (12361, 'EMIS', 'wCdITwyfAQ8', 'Nyakabande Subcounty', '/KJPN4PduBWe/YPWYLd0d3k3/aPhSZRinfbg/Va2CQJHrKHU/wCdITwyfAQ8', 5, 10751, '2025-07-22 13:23:11', '2025-07-22 13:23:16');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (12362, 'EMIS', 'BdmuhnYJ5TD', 'Nyakabirizi Division', '/KJPN4PduBWe/LCiSfhGKLEU/It5UGwdHAPF/OleARO2NWCf/BdmuhnYJ5TD', 5, 10695, '2025-07-22 13:23:11', '2025-07-22 13:23:16'),
 (12363, 'EMIS', 'I49oC5z7aKQ', 'Nyakagyeme Subcounty', '/KJPN4PduBWe/YPWYLd0d3k3/tugqr4dY6wq/lCwMeapfpzt/I49oC5z7aKQ', 5, 10829, '2025-07-22 13:23:11', '2025-07-22 13:23:16'),
 (12364, 'EMIS', 'kt4719DszlX', 'Nyakarongo Subcounty', '/KJPN4PduBWe/uUGeUQZ5nI4/orgY0d5MJa9/sn5jZyTTiUe/kt4719DszlX', 5, 10723, '2025-07-22 13:23:11', '2025-07-22 13:23:16'),
@@ -17932,7 +17931,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (12647, 'EMIS', 'e7FNGCD95EI', 'Wera Subcounty', '/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/e7FNGCD95EI', 5, 10674, '2025-07-22 13:24:31', '2025-07-22 13:24:34'),
 (12648, 'EMIS', 'SoLI6opM06A', 'West Division', '/KJPN4PduBWe/uN4gXUciDZ8/aPZzL4CyBTg/gsMQbtzPvWK/SoLI6opM06A', 5, 10760, '2025-07-22 13:24:31', '2025-07-22 13:24:34'),
 (12649, 'EMIS', 'F79dmbz2j35', 'Western Division', '/KJPN4PduBWe/LCiSfhGKLEU/hAoe9dhZh9V/M50EZrK7NfF/F79dmbz2j35', 5, 10816, '2025-07-22 13:24:31', '2025-07-22 13:24:34');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (12650, 'EMIS', 'uWAqSEmP7N8', 'Western Division(Bugiri District)', '/KJPN4PduBWe/GdYvXsZ4rB6/gUaoj8Geuao/qwmiJpHNsaA/uWAqSEmP7N8', 5, 10683, '2025-07-22 13:24:31', '2025-07-22 13:24:34'),
 (12651, 'EMIS', 'cpBPWAAwcGO', 'Western Division(Busia District)', '/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/Nd7YjfuPxyA/cpBPWAAwcGO', 5, 10697, '2025-07-22 13:24:31', '2025-07-22 13:24:34'),
 (12652, 'EMIS', 'kEcwhopaNUe', 'Western Division(Kabarole District)', '/KJPN4PduBWe/AISa21ffM1p/m77oR1YJESj/g3ykLtsBobv/kEcwhopaNUe', 5, 10705, '2025-07-22 13:24:31', '2025-07-22 13:24:34'),
@@ -18199,7 +18198,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (12913, 'EMIS', 'wVhy1frQcuD', 'Abwoc Olil Parish', '/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/b62W7Du8SBv/wVhy1frQcuD', 6, 11094, '2025-07-22 13:32:41', '2025-07-22 13:32:44'),
 (12914, 'EMIS', 'Oj14jeYdw7x', 'Abwoch Parish', '/KJPN4PduBWe/yXncUmqtQYF/S5fvUXgY54J/hzu0iHelGx4/ACuoMtDQa9M/Oj14jeYdw7x', 6, 12452, '2025-07-22 13:32:41', '2025-07-22 13:32:44'),
 (12915, 'EMIS', 'EueOZ3QasL3', 'Abwockwar Parish', '/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/lnuAGQZpJO6/EueOZ3QasL3', 6, 11500, '2025-07-22 13:32:41', '2025-07-22 13:32:44');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (12916, 'EMIS', 'pl13ncJObIe', 'Abwokodia Parish', '/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/CBFtk2zhHUw/pl13ncJObIe', 6, 12632, '2025-07-22 13:32:41', '2025-07-22 13:32:44'),
 (12917, 'EMIS', 'VAJhDbWG4os', 'Abwong Parish', '/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/H5aaabQNsOQ/VAJhDbWG4os', 6, 11044, '2025-07-22 13:32:41', '2025-07-22 13:32:44'),
 (12918, 'EMIS', 'uni9Kz6083g', 'Abyenek Parish', '/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/uORouhNAbq5/uni9Kz6083g', 6, 11157, '2025-07-22 13:32:41', '2025-07-22 13:32:44'),
@@ -18473,7 +18472,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (13186, 'EMIS', 'Iv0mzQkLPz4', 'Amokoge Parish', '/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/b62W7Du8SBv/Iv0mzQkLPz4', 6, 11094, '2025-07-22 13:38:57', '2025-07-22 13:38:57'),
 (13187, 'EMIS', 'RSG6EPb6LbV', 'Amolatar Parish', '/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/LtqhaJd6sm3/RSG6EPb6LbV', 6, 11068, '2025-07-22 13:38:57', '2025-07-22 13:38:57'),
 (13188, 'EMIS', 'VudfZiwhmOM', 'Amolo Parish', '/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/e7FNGCD95EI/VudfZiwhmOM', 6, 12647, '2025-07-22 13:38:57', '2025-07-22 13:38:57');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (13189, 'EMIS', 'EbhiSyftUwu', 'Amilimili Parish', '/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/dlW3jC4tF2A/EbhiSyftUwu', 6, 11934, '2025-07-22 13:38:57', '2025-07-22 13:38:57'),
 (13190, 'EMIS', 'wH9e3E94pBL', 'Aminit(Kamuda Subcounty) Parish', '/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/c25qRvx0b0Z/PrpVnR68wW8/wH9e3E94pBL', 6, 11655, '2025-07-22 13:38:57', '2025-07-22 13:38:57'),
 (13191, 'EMIS', 'dRBYv41DWZC', 'Aminit(Kolir Subcounty) Parish', '/KJPN4PduBWe/rn2uTdRyUbh/tdZbtg9sZkO/Pf8NPQB7A7K/ERBPumWfX4z/dRBYv41DWZC', 6, 11927, '2025-07-22 13:38:57', '2025-07-22 13:38:57'),
@@ -18747,7 +18746,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (13459, 'EMIS', 'D06WG6qzuwK', 'Bamusuuta(Nabbaale Subcounty) Parish', '/KJPN4PduBWe/HOjHt8pjWWH/a0DfYpC2Rwl/cjk4b2j6aLE/YkIzw5ekiOO/D06WG6qzuwK', 6, 12198, '2025-07-22 13:38:57', '2025-07-22 13:39:00'),
 (13460, 'EMIS', 'iy6OCeLTIiM', 'Bananywa Parish', '/KJPN4PduBWe/HOjHt8pjWWH/IVuiLJYABw6/Gs1LsiCV1C3/g61G16YwyCw/iy6OCeLTIiM', 6, 11151, '2025-07-22 13:38:57', '2025-07-22 13:39:00'),
 (13461, 'EMIS', 'cGhrw4LfVsw', 'Banda(Banda Subcounty(Kyankwanzi District)) Parish', '/KJPN4PduBWe/HOjHt8pjWWH/IVuiLJYABw6/Gs1LsiCV1C3/nUO2ZWjWwDV/cGhrw4LfVsw', 6, 11152, '2025-07-22 13:38:57', '2025-07-22 13:39:00');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (13462, 'EMIS', 'CLSCTYY23ga', 'Banda(Mende Subcounty) Parish', '/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/PK9Fwv2Vpud/CLSCTYY23ga', 6, 12130, '2025-07-22 13:38:57', '2025-07-22 13:39:00'),
 (13463, 'EMIS', 'g9TuB8EEXxs', 'Banda(Nakawa Division) Parish', '/KJPN4PduBWe/HOjHt8pjWWH/aXmBzv61LbM/FtPH7HPJ4y1/QnkiZl7WtFR/g9TuB8EEXxs', 6, 12233, '2025-07-22 13:38:57', '2025-07-22 13:39:00'),
 (13464, 'EMIS', 'Fq1pSNPxLqw', 'Bangaladesh Parish', '/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/sN6QVIjZ3Si/Fq1pSNPxLqw', 6, 12251, '2025-07-22 13:38:57', '2025-07-22 13:39:00'),
@@ -19017,7 +19016,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (13728, 'EMIS', 'hrsppkJsvs6', 'Bugomolwa Parish', '/KJPN4PduBWe/HOjHt8pjWWH/IVuiLJYABw6/Gs1LsiCV1C3/sMayBKzAD9O/hrsppkJsvs6', 6, 12314, '2025-07-23 07:20:50', '2025-07-23 07:20:50'),
 (13729, 'EMIS', 'FzREBpZYjuO', 'Bugona Parish', '/KJPN4PduBWe/HOjHt8pjWWH/P8iz90eiIrW/W0g7xrcRykI/EjRGtLZSrKK/FzREBpZYjuO', 6, 12049, '2025-07-23 07:20:50', '2025-07-23 07:20:50'),
 (13730, 'EMIS', 'GJ0143knVCc', 'Bugondha(Mbulamuti Subcounty) Parish', '/KJPN4PduBWe/GdYvXsZ4rB6/oyygQ2STBST/WKdAEgwdWZr/zoJDrUqFBIl/GJ0143knVCc', 6, 12128, '2025-07-23 07:20:50', '2025-07-23 07:20:50');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (13731, 'EMIS', 'MB6vRhfI6Qz', 'Bugondha(Namwendwa Subcounty) Parish', '/KJPN4PduBWe/GdYvXsZ4rB6/oyygQ2STBST/WKdAEgwdWZr/aBWUBhzXWat/MB6vRhfI6Qz', 6, 12267, '2025-07-23 07:20:50', '2025-07-23 07:20:50'),
 (13732, 'EMIS', 'DXNJFq5yGbI', 'Bugondo Parish', '/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/OEWhwSnx6tP/DXNJFq5yGbI', 6, 11813, '2025-07-23 07:20:50', '2025-07-23 07:20:50'),
 (13733, 'EMIS', 'DadJkt9nJam', 'Bugondo(Bugondo Subcounty) Parish', '/KJPN4PduBWe/rn2uTdRyUbh/zJfpujxC1kD/KNPVL257sX3/ulJAtodMnHH/DadJkt9nJam', 6, 11219, '2025-07-23 07:20:50', '2025-07-23 07:20:50'),
@@ -19288,7 +19287,7 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (13998, 'EMIS', 'pylAOkdiyKf', 'Bulwanyi Ward', '/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/mvbnJx4izDL/pylAOkdiyKf', 6, 11604, '2025-07-23 07:20:50', '2025-07-23 07:20:53'),
 (13999, 'EMIS', 'JWIrDDrzXkz', 'Bulwenge Parish', '/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/q3TZaSsNLoG/JWIrDDrzXkz', 6, 11229, '2025-07-23 07:20:50', '2025-07-23 07:20:53'),
 (14000, 'EMIS', 'L5SQLLfqJu8', 'Bulweta Parish', '/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/hcI8iRFaq7C/L5SQLLfqJu8', 6, 11269, '2025-07-23 07:20:50', '2025-07-23 07:20:53');
-INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
+INSERT INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hierarchylevel`, `parent_id`, `created`, `updated`) VALUES
 (14001, 'EMIS', 'gWH14SwNDLJ', 'Bulyaganda Parish', '/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/M3Pmx8tT6Z0/gWH14SwNDLJ', 6, 12162, '2025-07-23 07:20:50', '2025-07-23 07:20:53'),
 (14002, 'EMIS', 'M2bMwghiSFX', 'Bulyake Parish', '/KJPN4PduBWe/HOjHt8pjWWH/aSbgVKaeCP0/jCAFrPofXqk/Fu5kLR1xLRN/M2bMwghiSFX', 6, 11714, '2025-07-23 07:20:50', '2025-07-23 07:20:53'),
 (14003, 'EMIS', 'p3Nf3SbUnnc', 'Bulyambidde Parish', '/KJPN4PduBWe/HOjHt8pjWWH/Pvl4FVXO0RD/ChzhMks9PhZ/r9w4SzPaFwF/p3Nf3SbUnnc', 6, 12087, '2025-07-23 07:20:50', '2025-07-23 07:20:53'),
@@ -19486,7 +19485,8 @@ INSERT IGNORE INTO `location` (`id`, `instance_key`, `uid`, `name`, `path`, `hie
 (14195, 'EMIS', 'AhiRCHDdd0g', 'Burama Parish', '/KJPN4PduBWe/YPWYLd0d3k3/tugqr4dY6wq/lCwMeapfpzt/zlYNPre8OdH/AhiRCHDdd0g', 6, 11210, '2025-07-23 07:20:50', '2025-07-23 07:20:55'),
 (14196, 'EMIS', 'PVUOwwGNl0Y', 'Buramali Parish', '/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw/bAeEQRpZomY/hqRRpf543R8/PVUOwwGNl0Y', 6, 12437, '2025-07-23 07:20:50', '2025-07-23 07:20:55'),
 (14197, 'EMIS', 'VvNuVphikci', 'Buramba Parish', '/KJPN4PduBWe/LCiSfhGKLEU/It5UGwdHAPF/OleARO2NWCf/TKxlzEKyVHM/VvNuVphikci', 6, 11542, '2025-07-23 07:20:50', '2025-07-23 07:20:55'),
-(14198, 'EMIS', 'YGUQ5LKorYC', 'Burambagira Parish', '/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/gu8PIPf7PJz/YGUQ5LKorYC', 6, 12297, '2025-07-23 07:20:50', '2025-07-23 07:20:55');
+(14198, 'EMIS', 'YGUQ5LKorYC', 'Burambagira Parish', '/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/gu8PIPf7PJz/YGUQ5LKorYC', 6, 12297, '2025-07-23 07:20:50', '2025-07-23 07:20:55'),
+(14201, 'UiO', 'akV6429SUqu', 'MOH - Uganda', '/akV6429SUqu', 1, NULL, '2025-07-24 20:28:21', '2025-07-24 20:28:21');
 
 -- --------------------------------------------------------
 
@@ -19550,7 +19550,7 @@ CREATE TABLE `option_set` (
 -- Dumping data for table `option_set`
 --
 
-INSERT IGNORE INTO `option_set` (`id`, `name`, `created`, `updated`) VALUES
+INSERT INTO `option_set` (`id`, `name`, `created`, `updated`) VALUES
 (22, 'E-G-F-P', '2025-02-24 13:58:59', '2025-02-25 06:33:37'),
 (23, 'Y-N', '2025-02-24 20:00:00', '2025-02-25 06:33:54'),
 (24, 'A-N-F', '2025-02-24 20:00:41', '2025-02-25 06:34:10'),
@@ -19643,7 +19643,9 @@ INSERT IGNORE INTO `option_set` (`id`, `name`, `created`, `updated`) VALUES
 (240, 'Custom_1752588489', '2025-07-15 14:08:09', '2025-07-15 14:08:09'),
 (241, 'Custom_1752588776', '2025-07-15 14:12:56', '2025-07-15 14:12:56'),
 (242, 'Custom_1752657851', '2025-07-16 09:24:11', '2025-07-16 09:24:11'),
-(243, 'Designation of district Respodent', '2025-07-22 07:53:09', '2025-07-22 07:53:09');
+(243, 'Designation of district Respodent', '2025-07-22 07:53:09', '2025-07-22 07:53:09'),
+(244, 'School Term', '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(245, 'Nationality/Sex', '2025-07-23 16:10:41', '2025-07-23 16:10:41');
 
 -- --------------------------------------------------------
 
@@ -19665,7 +19667,7 @@ CREATE TABLE `option_set_values` (
 -- Dumping data for table `option_set_values`
 --
 
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (73, 22, 'Excellent', '{\"ac\": \"Labongo\", \"at\": \"Edeke\", \"en\": \"Excellent\", \"lg\": \"Kirungi nnyo\", \"ls\": \"Kirungi nnyo\", \"rk\": \"Kinu\", \"rn\": \"Kinu\"}', '2025-02-25 06:36:40', '2025-02-25 06:36:40'),
 (74, 22, 'Good', '{\"ac\": \"Ber\", \"at\": \"Ejok\", \"en\": \"Good\", \"lg\": \"Kirungi\", \"ls\": \"Kirungi\", \"rk\": \"Kirungi\", \"rn\": \"Kirungi\"}', '2025-02-25 06:38:08', '2025-02-25 06:38:08'),
 (75, 22, 'Fair', '{\"ac\": \"Otyeno\", \"at\": \"Akipuran\", \"en\": \"Fair\", \"lg\": \"Kati kati\", \"ls\": \"Kati kati\", \"rk\": \"Mbwenu\", \"rn\": \"Mbwenu\"}', '2025-02-25 06:38:51', '2025-02-25 06:38:51'),
@@ -20241,7 +20243,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (26166, 203, 'Postmi', NULL, '2025-06-12 08:51:57', '2025-06-12 08:51:57'),
 (26167, 203, 'Rabies', NULL, '2025-06-12 08:51:57', '2025-06-12 08:51:57'),
 (26168, 203, 'Sepsis', NULL, '2025-06-12 08:51:57', '2025-06-12 08:51:57');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (26169, 203, 'Smoker', NULL, '2025-06-12 08:51:57', '2025-06-12 08:51:57'),
 (26170, 203, 'Stroke', NULL, '2025-06-12 08:51:57', '2025-06-12 08:51:57'),
 (26171, 203, 'Thrush', NULL, '2025-06-12 08:51:57', '2025-06-12 08:51:57'),
@@ -20875,7 +20877,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (26799, 203, 'Cerebral Event', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58'),
 (26800, 203, 'Cerebral Palsy', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58'),
 (26801, 203, 'Cerebrum Event', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (26802, 203, 'Cerva Syndrome', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58'),
 (26803, 203, 'Cervical Spine', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58'),
 (26804, 203, 'Chronic Smoker', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58'),
@@ -21472,7 +21474,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (27395, 203, 'Superficial Burns', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58'),
 (27396, 203, 'Temporal Lobe Cva', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58'),
 (27397, 203, 'Tetanus, Neonatal', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (27398, 203, 'Third-Degree Burn', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58'),
 (27399, 203, 'Thrombosis (Vein)', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58'),
 (27400, 203, 'Thyroid Myxoedema', NULL, '2025-06-12 08:51:58', '2025-06-12 08:51:58'),
@@ -22046,7 +22048,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (27968, 203, 'Primary Coxarthrosis', NULL, '2025-06-12 08:51:59', '2025-06-12 08:51:59'),
 (27969, 203, 'Primary Gonarthrosis', NULL, '2025-06-12 08:51:59', '2025-06-12 08:51:59'),
 (27970, 203, 'Progressive Apoplexy', NULL, '2025-06-12 08:51:59', '2025-06-12 08:51:59');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (27971, 203, 'Puerperal Thrombosis', NULL, '2025-06-12 08:51:59', '2025-06-12 08:51:59'),
 (27972, 203, 'Pulmonary Hemorrhage', NULL, '2025-06-12 08:51:59', '2025-06-12 08:51:59'),
 (27973, 203, 'Pulmonary Immaturity', NULL, '2025-06-12 08:51:59', '2025-06-12 08:51:59'),
@@ -22602,7 +22604,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (28523, 203, 'Multiple Apoplectic Fit', NULL, '2025-06-12 08:52:00', '2025-06-12 08:52:00'),
 (28524, 203, 'Multiple Basilar Stroke', NULL, '2025-06-12 08:52:00', '2025-06-12 08:52:00'),
 (28525, 203, 'Multiple Brain Apoplexy', NULL, '2025-06-12 08:52:00', '2025-06-12 08:52:00');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (28526, 203, 'Multiple Brain Episodes', NULL, '2025-06-12 08:52:00', '2025-06-12 08:52:00'),
 (28527, 203, 'Multiple Carotid Stroke', NULL, '2025-06-12 08:52:00', '2025-06-12 08:52:00'),
 (28528, 203, 'Multiple Central Stroke', NULL, '2025-06-12 08:52:00', '2025-06-12 08:52:00'),
@@ -23142,7 +23144,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (29062, 203, 'Cerebral Hemisphere Stroke', NULL, '2025-06-12 08:52:02', '2025-06-12 08:52:02'),
 (29063, 203, 'Cerebral Vascular Accident', NULL, '2025-06-12 08:52:02', '2025-06-12 08:52:02'),
 (29064, 203, 'Cerebral Vascular Collapse', NULL, '2025-06-12 08:52:02', '2025-06-12 08:52:02');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (29065, 203, 'Cerebral Vascular Incident', NULL, '2025-06-12 08:52:02', '2025-06-12 08:52:02'),
 (29066, 203, 'Cerebrovascular Infarction', NULL, '2025-06-12 08:52:02', '2025-06-12 08:52:02'),
 (29067, 203, 'Cerebrum Aneurysm Ruptured', NULL, '2025-06-12 08:52:02', '2025-06-12 08:52:02'),
@@ -23668,7 +23670,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (29587, 203, 'Perforated Cerebrum Aneurysm', NULL, '2025-06-12 08:52:04', '2025-06-12 08:52:04'),
 (29588, 203, 'Perforated Sigmoidal Colonic', NULL, '2025-06-12 08:52:04', '2025-06-12 08:52:04'),
 (29589, 203, 'Peripheral  Vascular Disease', NULL, '2025-06-12 08:52:04', '2025-06-12 08:52:04');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (29590, 203, 'Polycystic Pulmonary Disease', NULL, '2025-06-12 08:52:04', '2025-06-12 08:52:04'),
 (29591, 203, 'Posterior Circulation Stroke', NULL, '2025-06-12 08:52:04', '2025-06-12 08:52:04'),
 (29592, 203, 'Preterm Labour With Delivery', NULL, '2025-06-12 08:52:04', '2025-06-12 08:52:04'),
@@ -24178,7 +24180,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (30096, 203, 'Multiple Vertebrobasilar Stroke', NULL, '2025-06-12 08:52:06', '2025-06-12 08:52:06'),
 (30097, 203, 'Necrotic Tuberculosis Infection', NULL, '2025-06-12 08:52:06', '2025-06-12 08:52:06'),
 (30098, 203, 'Non Etoh Hepatic Encephalopathy', NULL, '2025-06-12 08:52:06', '2025-06-12 08:52:06');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (30099, 203, 'Non Haemorrhagic Basilar Stroke', NULL, '2025-06-12 08:52:06', '2025-06-12 08:52:06'),
 (30100, 203, 'Non Tuberculous Lung Cavitation', NULL, '2025-06-12 08:52:06', '2025-06-12 08:52:06'),
 (30101, 203, 'Nonq Wave Myocardium Infarction', NULL, '2025-06-12 08:52:06', '2025-06-12 08:52:06'),
@@ -24674,7 +24676,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (30591, 203, 'Lateral Wall Myocardial Infarction', NULL, '2025-06-12 08:52:08', '2025-06-12 08:52:08'),
 (30592, 203, 'Lateral Wall Myocardium Infarction', NULL, '2025-06-12 08:52:08', '2025-06-12 08:52:08'),
 (30593, 203, 'Liver Haemangioendothelial Sarcoma', NULL, '2025-06-12 08:52:08', '2025-06-12 08:52:08');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (30594, 203, 'Metastatic Hepatic Cells Carcinoma', NULL, '2025-06-12 08:52:08', '2025-06-12 08:52:08'),
 (30595, 203, 'Mid Brain Cerebrovascular Accident', NULL, '2025-06-12 08:52:08', '2025-06-12 08:52:08'),
 (30596, 203, 'Multi Anoxic Ventricle Haemorrhage', NULL, '2025-06-12 08:52:08', '2025-06-12 08:52:08'),
@@ -25157,7 +25159,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (31073, 203, 'Interventricular Cerebral Haemorrhage', NULL, '2025-06-12 08:52:10', '2025-06-12 08:52:10'),
 (31074, 203, 'Interventricular Cerebrum Haemorrhage', NULL, '2025-06-12 08:52:10', '2025-06-12 08:52:10'),
 (31075, 203, 'Intraparenchymal Cerebral Haemorrhage', NULL, '2025-06-12 08:52:10', '2025-06-12 08:52:10');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (31076, 203, 'Intraparenchymal Cerebrum Haemorrhage', NULL, '2025-06-12 08:52:10', '2025-06-12 08:52:10'),
 (31077, 203, 'Intraventricular Cerebral Haemorrhage', NULL, '2025-06-12 08:52:10', '2025-06-12 08:52:10'),
 (31078, 203, 'Intraventricular Cerebrum Haemorrhage', NULL, '2025-06-12 08:52:10', '2025-06-12 08:52:10'),
@@ -25625,7 +25627,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (31540, 203, 'Acute Anterior Wall Myocardium Infarction', NULL, '2025-06-12 08:52:13', '2025-06-12 08:52:13'),
 (31541, 203, 'Acute Anterioseptal Myocardial Infarction', NULL, '2025-06-12 08:52:13', '2025-06-12 08:52:13'),
 (31542, 203, 'Acute Anterioseptal Myocardium Infarction', NULL, '2025-06-12 08:52:13', '2025-06-12 08:52:13');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (31543, 203, 'Acute Anterolateral Myocardial Infarction', NULL, '2025-06-12 08:52:13', '2025-06-12 08:52:13'),
 (31544, 203, 'Acute Anterolateral Myocardium Infarction', NULL, '2025-06-12 08:52:13', '2025-06-12 08:52:13'),
 (31545, 203, 'Acute Multiple Haemorrhagic Brain Episode', NULL, '2025-06-12 08:52:13', '2025-06-12 08:52:13'),
@@ -26077,7 +26079,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (31991, 203, 'Multi Haemorrhagic Cerebral Vascular Accident', NULL, '2025-06-12 08:52:15', '2025-06-12 08:52:15'),
 (31992, 203, 'Multi Haemorrhagic Cerebrovascular Infarction', NULL, '2025-06-12 08:52:15', '2025-06-12 08:52:15'),
 (31993, 203, 'Multi Haemorrhagic Cerebrum Vascular Accident', NULL, '2025-06-12 08:52:15', '2025-06-12 08:52:15');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (31994, 203, 'Multi Hypertensive Cerebral Vascular Accident', NULL, '2025-06-12 08:52:15', '2025-06-12 08:52:15'),
 (31995, 203, 'Multi Hypertensive Cerebrum Vascular Accident', NULL, '2025-06-12 08:52:15', '2025-06-12 08:52:15'),
 (31996, 203, 'Multi Hypertensive Inter Cerebrum Haemorrhage', NULL, '2025-06-12 08:52:15', '2025-06-12 08:52:15'),
@@ -26535,7 +26537,7 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (32469, 223, '20-24Yrs, Female', NULL, '2025-06-18 07:54:29', '2025-06-18 07:54:29'),
 (32470, 223, '<1Yr, Male', NULL, '2025-06-18 07:54:29', '2025-06-18 07:54:29'),
 (32471, 224, '25-29Yrs, Male', NULL, '2025-06-18 07:54:29', '2025-06-18 07:54:29');
-INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
+INSERT INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `translations`, `created`, `updated`) VALUES
 (32472, 224, '50+Yrs, Female', NULL, '2025-06-18 07:54:29', '2025-06-18 07:54:29'),
 (32473, 224, '15-19Yrs, Male', NULL, '2025-06-18 07:54:29', '2025-06-18 07:54:29'),
 (32474, 224, '10-14Yrs, Male', NULL, '2025-06-18 07:54:29', '2025-06-18 07:54:29'),
@@ -26797,7 +26799,14 @@ INSERT IGNORE INTO `option_set_values` (`id`, `option_set_id`, `option_value`, `
 (32730, 243, 'District Planner', NULL, '2025-07-22 07:53:09', '2025-07-22 07:53:09'),
 (32731, 243, 'District Biostatician', NULL, '2025-07-22 07:53:09', '2025-07-22 07:53:09'),
 (32732, 243, 'District Statistics Officer (DSO)', NULL, '2025-07-22 07:53:09', '2025-07-22 07:53:09'),
-(32733, 243, 'Community Health Worker (CHW)', NULL, '2025-07-22 07:53:09', '2025-07-22 07:53:09');
+(32733, 243, 'Community Health Worker (CHW)', NULL, '2025-07-22 07:53:09', '2025-07-22 07:53:09'),
+(32734, 244, 'Term 3', NULL, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(32735, 244, 'Term 1', NULL, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(32736, 244, 'Term 2', NULL, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(32737, 245, 'Nationals, Male', NULL, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(32738, 245, 'Refugees, Female', NULL, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(32739, 245, 'Nationals, Female', NULL, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(32740, 245, 'Refugees, Male', NULL, '2025-07-23 16:10:41', '2025-07-23 16:10:41');
 
 -- --------------------------------------------------------
 
@@ -26817,7 +26826,7 @@ CREATE TABLE `owner` (
 -- Dumping data for table `owner`
 --
 
-INSERT IGNORE INTO `owner` (`id`, `name`, `created`, `updated`) VALUES
+INSERT INTO `owner` (`id`, `name`, `created`, `updated`) VALUES
 (1, 'Govt', '2025-02-05 00:49:20', '2025-02-05 00:49:20'),
 (2, 'PNFP', '2025-02-05 00:49:20', '2025-02-05 00:49:20'),
 (3, 'PFP', '2025-02-05 00:49:20', '2025-02-05 00:49:20');
@@ -26844,7 +26853,7 @@ CREATE TABLE `question` (
 -- Dumping data for table `question`
 --
 
-INSERT IGNORE INTO `question` (`id`, `label`, `question_type`, `is_required`, `translations`, `option_set_id`, `created`, `updated`) VALUES
+INSERT INTO `question` (`id`, `label`, `question_type`, `is_required`, `translations`, `option_set_id`, `created`, `updated`) VALUES
 (5173, 'What is your role in health?', 'text', 0, NULL, NULL, '2025-07-15 11:56:31', '2025-07-15 11:56:31'),
 (5174, 'What is your role in the health disease surveillance in Uganda?', 'select', 1, NULL, 233, '2025-07-15 12:54:39', '2025-07-18 08:41:04'),
 (5175, 'At which level of the health system do you primarily work', 'select', 1, NULL, 232, '2025-07-15 12:55:35', '2025-07-18 08:41:15'),
@@ -26905,7 +26914,20 @@ INSERT IGNORE INTO `question` (`id`, `label`, `question_type`, `is_required`, `t
 (5230, 'PM_Number of secondary Schools (Government)', 'text', 1, NULL, NULL, '2025-07-22 07:53:09', '2025-07-22 07:53:09'),
 (5231, 'PM_Number of secondary Schools (Private)', 'text', 1, NULL, NULL, '2025-07-22 07:53:09', '2025-07-22 07:53:09'),
 (5232, 'PM_Name of Respondent', 'text', 1, NULL, NULL, '2025-07-22 07:53:09', '2025-07-22 07:53:09'),
-(5233, 'PM_Designation of district Respondent', 'select', 1, NULL, 243, '2025-07-22 07:53:09', '2025-07-22 07:53:09');
+(5233, 'PM_Designation of district Respondent', 'select', 1, NULL, 243, '2025-07-22 07:53:09', '2025-07-22 07:53:09'),
+(5234, 'School Term', 'select', 1, NULL, 244, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5235, 'Learners enrolled in P.4', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5236, 'Learners enrolled in AEP level 3', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5237, 'Learners enrolled in P.5', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5238, 'Learners enrolled in P.7', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5239, 'Learners enrolled in P.3', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5240, 'Learners enrolled in P.1', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5241, 'Number of CWDs enrolled', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5242, 'Learners enrolled in AEP level 2', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5243, 'Learners enrolled in AEP level 1', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5244, 'Number of Child mothers enrolled', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5245, 'Learners enrolled in P.6', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41'),
+(5246, 'Learners enrolled in P.2', 'select', 1, NULL, 245, '2025-07-23 16:10:41', '2025-07-23 16:10:41');
 
 -- --------------------------------------------------------
 
@@ -26926,7 +26948,7 @@ CREATE TABLE `question_dhis2_mapping` (
 -- Dumping data for table `question_dhis2_mapping`
 --
 
-INSERT IGNORE INTO `question_dhis2_mapping` (`id`, `question_id`, `dhis2_dataelement_id`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `question_dhis2_mapping` (`id`, `question_id`, `dhis2_dataelement_id`, `dhis2_option_set_id`, `created`) VALUES
 (5123, 5224, 'biIdwUNiNxa', NULL, '2025-07-22 07:53:09'),
 (5124, 5225, 'KhpZKRtUL6W', NULL, '2025-07-22 07:53:09'),
 (5125, 5226, 'Brip9mXEPEK', NULL, '2025-07-22 07:53:09'),
@@ -26936,7 +26958,20 @@ INSERT IGNORE INTO `question_dhis2_mapping` (`id`, `question_id`, `dhis2_dataele
 (5129, 5230, 'iZg0vEDTYzh', NULL, '2025-07-22 07:53:09'),
 (5130, 5231, 'asUaTFk0mp0', NULL, '2025-07-22 07:53:09'),
 (5131, 5232, 'EYOX8geRbfX', NULL, '2025-07-22 07:53:09'),
-(5132, 5233, 'NSYPhubL8jA', 'bFtoOaeP5Di', '2025-07-22 07:53:09');
+(5132, 5233, 'NSYPhubL8jA', 'bFtoOaeP5Di', '2025-07-22 07:53:09'),
+(5133, 5234, 'category_combo', 'JDT1pO0eCJh', '2025-07-23 16:10:41'),
+(5134, 5235, 'y8C06caJGPg', 'msAWiuNNyz4', '2025-07-23 16:10:41'),
+(5135, 5236, 'OTY4Rd2F1DM', 'msAWiuNNyz4', '2025-07-23 16:10:41'),
+(5136, 5237, 'FB8EYY31Ffa', 'msAWiuNNyz4', '2025-07-23 16:10:41'),
+(5137, 5238, 'kPzY07ZZZME', 'msAWiuNNyz4', '2025-07-23 16:10:41'),
+(5138, 5239, 'yRjwzAAynFY', 'msAWiuNNyz4', '2025-07-23 16:10:41'),
+(5139, 5240, 'elR368HaRJK', 'msAWiuNNyz4', '2025-07-23 16:10:41'),
+(5140, 5241, 'xGCtKv5kdZA', 'msAWiuNNyz4', '2025-07-23 16:10:41'),
+(5141, 5242, 'oIfRZcEYimT', 'msAWiuNNyz4', '2025-07-23 16:10:41'),
+(5142, 5243, 'xD84mZrmVu5', 'msAWiuNNyz4', '2025-07-23 16:10:41'),
+(5143, 5244, 'HZyLACGxe9w', 'msAWiuNNyz4', '2025-07-23 16:10:41'),
+(5144, 5245, 'v6rbIUMGMxC', 'msAWiuNNyz4', '2025-07-23 16:10:41'),
+(5145, 5246, 'QsOTeosMgYE', 'msAWiuNNyz4', '2025-07-23 16:10:41');
 
 -- --------------------------------------------------------
 
@@ -26956,7 +26991,7 @@ CREATE TABLE `service_unit` (
 -- Dumping data for table `service_unit`
 --
 
-INSERT IGNORE INTO `service_unit` (`id`, `name`, `created`, `updated`) VALUES
+INSERT INTO `service_unit` (`id`, `name`, `created`, `updated`) VALUES
 (1, 'OPD', '2025-02-05 00:47:08', '2025-02-05 00:47:08'),
 (2, 'Medical Ward', '2025-02-05 00:47:08', '2025-02-05 00:47:08'),
 (3, 'Maternity', '2025-02-05 00:47:08', '2025-02-05 00:47:08'),
@@ -26986,7 +27021,7 @@ CREATE TABLE `service_unit_mapping` (
 -- Dumping data for table `service_unit_mapping`
 --
 
-INSERT IGNORE INTO `service_unit_mapping` (`id`, `service_unit_id`, `dhis2_dataelement_id`, `dhis2_option_set_id`, `created`) VALUES
+INSERT INTO `service_unit_mapping` (`id`, `service_unit_id`, `dhis2_dataelement_id`, `dhis2_option_set_id`, `created`) VALUES
 (1, 1, 'tlMvcgWoRPD', 'RISjMt3IGAH', '2025-04-23 11:56:38'),
 (2, 2, 'tlMvcgWoRPD', 'RISjMt3IGAH', '2025-04-23 11:56:38'),
 (3, 3, 'tlMvcgWoRPD', 'RISjMt3IGAH', '2025-04-23 11:56:38'),
@@ -27018,92 +27053,6 @@ CREATE TABLE `submission` (
   `updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `submission`
---
-
-INSERT IGNORE INTO `submission` (`id`, `uid`, `age`, `sex`, `period`, `service_unit_id`, `location_id`, `ownership_id`, `survey_id`, `created`, `updated`) VALUES
-(92, '7E92F40407', 65, 'Female', '2025-04-17', 4, 10082, 1, 32, '2025-04-17 11:39:02', '2025-04-17 11:39:02'),
-(93, 'AE76FA7834', 33, 'Female', '2025-04-17', 4, 10082, 1, 32, '2025-04-17 12:03:14', '2025-04-17 12:03:14'),
-(103, '62D2DF5CF8', 31, 'Male', '2025-04-21', 5, 9977, 2, 32, '2025-04-21 17:49:29', '2025-04-21 17:49:29'),
-(104, 'BEC989DB7D', 39, 'Female', '2025-04-21', 4, 2616, 2, 32, '2025-04-21 17:49:56', '2025-04-21 17:49:56'),
-(105, '69B71CA645', 25, 'Female', '2025-04-21', 5, 3536, 1, 32, '2025-04-21 17:51:55', '2025-04-21 17:51:55'),
-(119, 'C78B6914D0', 55, 'Female', '2025-04-22', 2, 10082, 2, 32, '2025-04-22 12:13:06', '2025-04-22 12:13:06'),
-(121, '5B4B7A9660', 14, 'Male', '2025-04-22', 7, 10082, 2, 32, '2025-04-22 12:47:33', '2025-04-22 12:47:33'),
-(122, 'BE574549A4', 56, 'Male', '2025-04-22', 4, 10082, 1, 32, '2025-04-22 12:59:58', '2025-04-22 12:59:58'),
-(123, '409ABBAA46', 44, 'Male', '2025-04-22', 7, 10082, 2, 32, '2025-04-22 13:04:26', '2025-04-22 13:04:26'),
-(124, '07D7D41FF2', 33, 'Male', '2025-04-22', 2, 10082, 1, 32, '2025-04-22 13:09:15', '2025-04-22 13:09:15'),
-(125, '7A98AF736D', 34, 'Male', '2025-04-22', 2, 10082, 1, 32, '2025-04-22 13:14:02', '2025-04-22 13:14:02'),
-(126, '82516826A4', 34, 'Male', '2025-04-22', 7, 10082, 2, 32, '2025-04-22 13:19:23', '2025-04-22 13:19:23'),
-(127, 'DDB94871B8', 23, 'Female', '2025-04-22', 7, 10082, 2, 32, '2025-04-22 13:23:00', '2025-04-22 13:23:00'),
-(128, 'DAD3CECCB6', 34, 'Male', '2025-04-22', 6, 10082, 2, 32, '2025-04-22 13:26:31', '2025-04-22 13:26:31'),
-(129, 'CE2E873188', 34, 'Male', '2025-04-22', 6, 10082, 2, 32, '2025-04-22 13:28:48', '2025-04-22 13:28:48'),
-(130, '2CDA582A49', 33, 'Male', '2025-04-22', 2, 10082, 2, 32, '2025-04-22 13:29:56', '2025-04-22 13:29:56'),
-(131, '5413366F57', 44, 'Male', '2025-04-22', 7, 10082, 1, 32, '2025-04-22 13:34:46', '2025-04-22 13:34:46'),
-(132, 'D5FDF52E10', 34, 'Female', '2025-04-23', 3, 5126, 1, 32, '2025-04-23 05:49:36', '2025-04-23 05:49:36'),
-(137, '30F700EF5D', 34, 'Male', '2025-04-23', 4, 2704, 2, 32, '2025-04-23 12:32:48', '2025-04-23 12:32:48'),
-(140, '0CEA156707', 45, 'Female', '2025-04-23', 2, 2704, 2, 32, '2025-04-23 12:58:16', '2025-04-23 12:58:16'),
-(141, 'C8754A12A4', 23, 'Female', '2025-04-23', 6, 2704, 1, 32, '2025-04-23 13:10:12', '2025-04-23 13:10:12'),
-(142, 'E5C54DCC7F', 25, 'Male', '2025-04-23', 4, 2704, 1, 32, '2025-04-23 13:21:39', '2025-04-23 13:21:39'),
-(146, 'D7A089D0CD', 22, 'Female', '2025-04-23', 5, 10082, 1, 32, '2025-04-23 13:39:20', '2025-04-23 13:39:20'),
-(147, '1B122FE2CF', 56, 'Female', '2025-04-23', 5, 10082, 2, 32, '2025-04-23 13:41:40', '2025-04-23 13:41:40'),
-(148, '10CF1A44A0', 54, 'Male', '2025-04-24', 2, 2704, 1, 32, '2025-04-24 05:05:21', '2025-04-24 05:05:21'),
-(149, '7CBE39F067', 21, 'Female', '2025-04-24', 3, 2704, 2, 32, '2025-04-24 05:36:51', '2025-04-24 05:36:51'),
-(150, 'A28F6C753B', 32, 'Female', '2025-04-24', 2, 2046, 1, 32, '2025-04-24 05:38:52', '2025-04-24 05:38:52'),
-(167, 'D0F8E3C9AE', 45, 'Male', '2025-04-24', 3, 10082, 1, 32, '2025-04-24 07:35:49', '2025-04-24 07:35:49'),
-(168, 'B361486FCF', 44, 'Female', '2025-04-24', 5, 10082, 1, 32, '2025-04-24 07:56:23', '2025-04-24 07:56:23'),
-(169, 'D01644BBD9', 44, 'Female', '2025-04-24', 5, 10082, 1, 32, '2025-04-24 07:57:19', '2025-04-24 07:57:19'),
-(180, '82758A727F', 21, 'Female', '2025-04-24', 2, 2532, 1, 32, '2025-04-24 09:50:18', '2025-04-24 09:50:18'),
-(204, 'CFB671D34F', NULL, NULL, NULL, NULL, 4114, NULL, 90, '2025-05-30 06:59:11', '2025-05-30 06:59:11'),
-(205, 'E7329FA1FA', NULL, NULL, NULL, NULL, 6799, NULL, 90, '2025-05-30 07:03:06', '2025-05-30 07:03:06'),
-(267, '6BDD885257', NULL, NULL, NULL, NULL, 10082, NULL, 110, '2025-06-11 09:25:34', '2025-06-11 09:25:34'),
-(268, '2DD428269F', NULL, NULL, NULL, NULL, 10256, NULL, 110, '2025-06-11 10:29:01', '2025-06-11 10:29:01'),
-(269, '902580BE83', NULL, NULL, NULL, NULL, 10082, NULL, 114, '2025-06-12 09:12:34', '2025-06-12 09:12:34'),
-(270, 'B418E33089', NULL, NULL, NULL, NULL, 10082, NULL, 115, '2025-06-12 12:05:43', '2025-06-12 12:05:43'),
-(272, '7B2F9D5973', NULL, NULL, NULL, NULL, 10082, NULL, 115, '2025-06-12 12:27:30', '2025-06-12 12:27:30'),
-(273, 'D2D913F1F9', NULL, NULL, NULL, NULL, 10082, NULL, 115, '2025-06-12 12:30:29', '2025-06-12 12:30:29'),
-(274, '776F6D7B8F', NULL, NULL, NULL, NULL, 10256, NULL, 114, '2025-06-19 06:18:10', '2025-06-19 06:18:10'),
-(275, '6CEAA7C4B5', NULL, NULL, NULL, NULL, 10082, NULL, 147, '2025-06-24 13:51:05', '2025-06-24 13:51:05'),
-(276, '4F2A6F8B6C', NULL, NULL, NULL, NULL, 10256, NULL, 115, '2025-06-30 06:40:57', '2025-06-30 06:40:57'),
-(277, '82D95F951F', NULL, NULL, NULL, NULL, 10082, NULL, 144, '2025-06-30 06:52:14', '2025-06-30 06:52:14'),
-(278, '4AA2DDE77D', NULL, NULL, NULL, NULL, 10256, NULL, 115, '2025-06-30 07:09:17', '2025-06-30 07:09:17'),
-(279, '68FBE1F097', NULL, NULL, NULL, NULL, 10256, NULL, 115, '2025-06-30 07:13:29', '2025-06-30 07:13:29'),
-(280, 'A7A4048190', NULL, NULL, NULL, NULL, 8538, NULL, 114, '2025-06-30 07:18:13', '2025-06-30 07:18:13'),
-(281, '485A8DFBE5', NULL, NULL, NULL, NULL, 8538, NULL, 114, '2025-06-30 07:20:25', '2025-06-30 07:20:25'),
-(282, '81F5F4C88D', NULL, NULL, NULL, NULL, 8538, NULL, 131, '2025-06-30 07:37:03', '2025-06-30 07:37:03'),
-(283, 'E41B1A4C96', NULL, NULL, NULL, NULL, 8538, NULL, 131, '2025-06-30 07:38:30', '2025-06-30 07:38:30'),
-(284, '3EE58D7CB9', NULL, NULL, NULL, NULL, 8538, NULL, 131, '2025-06-30 07:40:00', '2025-06-30 07:40:00'),
-(285, '31AAC8DF31', NULL, NULL, NULL, NULL, 4082, NULL, 110, '2025-06-30 08:07:31', '2025-06-30 08:07:31'),
-(287, '32AEC9F875', NULL, NULL, NULL, NULL, 4082, NULL, 148, '2025-06-30 08:37:45', '2025-06-30 08:37:45'),
-(288, 'C5BB6F6985', NULL, NULL, NULL, NULL, 4082, NULL, 148, '2025-06-30 08:45:50', '2025-06-30 08:45:50'),
-(289, '52C1142767', NULL, NULL, NULL, NULL, 4082, NULL, 148, '2025-06-30 08:50:51', '2025-06-30 08:50:51'),
-(290, 'FD430CC617', NULL, NULL, NULL, NULL, 10082, NULL, 149, '2025-06-30 08:56:47', '2025-06-30 08:56:47'),
-(291, 'C47D377584', NULL, NULL, NULL, NULL, 10082, NULL, 149, '2025-06-30 10:00:44', '2025-06-30 10:00:44'),
-(292, 'A38F4F64DD', NULL, NULL, NULL, NULL, 10082, NULL, 149, '2025-06-30 10:40:05', '2025-06-30 10:40:05'),
-(293, '24D637F1F3', NULL, NULL, NULL, NULL, 10082, NULL, 149, '2025-06-30 10:44:50', '2025-06-30 10:44:50'),
-(294, '6FEA415AF5', NULL, NULL, NULL, NULL, 10082, NULL, 149, '2025-06-30 11:05:05', '2025-06-30 11:05:05'),
-(295, '0B0EA4193B', NULL, NULL, NULL, NULL, 10082, NULL, 149, '2025-07-01 07:52:36', '2025-07-01 07:52:36'),
-(296, 'ED04F64A12', NULL, NULL, NULL, NULL, 10082, NULL, 149, '2025-07-01 08:07:08', '2025-07-01 08:07:08'),
-(297, 'E2B6035F85', NULL, NULL, NULL, NULL, 10082, NULL, 149, '2025-07-01 08:40:41', '2025-07-01 08:40:41'),
-(298, '2ABDBF380C', NULL, NULL, NULL, NULL, 10082, NULL, 110, '2025-07-01 09:23:31', '2025-07-01 09:23:31'),
-(299, 'D204237A92', NULL, NULL, NULL, NULL, 10082, NULL, 110, '2025-07-01 09:24:05', '2025-07-01 09:24:05'),
-(300, '667939F500', NULL, NULL, NULL, NULL, 10256, NULL, 110, '2025-07-01 09:25:00', '2025-07-01 09:25:00'),
-(301, '79B895D08E', NULL, NULL, NULL, NULL, 10256, NULL, 110, '2025-07-01 09:26:37', '2025-07-01 09:26:37'),
-(302, 'B194EFF26E', NULL, NULL, NULL, NULL, 10256, NULL, 110, '2025-07-01 09:28:59', '2025-07-01 09:28:59'),
-(303, '28789F6AEF', NULL, NULL, NULL, NULL, 10256, NULL, 110, '2025-07-01 09:29:51', '2025-07-01 09:29:51'),
-(304, '7E22233B3F', NULL, NULL, NULL, NULL, 10256, NULL, 149, '2025-07-01 09:31:14', '2025-07-01 09:31:14'),
-(305, 'C748EEE205', NULL, NULL, NULL, NULL, 10256, NULL, 149, '2025-07-01 09:44:02', '2025-07-01 09:44:02'),
-(306, '4378EBDE54', NULL, NULL, NULL, NULL, 4082, NULL, 110, '2025-07-01 09:44:57', '2025-07-01 09:44:57'),
-(307, 'B38273D75F', 34, 'Female', '2025-07-02', 1, 4889, 1, 150, '2025-07-02 05:40:37', '2025-07-02 05:40:37'),
-(309, '43B89C0DF8', NULL, NULL, NULL, NULL, 10082, NULL, 114, '2025-07-09 11:58:18', '2025-07-09 11:58:18'),
-(310, 'F04598362A', NULL, NULL, NULL, NULL, 10387, NULL, 110, '2025-07-11 08:49:26', '2025-07-11 08:49:26'),
-(311, 'D1F7A8CB89', NULL, NULL, NULL, NULL, 10082, NULL, 132, '2025-07-14 13:41:04', '2025-07-14 13:41:04'),
-(312, 'FB049F7360', NULL, NULL, NULL, NULL, 10082, NULL, 149, '2025-07-15 07:13:59', '2025-07-15 07:13:59'),
-(313, 'C0B5D0D0B7', NULL, NULL, NULL, NULL, 10082, NULL, 149, '2025-07-15 09:20:24', '2025-07-15 09:20:24'),
-(330, 'C3A0715338', NULL, NULL, '2025-07-20', NULL, NULL, NULL, 154, '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(331, 'BC512FD701', NULL, NULL, '2025-07-20', NULL, NULL, NULL, 154, '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(332, 'D81206DC5F', NULL, NULL, '2025-07-21', NULL, NULL, NULL, 154, '2025-07-21 07:43:19', '2025-07-21 07:43:19');
-
 -- --------------------------------------------------------
 
 --
@@ -27119,189 +27068,6 @@ CREATE TABLE `submission_response` (
   `created` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `submission_response`
---
-
-INSERT IGNORE INTO `submission_response` (`id`, `submission_id`, `question_id`, `response_value`, `created`, `updated`) VALUES
-(2000, 330, 5174, 'Health Worker', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2001, 330, 5175, 'Health Facility', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2002, 330, 5176, '1-5 years', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2003, 330, 5177, 'Busoga', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2004, 330, 5178, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2005, 330, 5179, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2006, 330, 5180, '2017', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2007, 330, 5181, 'In person', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2008, 330, 5182, '2017', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2009, 330, 5183, 'E-learning', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2010, 330, 5184, 'Weekly reports', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2011, 330, 5184, 'Monthly reports', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2012, 330, 5184, 'Outbreak Alerts', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2013, 330, 5184, 'eiDSR dashboards', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2014, 330, 5184, 'Outbreak investigation reports', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2015, 330, 5184, 'Other', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2016, 330, 5185, 'Rarely', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2017, 330, 5186, 'Case detection,', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2018, 330, 5186, 'Outbreak response', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2019, 330, 5186, 'Policy planning', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2020, 330, 5186, 'Resource allocation', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2021, 330, 5186, 'Community education', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2022, 330, 5186, 'Routine Monitoring and Evaluation', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2023, 330, 5186, 'Reporting', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2024, 330, 5186, 'Other:', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2025, 330, 5187, 'Paper-based reports', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2026, 330, 5187, 'eIDSR platform', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2027, 330, 5187, 'Email', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2028, 330, 5187, 'Weekly newspaper', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2029, 330, 5187, 'Website', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2030, 330, 5187, 'Other:', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2031, 330, 5188, '3', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2032, 330, 5189, '4', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2033, 330, 5190, '3', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2034, 330, 5191, '3', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2035, 330, 5192, '3', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2036, 330, 5193, 'No', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2037, 330, 5194, 'No', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2038, 330, 5195, 'Maybe', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2039, 330, 5196, 'Don\\\'t know', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2040, 330, 5197, 'No', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2041, 330, 5198, 'No', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2042, 330, 5199, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2043, 330, 5200, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2044, 330, 5201, 'Maybe', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2045, 330, 5202, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2046, 330, 5203, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2047, 330, 5204, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2048, 330, 5205, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2049, 330, 5206, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2050, 330, 5207, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2051, 330, 5208, 'No', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2052, 330, 5209, 'No', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2053, 330, 5210, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2054, 330, 5211, 'Don\\\'t know', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2055, 330, 5212, 'Don\\\'t know', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2056, 330, 5213, 'Don\\\'t know', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2057, 330, 5214, 'Maybe', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2058, 330, 5215, 'No', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2059, 330, 5216, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2060, 330, 5217, 'Yes', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2061, 330, 5218, 'More', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2062, 330, 5219, 'Environmental', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2063, 330, 5220, 'Transport', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2064, 330, 5221, 'Few', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2065, 330, 5222, 'Incomplete data', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2066, 330, 5222, 'Delayed reports', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2067, 330, 5222, 'Lack of training', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2068, 330, 5222, 'Poor internet connectivity', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2069, 330, 5222, 'Insufficient funding', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2070, 330, 5222, 'Inaccessible', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2071, 330, 5222, 'Other:', '2025-07-20 12:09:52', '2025-07-20 12:09:52'),
-(2072, 331, 5174, 'Surveillance Focal Person', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2073, 331, 5175, 'Health Facility', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2074, 331, 5176, '1-5 years', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2075, 331, 5177, 'Bugisu', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2076, 331, 5178, 'No', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2077, 331, 5179, 'No', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2078, 331, 5180, '2018', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2079, 331, 5181, 'In person', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2080, 331, 5182, '2017', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2081, 331, 5183, 'In person', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2082, 331, 5184, 'Monthly reports', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2083, 331, 5184, 'Other', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2084, 331, 5185, 'Weekly', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2085, 331, 5186, 'Outbreak response', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2086, 331, 5186, 'Routine Monitoring and Evaluation', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2087, 331, 5187, 'eIDSR platform', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2088, 331, 5188, '1', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2089, 331, 5189, '2', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2090, 331, 5190, '3', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2091, 331, 5191, '2', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2092, 331, 5192, '4', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2093, 331, 5193, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2094, 331, 5194, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2095, 331, 5195, 'No', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2096, 331, 5196, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2097, 331, 5197, 'Yes', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2098, 331, 5198, 'No', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2099, 331, 5199, 'Yes', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2100, 331, 5200, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2101, 331, 5201, 'No', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2102, 331, 5202, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2103, 331, 5203, 'Don\\\'t know', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2104, 331, 5204, 'Don\\\'t know', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2105, 331, 5205, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2106, 331, 5206, 'No', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2107, 331, 5207, 'Yes', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2108, 331, 5208, 'No', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2109, 331, 5209, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2110, 331, 5210, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2111, 331, 5211, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2112, 331, 5212, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2113, 331, 5213, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2114, 331, 5214, 'Don\\\'t know', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2115, 331, 5215, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2116, 331, 5216, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2117, 331, 5217, 'Maybe', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2118, 331, 5218, 'Equipment', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2119, 331, 5219, 'All', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2120, 331, 5220, 'Equipment', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2121, 331, 5221, 'Air', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2122, 331, 5222, 'Lack of training', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2123, 331, 5222, 'Other:', '2025-07-20 12:50:36', '2025-07-20 12:50:36'),
-(2124, 332, 5174, 'Health Worker', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2125, 332, 5175, 'Community', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2126, 332, 5176, '6-10 years', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2127, 332, 5177, 'Bugisu', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2128, 332, 5178, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2129, 332, 5179, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2130, 332, 5180, '2018', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2131, 332, 5181, 'In person', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2132, 332, 5182, '2017', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2133, 332, 5183, 'E-learning', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2134, 332, 5184, 'Monthly reports', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2135, 332, 5184, 'eiDSR dashboards', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2136, 332, 5185, 'Weekly', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2137, 332, 5186, 'Policy planning', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2138, 332, 5186, 'Routine Monitoring and Evaluation', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2139, 332, 5187, 'Email', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2140, 332, 5187, 'Other:', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2141, 332, 5188, '4', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2142, 332, 5189, '3', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2143, 332, 5190, '2', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2144, 332, 5191, '2', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2145, 332, 5192, '1', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2146, 332, 5193, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2147, 332, 5194, 'Maybe', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2148, 332, 5195, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2149, 332, 5196, 'Maybe', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2150, 332, 5197, 'Don\\\'t know', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2151, 332, 5198, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2152, 332, 5199, 'Yes', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2153, 332, 5200, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2154, 332, 5201, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2155, 332, 5202, 'Maybe', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2156, 332, 5203, 'Maybe', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2157, 332, 5204, 'Maybe', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2158, 332, 5205, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2159, 332, 5206, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2160, 332, 5207, 'Maybe', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2161, 332, 5208, 'Maybe', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2162, 332, 5209, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2163, 332, 5210, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2164, 332, 5211, 'Maybe', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2165, 332, 5212, 'Don\\\'t know', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2166, 332, 5213, 'Maybe', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2167, 332, 5214, 'Don\\\'t know', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2168, 332, 5215, 'Maybe', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2169, 332, 5216, 'Maybe', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2170, 332, 5217, 'No', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2171, 332, 5218, 'test', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2172, 332, 5219, 'test', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2173, 332, 5220, 'Equipment', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2174, 332, 5221, 'Air', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2175, 332, 5222, 'Incomplete data', '2025-07-21 07:43:19', '2025-07-21 07:43:19'),
-(2176, 332, 5222, 'Inaccessible', '2025-07-21 07:43:19', '2025-07-21 07:43:19');
 
 -- --------------------------------------------------------
 
@@ -27327,32 +27093,10 @@ CREATE TABLE `survey` (
 -- Dumping data for table `survey`
 --
 
-INSERT IGNORE INTO `survey` (`id`, `name`, `created`, `updated`, `type`, `start_date`, `end_date`, `is_active`, `dhis2_instance`, `program_dataset`) VALUES
-(32, 'Test 03', '2025-03-12 06:53:57', '2025-05-28 06:16:31', 'local', NULL, NULL, 0, 'UiO', 'GfDOw2s4mCj'),
-(79, 'HFA - Healthcare system accessibility', '2025-05-15 13:06:34', '2025-05-15 13:09:04', 'dhis2', '2025-05-15', '2026-05-15', 1, 'UiO', 'rSLqsO4n9ds'),
-(81, 'HMIS 102 - Health Facility Equipment Inventory Rep', '2025-05-16 08:00:50', '2025-06-12 07:54:16', 'dhis2', '2025-05-16', '2026-05-16', 0, 'UiO', 'DysyMchxKuu'),
-(83, 'opio', '2025-05-27 12:10:28', '2025-05-27 12:10:42', 'local', '2025-05-27', '2025-11-30', 0, 'UiO', 'GfDOw2s4mCj'),
-(89, ' Acute Flaccid Paralysis Case Investigation Form', '2025-05-29 06:54:51', '2025-05-29 06:54:51', 'dhis2', '2025-05-29', '2026-05-29', 0, 'UiO', 'NKQRhkoc4bj'),
-(90, 'HMIS 110 - District Health Facility  WASH Report', '2025-05-29 06:56:36', '2025-06-12 07:54:13', 'dhis2', '2025-05-29', '2026-05-29', 0, 'UiO', 'bv6CZdughvo'),
-(108, 'HFA - Healthcare system preparedness', '2025-06-10 11:09:40', '2025-06-30 08:29:51', 'dhis2', '2025-06-10', '2026-06-10', 1, 'UiO', 'YbZsCH0wrp2'),
-(110, 'ET00-Event Test FBS', '2025-06-11 09:24:59', '2025-06-30 08:06:40', 'dhis2', '2025-06-11', '2026-06-11', 1, 'UiO', 'HnpFrrx9oHb'),
-(114, 'HMIS 100 - Medical Certificate of Cause of Death', '2025-06-12 08:51:57', '2025-06-19 06:14:03', 'dhis2', '2025-06-12', '2026-06-12', 1, 'UiO', 'vf8dN49jprI'),
-(115, 'HMIS MAL 001- Malaria Entomological Surveillance ', '2025-06-12 11:56:03', '2025-06-30 06:39:32', 'dhis2', '2025-06-12', '2026-06-12', 1, 'UiO', 'NPzEcFPfQWF'),
-(116, 'HMIS MCH 004 - Maternal Death Notifications', '2025-06-12 12:02:16', '2025-06-12 12:02:16', 'dhis2', '2025-06-12', '2026-06-12', 0, 'UiO', 'ZJRDIb1joXP'),
-(125, 'HMIS 104 - NTDS MDA Implementation Report', '2025-06-16 12:40:44', '2025-06-16 12:40:58', 'dhis2', '2025-06-16', '2026-06-16', 1, 'UiO', 'ijQTwdoFdC3'),
-(126, 'Test 2.41', '2025-06-16 12:42:15', '2025-06-16 12:42:24', 'dhis2', '2025-06-16', '2026-06-16', 1, 'UiO', 'h65D6xqVYiX'),
-(131, 'HMIS MCH 019 - Perinatal Death Notification Form', '2025-06-17 06:11:23', '2025-06-17 06:11:30', 'dhis2', '2025-06-17', '2026-06-17', 1, 'UiO', 'gMC8hUMD4Zi'),
-(132, 'LMIS: TWOS - TB First Line Report', '2025-06-17 11:17:21', '2025-07-14 13:35:54', 'dhis2', '2025-06-17', '2026-06-17', 1, 'UiO', 'JmneeJ5WLij'),
-(141, 'HMIS 106a:01-02 - HIV Quarterly Report', '2025-06-18 07:54:29', '2025-06-18 07:54:34', 'dhis2', '2025-06-18', '2026-06-18', 1, 'UiO', 'dFRD2A5fdvn'),
-(144, 'HMIS 111 - District School WASH Summary Report (A)', '2025-06-23 09:56:39', '2025-06-30 06:38:24', 'dhis2', '2025-06-23', '2026-06-23', 1, 'UiO', 'GcShGHoBAI0'),
-(145, 'HMIS MAL 003 - Daily Spray Operator Form : Totals', '2025-06-23 09:59:47', '2025-06-30 07:24:37', 'dhis2', '2025-06-23', '2026-06-23', 1, 'UiO', 'zQZss0QIRq4'),
-(146, 'HMIS 106a:04 - Lab Quarterly Report (A)', '2025-06-23 10:38:57', '2025-06-23 10:39:08', 'dhis2', '2025-06-23', '2026-06-23', 1, 'UiO', 'GwSIuQVi8b2'),
-(147, 'Test Dataset_Predictor (A)', '2025-06-24 13:48:49', '2025-06-24 13:49:46', 'dhis2', '2025-06-24', '2026-06-24', 1, 'UiO', 'ZWqjhNttpkB'),
-(148, 'HMIS 016 - Maternal Perinatal Death Review monthly report', '2025-06-30 08:36:38', '2025-06-30 08:37:00', 'dhis2', '2025-06-30', '2026-06-30', 1, 'UiO', 'M9iSvQgzYVM'),
-(149, 'ETDataset (A)', '2025-06-30 08:52:14', '2025-06-30 08:52:24', 'dhis2', '2025-06-30', '2026-06-30', 1, 'UiO', 'rmaYTmNPkVA'),
-(150, 'Demo', '2025-07-02 05:31:11', '2025-07-02 05:31:11', 'local', '2025-07-02', '2026-01-02', 1, 'UiO', 'GfDOw2s4mCj'),
-(151, 'test 19', '2025-07-09 08:33:46', '2025-07-09 08:33:58', 'local', '2025-07-09', '2026-01-09', 1, 'UiO', 'GfDOw2s4mCj'),
-(154, 'Use of the Electronic Integrated Disease Surveillance and Response system', '2025-07-15 12:43:41', '2025-07-15 12:43:41', 'local', '2025-07-15', '2026-01-15', 1, 'UiO', 'GfDOw2s4mCj');
+INSERT INTO `survey` (`id`, `name`, `created`, `updated`, `type`, `start_date`, `end_date`, `is_active`, `dhis2_instance`, `program_dataset`) VALUES
+(154, 'Use of the Electronic Integrated Disease Surveillance and Response system', '2025-07-15 12:43:41', '2025-07-15 12:43:41', 'local', '2025-07-15', '2026-01-15', 1, 'UiO', 'GfDOw2s4mCj'),
+(157, 'Test', '2025-07-23 14:44:08', '2025-07-23 14:44:08', 'local', '2025-07-23', '2026-01-23', 1, 'UiO', 'GfDOw2s4mCj'),
+(159, 'Learner Enrolment Monitoring Tool (A)', '2025-07-23 16:10:41', '2025-07-23 16:10:47', 'dhis2', '2025-07-23', '2026-07-23', 1, 'EMIS', 'H0udrsSm3uF');
 
 --
 -- Triggers `survey`
@@ -27416,56 +27160,70 @@ CREATE TABLE `survey_question` (
 -- Dumping data for table `survey_question`
 --
 
-INSERT IGNORE INTO `survey_question` (`survey_id`, `question_id`, `position`, `created`, `updated`, `id`) VALUES
-(154, 5174, 1, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18036),
-(154, 5175, 2, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18037),
-(154, 5176, 3, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18038),
-(154, 5177, 4, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18039),
-(154, 5178, 5, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18040),
-(154, 5179, 6, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18041),
-(154, 5182, 7, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18042),
-(154, 5181, 8, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18043),
-(154, 5180, 9, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18044),
-(154, 5183, 10, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18045),
-(154, 5184, 11, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18046),
-(154, 5185, 12, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18047),
-(154, 5186, 13, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18048),
-(154, 5187, 14, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18049),
-(154, 5188, 15, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18050),
-(154, 5189, 16, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18051),
-(154, 5190, 17, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18052),
-(154, 5191, 18, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18053),
-(154, 5192, 19, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18054),
-(154, 5193, 20, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18055),
-(154, 5194, 21, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18056),
-(154, 5195, 22, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18057),
-(154, 5196, 23, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18058),
-(154, 5197, 24, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18059),
-(154, 5198, 25, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18060),
-(154, 5199, 26, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18061),
-(154, 5200, 27, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18062),
-(154, 5201, 28, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18063),
-(154, 5202, 29, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18064),
-(154, 5203, 30, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18065),
-(154, 5204, 31, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18066),
-(154, 5205, 32, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18067),
-(154, 5206, 33, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18068),
-(154, 5207, 34, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18069),
-(154, 5208, 35, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18070),
-(154, 5209, 36, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18071),
-(154, 5210, 37, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18072),
-(154, 5211, 38, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18073),
-(154, 5212, 39, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18074),
-(154, 5213, 40, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18075),
-(154, 5214, 41, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18076),
-(154, 5215, 42, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18077),
-(154, 5216, 43, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18078),
-(154, 5217, 44, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18079),
-(154, 5222, 45, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18080),
-(154, 5221, 46, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18081),
-(154, 5220, 47, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18082),
-(154, 5218, 48, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18083),
-(154, 5219, 49, '2025-07-23 06:48:31', '2025-07-23 06:48:31', 18084);
+INSERT INTO `survey_question` (`survey_id`, `question_id`, `position`, `created`, `updated`, `id`) VALUES
+(159, 5234, 1, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18383),
+(159, 5235, 2, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18384),
+(159, 5236, 3, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18385),
+(159, 5237, 4, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18386),
+(159, 5238, 5, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18387),
+(159, 5239, 6, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18388),
+(159, 5240, 7, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18389),
+(159, 5241, 8, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18390),
+(159, 5242, 9, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18391),
+(159, 5243, 10, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18392),
+(159, 5244, 11, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18393),
+(159, 5245, 12, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18394),
+(159, 5246, 13, '2025-07-24 22:19:50', '2025-07-24 22:19:50', 18395),
+(154, 5174, 1, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18397),
+(154, 5175, 2, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18398),
+(154, 5176, 3, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18399),
+(154, 5177, 4, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18400),
+(154, 5178, 5, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18401),
+(154, 5179, 6, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18402),
+(154, 5182, 7, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18403),
+(154, 5181, 8, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18404),
+(154, 5180, 9, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18405),
+(154, 5183, 10, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18406),
+(154, 5184, 11, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18407),
+(154, 5185, 12, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18408),
+(154, 5186, 13, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18409),
+(154, 5187, 14, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18410),
+(154, 5188, 15, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18411),
+(154, 5189, 16, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18412),
+(154, 5190, 17, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18413),
+(154, 5191, 18, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18414),
+(154, 5192, 19, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18415),
+(154, 5193, 20, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18416),
+(154, 5194, 21, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18417),
+(154, 5195, 22, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18418),
+(154, 5196, 23, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18419),
+(154, 5197, 24, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18420),
+(154, 5198, 25, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18421),
+(154, 5199, 26, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18422),
+(154, 5200, 27, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18423),
+(154, 5201, 28, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18424),
+(154, 5202, 29, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18425),
+(154, 5203, 30, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18426),
+(154, 5204, 31, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18427),
+(154, 5205, 32, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18428),
+(154, 5206, 33, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18429),
+(154, 5207, 34, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18430),
+(154, 5208, 35, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18431),
+(154, 5209, 36, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18432),
+(154, 5210, 37, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18433),
+(154, 5211, 38, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18434),
+(154, 5212, 39, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18435),
+(154, 5213, 40, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18436),
+(154, 5214, 41, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18437),
+(154, 5215, 42, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18438),
+(154, 5216, 43, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18439),
+(154, 5217, 44, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18440),
+(154, 5222, 45, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18441),
+(154, 5221, 46, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18442),
+(154, 5220, 47, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18443),
+(154, 5218, 48, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18444),
+(154, 5219, 49, '2025-07-24 22:20:17', '2025-07-24 22:20:17', 18445),
+(157, 5175, 1, '2025-07-25 05:30:22', '2025-07-25 05:30:22', 18446);
 
 -- --------------------------------------------------------
 
@@ -27509,12 +27267,10 @@ CREATE TABLE `survey_settings` (
 -- Dumping data for table `survey_settings`
 --
 
-INSERT IGNORE INTO `survey_settings` (`id`, `survey_id`, `logo_path`, `show_logo`, `flag_black_color`, `flag_yellow_color`, `flag_red_color`, `show_flag_bar`, `title_text`, `show_title`, `subheading_text`, `show_subheading`, `show_submit_button`, `rating_instruction1_text`, `rating_instruction2_text`, `show_rating_instructions`, `show_facility_section`, `show_location_row_general`, `show_location_row_period_age`, `show_ownership_section`, `republic_title_text`, `show_republic_title_share`, `ministry_subtitle_text`, `show_ministry_subtitle_share`, `qr_instructions_text`, `show_qr_instructions_share`, `footer_note_text`, `show_footer_note_share`) VALUES
-(3, 150, 'asets/asets/img/loog.jpg', 1, '#000000', '#FCD116', '0', 1, NULL, 1, '0', 1, 1, '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.', '0', 1, 1, 1, 1, 1, 'THE REPUBLIC OF UGANDA', 1, 'MINISTRY OF HEALTH', 1, 'Scan this QR Code to Give Your Feedback on Services Received', 1, '0', 1),
-(4, 79, 'http://localhost/fbs/admin/0', 1, '#000000', '#fcd116', '#d21034', 1, 'HFA - Healthcare system accessibility', 1, 'This tool is used to obtain clients’ feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.', 1, 1, '0', 'Where 0 means Poor, 1 Fair, 2 Good, and 3 Excellent.', 1, 1, 1, 1, 1, '0', 1, '0', 1, 'Scan this QR Code to Give Your Feedback on Services Received', 1, '0', 1),
+INSERT INTO `survey_settings` (`id`, `survey_id`, `logo_path`, `show_logo`, `flag_black_color`, `flag_yellow_color`, `flag_red_color`, `show_flag_bar`, `title_text`, `show_title`, `subheading_text`, `show_subheading`, `show_submit_button`, `rating_instruction1_text`, `rating_instruction2_text`, `show_rating_instructions`, `show_facility_section`, `show_location_row_general`, `show_location_row_period_age`, `show_ownership_section`, `republic_title_text`, `show_republic_title_share`, `ministry_subtitle_text`, `show_ministry_subtitle_share`, `qr_instructions_text`, `show_qr_instructions_share`, `footer_note_text`, `show_footer_note_share`) VALUES
 (7, 154, 'http://v1fbs.test/fbs/admin/uploads/survey_logos/survey_154_1753012719_687cd9efb99f5.jpg', 1, '#000000', '#fcd116', '#d21034', 1, 'Use of the Electronic Integrated Disease Surveillance and Response system', 1, 'INTRODUCTION\nThe MOH is interested in improving and\nincreasing the use of the Electronic Integrated Disease Surveillance and\nResponse system. To do this, we need to a) understand the eIDSR users\'\nneeds. b) Assess the current system performance, and c) Identify and upgrade the\ncurrent system and improve its functionality. As a key stakeholder, we would like you to\nshare your views on this questionnaire, which will help us to optimize IDSR\noutputs for decision-making, outbreak response, and health policy in Uganda. This\nsurvey is anonymous, and your responses will be used only for programmatic purposes.', 1, 1, 'Please rate each of the following parameters according to your experience today on a scale of 1 to 4.', 'Where 0 means Poor, 1 Fair, 2 Good, and 3 Excellent.', 0, 0, 0, 0, 0, 'REPUBLIC OF UGANDA', 1, 'MINISTRY OF HEALTH', 1, '0', 0, '0', 0),
-(9, 144, '0', 1, '#000000', '#FCD116', '0', 1, '0', 1, 'This tool is used to obtain clients’ feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.', 1, 1, 'Please rate each of the following parameters according to your experience today on a scale of 1 to 4.', 'Where 0 means Poor, 1 Fair, 2 Good, and 3 Excellent.', 1, 1, 1, 1, 1, '0', 1, 'MINISTRY OF HEALTH', 1, 'Scan this QR Code to Give Your Feedback on Services Received', 1, 'Thank you for helping us improve our services.', 1),
-(10, 151, 'http://localhost/fbs/admin/0', 1, '#000000', '#fcd116', '#d21034', 1, 'test 19', 1, 'This tool is used to obtain clients’ feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.', 1, 1, 'Please rate each of the following parameters according to your experience today on a scale of 1 to 4.', 'Where 0 means Poor, 1 Fair, 2 Good, and 3 Excellent.', 1, 1, 1, 1, 1, '0', 1, '0', 1, '0', 1, '0', 1);
+(15, 157, 'http://v1fbs.test/fbs/admin/asets/asets/img/loog.jpg', 1, '#000000', '#fcd116', '#d21034', 1, 'Test', 1, 'This tool is used to obtain clients’ feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.', 1, 1, 'Please rate each of the following parameters according to your experience today on a scale of 1 to 4.', 'Where 0 means Poor, 1 Fair, 2 Good, and 3 Excellent.', 1, 1, 1, 1, 1, 'THE REPUBLIC OF UGANDA', 1, 'MINISTRY OF HEALTH', 1, 'Scan this QR Code to Give Your Feedback on Services Received', 1, 'Thank you for helping us improve our services.', 1),
+(16, 159, 'asets/asets/img/loog.jpg', 1, '#000000', '#FCD116', '#D21034', 1, 'Learner Enrolment Monitoring Tool (A)', 1, 'This tool is used to obtain clients’ feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.', 1, 1, 'Please rate each of the following parameters according to your experience today on a scale of 1 to 4.', 'Where 0 means Poor, 1 Fair, 2 Good, and 3 Excellent.', 1, 1, 1, 1, 1, 'THE REPUBLIC OF UGANDA', 1, 'MINISTRY OF HEALTH', 1, 'Scan this QR Code to Give Your Feedback on Services Received', 1, 'Thank you for helping us improve our services.', 1);
 
 --
 -- Indexes for dumped tables
@@ -27540,7 +27296,7 @@ ALTER TABLE `default_text`
 --
 ALTER TABLE `dhis2_instances`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `key` (`key`);
+  ADD UNIQUE KEY `key` (`instance_key`);
 
 --
 -- Indexes for table `dhis2_option_set_mapping`
@@ -27739,7 +27495,7 @@ ALTER TABLE `health_facility_level`
 -- AUTO_INCREMENT for table `location`
 --
 ALTER TABLE `location`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14199;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14202;
 
 --
 -- AUTO_INCREMENT for table `location_location_type`
@@ -27763,13 +27519,13 @@ ALTER TABLE `location_type`
 -- AUTO_INCREMENT for table `option_set`
 --
 ALTER TABLE `option_set`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=244;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=246;
 
 --
 -- AUTO_INCREMENT for table `option_set_values`
 --
 ALTER TABLE `option_set_values`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32734;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32741;
 
 --
 -- AUTO_INCREMENT for table `owner`
@@ -27781,13 +27537,13 @@ ALTER TABLE `owner`
 -- AUTO_INCREMENT for table `question`
 --
 ALTER TABLE `question`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5234;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5247;
 
 --
 -- AUTO_INCREMENT for table `question_dhis2_mapping`
 --
 ALTER TABLE `question_dhis2_mapping`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5133;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5146;
 
 --
 -- AUTO_INCREMENT for table `service_unit`
@@ -27805,31 +27561,31 @@ ALTER TABLE `service_unit_mapping`
 -- AUTO_INCREMENT for table `submission`
 --
 ALTER TABLE `submission`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=333;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `submission_response`
 --
 ALTER TABLE `submission_response`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2177;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2178;
 
 --
 -- AUTO_INCREMENT for table `survey`
 --
 ALTER TABLE `survey`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=157;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=160;
 
 --
 -- AUTO_INCREMENT for table `survey_question`
 --
 ALTER TABLE `survey_question`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18096;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18447;
 
 --
 -- AUTO_INCREMENT for table `survey_settings`
 --
 ALTER TABLE `survey_settings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Constraints for dumped tables
