@@ -1,15 +1,29 @@
+# RewriteEngine On
+# RewriteBase /fbs/
+#   # IMPORTANT: This must match your project's subfolder name exactly
+
+# # If the request is for a file that exists, serve it
+# RewriteCond %{REQUEST_FILENAME} -f
+# RewriteRule ^ - [L]
+
+# # If the request is for a directory that exists, serve it
+# RewriteCond %{REQUEST_FILENAME} -d
+# RewriteRule ^ - [L]
+
+# # If the request is for a URL that doesn't map directly to a file or directory,
+# # rewrite it to append .php
+# RewriteRule ^(.*)$ $1.php [L]
+
+
+
+
 RewriteEngine On
-RewriteBase /fbs/
-  # IMPORTANT: This must match your project's subfolder name exactly
+RewriteBase /survey-engine/
 
-# If the request is for a file that exists, serve it
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^ - [L]
-
-# If the request is for a directory that exists, serve it
+# Serve existing files/directories as-is
+RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# If the request is for a URL that doesn't map directly to a file or directory,
-# rewrite it to append .php
-RewriteRule ^(.*)$ $1.php [L]
+# Everything else goes to index.php for front controller handling
+RewriteRule ^ index.php [L]
