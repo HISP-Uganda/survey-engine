@@ -1,0 +1,65 @@
+[28-Jul-2025 07:04:49 UTC] Attempting to get DHIS2 config for provided key: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[28-Jul-2025 07:04:49 UTC] Binding parameter :key with value: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] Successfully retrieved DHIS2 config for key: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] Attempting to get DHIS2 config for provided key: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[28-Jul-2025 07:04:49 UTC] Binding parameter :key with value: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] Successfully retrieved DHIS2 config for key: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] Attempting to get DHIS2 config for provided key: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[28-Jul-2025 07:04:49 UTC] Binding parameter :key with value: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] Successfully retrieved DHIS2 config for key: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] DHIS2 API call: GET https://hmis.moh.go.ug/api/organisationUnitLevels?fields=id,level,displayName
+[28-Jul-2025 07:04:49 UTC] Attempting to get DHIS2 config for provided key: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[28-Jul-2025 07:04:49 UTC] Binding parameter :key with value: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] Successfully retrieved DHIS2 config for key: 'eHMIS'
+[28-Jul-2025 07:04:49 UTC] CURL Error: Could not resolve host: hmis.moh.go.ug
+HTTP Code: 0
+Verbose log: * Could not resolve host: hmis.moh.go.ug
+* Closing connection 0
+
+[28-Jul-2025 07:04:51 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[28-Jul-2025 07:04:51 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[28-Jul-2025 07:04:51 UTC] Binding parameter :key with value: 'UiO'
+[28-Jul-2025 07:04:51 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[28-Jul-2025 07:04:51 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[28-Jul-2025 07:04:51 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[28-Jul-2025 07:04:51 UTC] Binding parameter :key with value: 'UiO'
+[28-Jul-2025 07:04:51 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[28-Jul-2025 07:04:51 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[28-Jul-2025 07:04:51 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[28-Jul-2025 07:04:51 UTC] Binding parameter :key with value: 'UiO'
+[28-Jul-2025 07:04:51 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[28-Jul-2025 07:04:51 UTC] DHIS2 API call: GET https://tests.dhis2.hispuganda.org/hmis/api/organisationUnitLevels?fields=id,level,displayName
+[28-Jul-2025 07:04:51 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[28-Jul-2025 07:04:51 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[28-Jul-2025 07:04:51 UTC] Binding parameter :key with value: 'UiO'
+[28-Jul-2025 07:04:51 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[28-Jul-2025 07:04:52 UTC] HTTP Status: 200
+[28-Jul-2025 07:04:52 UTC] DHIS2 Response (first 500 chars): {"pager":{"page":1,"total":5,"pageSize":50,"pageCount":1},"organisationUnitLevels":[{"level":3,"displayName":"District","id":"iITwmH31lPe"},{"level":5,"displayName":"Health Facility","id":"Sg9YZ6o7bCQ"},{"level":1,"displayName":"National","id":"Qwwy9GM6dFu"},{"level":2,"displayName":"Region","id":"CfnWgqkxbyg"},{"level":4,"displayName":"Sub County/Town Council/Div","id":"NGXlJhHTDdV"}]}

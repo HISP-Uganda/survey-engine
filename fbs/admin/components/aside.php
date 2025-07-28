@@ -43,7 +43,16 @@ $menuItems = [
     'link' => 'settings.php',
     'color' => 'light', // Light for visibility
     'pages' => ['settings.php']
+    ],
+    [
+    'title' => 'DHIS2 Payload Checker',
+    'icon' => 'fa-check-square', // Checkmark for payload checker
+    'link' => 'payload_checker.php',
+    'color' => 'primary', // Blue for primary action
+    'pages' => ['payload_checker.php']
     ]
+
+
     ]
 ;
 ?>

@@ -180,9 +180,9 @@ foreach ($responses as $response) {
                             <p class="text-sm text-secondary mb-0">ID: <?php echo $submission['id']; ?></p>
                         </div>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-primary mb-0" onclick="window.print()">
+                            <!-- <button class="btn btn-sm btn-outline-primary mb-0" onclick="window.print()">
                                 <i class="fas fa-print me-1"></i> Print
-                            </button>
+                            </button> -->
                             <button class="btn btn-sm btn-outline-dark mb-0" onclick="goBack()">
                                 <i class="fas fa-arrow-left me-1"></i> Back to List
                             </button>
@@ -195,12 +195,12 @@ foreach ($responses as $response) {
             </div>
 
             <!-- Print header (only shows when printing) -->
-            <div class="print-only mb-4">
+            <!-- <div class="print-only mb-4">
                 <h4>Submission Details</h4>
                 <p class="text-sm">ID: <?php echo $submission['id']; ?> | Survey: <?php echo htmlspecialchars($submission['survey_name']); ?></p>
                 <p class="text-sm">Date: <?php echo date('M j, Y g:i A', strtotime($submission['created'])); ?></p>
                 <hr>
-            </div>
+            </div> -->
 
             <!-- Submission Details Card -->
             <div class="card mb-4">

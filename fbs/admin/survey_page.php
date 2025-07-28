@@ -92,6 +92,8 @@ try {
             'show_qr_instructions_share' => 1,
             'footer_note_text' => 'Thank you for helping us improve our services.',
             'show_footer_note_share' => 1,
+            'selected_instance_key' => null, // Ensure these are part of the fallback if DB row doesn't exist
+            'selected_hierarchy_level' => null,
         ];
     }
 } catch (PDOException $e) {
@@ -124,14 +126,21 @@ try {
         'show_qr_instructions_share' => 1,
         'footer_note_text' => 'Thank you for helping us improve our services.',
         'show_footer_note_share' => 1,
+        'selected_instance_key' => null, // Ensure these are part of the fallback
+        'selected_hierarchy_level' => null,
     ];
 }
 
 
-// echo '<pre style="background: lightyellow; padding: 10px; border: 1px solid orange;">';
-// echo 'DEBUGGING $surveySettings in survey_page.php for survey_id=' . $surveyId . ':<br>';
-// print_r($surveySettings);
-// echo '</pre>';
+// Extract selected instance key and hierarchy level from survey settings
+$selectedInstanceKey = $surveySettings['selected_instance_key'] ?? null;
+$selectedHierarchyLevel = $surveySettings['selected_hierarchy_level'] ?? null;
+
+// Hierarchy Level Mapping (Fixed to Level X) - needed for display logic
+$hierarchyLevels = [];
+for ($i = 1; $i <= 8; $i++) {
+    $hierarchyLevels[$i] = 'Level ' . $i;
+}
 
 // Fetch questions and options
 $questionsArray = [];
@@ -175,11 +184,8 @@ foreach ($questionsArray as &$question) {
         $option['option_value'] = $optionTranslations[$language] ?? $option['option_value'];
     }
 }
-// Remove references after loop, good practice
 unset($question);
 unset($option);
-
-// No explicit $pdo->close() needed; PDO connection closes automatically at script end.
 
 ?>
 <!DOCTYPE html>
@@ -364,8 +370,36 @@ unset($option);
 .star:focus {
     outline: 2px solid #1976d2;
 }
-
-
+        /* Styles for the new searchable dropdown in survey_page */
+        .searchable-dropdown {
+            position: relative;
+        }
+        .dropdown-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            background-color: #fff;
+            position: absolute;
+            width: 100%;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+        .dropdown-item {
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+        .hierarchy-path .path-display {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 5px;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -406,7 +440,7 @@ unset($option);
                 <div class="form-group">
                     <label for="facility-search">Locations:</label>
                     <div class="searchable-dropdown">
-                        <input type="text" id="facility-search" placeholder="Type to search facilities..." autocomplete="off">
+                        <input type="text" id="facility-search" placeholder="Type to search locations..." autocomplete="off">
                         <div class="dropdown-results" id="facility-results"></div>
                         <input type="hidden" id="facility_id" name="facility_id">
                     </div>
@@ -581,60 +615,218 @@ unset($option);
   <div class="pagination-controls">
     <button type="button" id="prev-page-btn" style="display: none;">Back</button>
     <button type="button" id="next-page-btn">Next</button>
-    <button type="submit" id="submit-button-final" style="display: none;"><?php echo $translations['submit'] ?? 'Submit Feedback'; ?></button>
+    
+    <button type="submit" id="submit-button-final" style="display: inline-block;">Submit</button>
 </div>
         </form>
     </div>
 
     <script>
-        // No need for global variables that fetch elements initially, as PHP renders their style directly.
-        // These are only needed for JS if you plan to dynamically change them *after* page load using JS.
+        // Pass selected filters from PHP to JavaScript
+        const surveyId = "<?php echo $surveyId; ?>";
+        const preselectedInstanceKey = "<?php echo htmlspecialchars($selectedInstanceKey ?? ''); ?>";
+        const preselectedHierarchyLevel = "<?php echo htmlspecialchars($selectedHierarchyLevel ?? ''); ?>";
+        const totalQuestionsFromPHP = <?php echo count($questionsArray); ?>; // Pass total questions for pagination
 
         document.addEventListener('DOMContentLoaded', function() {
-            // PHP has already applied all settings directly into the HTML's style attributes and content.
-            // Therefore, there is no need for a JavaScript `applySavedSettings()` function or localStorage here.
-            // The elements are rendered correctly on the server side.
+            // --- DOM Element References ---
+            const facilitySearchInput = document.getElementById('facility-search');
+            const facilityResultsDiv = document.getElementById('facility-results');
+            const facilityIdInput = document.getElementById('facility_id');
+            const pathDisplay = document.getElementById('path-display');
+            const hierarchyDataInput = document.getElementById('hierarchy_data');
+            const facilitySectionElement = document.getElementById('facility-section'); // For visibility check
 
-            // Any elements that were conditionally hidden by PHP's style="display:none;" will be hidden.
-            // Any elements that had their content set by PHP's echo will show that content.
+            let currentFilteredLocations = []; // Holds locations matching the pre-selected filters
 
-            // --- Language switcher function (if you uncommented it) ---
-            const languageSelect = document.getElementById('languageSelect');
-            if (languageSelect) {
-                languageSelect.addEventListener('change', function() {
-                    var selectedLang = this.value;
-                    window.location.href = "survey_page.php?survey_id=<?php echo $surveyId; ?>&language=" + selectedLang;
+            // --- Helper Functions for Locations ---
+            async function fetchLocationsForSurveyPage() {
+                if (facilitySectionElement.style.display === 'none') {
+                    // If the facility section is hidden by survey settings, do nothing.
+                    // Ensure the facility search input is completely irrelevant for form submission if hidden.
+                    if (facilitySearchInput) facilitySearchInput.removeAttribute('required');
+                    if (facilityIdInput) facilityIdInput.removeAttribute('required');
+                    return;
+                }
+
+                // If filters are not set in admin panel, disable search and show prompt
+                if (!preselectedInstanceKey || !preselectedHierarchyLevel) {
+                    if (facilitySearchInput) {
+                        facilitySearchInput.disabled = true;
+                        facilitySearchInput.placeholder = "Locations not configured by admin.";
+                    }
+                    if (facilityResultsDiv) {
+                        facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No locations available. Filters not set in admin panel.</div>';
+                        facilityResultsDiv.style.display = 'block';
+                    }
+                    // Make location selection NOT required if not configured
+                    if (facilitySearchInput) facilitySearchInput.removeAttribute('required');
+                    if (facilityIdInput) facilityIdInput.removeAttribute('required');
+                    return;
+                }
+
+                // Filters are set, enable search and fetch data
+                if (facilitySearchInput) {
+                    facilitySearchInput.disabled = false;
+                    facilitySearchInput.placeholder = "Type to search locations...";
+                    // Make location selection required if configured
+                    facilitySearchInput.setAttribute('required', 'required');
+                    facilityIdInput.setAttribute('required', 'required');
+                }
+
+                try {
+                    const params = new URLSearchParams();
+                    params.append('instance_key', preselectedInstanceKey);
+                    params.append('hierarchylevel', preselectedHierarchyLevel);
+
+                    const response = await fetch(`get_locations.php?${params.toString()}`);
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Network response was not ok (${response.status}): ${errorText}`);
+                    }
+                    const responseData = await response.json();
+
+                    if (responseData.error) {
+                        throw new Error(`Server Error: ${responseData.error}`);
+                    }
+
+                    currentFilteredLocations = responseData; // Populate the master list for this page
+                    // Display all loaded locations initially
+                    filterAndDisplaySearchResults(facilitySearchInput.value);
+
+                } catch (error) {
+                    console.error('Error fetching locations on survey page:', error);
+                    if (facilityResultsDiv) {
+                        facilityResultsDiv.innerHTML = `<div style="padding: 8px; color: red;">${error.message || 'Error loading locations.'}</div>`;
+                        facilityResultsDiv.style.display = 'block';
+                    }
+                    if (facilitySearchInput) {
+                        facilitySearchInput.disabled = true;
+                        facilitySearchInput.placeholder = "Error loading locations.";
+                        // Make location selection NOT required if there was an error loading them
+                        facilitySearchInput.removeAttribute('required');
+                        facilityIdInput.removeAttribute('required');
+                    }
+                }
+            }
+
+            async function fetchLocationPath(locationId) {
+                if (!locationId) {
+                    return '';
+                }
+                try {
+                    const response = await fetch(`get_location_path.php?id=${locationId}`);
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Network response was not ok (${response.status}): ${errorText}`);
+                    }
+                    const data = await response.json();
+                    if (data.error) {
+                        throw new Error(`Server Error: ${data.error}`);
+                    }
+                    return data.path || '';
+                } catch (error) {
+                    console.error('Error fetching location path:', error);
+                    return `Error: ${error.message.substring(0, 50)}...`;
+                }
+            }
+
+            function filterAndDisplaySearchResults(searchTerm) {
+                if (!facilityResultsDiv || !facilitySearchInput) return; // Guard against elements not existing
+
+                facilityResultsDiv.innerHTML = '';
+                facilityResultsDiv.style.display = 'block';
+
+                if (facilitySearchInput.disabled) {
+                    // Message already set by fetchLocationsForSurveyPage if disabled
+                    return;
+                }
+
+                const lowerCaseSearchTerm = searchTerm.toLowerCase();
+                const searchResults = currentFilteredLocations.filter(location =>
+                    location.name.toLowerCase().includes(lowerCaseSearchTerm)
+                );
+
+                if (searchResults.length > 0) {
+                    searchResults.forEach(location => {
+                        const div = document.createElement('div');
+                        div.classList.add('dropdown-item');
+                        div.textContent = location.name;
+                        div.dataset.id = location.id;
+                        div.dataset.path = location.path;
+                        div.dataset.hierarchylevel = location.hierarchylevel;
+                        div.dataset.instancekey = location.instance_key;
+                        facilityResultsDiv.appendChild(div);
+                    });
+                } else {
+                    if (searchTerm.length > 0) {
+                        facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No matching locations found for your search.</div>';
+                    } else {
+                        facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No locations available for selected filters.</div>';
+                    }
+                }
+            }
+
+            // --- Event Listeners for Locations ---
+            if (facilitySearchInput) { // Check if facilitySearchInput exists before adding listeners
+                facilitySearchInput.addEventListener('input', function() {
+                    filterAndDisplaySearchResults(this.value);
+                });
+
+                facilitySearchInput.addEventListener('focus', function() {
+                    filterAndDisplaySearchResults(this.value);
                 });
             }
 
-            // --- Print function (if you uncommented it) ---
-            const printButton = document.getElementById('print-button');
-            if (printButton) {
-                printButton.addEventListener('click', function() {
-                    window.print();
+            document.addEventListener('click', function(event) {
+                if (facilitySearchInput && facilityResultsDiv &&
+                    !facilitySearchInput.contains(event.target) && !facilityResultsDiv.contains(event.target)) {
+                    facilityResultsDiv.style.display = 'none';
+                }
+            });
+
+            if (facilityResultsDiv) { // Check if facilityResultsDiv exists
+                facilityResultsDiv.addEventListener('click', async function(event) {
+                    const target = event.target;
+                    if (target.classList.contains('dropdown-item')) {
+                        const locationId = target.dataset.id;
+
+                        if (facilitySearchInput) facilitySearchInput.value = target.textContent;
+                        if (facilityIdInput) facilityIdInput.value = locationId;
+
+                        const humanReadablePath = await fetchLocationPath(locationId);
+                        if (pathDisplay) pathDisplay.textContent = humanReadablePath;
+                        if (hierarchyDataInput) hierarchyDataInput.value = humanReadablePath;
+
+                        facilityResultsDiv.style.display = 'none';
+                    }
                 });
             }
-
 
             // --- Form validation function ---
-            // This function still relies on checking visibility based on current display style
+            // This function checks all required fields on the current page, INCLUDING facility if visible
             function validateForm() {
-                const facilitySectionElement = document.getElementById('facility-section'); // Re-fetch or pass element
-                const facilitySectionVisible = facilitySectionElement && facilitySectionElement.style.display !== 'none';
-                const facilityId = document.getElementById('facility_id').value;
+                // Initial check for facility section if visible
+                const isFacilitySectionVisible = facilitySectionElement && facilitySectionElement.style.display !== 'none';
+                const facilityId = facilityIdInput ? facilityIdInput.value : '';
 
-                if (facilitySectionVisible && !facilityId) {
-                    alert('Please select a Health Facility.');
-                    document.getElementById('facility-search').focus();
+                if (isFacilitySectionVisible && facilityIdInput && facilityIdInput.hasAttribute('required') && !facilityId) {
+                    showValidationMessage('Please select a location from the dropdown.');
+                    if (facilitySearchInput) facilitySearchInput.focus();
                     return false;
                 }
+
+                // Now, validate current page's questions
+                if (!validateCurrentPageQuestions()) return false;
+
                 return true;
             }
 
             // --- Pagination logic for survey questions ---
-            const QUESTIONS_PER_PAGE = 10;
-            const questions = Array.from(document.querySelectorAll('.survey-question'));
-            const totalQuestions = questions.length;
+            const QUESTIONS_PER_PAGE = 20;
+            // Select questions directly; no need for a global 'questions' variable that could be overwritten
+            const allSurveyQuestions = Array.from(document.querySelectorAll('.form-group.survey-question'));
+            const totalQuestions = allSurveyQuestions.length; // Use total questions from DOM
             const totalPages = Math.ceil(totalQuestions / QUESTIONS_PER_PAGE);
 
             let currentPage = 1;
@@ -644,106 +836,147 @@ unset($option);
             const submitBtn = document.getElementById('submit-button-final');
 
             function showPage(page) {
-                questions.forEach(q => q.style.display = 'none');
+                // Hide all questions first
+                allSurveyQuestions.forEach(q => q.style.display = 'none');
+
+                // Determine which questions to show for the current page
                 const start = (page - 1) * QUESTIONS_PER_PAGE;
                 const end = Math.min(start + QUESTIONS_PER_PAGE, totalQuestions);
+
                 for (let i = start; i < end; i++) {
-                    questions[i].style.display = '';
+                    allSurveyQuestions[i].style.display = ''; // Show relevant questions
                 }
 
+                // Update pagination button visibility
                 prevBtn.style.display = (page > 1) ? '' : 'none';
-                nextBtn.style.display = (page < totalPages) ? '' : 'none';
-                submitBtn.style.display = (page === totalPages) ? '' : 'none';
+                // Only show next if not on the last page AND if there are questions at all
+                nextBtn.style.display = (page < totalPages && totalQuestions > 0) ? '' : 'none';
+                submitBtn.style.display = (page === totalPages && totalQuestions > 0) ? '' : 'none';
+
+                // If no questions or only one page, show submit button if necessary
+                if (totalQuestions === 0 || totalPages === 1) {
+                    nextBtn.style.display = 'none';
+                    submitBtn.style.display = 'inline-block'; // Or whatever default submit display is
+                }
             }
 
             prevBtn.addEventListener('click', function() {
                 if (currentPage > 1) {
                     currentPage--;
                     showPage(currentPage);
-                    window.scrollTo(0, 0);
+                    window.scrollTo(0, 0); // Scroll to top for new page
                 }
             });
 
             nextBtn.addEventListener('click', function() {
-                if (!validateCurrentPage()) return;
+                if (!validateCurrentPageQuestions()) { // Validate only questions on current page
+                    return;
+                }
                 if (currentPage < totalPages) {
                     currentPage++;
                     showPage(currentPage);
-                    window.scrollTo(0, 0);
+                    window.scrollTo(0, 0); // Scroll to top for new page
                 }
             });
 
-            /* --- Add this HTML where appropriate, e.g., above your survey form --- */
-
-
-
-function showValidationMessage(msg) {
-    const msgDiv = document.getElementById('validation-message');
-    msgDiv.textContent = msg;
-    msgDiv.style.display = 'block';
-    // Optionally, auto-hide after a few seconds:
-    setTimeout(() => { msgDiv.style.display = 'none'; }, 4000);
-}
-
-function validateCurrentPage() {
-    // Hide previous message
-    document.getElementById('validation-message').style.display = 'none';
-
-    const visibleQuestions = questions.filter(q => q.style.display !== 'none');
-    for (const q of visibleQuestions) {
-        const requiredInputs = q.querySelectorAll('[required]');
-        for (const input of requiredInputs) {
-            if (input.type === 'radio' || input.type === 'checkbox') {
-                const name = input.name;
-                const group = q.querySelectorAll(`[name="${name}"]`);
-                if (![...group].some(i => i.checked)) {
-                    showValidationMessage('Please answer all required questions on this page.');
-                    input.focus();
-                    return false;
+            function showValidationMessage(msg) {
+                const msgDiv = document.getElementById('validation-message');
+                if (msgDiv) {
+                    msgDiv.textContent = msg;
+                    msgDiv.style.display = 'block';
+                    setTimeout(() => { msgDiv.style.display = 'none'; }, 4000);
                 }
-            } else if (!input.value) {
-                showValidationMessage('Please answer all required questions on this page.');
-                input.focus();
-                return false;
             }
-        }
-    }
-    return true;
-}
+
+            // Function to validate only questions visible on the current page
+            function validateCurrentPageQuestions() {
+                document.getElementById('validation-message').style.display = 'none'; // Hide previous message
+
+                // Filter for currently visible questions (form-group.survey-question elements that are not display:none)
+                const visibleQuestions = allSurveyQuestions.filter(q => q.style.display !== 'none');
+
+                for (const q of visibleQuestions) {
+                    const requiredInputs = q.querySelectorAll('[required]');
+                    for (const input of requiredInputs) {
+                        // Special handling for radio/checkbox groups
+                        if (input.type === 'radio' || input.type === 'checkbox') {
+                            const name = input.name;
+                            // Select all inputs in the same group within the current visible question's context
+                            const group = q.querySelectorAll(`[name="${name}"]`);
+                            if (![...group].some(i => i.checked)) {
+                                showValidationMessage('Please answer all required questions on this page.');
+                                input.focus();
+                                return false; // Validation failed
+                            }
+                        }
+                        // General validation for other input types (text, number, select, textarea)
+                        else if (!input.value.trim()) { // Use .trim() for text inputs
+                            showValidationMessage('Please answer all required questions on this page.');
+                            input.focus();
+                            return false; // Validation failed
+                        }
+                    }
+                }
+                return true; // All visible required questions are answered
+            }
 
 
             document.querySelector('form').addEventListener('submit', function(e) {
-                for (const q of questions) {
+                // Prevent default submission to handle custom validation
+                e.preventDefault();
+
+                // 1. Validate facility section first (if visible and required)
+                const isFacilitySectionVisible = facilitySectionElement && facilitySectionElement.style.display !== 'none';
+                const facilityId = facilityIdInput ? facilityIdInput.value : '';
+
+                if (isFacilitySectionVisible && facilityIdInput && facilityIdInput.hasAttribute('required') && !facilityId) {
+                    showValidationMessage('Please select a location from the dropdown.');
+                    if (facilitySearchInput) facilitySearchInput.focus();
+                    return; // Stop submission
+                }
+
+                // 2. Validate all questions across all pages on final submit
+                // This is needed because questions on other pages won't be "visible"
+                // but are still part of the form submission requirements.
+                for (const q of allSurveyQuestions) { // Loop through ALL questions
                     const requiredInputs = q.querySelectorAll('[required]');
                     for (const input of requiredInputs) {
                         if (input.type === 'radio' || input.type === 'checkbox') {
                             const name = input.name;
                             const group = q.querySelectorAll(`[name="${name}"]`);
                             if (![...group].some(i => i.checked)) {
-                                alert('Please answer all required questions.');
-                                input.focus();
-                                e.preventDefault();
-                                return false;
+                                showValidationMessage('Please answer all required questions before submitting.');
+                                // Optionally, navigate to the page where this question is, and focus
+                                // For simplicity, we just alert/show message here for cross-page issues.
+                                return; // Stop submission
                             }
-                        } else if (!input.value) {
-                            alert('Please answer all required questions.');
-                            input.focus();
-                            e.preventDefault();
-                            return false;
+                        } else if (!input.value.trim()) {
+                            showValidationMessage('Please answer all required questions before submitting.');
+                            return; // Stop submission
                         }
                     }
                 }
-                return true;
+
+                // If all validations pass, manually submit the form
+                this.submit();
             });
 
-            // Show the first page on load
+            // Initial load: Show the first page and fetch locations
             showPage(currentPage);
+            fetchLocationsForSurveyPage(); // Call this function on page load
 
-            // Star rating logic
+
+            // Star rating logic (existing code, ensure it's here)
             document.querySelectorAll('.star-rating').forEach(function(starRatingDiv) {
                 const stars = Array.from(starRatingDiv.querySelectorAll('.star'));
                 const input = starRatingDiv.querySelector('input[type="hidden"]');
                 let selectedValue = 0;
+
+                // Restore selected value if form is reloaded (e.g., due to validation error)
+                if (input.value) {
+                    selectedValue = parseInt(input.value, 10);
+                    setStars(selectedValue);
+                }
 
                 function setStars(value) {
                     stars.forEach((star, idx) => {
@@ -775,6 +1008,7 @@ function validateCurrentPage() {
                             setStars(selectedValue);
                             input.value = selectedValue;
                             e.preventDefault();
+                            star.blur(); // Remove focus after selection
                         }
                         if (e.key === 'ArrowLeft' && selectedValue > 1) {
                             selectedValue--;
@@ -799,11 +1033,8 @@ function validateCurrentPage() {
                 });
             });
         });
-
     </script>
-
     <script defer src="survey_page.js"></script>
-
     <script defer src="../translations.js"></script>
 </body>
 </html>

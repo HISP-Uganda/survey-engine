@@ -114,22 +114,26 @@ if (isset($pdo)) {
         'title_text' => $defaultSurveyTitle,
     ];
 }
-// Close the connection after all fetches are done
 
+// --- START: Dynamic Base Path for QR URL ---
+$scriptName = $_SERVER['SCRIPT_NAME']; // e.g., /fbs/admin/share_page.php or /survey-engine/share_page.php
+$basePath = dirname($scriptName);     // e.g., /fbs/admin or /survey-engine
 
-// // --- DEBUGGING START ---
-// echo '<pre style="background: lightblue; padding: 10px; border: 1px solid darkblue;">';
-// echo 'DEBUGGING $surveySettings in share_page.php for survey_id=' . $surveyId . ':<br>';
-// print_r($surveySettings);
-// echo '</pre>';
-// // --- DEBUGGING END ---
-
+// Ensure a trailing slash if it's not the root directory
+if ($basePath !== '/') {
+    $basePath .= '/';
+}
+// --- END: Dynamic Base Path for QR URL ---
 
 // The URL for the QR code generation
-// Use the URL passed from preview_form.php, or construct it if not provided
-$qrUrl = $surveyUrl ? $surveyUrl : (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]/fbs/admin/survey_page.php?survey_id=" . $surveyId;
+// Use the URL passed from preview_form.php ($surveyUrl), or construct it if not provided
+$qrUrl = $surveyUrl ? $surveyUrl : 
+         (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . 
+         "://" . $_SERVER['HTTP_HOST'] . 
+         $basePath . 
+         "survey_page.php?survey_id=" . $surveyId;
 
-// Use a QR code generation library (e.g., qrcodejs on client-side)
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
