@@ -98,24 +98,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include 'components/aside.php'; ?>
     
     <main class="main-content position-relative border-radius-lg">
-        <?php include 'components/navbar.php'; ?>
+       
 
            <!-- Page Title Section -->
-        <div class="d-flex align-items-center flex-grow-1" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+      <div class="d-flex align-items-center flex-grow-1 py-3 px-2" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
             <nav aria-label="breadcrumb" class="flex-grow-1">
-            <ol class="breadcrumb mb-0 navbar-breadcrumb" style="background: transparent;">
-                <li class="breadcrumb-item">
-                <a href="main" class="breadcrumb-link" style="color: #ffd700; font-weight: 600;">
-                    <i class="fas fa-home me-1" style="color: #ffd700;"></i>Home
-                </a>
-                </li>
-                <li class="breadcrumb-item active navbar-breadcrumb-active" aria-current="page" style="color: #fff; font-weight: 700;">
-                <?= $pageTitle ?>
-                </li>
-            </ol>
-            <h5 class="navbar-title mb-0" style="color: #fff; text-shadow: 0 1px 8px #1e3c72, 0 0 2px #ffd700;">
-                <?= $pageTitle ?>
-            </h5>
+                <ol class="breadcrumb mb-1 navbar-breadcrumb" style="background: transparent;">
+                    <li class="breadcrumb-item">
+                        <a href="main" class="breadcrumb-link" style="color: #ffd700; font-weight: 600;">
+                            <i class="fas fa-home me-1" style="color: #ffd700;"></i>Home
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active navbar-breadcrumb-active" aria-current="page" style="color: #fff; font-weight: 700;">
+                        <?= htmlspecialchars($pageTitle ?? 'Survey') ?>
+                    </li>
+                </ol>
+                <h4 class="navbar-title mb-0 mt-1" style="color: #fff; text-shadow: 0 1px 8px #1e3c72, 0 0 2px #ffd700; font-weight: 700;">
+                    <?= htmlspecialchars($pageTitle ?? 'Survey') ?>
+                </h4>
             </nav>
         </div>
         <div class="container-fluid py-4">
@@ -301,12 +301,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         
                                         <td class="text-end">
                                             <div class="d-flex justify-content-end gap-2">
-                                                <?php if ($survey['type'] === 'local'): ?>
+                                                <!-- <?php if ($survey['type'] === 'local'): ?>
                                                     <a href="pb.php?survey_id=<?php echo urlencode($survey['id']); ?>" class="btn btn-sm btn-outline-primary mb-0 action-btn" title="Publish to DHIS2">
                                                         <i class="fas fa-cloud-upload-alt"></i>
                                                         <span class="btn-text d-none d-md-inline">DHIS2 Publisher</span>
                                                     </a>
-                                                <?php endif; ?>
+                                                <?php endif; ?> -->
 
                                                 <?php if ($survey['is_active']): ?>
                                                     <form method="POST" class="d-inline">

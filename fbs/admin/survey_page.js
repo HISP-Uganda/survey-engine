@@ -1,127 +1,18 @@
-class FacilitySearch {
-    constructor() {
-        this.searchInput = document.getElementById('facility-search');
-        this.resultsContainer = document.getElementById('facility-results');
-        this.facilityIdInput = document.getElementById('facility_id');
-        this.pathDisplay = document.getElementById('path-display');
-        
-        if (!this.facilityIdInput) {
-            this.facilityIdInput = document.createElement('input');
-            this.facilityIdInput.type = 'hidden';
-            this.facilityIdInput.id = 'facility_id';
-            this.facilityIdInput.name = 'facility_id';
-            document.querySelector('.facility-section').appendChild(this.facilityIdInput);
-        }
-        
-        if (!this.pathDisplay) {
-            this.pathDisplay = document.createElement('div');
-            this.pathDisplay.id = 'path-display';
-            this.pathDisplay.className = 'path-display';
-            document.querySelector('.hierarchy-path').appendChild(this.pathDisplay);
-        }
-        
-        this.init();
-    }
-    
-    init() {
-        this.setupEventListeners();
-    }
-    
-    setupEventListeners() {
-        this.searchInput.addEventListener('input', () => {
-            const searchTerm = this.searchInput.value.trim();
-            if (searchTerm.length >= 2) {
-                this.handleSearch(searchTerm);
-            } else {
-                this.resultsContainer.style.display = 'none';
-            }
-        });
-        
-        document.addEventListener('click', (e) => {
-            if (!this.searchInput.contains(e.target) && !this.resultsContainer.contains(e.target)) {
-                this.resultsContainer.style.display = 'none';
-            }
-        });
-    }
-    
-    async handleSearch(searchTerm) {
-        try {
-            const response = await fetch(`location.php?action=search_facilities&term=${encodeURIComponent(searchTerm)}`);
-            if (!response.ok) throw new Error('Network error');
-            
-            const facilities = await response.json();
-            this.displayResults(facilities);
-        } catch (error) {
-            console.error('Search error:', error);
-            this.resultsContainer.innerHTML = '<div class="error">Error loading facilities</div>';
-            this.resultsContainer.style.display = 'block';
-        }
-    }
-    
-    displayResults(facilities) {
-        this.resultsContainer.innerHTML = '';
-        
-        if (!facilities || facilities.length === 0) {
-            this.resultsContainer.innerHTML = '<div class="no-results">No facilities found</div>';
-            this.resultsContainer.style.display = 'block';
-            return;
-        }
-        
-        facilities.forEach(facility => {
-            const div = document.createElement('div');
-            div.className = 'facility-item';
-            div.textContent = facility.facility_name;
-            div.addEventListener('click', () => this.selectFacility(facility));
-            this.resultsContainer.appendChild(div);
-        });
-        
-        this.resultsContainer.style.display = 'block';
-    }
-    
-    async selectFacility(facility) {
-        this.searchInput.value = facility.facility_name;
-        this.facilityIdInput.value = facility.id;
-        this.resultsContainer.style.display = 'none';
-        
-        try {
-            const response = await fetch(`location.php?action=get_hierarchy&facility_id=${facility.id}`);
-            if (!response.ok) throw new Error('Network error');
-            
-            const data = await response.json();
-            this.displayHierarchy(data);
-        } catch (error) {
-            console.error('Hierarchy error:', error);
-            this.pathDisplay.textContent = 'Error loading hierarchy';
-        }
-    }
-    
-    displayHierarchy(data) {
-        if (!data || data.error) {
-            this.pathDisplay.textContent = 'No hierarchy data';
-            return;
-        }
-        
-        let path = '';
-        if (data.hierarchy && data.hierarchy.length > 0) {
-            path = data.hierarchy.map(loc => loc.name).join(' → ');
-            path += ' → ';
-        }
-        path += data.facility_name;
-        
-        this.pathDisplay.textContent = path;
-    }
-}
+// Remove the entire FacilitySearch class and its initialization.
+// The location search logic is now managed directly within survey_page.php.
 
-// Initialize when DOM loads
+// Your other initialization code for service units and ownership options
+// (These are currently being fetched via direct fetch calls, not through FacilitySearch)
 document.addEventListener('DOMContentLoaded', () => {
-    new FacilitySearch();
-    
-    // Your other initialization code...
+
+    // Removed the "new FacilitySearch();" line as it's no longer needed.
+
+    // Fetch service units (if they are still needed and their HTML is in survey_page.php)
     fetch('../get_service_units.php')
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('serviceUnit');
-            if (select) {
+            if (select) { // Ensure element exists
                 select.innerHTML = '<option value="">none selected</option>';
                 data.forEach(unit => {
                     select.innerHTML += `<option value="${unit.id}">${unit.name}</option>`;
@@ -129,16 +20,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         .catch(error => console.error('Service units error:', error));
-    
+
+    // Fetch ownership options (if they are still needed and their HTML is in survey_page.php)
     fetch('../get_ownership_options.php')
         .then(response => response.json())
         .then(data => {
             const container = document.getElementById('ownership-options');
-            if (container) {
+            if (container) { // Ensure element exists
+                container.innerHTML = ''; // Clear existing options before adding
                 data.forEach(option => {
                     container.innerHTML += `
                         <label class="radio-option">
-                            <input type="radio" name="ownership" value="${option.id}" 
+                            <input type="radio" name="ownership" value="${option.id}"
                                    class="radio" data-translate="${option.name.toLowerCase()}"/>
                             <span>${option.name}</span>
                         </label>
@@ -149,8 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Ownership options error:', error));
 
 
-    // Initialize date picker
-    const dateInputs = document.querySelectorAll('.date-picker');               
+    // Initialize date picker (if still needed)
+    const dateInputs = document.querySelectorAll('.date-picker');
     dateInputs.forEach(input => {
         input.addEventListener('focus', function() {
             this.type = 'date';
@@ -162,51 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    
-    // Form validation
-    window.validateForm = function() {
-        const requiredFields = document.querySelectorAll('[required]');
-        let isValid = true;
-        
-        requiredFields.forEach(field => {
-            if (!field.value) {
-                alert(`Please fill out the required field: ${field.name || field.id}`);
-                isValid = false;
-            }
-        });
-        
-        return isValid;
-    };
-    
-    // Toggle demographics section
-    window.toggleDemographics = function() {
-        const section = document.getElementById("demographics-section");
-        const arrow = document.querySelector(".dropdown .arrow");
-        
-        if (section && arrow) {
-            if (section.classList.contains("hidden")) {
-                section.classList.remove("hidden");
-                arrow.innerHTML = "&#9650;";
-            } else {
-                section.classList.add("hidden");
-                arrow.innerHTML = "&#9660;";
-            }
-        }
-    };
-    
-    // Print form
-    window.printForm = function() {
-        const printContents = document.getElementById("form-content")?.innerHTML;
-        if (printContents) {
-            const originalContents = document.body.innerHTML;
-            document.body.innerHTML = printContents;
-            window.print();
-            document.body.innerHTML = originalContents;
-            location.reload();
-        }
-    };
-    
-    // Load all data
-    loadServiceUnits();
-    loadOwnershipOptions();
+    // Removed the old window.validateForm here. The validation is now handled in survey_page.php's script block.
+    // Removed window.toggleDemographics as its section is not in survey_page.php HTML.
+    // Removed window.printForm as its section is not in survey_page.php HTML.
+    // Removed old loadServiceUnits() and loadOwnershipOptions() calls, as the fetch calls above handle it directly.
+
 });
+
+// Important Note: The main pagination logic, location search behavior,
+// and form submission validation are now managed directly within the <script>
+// tags of survey_page.php itself. This file (survey_page.js) should only
+// contain supplementary, non-conflicting JavaScript.

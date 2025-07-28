@@ -501,7 +501,7 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
     <script src="asets/asets/js/plugins/smooth-scrollbar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script src="asets/asets/js/argon-dashboard.js"></script>
-    <script src="js/update_form.js"></script>
+    <!-- <script src="js/update_form.js"></script> -->
 
     <script>
    document.addEventListener('DOMContentLoaded', function() {

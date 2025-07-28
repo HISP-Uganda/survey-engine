@@ -248,7 +248,7 @@ $message = [];
     <?php include 'components/aside.php'; ?>
 
     <div class="main-content position-relative border-radius-lg">
-        <?php include 'components/navbar.php'; ?>
+     
 
         <div class="d-flex align-items-center flex-grow-1 py-3 px-2" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
             <nav aria-label="breadcrumb" class="flex-grow-1">

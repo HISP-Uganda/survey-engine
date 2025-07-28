@@ -104,24 +104,24 @@ $surveys = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php include 'components/aside.php'; ?>
 
     <main class="main-content position-relative border-radius-lg">
-        <?php include 'components/navbar.php'; ?>
+       
         
            <!-- Page Title Section -->
-        <div class="d-flex align-items-center flex-grow-1" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+         <div class="d-flex align-items-center flex-grow-1 py-3 px-2" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
             <nav aria-label="breadcrumb" class="flex-grow-1">
-            <ol class="breadcrumb mb-0 navbar-breadcrumb" style="background: transparent;">
-                <li class="breadcrumb-item">
-                <a href="main" class="breadcrumb-link" style="color: #ffd700; font-weight: 600;">
-                    <i class="fas fa-home me-1" style="color: #ffd700;"></i>Home
-                </a>
-                </li>
-                <li class="breadcrumb-item active navbar-breadcrumb-active" aria-current="page" style="color: #fff; font-weight: 700;">
-                <?= $pageTitle ?>
-                </li>
-            </ol>
-            <h5 class="navbar-title mb-0" style="color: #fff; text-shadow: 0 1px 8px #1e3c72, 0 0 2px #ffd700;">
-                <?= $pageTitle ?>
-            </h5>
+                <ol class="breadcrumb mb-1 navbar-breadcrumb" style="background: transparent;">
+                    <li class="breadcrumb-item">
+                        <a href="main" class="breadcrumb-link" style="color: #ffd700; font-weight: 600;">
+                            <i class="fas fa-home me-1" style="color: #ffd700;"></i>Home
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active navbar-breadcrumb-active" aria-current="page" style="color: #fff; font-weight: 700;">
+                        <?= htmlspecialchars($pageTitle ?? 'Analytics') ?>
+                    </li>
+                </ol>
+                <h4 class="navbar-title mb-0 mt-1" style="color: #fff; text-shadow: 0 1px 8px #1e3c72, 0 0 2px #ffd700; font-weight: 700;">
+                    <?= htmlspecialchars($pageTitle ?? 'Analytics') ?>
+                </h4>
             </nav>
         </div>
 

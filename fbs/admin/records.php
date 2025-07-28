@@ -394,7 +394,7 @@ if (!$surveyId) {
  <?php include 'components/aside.php'; ?>
 
     <div class="main-content position-relative border-radius-lg">
-        <?php include 'components/navbar.php'; ?>
+       
         
         <div class="d-flex align-items-center flex-grow-1 page-title-section">
             <nav aria-label="breadcrumb" class="flex-grow-1">

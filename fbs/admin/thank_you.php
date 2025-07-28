@@ -51,8 +51,9 @@ if (!$submission) {
 // IMPORTANT: Get survey_id directly from the submission if possible
 $surveyId = $submission['survey_id'] ?? $surveyIdFromSession;
 
-// Initialize facility name
+// Initialize facility name and survey name
 $facilityName = null;
+$surveyName = null; // New variable for survey name
 $facilityId = $submission['location_id'];
 
 // Conditionally fetch facility name ONLY if facilityId is not null
@@ -70,19 +71,22 @@ if ($facilityId !== null) {
     }
 }
 
-// Check survey type before fetching service unit and ownership
+// Check survey type and fetch survey name
 $surveyType = 'local'; // Default to local
 if ($surveyId) {
     try {
-        $stmt = $pdo->prepare("SELECT type FROM survey WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT name, type FROM survey WHERE id = ?");
         $stmt->execute([$surveyId]);
-        $surveyTypeRow = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($surveyTypeRow && isset($surveyTypeRow['type'])) {
-            $surveyType = $surveyTypeRow['type'];
+        $surveyInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($surveyInfo) {
+            $surveyName = $surveyInfo['name']; // Get the survey name
+            if (isset($surveyInfo['type'])) {
+                $surveyType = $surveyInfo['type'];
+            }
         }
     } catch (PDOException $e) {
-        error_log("Database error fetching survey type: " . $e->getMessage());
-        // $surveyType remains 'local'
+        error_log("Database error fetching survey name and type: " . $e->getMessage());
+        // $surveyName remains null, $surveyType remains 'local'
     }
 }
 
@@ -367,7 +371,9 @@ unset($_SESSION['submitted_survey_id']);
             <div class="flag-red" id="flag-red-color-thankyou"></div>
         </div>
 
-        <h2 id="survey-title-thankyou">CLIENT SATISFACTION FEEDBACK TOOL</h2>
+        <h2 id="survey-title-thankyou">
+            <?php echo htmlspecialchars($surveyName ?? 'CLIENT SATISFACTION FEEDBACK TOOL'); ?>
+        </h2>
 
         <div class="success-message">
             Thank you for taking the time to provide your valuable feedback! Your insights will help us improve healthcare services.
@@ -390,6 +396,12 @@ unset($_SESSION['submitted_survey_id']);
                         <th>Reference ID</th>
                         <td><?php echo htmlspecialchars($uid); ?></td>
                     </tr>
+                    <?php if ($surveyName !== null): ?>
+                    <tr>
+                        <th>Survey Name</th>
+                        <td><?php echo htmlspecialchars($surveyName); ?></td>
+                    </tr>
+                    <?php endif; ?>
                     <?php if ($facilityName !== null): ?>
                     <tr>
                         <th>Facility</th>
@@ -536,11 +548,15 @@ unset($_SESSION['submitted_survey_id']);
                 }
 
                 // Apply Survey Title (from preview settings if available)
+                // This will override the PHP-set survey name if a custom title was set in preview
                 if (settings.hasOwnProperty('showTitle') && !settings.showTitle) {
                     surveyTitleThankYou.classList.add('hidden-element');
                 } else {
                     surveyTitleThankYou.classList.remove('hidden-element');
-                    surveyTitleThankYou.textContent = settings.titleText || 'CLIENT SATISFACTION FEEDBACK TOOL';
+                    // Only override if settings.titleText exists, otherwise keep PHP-fetched survey name
+                    if (settings.titleText) {
+                        surveyTitleThankYou.textContent = settings.titleText;
+                    }
                 }
 
                 // No need for specific JavaScript logic to hide the rows if null for surveyType 'dhis2'

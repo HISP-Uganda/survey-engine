@@ -1,231 +1,145 @@
 <?php
-ob_start(); // Start output buffering
-session_start();
+// save_survey_settings.php
+require_once 'connect.php'; // Include your database connection
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+header('Content-Type: application/json');
 
-// Include the centralized database connection file
-// Since it's in the same directory, a direct filename is sufficient.
-require_once 'connect.php';
-
-// Check if the PDO object is available from connect.php
 if (!isset($pdo)) {
-    http_response_code(500);
-    ob_clean(); // Clean any previous output before sending JSON
-    echo json_encode(['success' => false, 'message' => 'Database connection failed: Central PDO object not found.']);
-    exit();
+    echo json_encode(['status' => 'error', 'message' => 'Database connection failed.']);
+    exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405); // Use 405 Method Not Allowed for incorrect method
-    ob_clean();
-    echo json_encode(['success' => false, 'message' => 'Invalid request method. Only POST requests are allowed.']);
-    exit();
-}
-
+// Get the raw POST data
 $input = file_get_contents('php://input');
-$settings = json_decode($input, true);
+$data = json_decode($input, true);
 
-// Validate JSON decoding
 if (json_last_error() !== JSON_ERROR_NONE) {
-    http_response_code(400);
-    ob_clean();
-    echo json_encode(['success' => false, 'message' => 'Invalid JSON input: ' . json_last_error_msg()]);
-    exit();
+    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON input.']);
+    exit;
 }
 
-$surveyId = $settings['surveyId'] ?? null;
-if (!$surveyId || !is_numeric($surveyId)) {
-    http_response_code(400);
-    ob_clean();
-    echo json_encode(['success' => false, 'message' => 'Invalid Survey ID. A numeric Survey ID is required.']);
-    exit();
+$surveyId = $data['surveyId'] ?? null;
+
+if (!$surveyId) {
+    echo json_encode(['status' => 'error', 'message' => 'Survey ID is missing.']);
+    exit;
 }
 
-// Fetch survey name for default title handling
-$surveyName = '';
-try {
-    $surveyNameStmt = $pdo->prepare("SELECT name FROM survey WHERE id = ?");
-    $surveyNameStmt->execute([$surveyId]);
-    $row = $surveyNameStmt->fetch(PDO::FETCH_ASSOC);
-    if ($row) {
-        $surveyName = $row['name'];
+// Extract other settings from $data
+$logoPath = $data['logoSrc'] ?? null; // Can be base64 data URL or existing path
+$showLogo = $data['showLogo'] ?? false;
+$flagBlackColor = $data['flagBlackColor'] ?? '#000000';
+$flagYellowColor = $data['flagYellowColor'] ?? '#FCD116';
+$flagRedColor = $data['flagRedColor'] ?? '#D21034';
+$showFlagBar = $data['showFlagBar'] ?? false;
+$titleText = $data['titleText'] ?? '';
+$showTitle = $data['showTitle'] ?? false;
+$subheadingText = $data['subheadingText'] ?? '';
+$showSubheading = $data['showSubheading'] ?? false;
+$showSubmitButton = $data['showSubmitButton'] ?? false;
+$ratingInstruction1Text = $data['ratingInstruction1Text'] ?? '';
+$ratingInstruction2Text = $data['ratingInstruction2Text'] ?? '';
+$showRatingInstructions = $data['showRatingInstructions'] ?? false;
+$showFacilitySection = $data['showFacilitySection'] ?? false;
+$showLocationRowGeneral = $data['showLocationRowGeneral'] ?? false;
+$showLocationRowPeriodAge = $data['showLocationRowPeriodAge'] ?? false;
+$showOwnershipSection = $data['showOwnershipSection'] ?? false;
+$republicTitleText = $data['republicTitleText'] ?? '';
+$showRepublicTitleShare = $data['showRepublicTitleShare'] ?? false;
+$ministrySubtitleText = $data['ministrySubtitleText'] ?? '';
+$showMinistrySubtitleShare = $data['showMinistrySubtitleShare'] ?? false;
+$qrInstructionsText = $data['qrInstructionsText'] ?? '';
+$showQrInstructionsShare = $data['showQrInstructionsShare'] ?? false;
+$footerNoteText = $data['footerNoteText'] ?? '';
+$showFooterNoteShare = $data['showFooterNoteShare'] ?? false;
+
+// NEW: Get the selected instance key and hierarchy level
+$selectedInstanceKey = $data['selectedInstanceKey'] ?? null;
+$selectedHierarchyLevel = $data['selectedHierarchyLevel'] ?? null;
+
+// Handle logo upload if it's a new base64 image
+if (strpos($logoPath, 'data:image/') === 0) {
+    $base64Image = explode(',', $logoPath)[1];
+    $imageType = explode(';', explode(':', $logoPath)[1])[0]; // e.g., image/jpeg
+    $extension = explode('/', $imageType)[1]; // e.g., jpeg
+    $uploadDir = 'asets/asets/img/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
     }
-} catch (PDOException $e) {
-    error_log("Database error fetching survey name: " . $e->getMessage());
-    // Continue with empty surveyName, default title will be used
-}
-
-
-$uploadDir = __DIR__ . '/uploads/survey_logos/';
-$uploadWebPath = 'uploads/survey_logos/';
-
-// Ensure upload directory exists and is writable
-if (!is_dir($uploadDir)) {
-    if (!mkdir($uploadDir, 0775, true)) {
-        http_response_code(500);
-        ob_clean();
-        echo json_encode(['success' => false, 'message' => 'Failed to create upload directory. Check server permissions.']);
-        exit();
-    }
-}
-if (!is_writable($uploadDir)) {
-    http_response_code(500);
-    ob_clean();
-    echo json_encode(['success' => false, 'message' => 'Upload directory is not writable. Please check permissions for: ' . $uploadDir]);
-    exit();
-}
-
-$logoPath = $settings['logoSrc'] ?? 'asets/asets/img/loog.jpg'; // Default logo path
-
-// Handle base64 encoded image upload
-if (isset($settings['logoSrc']) && strpos($settings['logoSrc'], 'data:image/') === 0) {
-    @list($type, $data) = explode(';', $settings['logoSrc']);
-    @list(, $data) = explode(',', $data);
-    $data = base64_decode($data);
-
-    $mimeType = explode(':', $type)[1] ?? '';
-    $extension = '';
-
-    switch ($mimeType) {
-        case 'image/png':
-            $extension = 'png';
-            break;
-        case 'image/jpeg':
-            $extension = 'jpg';
-            break;
-        case 'image/gif':
-            $extension = 'gif';
-            break;
-        default:
-            http_response_code(400);
-            ob_clean();
-            echo json_encode(['success' => false, 'message' => 'Unsupported image format provided. Only PNG, JPEG, and GIF are allowed.']);
-            exit();
-    }
-
-    $fileName = 'survey_' . $surveyId . '_' . time() . '_' . uniqid() . '.' . $extension;
+    $fileName = 'logo_' . uniqid() . '.' . $extension;
     $filePath = $uploadDir . $fileName;
-    $webPath = $uploadWebPath . $fileName;
-
-    if (file_put_contents($filePath, $data)) {
-        $logoPath = $webPath;
+    if (file_put_contents($filePath, base64_decode($base64Image))) {
+        $logoPath = $filePath; // Update logoPath to the saved file path
     } else {
-        http_response_code(500);
-        ob_clean();
-        echo json_encode(['success' => false, 'message' => 'Failed to save uploaded image file to the server.']);
-        exit();
+        error_log("Failed to save uploaded logo.");
+        $logoPath = 'asets/asets/img/loog.jpg'; // Fallback to default
     }
 }
-
-// Assign other values from the received settings, providing sensible defaults
-$showLogo = (int)($settings['showLogo'] ?? 1); // Default to true
-$flagBlackColor = $settings['flagBlackColor'] ?? '#000000';
-$flagYellowColor = $settings['flagYellowColor'] ?? '#FCD116';
-$flagRedColor = $settings['flagRedColor'] ?? '#D21034';
-$showFlagBar = (int)($settings['showFlagBar'] ?? 1); // Default to true
-
-$titleText = trim($settings['titleText'] ?? '');
-if (empty($titleText)) {
-    $titleText = $surveyName; // Use survey name if title is empty
-}
-$showTitle = (int)($settings['showTitle'] ?? 1); // Default to true
-
-$subheadingText = $settings['subheadingText'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.';
-$showSubheading = (int)($settings['showSubheading'] ?? 1); // Default to true
-$showSubmitButton = (int)($settings['showSubmitButton'] ?? 1); // Default to true
-
-$ratingInstruction1Text = $settings['ratingInstruction1Text'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.';
-$ratingInstruction2Text = $settings['ratingInstruction2Text'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent';
-$showRatingInstructions = (int)($settings['showRatingInstructions'] ?? 1); // Default to true
-
-$showFacilitySection = (int)($settings['showFacilitySection'] ?? 1); // Default to true
-$showLocationRowGeneral = (int)($settings['showLocationRowGeneral'] ?? 1); // Default to true
-$showLocationRowPeriodAge = (int)($settings['showLocationRowPeriodAge'] ?? 1); // Default to true
-$showOwnershipSection = (int)($settings['showOwnershipSection'] ?? 1); // Default to true
-
-$republicTitleText = $settings['republicTitleText'] ?? 'THE REPUBLIC OF UGANDA';
-$showRepublicTitleShare = (int)($settings['showRepublicTitleShare'] ?? 1); // Default to true
-$ministrySubtitleText = $settings['ministrySubtitleText'] ?? 'MINISTRY OF HEALTH';
-$showMinistrySubtitleShare = (int)($settings['showMinistrySubtitleShare'] ?? 1); // Default to true
-$qrInstructionsText = $settings['qrInstructionsText'] ?? 'Scan this QR Code to Give Your Feedback on Services Received';
-$showQrInstructionsShare = (int)($settings['showQrInstructionsShare'] ?? 1); // Default to true
-$footerNoteText = $settings['footerNoteText'] ?? 'Thank you for helping us improve our services.';
-$showFooterNoteShare = (int)($settings['showFooterNoteShare'] ?? 1); // Default to true
-
-// Prepare UPDATE statement
-// PDO handles type binding automatically, no explicit type string is needed
-$sql = "
-    UPDATE survey_settings SET
-        logo_path = ?,
-        show_logo = ?,
-        flag_black_color = ?,
-        flag_yellow_color = ?,
-        flag_red_color = ?,
-        show_flag_bar = ?,
-        title_text = ?,
-        show_title = ?,
-        subheading_text = ?,
-        show_subheading = ?,
-        show_submit_button = ?,
-        rating_instruction1_text = ?,
-        rating_instruction2_text = ?,
-        show_rating_instructions = ?,
-        show_facility_section = ?,
-        show_location_row_general = ?,
-        show_location_row_period_age = ?,
-        show_ownership_section = ?,
-        republic_title_text = ?,
-        show_republic_title_share = ?,
-        ministry_subtitle_text = ?,
-        show_ministry_subtitle_share = ?,
-        qr_instructions_text = ?,
-        show_qr_instructions_share = ?,
-        footer_note_text = ?,
-        show_footer_note_share = ?
-    WHERE survey_id = ?
-";
 
 try {
-    $stmt = $pdo->prepare($sql);
+    // Check if settings exist for this survey
+    $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM survey_settings WHERE survey_id = ?");
+    $checkStmt->execute([$surveyId]);
+    $exists = $checkStmt->fetchColumn();
 
-    // No type string needed for PDO bindValue/execute
-    $params = [
-        $logoPath, $showLogo,
-        $flagBlackColor, $flagYellowColor, $flagRedColor, $showFlagBar,
-        $titleText, $showTitle,
-        $subheadingText, $showSubheading,
-        $showSubmitButton,
-        $ratingInstruction1Text, $ratingInstruction2Text, $showRatingInstructions,
-        $showFacilitySection, $showLocationRowGeneral, $showLocationRowPeriodAge, $showOwnershipSection,
-        $republicTitleText, $showRepublicTitleShare,
-        $ministrySubtitleText, $showMinistrySubtitleShare,
-        $qrInstructionsText, $showQrInstructionsShare,
-        $footerNoteText, $showFooterNoteShare,
-        (int)$surveyId // Ensure surveyId is correctly cast for the WHERE clause
-    ];
-
-    if ($stmt->execute($params)) {
-        ob_clean(); // Ensure no prior output before JSON
-        echo json_encode(['success' => true, 'message' => 'Survey settings saved successfully.']);
+    if ($exists) {
+        // Update existing settings
+        $stmt = $pdo->prepare("
+            UPDATE survey_settings SET
+                logo_path = ?, show_logo = ?,
+                flag_black_color = ?, flag_yellow_color = ?, flag_red_color = ?, show_flag_bar = ?,
+                title_text = ?, show_title = ?,
+                subheading_text = ?, show_subheading = ?, show_submit_button = ?,
+                rating_instruction1_text = ?, rating_instruction2_text = ?, show_rating_instructions = ?,
+                show_facility_section = ?, show_location_row_general = ?, show_location_row_period_age = ?, show_ownership_section = ?,
+                republic_title_text = ?, show_republic_title_share = ?, ministry_subtitle_text = ?, show_ministry_subtitle_share = ?,
+                qr_instructions_text = ?, show_qr_instructions_share = ?, footer_note_text = ?, show_footer_note_share = ?,
+                selected_instance_key = ?, selected_hierarchy_level = ? -- Added new columns here
+            WHERE survey_id = ?
+        ");
+        $stmt->execute([
+            $logoPath, (int)$showLogo,
+            $flagBlackColor, $flagYellowColor, $flagRedColor, (int)$showFlagBar,
+            $titleText, (int)$showTitle,
+            $subheadingText, (int)$showSubheading, (int)$showSubmitButton,
+            $ratingInstruction1Text, $ratingInstruction2Text, (int)$showRatingInstructions,
+            (int)$showFacilitySection, (int)$showLocationRowGeneral, (int)$showLocationRowPeriodAge, (int)$showOwnershipSection,
+            $republicTitleText, (int)$showRepublicTitleShare, $ministrySubtitleText, (int)$showMinistrySubtitleShare,
+            $qrInstructionsText, (int)$showQrInstructionsShare, $footerNoteText, (int)$showFooterNoteShare,
+            $selectedInstanceKey, $selectedHierarchyLevel, // Values for new columns
+            $surveyId
+        ]);
     } else {
-        // Log the PDO error information
-        error_log('Failed to execute statement: ' . json_encode($stmt->errorInfo()));
-        http_response_code(500);
-        ob_clean(); // Ensure no prior output before JSON
-        echo json_encode(['success' => false, 'message' => 'Failed to save survey settings due to a database error.']);
+        // Insert new settings (this should ideally be handled by preview_form.php's initial load)
+        // but included here for completeness/robustness.
+        $stmt = $pdo->prepare("
+            INSERT INTO survey_settings (
+                survey_id, logo_path, show_logo, flag_black_color, flag_yellow_color, flag_red_color, show_flag_bar,
+                title_text, show_title, subheading_text, show_subheading, show_submit_button,
+                rating_instruction1_text, rating_instruction2_text, show_rating_instructions,
+                show_facility_section, show_location_row_general, show_location_row_period_age, show_ownership_section,
+                republic_title_text, show_republic_title_share, ministry_subtitle_text, show_ministry_subtitle_share,
+                qr_instructions_text, show_qr_instructions_share, footer_note_text, show_footer_note_share,
+                selected_instance_key, selected_hierarchy_level -- Added new columns here
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $surveyId, $logoPath, (int)$showLogo,
+            $flagBlackColor, $flagYellowColor, $flagRedColor, (int)$showFlagBar,
+            $titleText, (int)$showTitle,
+            $subheadingText, (int)$showSubheading, (int)$showSubmitButton,
+            $ratingInstruction1Text, $ratingInstruction2Text, (int)$showRatingInstructions,
+            (int)$showFacilitySection, (int)$showLocationRowGeneral, (int)$showLocationRowPeriodAge, (int)$showOwnershipSection,
+            $republicTitleText, (int)$showRepublicTitleShare, $ministrySubtitleText, (int)$showMinistrySubtitleShare,
+            $qrInstructionsText, (int)$showQrInstructionsShare, $footerNoteText, (int)$showFooterNoteShare,
+            $selectedInstanceKey, $selectedHierarchyLevel // Values for new columns
+        ]);
     }
 
+    echo json_encode(['status' => 'success', 'message' => 'Settings saved successfully!']);
+
 } catch (PDOException $e) {
-    error_log('Database error during settings update: ' . $e->getMessage());
-    http_response_code(500);
-    ob_clean(); // Ensure no prior output before JSON
-    echo json_encode(['success' => false, 'message' => 'Internal server error during settings update.']);
+    error_log("Database error saving survey settings: " . $e->getMessage());
+    echo json_encode(['status' => 'error', 'message' => 'Error saving settings: ' . $e->getMessage()]);
 }
-
-// PDO connections automatically close when the script finishes.
-// No explicit $stmt->close() or $pdo->close() needed here.
-
-exit(); // Ensure no further code is executed after JSON response
 ?>
