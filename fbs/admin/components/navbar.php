@@ -170,6 +170,7 @@ $pageTitle = $pages[$currentPage] ?? "Admin Panel";
                         <form method="post" action="../../../index.php" class="m-0">
                             <button class="dropdown-item navbar-dropdown-item text-danger" name="logout">
                                 <i class="fas fa-sign-out-alt me-3"></i>Logout
+                               
                             </button>
                         </form>
                     </li>

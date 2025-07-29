@@ -13299,7 +13299,7 @@ CREATE TABLE `survey` (
 --
 
 INSERT INTO `survey` (`id`, `name`, `created`, `updated`, `type`, `start_date`, `end_date`, `is_active`, `dhis2_instance`, `program_dataset`, `dhis2_tracked_entity_type_uid`) VALUES
-(167, 'Electronic Integrated Disease', '2025-07-28 05:42:53', '2025-07-28 07:01:03', 'local', '2025-07-28', '2026-01-28', 1, 'UiO', '', NULL);
+(167, 'Electronic Integrated Disease Surveillance and Response system', '2025-07-28 05:42:53', '2025-07-28 07:01:03', 'local', '2025-07-28', '2026-01-28', 1, 'UiO', '', NULL);
 
 --
 -- Triggers `survey`
