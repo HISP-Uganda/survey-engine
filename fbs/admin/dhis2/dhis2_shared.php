@@ -150,8 +150,8 @@ function dhis2Curl($fullUrl, $instance, $method = 'GET', $data = null) {
         CURLOPT_SSL_VERIFYPEER => true,   // Enable SSL verification for security
         CURLOPT_SSL_VERIFYHOST => 2,      // Verify hostname matches certificate
         CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_TIMEOUT => 60,            // Set timeout to 60 seconds
-        CURLOPT_CONNECTTIMEOUT => 30      // Connection timeout
+        CURLOPT_TIMEOUT => 120,           // Increase timeout to 2 minutes
+        CURLOPT_CONNECTTIMEOUT => 60      // Increase connection timeout to 1 minute
     ];
 
     if (in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'])) {

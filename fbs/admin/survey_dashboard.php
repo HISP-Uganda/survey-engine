@@ -509,6 +509,18 @@ try {
                     </div>
                 </div>
                 
+                <!-- Purpose explanation -->
+                <div class="alert alert-info mb-4" style="border-left: 4px solid #17a2b8; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-info-circle text-info me-2 mt-1"></i>
+                        <div>
+                            <strong>Purpose:</strong> This section visualizes how users responded to individual questions in your survey. 
+                            Select a question below to see the distribution of responses in interactive charts with detailed statistics including 
+                            response rates, most common answers, and averages for numeric questions.
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="question-selector">
                     <label for="questionSelect"><strong>Select Question to Analyze:</strong></label>
                     <select id="questionSelect" class="form-select">
@@ -786,13 +798,40 @@ try {
                 });
 
                 const response = await fetch('dashboard_api.php?' + params);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log('Question analysis response:', data); // Debug logging
 
                 if (data.success) {
-                    updateQuestionChart(data.responses);
-                    updateQuestionStats(data.stats);
+                    if (data.responses && data.responses.length > 0) {
+                        updateQuestionChart(data.responses);
+                        updateQuestionStats(data.stats);
+                    } else {
+                        // Show empty state message
+                        questionChart.data.labels = ['No data available'];
+                        questionChart.data.datasets[0].data = [1];
+                        questionChart.data.datasets[0].backgroundColor = ['#e9ecef'];
+                        questionChart.update();
+                        
+                        // Show stats as zeros
+                        updateQuestionStats({
+                            total_responses: 0,
+                            average_score: 'N/A',
+                            most_common: 'No responses',
+                            response_rate: 0
+                        });
+                    }
                 } else {
                     console.error('Failed to load question data:', data.message);
+                    // Show error in chart
+                    questionChart.data.labels = ['Error loading data'];
+                    questionChart.data.datasets[0].data = [1];
+                    questionChart.data.datasets[0].backgroundColor = ['#dc3545'];
+                    questionChart.update();
                 }
             } catch (error) {
                 console.error('Error loading question data:', error);

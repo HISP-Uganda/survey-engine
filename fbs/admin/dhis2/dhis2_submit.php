@@ -892,6 +892,24 @@ class DHIS2SubmissionHandler {
             return $row['dhis2_option_code'];
         }
 
+        // Try trimmed lookup as additional fallback for whitespace issues
+        $trimmedValue = trim($localValue);
+        if ($trimmedValue !== $localValue) {
+            $stmt = $this->pdo->prepare("
+                SELECT dhis2_option_code
+                FROM dhis2_option_set_mapping
+                WHERE TRIM(local_value) = ? AND dhis2_option_set_id = ?
+            ");
+            $stmt->execute([$trimmedValue, $optionSetId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($row) {
+                error_log("WARNING: Whitespace-trimmed match for '$localValue' -> '$trimmedValue' found in option set '$optionSetId'. Consider cleaning data.");
+                $optionCodeCache[$optionSetId][$localValue] = $row['dhis2_option_code'];
+                return $row['dhis2_option_code'];
+            }
+        }
+
         error_log("WARNING: No DHIS2 option code found for local value '$localValue' in option set '$optionSetId'.");
         $optionCodeCache[$optionSetId][$localValue] = null; // Cache null to avoid repeated lookups
         return null;

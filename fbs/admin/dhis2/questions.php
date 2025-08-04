@@ -157,12 +157,15 @@ if (!$hasRequiredParams):
             <?php
             // Get questions for the selected survey
             $questionsStmt = $pdo->prepare("
-                SELECT q.id, q.label, q.question_type, q.options,
-                       qdm.dhis2_dataelement_id, qdm.dhis2_option_set_id
+                SELECT q.id, q.label, q.question_type, q.option_set_id,
+                       qdm.dhis2_dataelement_id,
+                       GROUP_CONCAT(osv.option_value ORDER BY osv.id) as options
                 FROM survey_question sq
                 JOIN question q ON sq.question_id = q.id
                 LEFT JOIN question_dhis2_mapping qdm ON q.id = qdm.question_id
+                LEFT JOIN option_set_values osv ON q.option_set_id = osv.option_set_id
                 WHERE sq.survey_id = ?
+                GROUP BY q.id, q.label, q.question_type, q.option_set_id, qdm.dhis2_dataelement_id
                 ORDER BY sq.position
             ");
             $questionsStmt->execute([$_GET['survey_id']]);
@@ -176,10 +179,6 @@ if (!$hasRequiredParams):
                     <p class="text-muted">This survey doesn't contain any questions yet.</p>
                 </div>
             <?php else: ?>
-                <form method="post" id="mappingForm">
-                    <input type="hidden" name="action" value="save_mappings">
-                    <input type="hidden" name="survey_id" value="<?= htmlspecialchars($_GET['survey_id']) ?>">
-                    
                     <?php foreach ($questions as $index => $question): ?>
                         <div class="question-card" data-question-id="<?= $question['id'] ?>">
                             <div class="d-flex justify-content-between align-items-start mb-3">
@@ -207,23 +206,14 @@ if (!$hasRequiredParams):
                             </div>
                             
                             <div class="mapping-details collapse" id="mapping-<?= $question['id'] ?>">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label class="form-label text-dark">DHIS2 Data Element</label>
-                                        <select name="mappings[<?= $question['id'] ?>][data_element]" 
-                                                class="form-select data-element-select">
-                                            <option value="">-- Select Data Element --</option>
-                                            <!-- Data elements will be loaded via AJAX -->
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-dark">Option Set (if applicable)</label>
-                                        <select name="mappings[<?= $question['id'] ?>][option_set]" 
-                                                class="form-select option-set-select">
-                                            <option value="">-- No Option Set --</option>
-                                            <!-- Option sets will be loaded via AJAX -->
-                                        </select>
-                                    </div>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Question Details:</strong> This question is of type "<?= htmlspecialchars($question['question_type']) ?>" 
+                                    <?php if (!empty($question['dhis2_dataelement_id'])): ?>
+                                        and is currently mapped to DHIS2 Data Element: <?= htmlspecialchars($question['dhis2_dataelement_id']) ?>
+                                    <?php else: ?>
+                                        and is not currently mapped to any DHIS2 Data Element
+                                    <?php endif; ?>
                                 </div>
                                 
                                 <?php if (!empty($question['options'])): ?>
@@ -231,11 +221,14 @@ if (!$hasRequiredParams):
                                     <label class="form-label text-dark">Question Options Preview</label>
                                     <div class="option-preview">
                                         <?php
-                                        $options = json_decode($question['options'], true);
+                                        $options = explode(',', $question['options']);
                                         if (is_array($options)) {
                                             foreach ($options as $option) {
-                                                echo '<span class="badge bg-light text-dark border me-1 mb-1">' . 
-                                                     htmlspecialchars($option) . '</span>';
+                                                $option = trim($option);
+                                                if (!empty($option)) {
+                                                    echo '<span class="badge bg-light text-dark border me-1 mb-1">' . 
+                                                         htmlspecialchars($option) . '</span>';
+                                                }
                                             }
                                         }
                                         ?>
@@ -246,16 +239,12 @@ if (!$hasRequiredParams):
                         </div>
                     <?php endforeach; ?>
                     
-                    <div class="mt-4 d-flex justify-content-between">
+                    <div class="mt-4">
                         <a href="?tab=new&dhis2_instance=<?= htmlspecialchars($_GET['dhis2_instance']) ?>&domain=<?= htmlspecialchars($_GET['domain']) ?>&<?= $_GET['domain'] === 'tracker' ? 'program=' . htmlspecialchars($_GET['program']) : 'dataset=' . htmlspecialchars($_GET['dataset']) ?>" 
                            class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-1"></i> Back to Configuration
                         </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i> Save All Mappings
-                        </button>
                     </div>
-                </form>
             <?php endif; ?>
         <?php endif; ?>
     </div>
@@ -301,8 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Load data elements and option sets via AJAX when needed
-    // This would be implemented based on your existing AJAX infrastructure
+    // Toggle functionality for question details is handled above
 });
 </script>
 

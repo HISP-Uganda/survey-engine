@@ -1,0 +1,998 @@
+instance_key,uid,name,path,level,parent_uid
+EMIS,ftq8bJq7cj0,"Aakum Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/hVZeyZ0q28u/ftq8bJq7cj0,6,hVZeyZ0q28u
+EMIS,z3nGsD2oPvw,"Aarapoo Parish",/KJPN4PduBWe/rn2uTdRyUbh/zJfpujxC1kD/KNPVL257sX3/nffZS6pdMhZ/z3nGsD2oPvw,6,nffZS6pdMhZ
+EMIS,Osy6bw8b3Ra,"Abaji Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/mfBJZtzMb9k/Osy6bw8b3Ra,6,mfBJZtzMb9k
+EMIS,TyVEgF5FlTL,"Abakadyak Parish",/KJPN4PduBWe/yXncUmqtQYF/xy0M4HhjXtD/StQcQsGYdz1/bM9rKCuKbpb/TyVEgF5FlTL,6,bM9rKCuKbpb
+EMIS,p5LFbBGgNW0,"Abala Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/K48w2kQQvUA/p5LFbBGgNW0,6,K48w2kQQvUA
+EMIS,jqRbqIYGvNj,"Abalang(Alwa Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/QoRZB7xc3j9/PUyNDCs6OkV/jXXa0PTeTUQ/jqRbqIYGvNj,6,jXXa0PTeTUQ
+EMIS,iCiVC1Xf6O3,"Abalang(Okwalongwen Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/jkEv7p1AY7B/iCiVC1Xf6O3,6,jkEv7p1AY7B
+EMIS,owJg22VYpkO,"Abaler Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/RRXG5pP25Tt/owJg22VYpkO,6,RRXG5pP25Tt
+EMIS,J1T1xQDa8cU,"Abalodyang Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/tw65TiDdjdi/J1T1xQDa8cU,6,tw65TiDdjdi
+EMIS,RkdwOz2GAeZ,"Abanga Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/X2vKJ3QpDNv/RkdwOz2GAeZ,6,X2vKJ3QpDNv
+EMIS,fdmtsKhXp9l,"Abangaimany Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/lireba0g3Da/fdmtsKhXp9l,6,lireba0g3Da
+EMIS,EWdoUe22WKb,"Abany Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/H5aaabQNsOQ/EWdoUe22WKb,6,H5aaabQNsOQ
+EMIS,uHGftpMW8DP,"Abanya Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/ZBe7SvBC4e6/uHGftpMW8DP,6,ZBe7SvBC4e6
+EMIS,RsjGhPp0Loj,"Abar East Parish",/KJPN4PduBWe/ToANlYyRiKb/Xjc0LDFa5gW/GDfVHitWE3g/CH2YURsZ7P5/RsjGhPp0Loj,6,CH2YURsZ7P5
+EMIS,oq8jWnQKqtQ,"Abar West Parish",/KJPN4PduBWe/ToANlYyRiKb/Xjc0LDFa5gW/GDfVHitWE3g/CH2YURsZ7P5/oq8jWnQKqtQ,6,CH2YURsZ7P5
+EMIS,IFqANToIFDT,"Abara Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/NhJ7OKjBwpO/IFqANToIFDT,6,NhJ7OKjBwpO
+EMIS,tcGErZVM6IV,"Abarikori Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/SzDWKeAxdpE/tcGErZVM6IV,6,SzDWKeAxdpE
+EMIS,KRg03UuPmlv,"Abedi Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/UzDsFP0I0JV/KRg03UuPmlv,6,UzDsFP0I0JV
+EMIS,HkNk2ishswX,"Abedmot Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/UgnKPKLjoP5/HkNk2ishswX,6,UgnKPKLjoP5
+EMIS,ix20Yvaw934,"Abeja Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/ZvKLjuT1TNW/ix20Yvaw934,6,ZvKLjuT1TNW
+EMIS,GsXpRWxtdGY,"Abeju Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/z9NDwyghV6T/GsXpRWxtdGY,6,z9NDwyghV6T
+EMIS,lbF7P9hFdwU,"Abeko Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/ztVnAoSZJ4I/lbF7P9hFdwU,6,ztVnAoSZJ4I
+EMIS,WNFGmtTOz6x,"Abela (Getom Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/B5tmOmYp1P0/WNFGmtTOz6x,6,B5tmOmYp1P0
+EMIS,CVPHP8s2YDN,"Abela Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/B5tmOmYp1P0/CVPHP8s2YDN,6,B5tmOmYp1P0
+EMIS,Sh8crxnIuNG,"Abela(Aleka Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/MxARwTFEsmj/Sh8crxnIuNG,6,MxARwTFEsmj
+EMIS,nBtWAjZXUzq,"Abele Parish",/KJPN4PduBWe/ToANlYyRiKb/iqsaGItA68C/lNCuzvl2tLj/nW2rpHlXmtK/nBtWAjZXUzq,6,nW2rpHlXmtK
+EMIS,P6qbo9r6gkG,"Abeli Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/unpu0JZWBny/P6qbo9r6gkG,6,unpu0JZWBny
+EMIS,shFw1P5RRNH,"Abenyo Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/oHnubudtkgX/shFw1P5RRNH,6,oHnubudtkgX
+EMIS,WVp8yMnO5cu,"Aberidwogo Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/lireba0g3Da/WVp8yMnO5cu,6,lireba0g3Da
+EMIS,aXeHoNqx92g,"Abia(Abia Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/lireba0g3Da/aXeHoNqx92g,6,lireba0g3Da
+EMIS,jP7zLnkaygp,"Abia(Kuju Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/dlW3jC4tF2A/jP7zLnkaygp,6,dlW3jC4tF2A
+EMIS,dJYSZHKF4Ya,"Abilaep Parish",/KJPN4PduBWe/rn2uTdRyUbh/tdZbtg9sZkO/Pf8NPQB7A7K/ERBPumWfX4z/dJYSZHKF4Ya,6,ERBPumWfX4z
+EMIS,YSXcUeNXJJY,"Abiliyep Parish",/KJPN4PduBWe/uN4gXUciDZ8/a8RHFdF4DXL/GY8MHzVLI6F/AK8bwzBcjWc/YSXcUeNXJJY,6,AK8bwzBcjWc
+EMIS,pahdntsOXH8,"Abindi Parish",/KJPN4PduBWe/ToANlYyRiKb/yKjxFBHrGgw/YSFmAjdcrQU/GKvplwWtTl3/pahdntsOXH8,6,GKvplwWtTl3
+EMIS,ZrzRQ35gnxc,"Abira East  Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/Duk7D3p3Cee/ZrzRQ35gnxc,6,Duk7D3p3Cee
+EMIS,O5PqjvFzYj9,"Abira East Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/Duk7D3p3Cee/O5PqjvFzYj9,6,Duk7D3p3Cee
+EMIS,oy1XooAItm0,"Abira West Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/Duk7D3p3Cee/oy1XooAItm0,6,Duk7D3p3Cee
+EMIS,zJRsayjSn3T,"Abirabira Parish",/KJPN4PduBWe/rn2uTdRyUbh/QoRZB7xc3j9/PUyNDCs6OkV/gp7Uz8fwu23/zJRsayjSn3T,6,gp7Uz8fwu23
+EMIS,uGXNINFzFIG,"Abiting Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/u9UneLEtuAi/uGXNINFzFIG,6,u9UneLEtuAi
+EMIS,Cjrtvwd5R6j,"Abochet Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/QZJn3hiO6Zp/Cjrtvwd5R6j,6,QZJn3hiO6Zp
+EMIS,gNcWhvlo7Ba,"Abok Parish",/KJPN4PduBWe/ToANlYyRiKb/uqUyTPvQKII/WzCTxqL56PX/bH7sNzWjO1I/gNcWhvlo7Ba,6,bH7sNzWjO1I
+EMIS,uIkyVCanq41,"Aboko Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/WoNw1cfI6QF/uIkyVCanq41,6,WoNw1cfI6QF
+EMIS,GnJxHrY4C7S,"Abongatin Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/VYVQfdvBzxG/GnJxHrY4C7S,6,VYVQfdvBzxG
+EMIS,mqwEAIftUHw,"Abongo Parish",/KJPN4PduBWe/ToANlYyRiKb/Xjc0LDFa5gW/GDfVHitWE3g/sLBLFPmx0Ki/mqwEAIftUHw,6,sLBLFPmx0Ki
+EMIS,pKJhPGITgCi,"Abongorwot(Agali Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/kQC82MEQIvT/pKJhPGITgCi,6,kQC82MEQIvT
+EMIS,HK4VXagTAmI,"Abongorwot(Orum Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/YLu91VNQTlD/HK4VXagTAmI,6,YLu91VNQTlD
+EMIS,A57LVbJKl6h,"Abubur Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/mVia0FcPFQg/MSkaQMKYDGU/A57LVbJKl6h,6,MSkaQMKYDGU
+EMIS,seSCKABv0Po,"Abukamola Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/T1ZBKTAVg4X/seSCKABv0Po,6,T1ZBKTAVg4X
+EMIS,jkrdPv6kKGx,"Abuli Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/fJIbsMWIqvm/jkrdPv6kKGx,6,fJIbsMWIqvm
+EMIS,JlaZq48Owhf,"Abunga(Amugu Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/VYVQfdvBzxG/JlaZq48Owhf,6,VYVQfdvBzxG
+EMIS,NVokHUUhiPe,"Abunga(Barr Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/cknntfF4SWQ/NVokHUUhiPe,6,cknntfF4SWQ
+EMIS,XVpRSZ55VBv,"Abur Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/zP8OUKT5xa1/XVpRSZ55VBv,6,zP8OUKT5xa1
+EMIS,qHXrJWj5Bc5,"Aburcero Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/FsinlhpFnq3/qHXrJWj5Bc5,6,FsinlhpFnq3
+EMIS,HZ39Lm8FOjg,"Aburkidi Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/ZvKLjuT1TNW/HZ39Lm8FOjg,6,ZvKLjuT1TNW
+EMIS,kT5GoVp08t0,"Aburkot Ward Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/xlAiS1ae6Af/kT5GoVp08t0,6,xlAiS1ae6Af
+EMIS,kOqNVjDjX0O,"Abwanget (Akoboi Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/EZ3SAh78r3j/kOqNVjDjX0O,6,EZ3SAh78r3j
+EMIS,pcoCeQjZOg5,"Abwanget Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/EZ3SAh78r3j/pcoCeQjZOg5,6,EZ3SAh78r3j
+EMIS,XTgzpKASsGU,"Abwanget(Willa Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/Hr3N4iC1NHc/XTgzpKASsGU,6,Hr3N4iC1NHc
+EMIS,wVhy1frQcuD,"Abwoc Olil Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/b62W7Du8SBv/wVhy1frQcuD,6,b62W7Du8SBv
+EMIS,Oj14jeYdw7x,"Abwoch Parish",/KJPN4PduBWe/yXncUmqtQYF/S5fvUXgY54J/hzu0iHelGx4/ACuoMtDQa9M/Oj14jeYdw7x,6,ACuoMtDQa9M
+EMIS,EueOZ3QasL3,"Abwockwar Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/lnuAGQZpJO6/EueOZ3QasL3,6,lnuAGQZpJO6
+EMIS,pl13ncJObIe,"Abwokodia Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/CBFtk2zhHUw/pl13ncJObIe,6,CBFtk2zhHUw
+EMIS,VAJhDbWG4os,"Abwong Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/H5aaabQNsOQ/VAJhDbWG4os,6,H5aaabQNsOQ
+EMIS,uni9Kz6083g,"Abyenek Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/uORouhNAbq5/uni9Kz6083g,6,uORouhNAbq5
+EMIS,T1kloR9lm9W,"Acaba Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/fJIbsMWIqvm/T1kloR9lm9W,6,fJIbsMWIqvm
+EMIS,BRqdHspk6CF,"Acanga Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/HcpAdZw6t1P/BRqdHspk6CF,6,HcpAdZw6t1P
+EMIS,WsL5O5rqG01,"Acanpii(Dokolo Tc Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/oHnubudtkgX/WsL5O5rqG01,6,oHnubudtkgX
+EMIS,JMWaLA3rHPR,"Acanpii(Loro Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/Pm9QCE8Tbaf/JMWaLA3rHPR,6,Pm9QCE8Tbaf
+EMIS,mUTg8kHJLY3,"Acanpii(Ogwette Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/ZWNO5xzFUsZ/mUTg8kHJLY3,6,ZWNO5xzFUsZ
+EMIS,fobHZhLxPD0,"Acede Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/tujGPMcrNlb/fobHZhLxPD0,6,tujGPMcrNlb
+EMIS,sPuSuYMlvvF,"Acegerekuma Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/oRcPLzsCoif/sPuSuYMlvvF,6,oRcPLzsCoif
+EMIS,qdOKzEn9Bh3,"Acegeretolim Parish",/KJPN4PduBWe/uN4gXUciDZ8/mOXva2xiwQv/Q2ltWABsUfW/WKvQqnCWwOF/qdOKzEn9Bh3,6,WKvQqnCWwOF
+EMIS,poWfA6agwyP,"Acelela Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/K48w2kQQvUA/poWfA6agwyP,6,K48w2kQQvUA
+EMIS,ZDKnOd2mAPI,"Acenlworo Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/i7IJMXUFR20/ZDKnOd2mAPI,6,i7IJMXUFR20
+EMIS,EIgjpB2EJ8O,"Aceno Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/jsnhoLUzhDg/EIgjpB2EJ8O,6,jsnhoLUzhDg
+EMIS,vwIZVGDonfz,"Acetgwen Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/qOuUEzeHcEw/QGwLgiGGvDk/vwIZVGDonfz,6,QGwLgiGGvDk
+EMIS,DtetQG213s7,"Achangali Parish",/KJPN4PduBWe/uN4gXUciDZ8/NREoMszwQZW/SyQ5EM0LXrU/R3gfJmmVEq6/DtetQG213s7,6,R3gfJmmVEq6
+EMIS,fQr8zwoTdDK,"Achol-Pii Parish",/KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q/mAI2njLcvwX/fQr8zwoTdDK,6,mAI2njLcvwX
+EMIS,YGJtqYk3ztn,"Acholi Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/RRxA8Kk0GBU/YGJtqYk3ztn,6,RRxA8Kk0GBU
+EMIS,c3Qajvg2g2a,"Achorichor Parish",/KJPN4PduBWe/uN4gXUciDZ8/a8RHFdF4DXL/GY8MHzVLI6F/AK8bwzBcjWc/c3Qajvg2g2a,6,AK8bwzBcjWc
+EMIS,VsoxSVaOC52,"Achukudu Parish",/KJPN4PduBWe/uN4gXUciDZ8/EDhGji3EteB/fV3JXoeHyKw/kNpj3PHRBmx/VsoxSVaOC52,6,kNpj3PHRBmx
+EMIS,l4fiJPb6PWs,"Achuna Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/c25qRvx0b0Z/cE1zC4eelwD/l4fiJPb6PWs,6,cE1zC4eelwD
+EMIS,VqE2wXiswBF,"Achungi Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/H5aaabQNsOQ/VqE2wXiswBF,6,H5aaabQNsOQ
+EMIS,DtgdCUMHUEN,"Acimi Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/Y7nPca3tf7Y/DtgdCUMHUEN,6,Y7nPca3tf7Y
+EMIS,FcULmPGqqdI,"Acokara Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/hWbz7QYuaRi/FcULmPGqqdI,6,hWbz7QYuaRi
+EMIS,FDQeV8bTaNr,"Acoro Parish",/KJPN4PduBWe/yXncUmqtQYF/aBrjuZk0W31/ehlCmFnbce9/KbcyV13VtRM/FDQeV8bTaNr,6,KbcyV13VtRM
+EMIS,u3SBw55Y20R,"Acoto Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/ATIUYA06Pqh/u3SBw55Y20R,6,ATIUYA06Pqh
+EMIS,RKTWzyAkTWb,"Acowa Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/t0XYuEU4iqm/RKTWzyAkTWb,6,t0XYuEU4iqm
+EMIS,EYf4PJ2REwe,"Acoyo Parish",/KJPN4PduBWe/yXncUmqtQYF/Gwk4wkLz7EW/F2gyHGKOZgR/x7pZ9LvlBky/EYf4PJ2REwe,6,x7pZ9LvlBky
+EMIS,UtxT5hixPsj,"Acut Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/WccRWlVxEVQ/UtxT5hixPsj,6,WccRWlVxEVQ
+EMIS,H9el93mnb6m,"Acwao Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/fJIbsMWIqvm/H9el93mnb6m,6,fJIbsMWIqvm
+EMIS,eHqTEITWJ03,"Acwera(Amuru Subcounty) Parish",/KJPN4PduBWe/yXncUmqtQYF/C0RSe3EWBqU/SQ3IaVbkqiy/ZetpPb7xE2Q/eHqTEITWJ03,6,ZetpPb7xE2Q
+EMIS,ghVLlfDlCLQ,"Acwera(Kucwiny Subcounty) Parish",/KJPN4PduBWe/ToANlYyRiKb/Xjc0LDFa5gW/GDfVHitWE3g/sO0r8dMBnBt/ghVLlfDlCLQ,6,sO0r8dMBnBt
+EMIS,B7LFNaj0VOC,"Adacar Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/hVZeyZ0q28u/B7LFNaj0VOC,6,hVZeyZ0q28u
+EMIS,zMzE9v61iQ0,"Adagmon Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/oHnubudtkgX/zMzE9v61iQ0,6,oHnubudtkgX
+EMIS,d4XsiTLPgWg,"Adagwoo Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/FsinlhpFnq3/d4XsiTLPgWg,6,FsinlhpFnq3
+EMIS,Z12NIVPLPXV,"Adakun Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/zzsaYyuJz1T/Z12NIVPLPXV,6,zzsaYyuJz1T
+EMIS,CbVoTDiQiMm,"Adal Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/A5nf4YARnYV/CbVoTDiQiMm,6,A5nf4YARnYV
+EMIS,UbjZc2Xwp3Y,"Adalafu Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/DoqDOSg4uWw/eM769s83Ie7/UbjZc2Xwp3Y,6,eM769s83Ie7
+EMIS,lVvp19ZMeYy,"Adea Parish",/KJPN4PduBWe/uN4gXUciDZ8/NREoMszwQZW/SyQ5EM0LXrU/YzgCzwkOJLN/lVvp19ZMeYy,6,YzgCzwkOJLN
+EMIS,MCrHnWsTjLe,"Adekokwok Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/FldPzwXnjfK/MCrHnWsTjLe,6,FldPzwXnjfK
+EMIS,CC5heKOo5VE,"Adel Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/jsnhoLUzhDg/CC5heKOo5VE,6,jsnhoLUzhDg
+EMIS,Ijz7QVodHbS,"Adem Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/u02CLxZxpNF/Ijz7QVodHbS,6,u02CLxZxpNF
+EMIS,fSnUpei4iC4,"Ademi Parish",/KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q/bgcAfFSJVV0/fSnUpei4iC4,6,bgcAfFSJVV0
+EMIS,vK0z1p62R9N,"Ader Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/hWbz7QYuaRi/vK0z1p62R9N,6,hWbz7QYuaRi
+EMIS,RGQtt5bj7G4,"Aderolongo Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/jkEv7p1AY7B/RGQtt5bj7G4,6,jkEv7p1AY7B
+EMIS,K8gX3LOXX3X,"Adidi Parish",/KJPN4PduBWe/ToANlYyRiKb/QYiQ2KqgCxj/IWyZ8SIUBMF/BIpNirBPqVy/K8gX3LOXX3X,6,BIpNirBPqVy
+EMIS,d3kS0FCrG6B,"Adigo Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/Pm9QCE8Tbaf/d3kS0FCrG6B,6,Pm9QCE8Tbaf
+EMIS,U5QdMCuIYad,"Adok(Adok Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/HIwCAP46Wfh/U5QdMCuIYad,6,HIwCAP46Wfh
+EMIS,Wdw37BA5HHA,"Adok(Arocha Division) Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/hYG3R7JZ67R/TIEYOBPZROP/Wdw37BA5HHA,6,TIEYOBPZROP
+EMIS,YlReafHCFW8,"Adola Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/b62W7Du8SBv/YlReafHCFW8,6,b62W7Du8SBv
+EMIS,Z6BxBZGrG8O,"Adolo Parish",/KJPN4PduBWe/ToANlYyRiKb/Xjc0LDFa5gW/GDfVHitWE3g/CH2YURsZ7P5/Z6BxBZGrG8O,6,CH2YURsZ7P5
+EMIS,iR3D8mJZMRf,"Adonyoimo Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/bY0J4KZy2NO/iR3D8mJZMRf,6,bY0J4KZy2NO
+EMIS,ECtb2f8fM9X,"Adowongowor Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/KfCqofEu1kM/ECtb2f8fM9X,6,KfCqofEu1kM
+EMIS,fRuMo93iYop,"Adraa Parish",/KJPN4PduBWe/ToANlYyRiKb/bLoH4VbxCGI/IAkdv8lnkij/BDdBTDClCZT/fRuMo93iYop,6,BDdBTDClCZT
+EMIS,OTA2BaDGMn4,"Adripi Parish",/KJPN4PduBWe/ToANlYyRiKb/yKjxFBHrGgw/YSFmAjdcrQU/GKvplwWtTl3/OTA2BaDGMn4,6,GKvplwWtTl3
+EMIS,BqJ9p2YSbtu,"Adul Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/k0zoEg1Qdka/BqJ9p2YSbtu,6,k0zoEg1Qdka
+EMIS,Pp6I8APi4BE,"Adwoa Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/zuc46mrwazu/Pp6I8APi4BE,6,zuc46mrwazu
+EMIS,kZDchpqIsl3,"Adwoki Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/ATIUYA06Pqh/kZDchpqIsl3,6,ATIUYA06Pqh
+EMIS,EbsWZeTVtmB,"Adyaka Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/kQC82MEQIvT/EbsWZeTVtmB,6,kQC82MEQIvT
+EMIS,QXUZ0RR9Bb8,"Adyang Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/unpu0JZWBny/QXUZ0RR9Bb8,6,unpu0JZWBny
+EMIS,SD3PrDLO3NL,"Adyeda(Aduku Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/WoNw1cfI6QF/SD3PrDLO3NL,6,WoNw1cfI6QF
+EMIS,UrjRa7F7eIx,"Adyeda(Akalo Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/unpu0JZWBny/UrjRa7F7eIx,6,unpu0JZWBny
+EMIS,OhQE5rI3NUo,"Adyeda(Loro Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/Pm9QCE8Tbaf/OhQE5rI3NUo,6,Pm9QCE8Tbaf
+EMIS,ty3kez0xSoF,"Adyegi Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/mYDNLw05F8s/ty3kez0xSoF,6,mYDNLw05F8s
+EMIS,KGbeg5q4jWy,"Afere Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/cXWb491FLqd/KGbeg5q4jWy,6,cXWb491FLqd
+EMIS,gsXuqy8uM1n,"Afya Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/vfnexhuC4Uh/gsXuqy8uM1n,6,vfnexhuC4Uh
+EMIS,mpLGVfY1Bib,"Agago Central Parish",/KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q/fVnJZiXJyCy/mpLGVfY1Bib,6,fVnJZiXJyCy
+EMIS,p47nVDxjkwD,"Agama Ward",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/qOuUEzeHcEw/QGwLgiGGvDk/p47nVDxjkwD,6,QGwLgiGGvDk
+EMIS,tYKiMSIo7bb,"Aganga Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/gS6HZ2ZApFq/tYKiMSIo7bb,6,gS6HZ2ZApFq
+EMIS,vbYpAXBj19Z,"Agaria(Mukongoro Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/ogMa6hT34Fe/vbYpAXBj19Z,6,ogMa6hT34Fe
+EMIS,eftsqJcsd0O,"Agaria(Nyero Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/cdLLK5GSIdV/eftsqJcsd0O,6,cdLLK5GSIdV
+EMIS,T89OJIrHCq8,"Agege Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/YRTZEQCv1PR/T89OJIrHCq8,6,YRTZEQCv1PR
+EMIS,EmFLxsyTgno,"Agelec Parish",/KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q/mAI2njLcvwX/EmFLxsyTgno,6,mAI2njLcvwX
+EMIS,pnbDApXAf31,"Agengo Parish",/KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q/bgcAfFSJVV0/pnbDApXAf31,6,bgcAfFSJVV0
+EMIS,EN2q2fYN9vf,"Ageni Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/wu26nVF2rFR/EN2q2fYN9vf,6,wu26nVF2rFR
+EMIS,Cc6VhXwQaHl,"Agikdak Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/SzDWKeAxdpE/Cc6VhXwQaHl,6,SzDWKeAxdpE
+EMIS,BGeZ7Tspai5,"Agirigiroi(Arapai Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/qOuUEzeHcEw/ghpendxMrmw/BGeZ7Tspai5,6,ghpendxMrmw
+EMIS,TNw4fyKnbGp,"Agirigiroi(Kapir Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/f7cc8BklNoP/TNw4fyKnbGp,6,f7cc8BklNoP
+EMIS,UKi0dD5zWdc,"Agoga Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/oOndOLnxBwq/UKi0dD5zWdc,6,oOndOLnxBwq
+EMIS,rlVl7hi6hJl,"Agogomit Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/k0zoEg1Qdka/rlVl7hi6hJl,6,k0zoEg1Qdka
+EMIS,zFvacpAMLrZ,"Agojo Parish",/KJPN4PduBWe/ToANlYyRiKb/QYiQ2KqgCxj/IWyZ8SIUBMF/bSsTwv6gQLG/zFvacpAMLrZ,6,bSsTwv6gQLG
+EMIS,uX9OeV0Nezy,"Agolitom Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/zH9M6dnz8DQ/uX9OeV0Nezy,6,zH9M6dnz8DQ
+EMIS,vk3uIIr2zUq,"Agong Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/u02CLxZxpNF/vk3uIIr2zUq,6,u02CLxZxpNF
+EMIS,C8QmfSTDMpU,"Agonga Parish",/KJPN4PduBWe/yXncUmqtQYF/zNgVoDVPYgD/wfh4ZvbnUOc/AcnwwILP8m6/C8QmfSTDMpU,6,AcnwwILP8m6
+EMIS,eQjlwtQTqkj,"Agonga Parish",/KJPN4PduBWe/yXncUmqtQYF/Gwk4wkLz7EW/F2gyHGKOZgR/x7pZ9LvlBky/eQjlwtQTqkj,6,x7pZ9LvlBky
+EMIS,HrrRmAkPZVj,"Agonga(Koch-Goma Subcounty) Parish",/KJPN4PduBWe/yXncUmqtQYF/zNgVoDVPYgD/wfh4ZvbnUOc/AcnwwILP8m6/HrrRmAkPZVj,6,AcnwwILP8m6
+EMIS,U5ELsFeJjMy,"Agonga(Okungur Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/wmQcuojFx6p/U5ELsFeJjMy,6,wmQcuojFx6p
+EMIS,RYySJoAgvIh,"Agora Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/c25qRvx0b0Z/PrpVnR68wW8/RYySJoAgvIh,6,PrpVnR68wW8
+EMIS,BUw8TWcV80W,"Agora Ward",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/qOuUEzeHcEw/QGwLgiGGvDk/BUw8TWcV80W,6,QGwLgiGGvDk
+EMIS,Fujj1Vx7uPW,"Agule Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/f7cc8BklNoP/Fujj1Vx7uPW,6,f7cc8BklNoP
+EMIS,xbZPsDIJxSu,"Agule(Agule Subcounty) Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/PzBhoCO9Kh8/xbZPsDIJxSu,6,PzBhoCO9Kh8
+EMIS,Kz2Yyu1Pnpo,"Agule(Bugondo Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/zJfpujxC1kD/KNPVL257sX3/ulJAtodMnHH/Kz2Yyu1Pnpo,6,ulJAtodMnHH
+EMIS,Of3l77XikQW,"Agule(Kumi Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/zH9M6dnz8DQ/Of3l77XikQW,6,zH9M6dnz8DQ
+EMIS,sxjIsNIob46,"Agulurude Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/Pm9QCE8Tbaf/sxjIsNIob46,6,Pm9QCE8Tbaf
+EMIS,QAGiAooSR3i,"Agurur Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/IXIlEM2ilPu/QAGiAooSR3i,6,IXIlEM2ilPu
+EMIS,IuiScEGRH73,"Agururu A Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/BvE89U4cLqG/RXyb9zLFiqf/IuiScEGRH73,6,RXyb9zLFiqf
+EMIS,N14elDyVh9Z,"Agururu B Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/BvE89U4cLqG/RXyb9zLFiqf/N14elDyVh9Z,6,RXyb9zLFiqf
+EMIS,CQg5D3XHjbB,"Agurut(Nyero Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/cdLLK5GSIdV/CQg5D3XHjbB,6,cdLLK5GSIdV
+EMIS,iCRbFUZuGzc,"Agurut(Ongino Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/yBGD0zMrPgF/iCRbFUZuGzc,6,yBGD0zMrPgF
+EMIS,KuSsfKU5FzW,"Agwar Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/MxARwTFEsmj/KuSsfKU5FzW,6,MxARwTFEsmj
+EMIS,zZTzrnMFr7v,"Agwara Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/dlW3jC4tF2A/zZTzrnMFr7v,6,dlW3jC4tF2A
+EMIS,kOy2wqoAfu9,"Agwayugi Parish",/KJPN4PduBWe/yXncUmqtQYF/C0RSe3EWBqU/SQ3IaVbkqiy/dxIFauOlUgV/kOy2wqoAfu9,6,dxIFauOlUgV
+EMIS,UQm4lGJp7yT,"Agwee Parish",/KJPN4PduBWe/yXncUmqtQYF/Gwk4wkLz7EW/F2gyHGKOZgR/x7pZ9LvlBky/UQm4lGJp7yT,6,x7pZ9LvlBky
+EMIS,TcIXBjp8zcI,"Agweng Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/cua0gMEDjsF/TcIXBjp8zcI,6,cua0gMEDjsF
+EMIS,e6MuX9oxdNv,"Agwenonywal Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/LtqhaJd6sm3/e6MuX9oxdNv,6,LtqhaJd6sm3
+EMIS,cIHM7yOLNZw,"Agwiciri Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/UgnKPKLjoP5/cIHM7yOLNZw,6,UgnKPKLjoP5
+EMIS,jmNTClKL6w1,"Agwingiri Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/LtqhaJd6sm3/jmNTClKL6w1,6,LtqhaJd6sm3
+EMIS,ZkAsPSQr7xn,"Aisa Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/CQNNZuyQuOQ/ZkAsPSQr7xn,6,CQNNZuyQuOQ
+EMIS,pdZghekInvy,"Aita Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/KzIoyeDgb3y/pdZghekInvy,6,KzIoyeDgb3y
+EMIS,YUQOvZDi3zC,"Ajaki Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/O83bcmVOeOy/YUQOvZDi3zC,6,O83bcmVOeOy
+EMIS,ZgZ0JKTr6rM,"Ajar Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/i7IJMXUFR20/ZgZ0JKTr6rM,6,i7IJMXUFR20
+EMIS,aCdwUqplWOO,"Ajeluk Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/k0zoEg1Qdka/aCdwUqplWOO,6,k0zoEg1Qdka
+EMIS,HKTnKB9x53f,"Ajepet Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/z9izemFi8Qs/HKTnKB9x53f,6,z9izemFi8Qs
+EMIS,D1rhoR8ozB3,"Ajerijeri Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/cpdy4YSoIQn/D1rhoR8ozB3,6,cpdy4YSoIQn
+EMIS,c2kVtVcMhq2,"Ajesa Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/f7cc8BklNoP/c2kVtVcMhq2,6,f7cc8BklNoP
+EMIS,atb5WM1dKX3,"Ajesai Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/Afml9JnrPed/atb5WM1dKX3,6,Afml9JnrPed
+EMIS,QQmQVVm1Dq6,"Ajia Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/viHdGLaij6G/M2EdZ4mtaUE/QQmQVVm1Dq6,6,M2EdZ4mtaUE
+EMIS,G4chfbtJRct,"Ajiba Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/KfCqofEu1kM/G4chfbtJRct,6,KfCqofEu1kM
+EMIS,C17toQ5rr0L,"Ajipala Parish",/KJPN4PduBWe/ToANlYyRiKb/iqsaGItA68C/nDE4TWIlT2y/FfiqxgUKikB/C17toQ5rr0L,6,FfiqxgUKikB
+EMIS,kqEVPZnzzlr,"Ajiraku Parish",/KJPN4PduBWe/ToANlYyRiKb/yKjxFBHrGgw/YSFmAjdcrQU/GKvplwWtTl3/kqEVPZnzzlr,6,GKvplwWtTl3
+EMIS,g4FR4jLkde9,"Ajok Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/UgnKPKLjoP5/g4FR4jLkde9,6,UgnKPKLjoP5
+EMIS,shaKyrrStaf,"Ajono Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/viHdGLaij6G/ky99bitbP4Z/shaKyrrStaf,6,ky99bitbP4Z
+EMIS,TXN4OdjJLo5,"Ajonyi Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/VYVQfdvBzxG/TXN4OdjJLo5,6,VYVQfdvBzxG
+EMIS,MZhwS222Aze,"Ajugopi Parish",/KJPN4PduBWe/ToANlYyRiKb/QYiQ2KqgCxj/IWyZ8SIUBMF/BIpNirBPqVy/MZhwS222Aze,6,BIpNirBPqVy
+EMIS,gyBRGDli9wm,"Ajuket(Kanyum Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/apv86hAYmE6/gyBRGDli9wm,6,apv86hAYmE6
+EMIS,f8odyewlqhm,"Ajuket(Kapir Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/f7cc8BklNoP/f8odyewlqhm,6,f7cc8BklNoP
+EMIS,AW8zDXUfl6V,"Ajuket(Sikuda Subcounty) Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/bjZ2sKrEbQN/AW8zDXUfl6V,6,bjZ2sKrEbQN
+EMIS,gpkXd6GYkhf,"Ajul Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/MxARwTFEsmj/gpkXd6GYkhf,6,MxARwTFEsmj
+EMIS,ieDsoR9IMCf,"Akado Parish",/KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q/PYjipnvSnnB/ieDsoR9IMCf,6,PYjipnvSnnB
+EMIS,SFWRU20RK2f,"Akadot Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/vHX1m3sQaji/SFWRU20RK2f,6,vHX1m3sQaji
+EMIS,V9Z53nGVL8m,"Akadot Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/ogMa6hT34Fe/V9Z53nGVL8m,6,ogMa6hT34Fe
+EMIS,l0UH67CZAAo,"Akadot Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/JyUAAhCCr2W/W6HpAU6Zad8/l0UH67CZAAo,6,W6HpAU6Zad8
+EMIS,wY19otyFg1H,"Akago Parish",/KJPN4PduBWe/yXncUmqtQYF/zNgVoDVPYgD/wfh4ZvbnUOc/tXbvbO1XKz4/wY19otyFg1H,6,tXbvbO1XKz4
+EMIS,Lr5pSF4c2vF,"Akaka Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/mYDNLw05F8s/Lr5pSF4c2vF,6,mYDNLw05F8s
+EMIS,R1kLkPEZAEY,"Akaku Parish",/KJPN4PduBWe/LCiSfhGKLEU/qf9xWZu7Dq8/WwquhSr63BA/Bha42mOF5qN/R1kLkPEZAEY,6,Bha42mOF5qN
+EMIS,cunDFtxhmaX,"Akali Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/H5aaabQNsOQ/cunDFtxhmaX,6,H5aaabQNsOQ
+EMIS,luNekM7liKx,"Akangi Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/zuc46mrwazu/luNekM7liKx,6,zuc46mrwazu
+EMIS,yE1qqc1AGVk,"Akara Parish",/KJPN4PduBWe/yXncUmqtQYF/pnTVIF5v27r/YjaAuGJksYm/KOcf2ww8HnI/yE1qqc1AGVk,6,KOcf2ww8HnI
+EMIS,z5Qo2eLgSlP,"Akarukei Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/OXPUPaEkd0c/z5Qo2eLgSlP,6,OXPUPaEkd0c
+EMIS,lpQkhxsWGUa,"Akatojo Parish",/KJPN4PduBWe/LCiSfhGKLEU/hAoe9dhZh9V/qz2RsZSk025/xVR6ICalitN/lpQkhxsWGUa,6,xVR6ICalitN
+EMIS,pCT6qJVJLzh,"Akaya Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/fr0h9tAqdt7/pCT6qJVJLzh,6,fr0h9tAqdt7
+EMIS,ro0TIbIJC5h,"Akayanja Parish",/KJPN4PduBWe/LCiSfhGKLEU/qf9xWZu7Dq8/WwquhSr63BA/Bha42mOF5qN/ro0TIbIJC5h,6,Bha42mOF5qN
+EMIS,kwgN0yL6aml,"Akeriau Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/KzIoyeDgb3y/kwgN0yL6aml,6,KzIoyeDgb3y
+EMIS,P7viLnogZWp,"Akero Parish",/KJPN4PduBWe/rn2uTdRyUbh/tdZbtg9sZkO/Pf8NPQB7A7K/cRAKWblh0Us/P7viLnogZWp,6,cRAKWblh0Us
+EMIS,UFETa3JZxMx,"Aketo Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/gS6HZ2ZApFq/UFETa3JZxMx,6,gS6HZ2ZApFq
+EMIS,PocmuR3HaUg,"Akia Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/FldPzwXnjfK/PocmuR3HaUg,6,FldPzwXnjfK
+EMIS,bfqIY8rtIQz,"Akibui Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/S721tCAqncG/bfqIY8rtIQz,6,S721tCAqncG
+EMIS,ebZIPTRXhKM,"Akide Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/yBGD0zMrPgF/ebZIPTRXhKM,6,yBGD0zMrPgF
+EMIS,ERLw9DnbGzf,"Akileng Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/Afml9JnrPed/ERLw9DnbGzf,6,Afml9JnrPed
+EMIS,wLlbFpRxeul,"Akinio Parish",/KJPN4PduBWe/ToANlYyRiKb/yKjxFBHrGgw/YSFmAjdcrQU/upjKeCSbyUs/wLlbFpRxeul,6,upjKeCSbyUs
+EMIS,wJvs3IYXNdu,"Akisim Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/lXy3hSi353t/wJvs3IYXNdu,6,lXy3hSi353t
+EMIS,N4V8tsfSX5I,"Akisim(Akisim Subcounty) Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/nbWkaw3g8sz/N4V8tsfSX5I,6,nbWkaw3g8sz
+EMIS,qulgdI3FSsZ,"Akisim(Amuria Town Council) Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/eDwM4NbKJgJ/qulgdI3FSsZ,6,eDwM4NbKJgJ
+EMIS,ij0vVzDAlVU,"Akisim(Eastern Division(Soroti District)) Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/qOuUEzeHcEw/F1c4e0zVa1b/ij0vVzDAlVU,6,F1c4e0zVa1b
+EMIS,ChJqvESeIk1,"Akisim(Kanyum Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/apv86hAYmE6/ChJqvESeIk1,6,apv86hAYmE6
+EMIS,o4bbY1eDyML,"Akisim(Kapir Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/f7cc8BklNoP/o4bbY1eDyML,6,f7cc8BklNoP
+EMIS,OKPgler19ad,"Akisim(Willa Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/Hr3N4iC1NHc/OKPgler19ad,6,Hr3N4iC1NHc
+EMIS,ZKuY5WbP7Kh,"Akobi Parish",/KJPN4PduBWe/yXncUmqtQYF/pnTVIF5v27r/YjaAuGJksYm/lXichvejmV9/ZKuY5WbP7Kh,6,lXichvejmV9
+EMIS,u6WEeMgZmaB,"Akoboi Parish",/KJPN4PduBWe/rn2uTdRyUbh/zJfpujxC1kD/KNPVL257sX3/TP7RrXdyio8/u6WEeMgZmaB,6,TP7RrXdyio8
+EMIS,UHQ30nVfkjn,"Akodokodoi Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/wmQcuojFx6p/UHQ30nVfkjn,6,wmQcuojFx6p
+EMIS,kKQFdmcL2zs,"Akokoro Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/frGOo5VaLWP/kKQFdmcL2zs,6,frGOo5VaLWP
+EMIS,StPqRsuzCFv,"Akol Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/ZvKLjuT1TNW/StPqRsuzCFv,6,ZvKLjuT1TNW
+EMIS,zwAv34bKZ9h,"Akolodongo Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/JyUAAhCCr2W/K37NuFmIwLM/zwAv34bKZ9h,6,K37NuFmIwLM
+EMIS,dLfYo0vNkW0,"Akomo Parish",/KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q/aqkKJ6HTtdn/dLfYo0vNkW0,6,aqkKJ6HTtdn
+EMIS,Ov2YoXOWdeK,"Akongomit Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/SoAE9AMbXXS/Ov2YoXOWdeK,6,SoAE9AMbXXS
+EMIS,rjzxyKM8R5l,"Akor Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/zuc46mrwazu/rjzxyKM8R5l,6,zuc46mrwazu
+EMIS,HWjCIvMOqL1,"Akore Town Board Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/WbKaPYBtvbV/HWjCIvMOqL1,6,WbKaPYBtvbV
+EMIS,NiltmiX2Xdv,"Akore(Akoromit Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/WbKaPYBtvbV/NiltmiX2Xdv,6,WbKaPYBtvbV
+EMIS,qkF3P6INVrn,"Akore(Ogolai Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/ztVnAoSZJ4I/qkF3P6INVrn,6,ztVnAoSZJ4I
+EMIS,eXpGhBEGh3u,"Akou Etom Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/t0XYuEU4iqm/eXpGhBEGh3u,6,t0XYuEU4iqm
+EMIS,Dj33qjuY36c,"Akubui Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/k0zoEg1Qdka/Dj33qjuY36c,6,k0zoEg1Qdka
+EMIS,BrGQTKAYlPO,"Akuca Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/WccRWlVxEVQ/BrGQTKAYlPO,6,WccRWlVxEVQ
+EMIS,RizIhqwNGKn,"Akum Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/yBGD0zMrPgF/RizIhqwNGKn,6,yBGD0zMrPgF
+EMIS,JLZvOZEZqW1,"Akum(Acowa Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/t0XYuEU4iqm/JLZvOZEZqW1,6,t0XYuEU4iqm
+EMIS,zJmXrN1q2Ka,"Akum(Willa Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/Hr3N4iC1NHc/zJmXrN1q2Ka,6,Hr3N4iC1NHc
+EMIS,XWDNqoYSzl3,"Akumoi Parish",/KJPN4PduBWe/rn2uTdRyUbh/zJfpujxC1kD/KNPVL257sX3/I2D5Esqpyui/XWDNqoYSzl3,6,I2D5Esqpyui
+EMIS,nEJ8ZRAosTy,"Akuoro Parish",/KJPN4PduBWe/rn2uTdRyUbh/tdZbtg9sZkO/Pf8NPQB7A7K/cRAKWblh0Us/nEJ8ZRAosTy,6,cRAKWblh0Us
+EMIS,rrrktKYfpT5,"Akura Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/ZA3LBUpRxvi/rrrktKYfpT5,6,ZA3LBUpRxvi
+EMIS,Hw7goR45s1W,"Akurao Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/i8DfYkEe9Ga/Hw7goR45s1W,6,i8DfYkEe9Ga
+EMIS,sa6LTGYgvhW,"Akurolango Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/F0oTeW1Sqgv/sa6LTGYgvhW,6,F0oTeW1Sqgv
+EMIS,xouQcTBqsYq,"Akwamor Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/MPmuXtpVOgW/xouQcTBqsYq,6,MPmuXtpVOgW
+EMIS,tNaGy8WjZX7,"Akwanga Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/jkEv7p1AY7B/tNaGy8WjZX7,6,jkEv7p1AY7B
+EMIS,uumqyAsQg7e,"Akwangkel Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/ltVgKBsPZx7/uumqyAsQg7e,6,ltVgKBsPZx7
+EMIS,uAQRbYC2bu3,"Akwirididi Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/HTK99u5ioZy/uAQRbYC2bu3,6,HTK99u5ioZy
+EMIS,P9iCA2LVq03,"Akwon Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/tw65TiDdjdi/P9iCA2LVq03,6,tw65TiDdjdi
+EMIS,kclrqkDtvIy,"Akworo Parish",/KJPN4PduBWe/yXncUmqtQYF/pnTVIF5v27r/YjaAuGJksYm/N5sEBOXXGdb/kclrqkDtvIy,6,N5sEBOXXGdb
+EMIS,THexBNW3JMn,"Akwoyo Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/CU0vGCAcG2r/THexBNW3JMn,6,CU0vGCAcG2r
+EMIS,iSXcZeMbvpv,"Alal Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/ltVgKBsPZx7/iSXcZeMbvpv,6,ltVgKBsPZx7
+EMIS,j8d8B1x463y,"Alangi Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/YLu91VNQTlD/j8d8B1x463y,6,YLu91VNQTlD
+EMIS,dFMADMnZNAI,"Alango Parish",/KJPN4PduBWe/yXncUmqtQYF/pnTVIF5v27r/PBM3l2nqRwN/UkxNbz57Hbm/dFMADMnZNAI,6,UkxNbz57Hbm
+EMIS,bud3X2UyAjy,"Alanyi Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/IY2R34kEofs/bud3X2UyAjy,6,IY2R34kEofs
+EMIS,wOuq5qf2Zy6,"Alapata Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/uORouhNAbq5/wOuq5qf2Zy6,6,uORouhNAbq5
+EMIS,bQBYjaoVG5K,"Alaro Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/frGOo5VaLWP/bQBYjaoVG5K,6,frGOo5VaLWP
+EMIS,umA2BbkxivM,"Alebere Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/cknntfF4SWQ/umA2BbkxivM,6,cknntfF4SWQ
+EMIS,J8clh1jGJ60,"Alebtong Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/ltVgKBsPZx7/J8clh1jGJ60,6,ltVgKBsPZx7
+EMIS,ZZEBUseIeD7,"Aleka Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/MxARwTFEsmj/ZZEBUseIeD7,6,MxARwTFEsmj
+EMIS,JUxC2S0YMFl,"Alem Parish",/KJPN4PduBWe/rn2uTdRyUbh/QoRZB7xc3j9/PUyNDCs6OkV/gnWLrY8AzgW/JUxC2S0YMFl,6,gnWLrY8AzgW
+EMIS,mdDhD3SmhVW,"Alemere Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/LtqhaJd6sm3/mdDhD3SmhVW,6,LtqhaJd6sm3
+EMIS,zXHZJ5MYY93,"Alemi Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/zP8OUKT5xa1/zXHZJ5MYY93,6,zP8OUKT5xa1
+EMIS,qyiaOu6LmMn,"Alengo Parish",/KJPN4PduBWe/rn2uTdRyUbh/zJfpujxC1kD/KNPVL257sX3/shIed0W2hlB/qyiaOu6LmMn,6,shIed0W2hlB
+EMIS,QdtReRcg4Q1,"Alere(Pacara Subcounty) Parish",/KJPN4PduBWe/ToANlYyRiKb/QYiQ2KqgCxj/IWyZ8SIUBMF/gJAg8NVbDZB/QdtReRcg4Q1,6,gJAg8NVbDZB
+EMIS,vLuwGWC6vTN,"Alere(Willa Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/Hr3N4iC1NHc/vLuwGWC6vTN,6,Hr3N4iC1NHc
+EMIS,EV0xBcGPuQ4,"Alero Kal Parish",/KJPN4PduBWe/yXncUmqtQYF/zNgVoDVPYgD/wfh4ZvbnUOc/Iu9qqQC6Ve3/EV0xBcGPuQ4,6,Iu9qqQC6Ve3
+EMIS,MH8tLPFsFSY,"Alia Parish",/KJPN4PduBWe/ToANlYyRiKb/yKjxFBHrGgw/YSFmAjdcrQU/eAvexvVjXXA/MH8tLPFsFSY,6,eAvexvVjXXA
+EMIS,t3l7YmTZ0Fe,"Aliakamer Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/et9LMk0mLQd/t3l7YmTZ0Fe,6,et9LMk0mLQd
+EMIS,lHVbwXFdyXv,"Aliapi Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/fXwQ7dvT8xC/lHVbwXFdyXv,6,fXwQ7dvT8xC
+EMIS,X9yvM8wCIgX,"Aliba Parish",/KJPN4PduBWe/ToANlYyRiKb/bLoH4VbxCGI/IAkdv8lnkij/us34Xlf5IJW/X9yvM8wCIgX,6,us34Xlf5IJW
+EMIS,nOBv9ZDpXgl,"Alibi Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/MxARwTFEsmj/nOBv9ZDpXgl,6,MxARwTFEsmj
+EMIS,lP38wj3Jzzr,"Alidi Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/Pm9QCE8Tbaf/lP38wj3Jzzr,6,Pm9QCE8Tbaf
+EMIS,aAYRqh7VHXw,"Alido Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/i7IJMXUFR20/aAYRqh7VHXw,6,i7IJMXUFR20
+EMIS,fFsZ5YjRZTL,"Aligoi(Kachumbala Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/tdZbtg9sZkO/Pf8NPQB7A7K/RfKhGmGQCIJ/fFsZ5YjRZTL,6,RfKhGmGQCIJ
+EMIS,JrANk3mpyEj,"Aligoi(Nyero Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/cdLLK5GSIdV/JrANk3mpyEj,6,cdLLK5GSIdV
+EMIS,jYiAYrYhaIx,"Aligoi(Ongino Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/yBGD0zMrPgF/jYiAYrYhaIx,6,yBGD0zMrPgF
+EMIS,AcK4MqRAH6L,"Alir Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/ZWNO5xzFUsZ/AcK4MqRAH6L,6,ZWNO5xzFUsZ
+EMIS,UoHktPEqajl,"Alira  Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/eDwM4NbKJgJ/UoHktPEqajl,6,eDwM4NbKJgJ
+EMIS,iFVowtApCg9,"Alira(Aduku Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/WoNw1cfI6QF/iFVowtApCg9,6,WoNw1cfI6QF
+EMIS,rLMvhudtfhg,"Alira(Amuria Town Council) Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/eDwM4NbKJgJ/rLMvhudtfhg,6,eDwM4NbKJgJ
+EMIS,hJDXfpb8gFr,"Aliribu Parish",/KJPN4PduBWe/ToANlYyRiKb/iqsaGItA68C/nDE4TWIlT2y/FfiqxgUKikB/hJDXfpb8gFr,6,FfiqxgUKikB
+EMIS,VJtkXM4NWEc,"Alito Camp Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/FN1kbZcv9n0/VJtkXM4NWEc,6,FN1kbZcv9n0
+EMIS,dwWcj2G1Ypi,"Alito(Alito Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/NYuLJ3RVofk/dwWcj2G1Ypi,6,NYuLJ3RVofk
+EMIS,Dbj0cPPIyv3,"Alito(Obalanga Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/Afml9JnrPed/Dbj0cPPIyv3,6,Afml9JnrPed
+EMIS,ZjH0YYxb5rc,"Alivu Parish",/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw/bAeEQRpZomY/x03WcFtEFkx/ZjH0YYxb5rc,6,x03WcFtEFkx
+EMIS,u7mayvv4oAi,"Alivu Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/DoqDOSg4uWw/Tuu2RXo83EC/u7mayvv4oAi,6,Tuu2RXo83EC
+EMIS,WWIhxJrY0CO,"Alla Parish",/KJPN4PduBWe/ToANlYyRiKb/iqsaGItA68C/nDE4TWIlT2y/CAdj0rt3SoB/WWIhxJrY0CO,6,CAdj0rt3SoB
+EMIS,KDOiV5jA5Ap,"Alobokwe Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/SzDWKeAxdpE/KDOiV5jA5Ap,6,SzDWKeAxdpE
+EMIS,ZrSD7eLop5s,"Aloet Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/qOuUEzeHcEw/QGwLgiGGvDk/ZrSD7eLop5s,6,QGwLgiGGvDk
+EMIS,tUktWYHkIk7,"Alogook Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/et9LMk0mLQd/tUktWYHkIk7,6,et9LMk0mLQd
+EMIS,PZ1vdfUIKkB,"Alokolum Parish",/KJPN4PduBWe/yXncUmqtQYF/Gwk4wkLz7EW/F2gyHGKOZgR/kTswDBmRkXI/PZ1vdfUIKkB,6,kTswDBmRkXI
+EMIS,RrFAmO81cgK,"Alolololo Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/T1ZBKTAVg4X/RrFAmO81cgK,6,T1ZBKTAVg4X
+EMIS,XWAzcDNbUhJ,"Aloman Parish",/KJPN4PduBWe/LSCoCf6ibP8/h1O9AvNR4jS/lS1VR73bBuH/RQgPN6OG52U/XWAzcDNbUhJ,6,RQgPN6OG52U
+EMIS,upZx7hUAahv,"Aloni Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/KfXPhafUNbu/upZx7hUAahv,6,KfXPhafUNbu
+EMIS,uJpqXTQOiYD,"Alpha Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/ultOGuAHzgW/uJpqXTQOiYD,6,ultOGuAHzgW
+EMIS,yVzVCgyq3vc,"Aluka Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/UgnKPKLjoP5/yVzVCgyq3vc,6,UgnKPKLjoP5
+EMIS,Ep9vJzvs9EN,"Alukucok Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/EZ3SAh78r3j/Ep9vJzvs9EN,6,EZ3SAh78r3j
+EMIS,HJ8y9WN3Fhc,"Alukucok Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/gR6hjO9RPTM/HJ8y9WN3Fhc,6,gR6hjO9RPTM
+EMIS,ZiFLUEn0ZX4,"Alupe Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/Afml9JnrPed/ZiFLUEn0ZX4,6,Afml9JnrPed
+EMIS,gYbzeYaFKsL,"Aluru Parish",/KJPN4PduBWe/ToANlYyRiKb/W0kQBddyGyh/DlWICmN329w/PfoXHUEUiLz/gYbzeYaFKsL,6,PfoXHUEUiLz
+EMIS,R86HT7pJnKH,"Aluti Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/jkEv7p1AY7B/R86HT7pJnKH,6,jkEv7p1AY7B
+EMIS,JeappyXUWjx,"Alutkot Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/Pm9QCE8Tbaf/JeappyXUWjx,6,Pm9QCE8Tbaf
+EMIS,cbCv4LW2GOs,"Alworo Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/b62W7Du8SBv/cbCv4LW2GOs,6,b62W7Du8SBv
+EMIS,p63b44iv9Sr,"Alworoceng Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/gS6HZ2ZApFq/p63b44iv9Sr,6,gS6HZ2ZApFq
+EMIS,qNdwFr3tPj0,"Alyec  Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/I4KCZcFBpKG/qNdwFr3tPj0,6,I4KCZcFBpKG
+EMIS,RLRAkvANeNW,"Alyec Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/I4KCZcFBpKG/RLRAkvANeNW,6,I4KCZcFBpKG
+EMIS,QrhbKkVQbvf,"Alyecmeda Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/LtqhaJd6sm3/QrhbKkVQbvf,6,LtqhaJd6sm3
+EMIS,hnnjvydUG1U,"Alyet Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/kQC82MEQIvT/hnnjvydUG1U,6,kQC82MEQIvT
+EMIS,mhrkl0FDru4,"Amagoro A Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/BvE89U4cLqG/SmmrtJn38ay/mhrkl0FDru4,6,SmmrtJn38ay
+EMIS,TnPoMJvC56l,"Amagoro B Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/BvE89U4cLqG/SmmrtJn38ay/TnPoMJvC56l,6,SmmrtJn38ay
+EMIS,gzOWnkAbNEc,"Amagoro Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/JyUAAhCCr2W/K37NuFmIwLM/gzOWnkAbNEc,6,K37NuFmIwLM
+EMIS,HAM8n3y5Sb8,"Amai Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/bY0J4KZy2NO/HAM8n3y5Sb8,6,bY0J4KZy2NO
+EMIS,J2zEO0xr8O3,"Amanang Parish",/KJPN4PduBWe/LSCoCf6ibP8/e8m9ZYMRoeR/iYVSxR1mvET/NBKNJaoiu5d/J2zEO0xr8O3,6,NBKNJaoiu5d
+EMIS,Fjg1kSCBdm1,"Amanipi Parish",/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw/bAeEQRpZomY/hZgKYy0KD85/Fjg1kSCBdm1,6,hZgKYy0KD85
+EMIS,xkIlKR0iZnw,"Amar Parish",/KJPN4PduBWe/yXncUmqtQYF/zNgVoDVPYgD/wfh4ZvbnUOc/AcnwwILP8m6/xkIlKR0iZnw,6,AcnwwILP8m6
+EMIS,cSUgL0hSRd1,"Amaseniko Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/oRcPLzsCoif/cSUgL0hSRd1,6,oRcPLzsCoif
+EMIS,bj6a4Gy868E,"Ambala parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/fr0h9tAqdt7/bj6a4Gy868E,6,fr0h9tAqdt7
+EMIS,nVsM2ksQEGN,"Ambele Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/j0ASCL5gN3o/nVsM2ksQEGN,6,j0ASCL5gN3o
+EMIS,Fe5RKa2orqy,"Ambelechu Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/NhJ7OKjBwpO/Fe5RKa2orqy,6,NhJ7OKjBwpO
+EMIS,An0WVQR67th,"Ambidro Parish",/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw/bAeEQRpZomY/x03WcFtEFkx/An0WVQR67th,6,x03WcFtEFkx
+EMIS,mcwHgy6Sqfk,"Amejei Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/mVia0FcPFQg/R6wwo8vaDE4/mcwHgy6Sqfk,6,R6wwo8vaDE4
+EMIS,iO1GURgSfyH,"Amemia Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/oRcPLzsCoif/iO1GURgSfyH,6,oRcPLzsCoif
+EMIS,RQ0kOqo34Us,"Amen Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/qOuUEzeHcEw/QGwLgiGGvDk/RQ0kOqo34Us,6,QGwLgiGGvDk
+EMIS,AT4FrYPGkyw,"Amero Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/t0XYuEU4iqm/AT4FrYPGkyw,6,t0XYuEU4iqm
+EMIS,G6UlbOxMXc2,"Amii Amilo Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/gS6HZ2ZApFq/G6UlbOxMXc2,6,gS6HZ2ZApFq
+EMIS,Qwdmk67rl7c,"Amiiaberidwogo Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/gS6HZ2ZApFq/Qwdmk67rl7c,6,gS6HZ2ZApFq
+EMIS,EbhiSyftUwu,"Amilimili Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/dlW3jC4tF2A/EbhiSyftUwu,6,dlW3jC4tF2A
+EMIS,wH9e3E94pBL,"Aminit(Kamuda Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/c25qRvx0b0Z/PrpVnR68wW8/wH9e3E94pBL,6,PrpVnR68wW8
+EMIS,dRBYv41DWZC,"Aminit(Kolir Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/tdZbtg9sZkO/Pf8NPQB7A7K/ERBPumWfX4z/dRBYv41DWZC,6,ERBPumWfX4z
+EMIS,Tzu8hEoSlHy,"Aminito Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/WbKaPYBtvbV/Tzu8hEoSlHy,6,WbKaPYBtvbV
+EMIS,N5KfLOG8vXK,"Aminteng Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/hYG3R7JZ67R/GiR57L6fv1P/N5KfLOG8vXK,6,GiR57L6fv1P
+EMIS,RVrNCwpHrw6,"Amirimiri Ward Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/xlAiS1ae6Af/RVrNCwpHrw6,6,xlAiS1ae6Af
+EMIS,Oj52GiUR8ie,"Amoilela Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/YRTZEQCv1PR/Oj52GiUR8ie,6,YRTZEQCv1PR
+EMIS,Iv0mzQkLPz4,"Amokoge Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/b62W7Du8SBv/Iv0mzQkLPz4,6,b62W7Du8SBv
+EMIS,RSG6EPb6LbV,"Amolatar Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/LtqhaJd6sm3/RSG6EPb6LbV,6,LtqhaJd6sm3
+EMIS,VudfZiwhmOM,"Amolo Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/e7FNGCD95EI/VudfZiwhmOM,6,e7FNGCD95EI
+EMIS,B25gtxAMvyK,"Amoni Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/JyUAAhCCr2W/aKIzOHNtKAF/B25gtxAMvyK,6,aKIzOHNtKAF
+EMIS,ejOlP6b8DnM,"Amonikakinei Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/QZJn3hiO6Zp/ejOlP6b8DnM,6,QZJn3hiO6Zp
+EMIS,yEijRSI9Mi3,"Amonolocoo Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/HIwCAP46Wfh/yEijRSI9Mi3,6,HIwCAP46Wfh
+EMIS,CV095LLYpsM,"Amonomito Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/u9UneLEtuAi/CV095LLYpsM,6,u9UneLEtuAi
+EMIS,nRhTgNblTEd,"Amononeno Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/IY2R34kEofs/nRhTgNblTEd,6,IY2R34kEofs
+EMIS,Qd96uEqUuS4,"Amootom Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/wmQcuojFx6p/Qd96uEqUuS4,6,wmQcuojFx6p
+EMIS,DYnbgLeVXKD,"Amor East Parish",/KJPN4PduBWe/ToANlYyRiKb/uqUyTPvQKII/WzCTxqL56PX/mygpAfCn9hH/DYnbgLeVXKD,6,mygpAfCn9hH
+EMIS,cB7Ps2IAaly,"Amor West Parish",/KJPN4PduBWe/ToANlYyRiKb/uqUyTPvQKII/WzCTxqL56PX/mygpAfCn9hH/cB7Ps2IAaly,6,mygpAfCn9hH
+EMIS,EZxaghtQWM1,"Amorigoga Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/H5aaabQNsOQ/EZxaghtQWM1,6,H5aaabQNsOQ
+EMIS,E701KyglJjk,"Amoru(Arapai Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/qOuUEzeHcEw/ghpendxMrmw/E701KyglJjk,6,ghpendxMrmw
+EMIS,CcmDTBquQwS,"Amoru(Otuboi Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/aHeWo2xvYfD/N3Fx3f2XHYS/l0vbaSZHnlp/CcmDTBquQwS,6,l0vbaSZHnlp
+EMIS,lOAh8GsJqqb,"Amoyai Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/wArMrPxQ8Em/lOAh8GsJqqb,6,wArMrPxQ8Em
+EMIS,fL2MWl4c6Sn,"Amoyokoma Parish",/KJPN4PduBWe/yXncUmqtQYF/C0RSe3EWBqU/SQ3IaVbkqiy/mDiPZMluWHS/fL2MWl4c6Sn,6,mDiPZMluWHS
+EMIS,iXYKHUAlMZe,"Amuca Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/qRejDNgWktI/iXYKHUAlMZe,6,qRejDNgWktI
+EMIS,pcWCIqPIBRM,"Amucu Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/O83bcmVOeOy/pcWCIqPIBRM,6,O83bcmVOeOy
+EMIS,V7dS2XcA6tn,"Amuda Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/ATIUYA06Pqh/V7dS2XcA6tn,6,ATIUYA06Pqh
+EMIS,OvnxaieWHeV,"Amudat Parish",/KJPN4PduBWe/uN4gXUciDZ8/a8RHFdF4DXL/GY8MHzVLI6F/Np4Vatu4wKI/OvnxaieWHeV,6,Np4Vatu4wKI
+EMIS,BknjdwgvdGJ,"Amuge Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/NYuLJ3RVofk/BknjdwgvdGJ,6,NYuLJ3RVofk
+EMIS,dEVYc4rZPnL,"Amukol Parish",/KJPN4PduBWe/LSCoCf6ibP8/aginheWSLef/zRunPyCqYTQ/BQgOi9wojr8/dEVYc4rZPnL,6,BQgOi9wojr8
+EMIS,u8EaHCbKKdP,"Amukugungu Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/hWbz7QYuaRi/u8EaHCbKKdP,6,hWbz7QYuaRi
+EMIS,Ox5NoTiiFsN,"Amun Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/frGOo5VaLWP/Ox5NoTiiFsN,6,frGOo5VaLWP
+EMIS,S4P7pbDR6jP,"Amunamun Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/HIwCAP46Wfh/S4P7pbDR6jP,6,HIwCAP46Wfh
+EMIS,JAutSd7bZMV,"Amunga Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/ZWNO5xzFUsZ/JAutSd7bZMV,6,ZWNO5xzFUsZ
+EMIS,UHoHP4mwPjD,"Amunupi Parish",/KJPN4PduBWe/ToANlYyRiKb/iqsaGItA68C/lNCuzvl2tLj/R3FjdR0b7ps/UHoHP4mwPjD,6,R3FjdR0b7ps
+EMIS,Q9LYcnoSRem,"Amuria Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/ltVgKBsPZx7/Q9LYcnoSRem,6,ltVgKBsPZx7
+EMIS,r0macRCUV1a,"Amurwo Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/JyUAAhCCr2W/yUy9SU1xZic/r0macRCUV1a,6,yUy9SU1xZic
+EMIS,PNJYSe2N0HT,"Amus Parish",/KJPN4PduBWe/rn2uTdRyUbh/tdZbtg9sZkO/Pf8NPQB7A7K/RfKhGmGQCIJ/PNJYSe2N0HT,6,RfKhGmGQCIJ
+EMIS,T3D90m3NjqF,"Amusia Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/GvAc2dl3DfC/T3D90m3NjqF,6,GvAc2dl3DfC
+EMIS,gwPmYnxPT5T,"Amusus Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/dlW3jC4tF2A/gwPmYnxPT5T,6,dlW3jC4tF2A
+EMIS,Yl0jtZ76kVa,"Amwa Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/Y7nPca3tf7Y/Yl0jtZ76kVa,6,Y7nPca3tf7Y
+EMIS,CVdSduQtuOj,"Amwoma Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/FsinlhpFnq3/CVdSduQtuOj,6,FsinlhpFnq3
+EMIS,pvAtTHQOWcC,"Amyel Parish",/KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q/fKPpzVhU8AX/pvAtTHQOWcC,6,fKPpzVhU8AX
+EMIS,OzGNl3LIKvI,"Anai Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/qRejDNgWktI/OzGNl3LIKvI,6,qRejDNgWktI
+EMIS,fjySQnEkiJa,"Anaka Parish",/KJPN4PduBWe/yXncUmqtQYF/xy0M4HhjXtD/StQcQsGYdz1/fr53d1mdMz6/fjySQnEkiJa,6,fr53d1mdMz6
+EMIS,JTftzf3QHxk,"Anamido Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/lnuAGQZpJO6/JTftzf3QHxk,6,lnuAGQZpJO6
+EMIS,Mqdu0cNylZg,"Anamwany Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/SoAE9AMbXXS/Mqdu0cNylZg,6,SoAE9AMbXXS
+EMIS,ahFBm0G92Si,"Anara Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/ltVgKBsPZx7/ahFBm0G92Si,6,ltVgKBsPZx7
+EMIS,pADGhEi3R8H,"Anavu Parish",/KJPN4PduBWe/ToANlYyRiKb/yKjxFBHrGgw/YSFmAjdcrQU/CvIH3LA5erX/pADGhEi3R8H,6,CvIH3LA5erX
+EMIS,c78yGnGvfwU,"Andibo Parish",/KJPN4PduBWe/ToANlYyRiKb/uqUyTPvQKII/WzCTxqL56PX/W5JOm7Ofkdb/c78yGnGvfwU,6,W5JOm7Ofkdb
+EMIS,B1uH3o14wxw,"Anepmoroto Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/YLu91VNQTlD/B1uH3o14wxw,6,YLu91VNQTlD
+EMIS,pIpqVAnZ0Ex,"Aneralibi Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/wu26nVF2rFR/pIpqVAnZ0Ex,6,wu26nVF2rFR
+EMIS,u3E0n7lDnOA,"Angal Lower Parish",/KJPN4PduBWe/ToANlYyRiKb/Xjc0LDFa5gW/GDfVHitWE3g/llVhib3aoJe/u3E0n7lDnOA,6,llVhib3aoJe
+EMIS,jjVYtQMmSKI,"Angar Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/j0ASCL5gN3o/jjVYtQMmSKI,6,j0ASCL5gN3o
+EMIS,k8cjof0EFpb,"Angarom Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/PzBhoCO9Kh8/k8cjof0EFpb,6,PzBhoCO9Kh8
+EMIS,FOS0y0WpHhM,"Angaya Parish",/KJPN4PduBWe/yXncUmqtQYF/Gwk4wkLz7EW/wsewxcNH3y2/Anb2BySBeLP/FOS0y0WpHhM,6,Anb2BySBeLP
+EMIS,KSy8iGsGajb,"Angayiki Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/hYG3R7JZ67R/PfQn5EuMhjD/KSy8iGsGajb,6,PfQn5EuMhjD
+EMIS,ocFbGJzHHJX,"Angazi Parish",/KJPN4PduBWe/ToANlYyRiKb/yKjxFBHrGgw/YSFmAjdcrQU/IEQz8yJNMnX/ocFbGJzHHJX,6,IEQz8yJNMnX
+EMIS,Qz7nVtc9chU,"Angerepo Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/JZ3TytKHvcl/Qz7nVtc9chU,6,JZ3TytKHvcl
+EMIS,TkpYLkL6JjF,"Angetta Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/T1ZBKTAVg4X/TkpYLkL6JjF,6,T1ZBKTAVg4X
+EMIS,feAYAVBdXEi,"Angic Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/YRTZEQCv1PR/feAYAVBdXEi,6,YRTZEQCv1PR
+EMIS,FcfsiPrWFb0,"Angodi Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/z9izemFi8Qs/FcfsiPrWFb0,6,z9izemFi8Qs
+EMIS,c8KW7AirZ9G,"Angodingod Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/GvAc2dl3DfC/c8KW7AirZ9G,6,GvAc2dl3DfC
+EMIS,e3vfJfnip5s,"Angol Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/UivW7gTQLES/e3vfJfnip5s,6,UivW7gTQLES
+EMIS,YscH9Yo0hXd,"Angole(Awere Subcounty) Parish",/KJPN4PduBWe/yXncUmqtQYF/aBrjuZk0W31/ehlCmFnbce9/SUCaBwNMHAI/YscH9Yo0hXd,6,SUCaBwNMHAI
+EMIS,SbPARlF2yxd,"Angole(Wera Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/e7FNGCD95EI/SbPARlF2yxd,6,e7FNGCD95EI
+EMIS,h72Xtu8IzvI,"Angolebwal(Acowa Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/t0XYuEU4iqm/h72Xtu8IzvI,6,t0XYuEU4iqm
+EMIS,bHisUxK4Sz5,"Angolebwal(Morulem Subcounty) Parish",/KJPN4PduBWe/uN4gXUciDZ8/NREoMszwQZW/SyQ5EM0LXrU/YzgCzwkOJLN/bHisUxK4Sz5,6,YzgCzwkOJLN
+EMIS,RdwgBlxuBl7,"Angoltok(Abako Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/IY2R34kEofs/RdwgBlxuBl7,6,IY2R34kEofs
+EMIS,EmR7V2A3Uqy,"Angoltok(Anyara Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/aHeWo2xvYfD/N3Fx3f2XHYS/Hjm1ts9bHTc/EmR7V2A3Uqy,6,Hjm1ts9bHTc
+EMIS,fw2xXqk9B1y,"Angwenya Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/F0oTeW1Sqgv/fw2xXqk9B1y,6,F0oTeW1Sqgv
+EMIS,UHI7RoDNDsy,"Angwetangwet Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/FldPzwXnjfK/UHI7RoDNDsy,6,FldPzwXnjfK
+EMIS,oTbqWsdTP4f,"Aninata Parish",/KJPN4PduBWe/uN4gXUciDZ8/NREoMszwQZW/SyQ5EM0LXrU/aQxpTlacfqR/oTbqWsdTP4f,6,aQxpTlacfqR
+EMIS,NGG0BAyK2Jy,"Anipi Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/DoqDOSg4uWw/GW4IzvX16tZ/NGG0BAyK2Jy,6,GW4IzvX16tZ
+EMIS,TRCNeYbZ8rA,"Anwangi(Kwera Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/oOndOLnxBwq/TRCNeYbZ8rA,6,oOndOLnxBwq
+EMIS,F96c8Kkz2IK,"Anwangi(Nambieso Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/fJIbsMWIqvm/F96c8Kkz2IK,6,fJIbsMWIqvm
+EMIS,z0H9ehcrIA8,"Anyacota Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/wu26nVF2rFR/z0H9ehcrIA8,6,wu26nVF2rFR
+EMIS,YH7bLMxPeuB,"Anyanga Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/ZA3LBUpRxvi/YH7bLMxPeuB,6,ZA3LBUpRxvi
+EMIS,NgoBJT7igcW,"Anyangapuc Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/MJkeIaUfKqI/NgoBJT7igcW,6,MJkeIaUfKqI
+EMIS,PcxFPBoU7zd,"Anyara(Adumi Subcounty) Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/DoqDOSg4uWw/loOLqOVYNm9/PcxFPBoU7zd,6,loOLqOVYNm9
+EMIS,L5U8OSXs654,"Anyara(Anyara Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/aHeWo2xvYfD/N3Fx3f2XHYS/Hjm1ts9bHTc/L5U8OSXs654,6,Hjm1ts9bHTc
+EMIS,MSg6zQyVwQ1,"Anyavu Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/viHdGLaij6G/MIhYI1UwwMw/MSg6zQyVwQ1,6,MIhYI1UwwMw
+EMIS,tCghbZuRwS5,"Anyeke Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/ZBe7SvBC4e6/tCghbZuRwS5,6,ZBe7SvBC4e6
+EMIS,Fo1ZRbOzw44,"Anyit Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/IY2R34kEofs/Fo1ZRbOzw44,6,IY2R34kEofs
+EMIS,N33VY7dxkzt,"Anyivu Parish",/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw/bAeEQRpZomY/LGnfNjyVIQR/N33VY7dxkzt,6,LGnfNjyVIQR
+EMIS,U5UXiErtik4,"Anyola Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/UivW7gTQLES/U5UXiErtik4,6,UivW7gTQLES
+EMIS,naPkgGDoWwn,"Anyomolyec Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/hWbz7QYuaRi/naPkgGDoWwn,6,hWbz7QYuaRi
+EMIS,dTsPuFyxYq1,"Anyomorem Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/MJkeIaUfKqI/dTsPuFyxYq1,6,MJkeIaUfKqI
+EMIS,XaX3ngXYFam,"Anyufira Parish",/KJPN4PduBWe/ToANlYyRiKb/yKjxFBHrGgw/YSFmAjdcrQU/IEQz8yJNMnX/XaX3ngXYFam,6,IEQz8yJNMnX
+EMIS,ShETapvVlx8,"Anywali Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/bY0J4KZy2NO/ShETapvVlx8,6,bY0J4KZy2NO
+EMIS,iMANxudKTr5,"Anzu Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/DoqDOSg4uWw/K8u4i9uhnwW/iMANxudKTr5,6,K8u4i9uhnwW
+EMIS,F39d4iDtKpU,"Anzuu (Vurra Subcounty) Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/viHdGLaij6G/ky99bitbP4Z/F39d4iDtKpU,6,ky99bitbP4Z
+EMIS,I9S2Jbo1RaZ,"Aojabule Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/CBFtk2zhHUw/I9S2Jbo1RaZ,6,CBFtk2zhHUw
+EMIS,LheLu4q3n69,"Aornga Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/fJIbsMWIqvm/LheLu4q3n69,6,fJIbsMWIqvm
+EMIS,DrikLAla5Jj,"Apa Parish",/KJPN4PduBWe/ToANlYyRiKb/iqsaGItA68C/lNCuzvl2tLj/nW2rpHlXmtK/DrikLAla5Jj,6,nW2rpHlXmtK
+EMIS,g5WRzKV63Yk,"Apach Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/HTK99u5ioZy/g5WRzKV63Yk,6,HTK99u5ioZy
+EMIS,ZrJkYrBR16i,"Apado Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/I4KCZcFBpKG/ZrJkYrBR16i,6,I4KCZcFBpKG
+EMIS,GmcduAmQlkP,"Apala Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/NYuLJ3RVofk/GmcduAmQlkP,6,NYuLJ3RVofk
+EMIS,ShmvRo3X8PT,"Apalepe Ward Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/xlAiS1ae6Af/ShmvRo3X8PT,6,xlAiS1ae6Af
+EMIS,ydXJpFVXG9Z,"Apama Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/qfeK5499YE7/ydXJpFVXG9Z,6,qfeK5499YE7
+EMIS,HEcnubWzljY,"Apanylongo Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/kQC82MEQIvT/HEcnubWzljY,6,kQC82MEQIvT
+EMIS,nZazKkstmFB,"Apapa Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/ki2VaButqMQ/nZazKkstmFB,6,ki2VaButqMQ
+EMIS,AAy155Mi8Ft,"Apapai Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/ViTfqdZgE2W/AAy155Mi8Ft,6,ViTfqdZgE2W
+EMIS,PrPdFsDapxJ,"Aparisa Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/i8DfYkEe9Ga/PrPdFsDapxJ,6,i8DfYkEe9Ga
+EMIS,RBhrSRSs2hX,"Aparisa(Asamuk Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/rEmgMBFWNxr/RBhrSRSs2hX,6,rEmgMBFWNxr
+EMIS,m6ytYOvjuLz,"Aparisa(Tubur Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/c25qRvx0b0Z/cE1zC4eelwD/m6ytYOvjuLz,6,cE1zC4eelwD
+EMIS,SpxS42JXdfl,"Apeduru Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/O83bcmVOeOy/SpxS42JXdfl,6,O83bcmVOeOy
+EMIS,Nwji9G9d2x2,"Apeitolim Parish",/KJPN4PduBWe/uN4gXUciDZ8/EDhGji3EteB/fV3JXoeHyKw/xqdvBBJPEsk/Nwji9G9d2x2,6,xqdvBBJPEsk
+EMIS,N6YbFYXLwmv,"Apenyoweo Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/wu26nVF2rFR/N6YbFYXLwmv,6,wu26nVF2rFR
+EMIS,UAaicRRfWd3,"Aperkira Parish",/KJPN4PduBWe/rn2uTdRyUbh/QoRZB7xc3j9/PUyNDCs6OkV/gp7Uz8fwu23/UAaicRRfWd3,6,gp7Uz8fwu23
+EMIS,YXdGStqXam3,"Apiioguro Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/NYuLJ3RVofk/YXdGStqXam3,6,NYuLJ3RVofk
+EMIS,pNYBlB6nI82,"Apire Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/WoNw1cfI6QF/pNYBlB6nI82,6,WoNw1cfI6QF
+EMIS,yM6bWvUJK4J,"Apoi Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/frGOo5VaLWP/yM6bWvUJK4J,6,frGOo5VaLWP
+EMIS,TLSaDMo5MUQ,"Apoka Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/zuc46mrwazu/TLSaDMo5MUQ,6,zuc46mrwazu
+EMIS,TRIeh9WkR2U,"Apokor(Mella Subcounty) Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/JyUAAhCCr2W/aKIzOHNtKAF/TRIeh9WkR2U,6,aKIzOHNtKAF
+EMIS,yYatLaldTMI,"Apokor(Merikit Subcounty) Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/JyUAAhCCr2W/yUy9SU1xZic/yYatLaldTMI,6,yUy9SU1xZic
+EMIS,FrGDnd2JHMP,"Apopong Parish",/KJPN4PduBWe/rn2uTdRyUbh/tdZbtg9sZkO/Pf8NPQB7A7K/ERBPumWfX4z/FrGDnd2JHMP,6,ERBPumWfX4z
+EMIS,aq0fHBuO1ww,"Apopong Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/A5nf4YARnYV/aq0fHBuO1ww,6,A5nf4YARnYV
+EMIS,w291aMIJZAw,"Apua Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/P8TlQUbldxU/w291aMIJZAw,6,P8TlQUbldxU
+EMIS,oUIHFyj94Z6,"Apuce Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/P8TlQUbldxU/oUIHFyj94Z6,6,P8TlQUbldxU
+EMIS,ONCfFQMrisv,"Apuru Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/HTK99u5ioZy/ONCfFQMrisv,6,HTK99u5ioZy
+EMIS,QzMguFudbyc,"Apuuton Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/i8DfYkEe9Ga/QzMguFudbyc,6,i8DfYkEe9Ga
+EMIS,Bshi5FU5HkT,"Apwor Parish",/KJPN4PduBWe/yXncUmqtQYF/aBrjuZk0W31/ehlCmFnbce9/Plm7cGDFWkF/Bshi5FU5HkT,6,Plm7cGDFWkF
+EMIS,LKSYIN3U6vc,"Apyara Parish",/KJPN4PduBWe/yXncUmqtQYF/xy0M4HhjXtD/StQcQsGYdz1/b8GEsw6FSsq/LKSYIN3U6vc,6,b8GEsw6FSsq
+EMIS,EyxGjCGM0Ss,"Apye Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/HIwCAP46Wfh/EyxGjCGM0Ss,6,HIwCAP46Wfh
+EMIS,rq3fhSPLCn9,"Apyennyang Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/oOndOLnxBwq/rq3fhSPLCn9,6,oOndOLnxBwq
+EMIS,xEqd0EJ5zZG,"Apyetta Parish",/KJPN4PduBWe/yXncUmqtQYF/xy0M4HhjXtD/StQcQsGYdz1/b8GEsw6FSsq/xEqd0EJ5zZG,6,b8GEsw6FSsq
+EMIS,E8cqAbtcxsY,"Aralam Parish",/KJPN4PduBWe/LSCoCf6ibP8/e8m9ZYMRoeR/iYVSxR1mvET/C2u6gVK2d0g/E8cqAbtcxsY,6,C2u6gVK2d0g
+EMIS,HVYXLG5jDqX,"Aramita Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/WccRWlVxEVQ/HVYXLG5jDqX,6,WccRWlVxEVQ
+EMIS,lu39Ztj6L79,"Arapai Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/qOuUEzeHcEw/QGwLgiGGvDk/lu39Ztj6L79,6,QGwLgiGGvDk
+EMIS,gYCjh7u5OIe,"Ararak Parish",/KJPN4PduBWe/rn2uTdRyUbh/QoRZB7xc3j9/PUyNDCs6OkV/gnWLrY8AzgW/gYCjh7u5OIe,6,gnWLrY8AzgW
+EMIS,d1hVHHLR63k,"Arasi Parish",/KJPN4PduBWe/ToANlYyRiKb/QYiQ2KqgCxj/IWyZ8SIUBMF/RExc9XN3eQ8/d1hVHHLR63k,6,RExc9XN3eQ8
+EMIS,ITnuk1alo2s,"Arembwola Parish",/KJPN4PduBWe/uN4gXUciDZ8/NREoMszwQZW/SyQ5EM0LXrU/aQxpTlacfqR/ITnuk1alo2s,6,aQxpTlacfqR
+EMIS,eDcxN4S78Do,"Aremo Parish",/KJPN4PduBWe/uN4gXUciDZ8/NREoMszwQZW/SyQ5EM0LXrU/YzgCzwkOJLN/eDcxN4S78Do,6,YzgCzwkOJLN
+EMIS,iaPFuHP9h6E,"Aria Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/RRxA8Kk0GBU/iaPFuHP9h6E,6,RRxA8Kk0GBU
+EMIS,xeaXqPDCquO,"Ariba Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/cpdy4YSoIQn/xeaXqPDCquO,6,cpdy4YSoIQn
+EMIS,Af54cfcymcT,"Aridai(Lotukei Subcounty) Parish",/KJPN4PduBWe/uN4gXUciDZ8/NREoMszwQZW/SyQ5EM0LXrU/R3gfJmmVEq6/Af54cfcymcT,6,R3gfJmmVEq6
+EMIS,VP1Rnq3E62X,"Aridai(Okungur Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/wmQcuojFx6p/VP1Rnq3E62X,6,wmQcuojFx6p
+EMIS,MDjT5zBtWiA,"Aridi Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/KfCqofEu1kM/MDjT5zBtWiA,6,KfCqofEu1kM
+EMIS,bivvqdRQamT,"Ariet Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/IxeABCtX4yC/cdLLK5GSIdV/bivvqdRQamT,6,cdLLK5GSIdV
+EMIS,Nii9VpSd277,"Ariguyi Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/P9hrOiHyAHz/Nii9VpSd277,6,P9hrOiHyAHz
+EMIS,aebUAwEqVXG,"Aringa Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/RRxA8Kk0GBU/aebUAwEqVXG,6,RRxA8Kk0GBU
+EMIS,n5F2Egk6VR6,"Aringa Parish",/KJPN4PduBWe/yXncUmqtQYF/aBrjuZk0W31/ehlCmFnbce9/Plm7cGDFWkF/n5F2Egk6VR6,6,Plm7cGDFWkF
+EMIS,zsXSyZ3IPgV,"Aringajobi Parish",/KJPN4PduBWe/ToANlYyRiKb/E5O2EgbhVyG/DtSHCs7tAJ1/EFbk5yqGHkP/zsXSyZ3IPgV,6,EFbk5yqGHkP
+EMIS,uyUEbz9y38T,"Aripia Parish",/KJPN4PduBWe/ToANlYyRiKb/yKjxFBHrGgw/YSFmAjdcrQU/eAvexvVjXXA/uyUEbz9y38T,6,eAvexvVjXXA
+EMIS,Hbds2RbWWFG,"Arivu Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/DoqDOSg4uWw/dvx3WvwA9nX/Hbds2RbWWFG,6,dvx3WvwA9nX
+EMIS,nxy7vO8x2EC,"Ariwara Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/DoqDOSg4uWw/dvx3WvwA9nX/nxy7vO8x2EC,6,dvx3WvwA9nX
+EMIS,uDtPUn5bSaM,"Aroi Parish",/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw/bAeEQRpZomY/hZgKYy0KD85/uDtPUn5bSaM,6,hZgKYy0KD85
+EMIS,qInSdM86mh8,"Aromi Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/tw65TiDdjdi/qInSdM86mh8,6,tw65TiDdjdi
+EMIS,L8BB7NaeFkt,"Arra Parish",/KJPN4PduBWe/ToANlYyRiKb/W0kQBddyGyh/DlWICmN329w/sbdAveDAcue/L8BB7NaeFkt,6,sbdAveDAcue
+EMIS,AcD6LU3rRFj,"Arubaku Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/MAvzZbrN92w/AcD6LU3rRFj,6,MAvzZbrN92w
+EMIS,JQEabpnpOGj,"Arunga Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/P9hrOiHyAHz/JQEabpnpOGj,6,P9hrOiHyAHz
+EMIS,Iz2csl2tYJt,"Arute Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/wjCf0J4l4xR/Iz2csl2tYJt,6,wjCf0J4l4xR
+EMIS,hPbCXyzgP0i,"Arwot Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/lnuAGQZpJO6/hPbCXyzgP0i,6,lnuAGQZpJO6
+EMIS,WuUPAFCmR0x,"Arwotcek Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/ZvKLjuT1TNW/WuUPAFCmR0x,6,ZvKLjuT1TNW
+EMIS,SZJTajSAyTL,"Arwotngo Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/wArMrPxQ8Em/SZJTajSAyTL,6,wArMrPxQ8Em
+EMIS,qRNggVero01,"Arwotomito Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/P8TlQUbldxU/qRNggVero01,6,P8TlQUbldxU
+EMIS,huWQQy54WBk,"Asamuk Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/rEmgMBFWNxr/huWQQy54WBk,6,rEmgMBFWNxr
+EMIS,RtgH5jEJ7KK,"Asamuk Town Board Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/rEmgMBFWNxr/RtgH5jEJ7KK,6,rEmgMBFWNxr
+EMIS,docCynDsZ2t,"Asilang(Abarilela Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/wjCf0J4l4xR/docCynDsZ2t,6,wjCf0J4l4xR
+EMIS,QtgTJb6OxPq,"Asilang(Atiira Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/zJfpujxC1kD/KNPVL257sX3/shIed0W2hlB/QtgTJb6OxPq,6,shIed0W2hlB
+EMIS,EZtzxGsCROb,"Asinge(Kwapa Subcounty) Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/JyUAAhCCr2W/kAEFWRJiF4M/EZtzxGsCROb,6,kAEFWRJiF4M
+EMIS,KH9ekxl5NYl,"Asinge(Malaba Town Council) Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/JyUAAhCCr2W/K37NuFmIwLM/KH9ekxl5NYl,6,K37NuFmIwLM
+EMIS,xIdSd8ZPjYn,"Asunga Parish",/KJPN4PduBWe/ToANlYyRiKb/iqsaGItA68C/nDE4TWIlT2y/tSqRlZaEerb/xIdSd8ZPjYn,6,tSqRlZaEerb
+EMIS,K6Ulv0dq8I8,"Asuret Parish",/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/GvAc2dl3DfC/K6Ulv0dq8I8,6,GvAc2dl3DfC
+EMIS,VbsEItz1lO4,"Aswii Parish",/KJPN4PduBWe/rn2uTdRyUbh/zJfpujxC1kD/KNPVL257sX3/nffZS6pdMhZ/VbsEItz1lO4,6,nffZS6pdMhZ
+EMIS,Jhnm3HT9HSS,"Ataboo Parish",/KJPN4PduBWe/ToANlYyRiKb/QYiQ2KqgCxj/IWyZ8SIUBMF/gCVodI7bO9l/Jhnm3HT9HSS,6,gCVodI7bO9l
+EMIS,eh5VXlfhx2H,"Atabu Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/uORouhNAbq5/eh5VXlfhx2H,6,uORouhNAbq5
+EMIS,ePYm3ePPDYT,"Atana Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/UzDsFP0I0JV/ePYm3ePPDYT,6,UzDsFP0I0JV
+EMIS,sxNRkccV0tN,"Atangwata Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/FxAEUJSVqzc/sxNRkccV0tN,6,FxAEUJSVqzc
+EMIS,mAOihn67MgP,"Atapar Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/f7cc8BklNoP/mAOihn67MgP,6,f7cc8BklNoP
+EMIS,oLM7ftwmrvA,"Atece Parish",/KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q/GOPBaZieWV1/oLM7ftwmrvA,6,GOPBaZieWV1
+EMIS,KraOzF2IjEL,"Atego Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/jsnhoLUzhDg/KraOzF2IjEL,6,jsnhoLUzhDg
+EMIS,pxHTwHhAJQh,"Atek Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/jsnhoLUzhDg/pxHTwHhAJQh,6,jsnhoLUzhDg
+EMIS,kQ0UQPdDyKS,"Atekober Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/ZBe7SvBC4e6/kQ0UQPdDyKS,6,ZBe7SvBC4e6
+EMIS,oIjdKZkSASi,"Aten Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/e7FNGCD95EI/oIjdKZkSASi,6,e7FNGCD95EI
+EMIS,bKy0GjqoOIP,"Aterai Parish",/KJPN4PduBWe/uN4gXUciDZ8/aPZzL4CyBTg/gsMQbtzPvWK/JFjxxRW6DuB/bKy0GjqoOIP,6,JFjxxRW6DuB
+EMIS,pPPoQPh63Pa,"Aterai Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/mVia0FcPFQg/MSkaQMKYDGU/pPPoQPh63Pa,6,MSkaQMKYDGU
+EMIS,ida6fJ8OBj5,"Atiabar Parish",/KJPN4PduBWe/yXncUmqtQYF/Gwk4wkLz7EW/wsewxcNH3y2/LNkFivzpeA1/ida6fJ8OBj5,6,LNkFivzpeA1
+EMIS,eaRKlihuMX6,"Atigolwok Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/u02CLxZxpNF/eaRKlihuMX6,6,u02CLxZxpNF
+EMIS,ZhOacEswjMV,"Atiira(Atiira Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/zJfpujxC1kD/KNPVL257sX3/shIed0W2hlB/ZhOacEswjMV,6,shIed0W2hlB
+EMIS,wOc3QDQa8rr,"Atiira(Kapelebyong Town Council) Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/oRcPLzsCoif/wOc3QDQa8rr,6,oRcPLzsCoif
+EMIS,oACbsLOlgGh,"Ating Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/YLu91VNQTlD/oACbsLOlgGh,6,YLu91VNQTlD
+EMIS,Q7Veo3narXX,"Atinkok Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/lireba0g3Da/Q7Veo3narXX,6,lireba0g3Da
+EMIS,VHIOdn3j1Ir,"Atira Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/ZWNO5xzFUsZ/VHIOdn3j1Ir,6,ZWNO5xzFUsZ
+EMIS,wNdKT2B4jYh,"Atiri Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/JyUAAhCCr2W/W6HpAU6Zad8/wNdKT2B4jYh,6,W6HpAU6Zad8
+EMIS,EFDeSFz4EWR,"Atirir Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/rEmgMBFWNxr/EFDeSFz4EWR,6,rEmgMBFWNxr
+EMIS,jNUu7Oqs7IZ,"Atomoro Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/SoAE9AMbXXS/jNUu7Oqs7IZ,6,SoAE9AMbXXS
+EMIS,xgV2ImRszcb,"Atongtidi Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/i7IJMXUFR20/xgV2ImRszcb,6,i7IJMXUFR20
+EMIS,oR8XSlDKIyF,"Atoo Parish",/KJPN4PduBWe/yXncUmqtQYF/aBrjuZk0W31/ehlCmFnbce9/oidlpVTVm7Y/oR8XSlDKIyF,6,oidlpVTVm7Y
+EMIS,ajoZvroXMp0,Atoo-Hill,/KJPN4PduBWe/yXncUmqtQYF/Gwk4wkLz7EW/wsewxcNH3y2/OKIyTJatyIr/ajoZvroXMp0,6,OKIyTJatyIr
+EMIS,ehrXoT9mxdh,"Atoot Parish",/KJPN4PduBWe/rn2uTdRyUbh/aj4hsYK3dVm/QRniz3m12CL/OXPUPaEkd0c/ehrXoT9mxdh,6,OXPUPaEkd0c
+EMIS,TINbLTTvnxT,"Atopi Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/hYG3R7JZ67R/TIEYOBPZROP/TINbLTTvnxT,6,TIEYOBPZROP
+EMIS,S1NlmMm81KV,"Atule Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/i7IJMXUFR20/S1NlmMm81KV,6,i7IJMXUFR20
+EMIS,RYiTx31j2gY,"Atumukaskou Parish",/KJPN4PduBWe/rn2uTdRyUbh/mvN9LBbpf7X/xDMjY0z6k2n/t0XYuEU4iqm/RYiTx31j2gY,6,t0XYuEU4iqm
+EMIS,h96j4RsIzlf,"Atunga Parish",/KJPN4PduBWe/uN4gXUciDZ8/NREoMszwQZW/SyQ5EM0LXrU/aQxpTlacfqR/h96j4RsIzlf,6,aQxpTlacfqR
+EMIS,x6t3UI9TFDA,"Atura Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/mYDNLw05F8s/x6t3UI9TFDA,6,mYDNLw05F8s
+EMIS,xuCeZlw3Hij,"Atut Parish",/KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q/xszj4k9qMHD/xuCeZlw3Hij,6,xszj4k9qMHD
+EMIS,bDHCtVN5FvS,"Atwol Parish",/KJPN4PduBWe/yXncUmqtQYF/xy0M4HhjXtD/StQcQsGYdz1/mxi6AGkzXST/bDHCtVN5FvS,6,mxi6AGkzXST
+EMIS,TuvMEEcAljb,"Atyak Parish",/KJPN4PduBWe/ToANlYyRiKb/uqUyTPvQKII/WzCTxqL56PX/qm1XBaNAs4e/TuvMEEcAljb,6,qm1XBaNAs4e
+EMIS,sN7QnhAFgTY,"Aukot Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/c25qRvx0b0Z/o9dogTvPFMa/sN7QnhAFgTY,6,o9dogTvPFMa
+EMIS,T7wdItgFuka,"Aumi Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/YRTZEQCv1PR/T7wdItgFuka,6,YRTZEQCv1PR
+EMIS,nWrEObwokwC,"Aunga Parish",/KJPN4PduBWe/ToANlYyRiKb/iqsaGItA68C/nDE4TWIlT2y/CAdj0rt3SoB/nWrEObwokwC,6,CAdj0rt3SoB
+EMIS,q0DscDrybgI,"Aungu Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/KfXPhafUNbu/q0DscDrybgI,6,KfXPhafUNbu
+EMIS,nI5QTpg0lh9,"Aupi Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/MAvzZbrN92w/nI5QTpg0lh9,6,MAvzZbrN92w
+EMIS,wD3MswfIlql,"Awal Aboro Parish",/KJPN4PduBWe/yXncUmqtQYF/Gwk4wkLz7EW/wsewxcNH3y2/N00GWUvXv52/wD3MswfIlql,6,N00GWUvXv52
+EMIS,OiJwvNH30Wd,"Awaliwal Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/c25qRvx0b0Z/o9dogTvPFMa/OiJwvNH30Wd,6,o9dogTvPFMa
+EMIS,dGehjfN9CqQ,"Awaoping Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/IY2R34kEofs/dGehjfN9CqQ,6,IY2R34kEofs
+EMIS,iqEZzVhHR42,"Awee Parish",/KJPN4PduBWe/yXncUmqtQYF/aBrjuZk0W31/ehlCmFnbce9/zK6ZwXTWaTU/iqEZzVhHR42,6,zK6ZwXTWaTU
+EMIS,grXx27moNhx,"Aweipeko Ward Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/sN6QVIjZ3Si/grXx27moNhx,6,sN6QVIjZ3Si
+EMIS,HBFNbiNkanj,"Awelo Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/KfCqofEu1kM/HBFNbiNkanj,6,KfCqofEu1kM
+EMIS,GuPaPtFgsml,"Awelu Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/UBoZcAoeJeT/GuPaPtFgsml,6,UBoZcAoeJeT
+EMIS,UApv3blz9mM,"Awich Parish",/KJPN4PduBWe/yXncUmqtQYF/Gwk4wkLz7EW/wsewxcNH3y2/N00GWUvXv52/UApv3blz9mM,6,N00GWUvXv52
+EMIS,B1kRXp4Vu33,"Awiepek Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/ltVgKBsPZx7/B1kRXp4Vu33,6,ltVgKBsPZx7
+EMIS,FjfVDhYnkIn,"Awika Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/viHdGLaij6G/h7UkWLjKnOd/FjfVDhYnkIn,6,h7UkWLjKnOd
+EMIS,TPC6J7Hn5Rg,"Awikori Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/sN6QVIjZ3Si/TPC6J7Hn5Rg,6,sN6QVIjZ3Si
+EMIS,ZVcph8cxJSs,"Awila Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/frGOo5VaLWP/ZVcph8cxJSs,6,frGOo5VaLWP
+EMIS,AFK9oMiy78f,"Awindiri Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/DoqDOSg4uWw/sbRC53zXmEc/AFK9oMiy78f,6,sbRC53zXmEc
+EMIS,FaAQKJ5aRLv,"Awinga Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/LWXzhuFTEhh/FaAQKJ5aRLv,6,LWXzhuFTEhh
+EMIS,hTYtO4G9m09,"Awio Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/KfXPhafUNbu/hTYtO4G9m09,6,KfXPhafUNbu
+EMIS,DTDCmlHW4xU,"Awiodyek Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/lnuAGQZpJO6/DTDCmlHW4xU,6,lnuAGQZpJO6
+EMIS,Mq7pZRNQirr,"Awir Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/hYG3R7JZ67R/GiR57L6fv1P/Mq7pZRNQirr,6,GiR57L6fv1P
+EMIS,BK2KSoh0yYg,"Awiri Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/oHnubudtkgX/BK2KSoh0yYg,6,oHnubudtkgX
+EMIS,Tw2An01Cavx,"Awoba Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/fr0h9tAqdt7/Tw2An01Cavx,6,fr0h9tAqdt7
+EMIS,yrPKSK3uIOa,"Awoja Parish",/KJPN4PduBWe/rn2uTdRyUbh/srmGjHrpVE5/c25qRvx0b0Z/o9dogTvPFMa/yrPKSK3uIOa,6,o9dogTvPFMa
+EMIS,AVVITcudQpz,"Awonangiro Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/SzDWKeAxdpE/AVVITcudQpz,6,SzDWKeAxdpE
+EMIS,Rol5zauFMdF,"Awondwe Parish",/KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q/GOPBaZieWV1/Rol5zauFMdF,6,GOPBaZieWV1
+EMIS,BzaQXw3SWAM,"Awori Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/tujGPMcrNlb/BzaQXw3SWAM,6,tujGPMcrNlb
+EMIS,E5afZJRHJLV,"Awuvu Parish",/KJPN4PduBWe/ToANlYyRiKb/bLoH4VbxCGI/IAkdv8lnkij/bBYlrx6265P/E5afZJRHJLV,6,bBYlrx6265P
+EMIS,OHMtX74hDF3,"Ayaa Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/viHdGLaij6G/M2EdZ4mtaUE/OHMtX74hDF3,6,M2EdZ4mtaUE
+EMIS,Af1924uxFsp,"Ayabi Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/fJIbsMWIqvm/Af1924uxFsp,6,fJIbsMWIqvm
+EMIS,utHBJtAwNjO,"Ayach Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/b62W7Du8SBv/utHBJtAwNjO,6,b62W7Du8SBv
+EMIS,ZynYo9eDtZp,"Ayago  Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/n5jh5Abvrnw/ZynYo9eDtZp,6,n5jh5Abvrnw
+EMIS,Il9xLBuSzBp,"Ayago(Akokoro Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/frGOo5VaLWP/Il9xLBuSzBp,6,frGOo5VaLWP
+EMIS,PCabvwCY5MR,"Ayago(Railway Division) Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/n5jh5Abvrnw/PCabvwCY5MR,6,n5jh5Abvrnw
+EMIS,v4rYP0sy3i6,"Ayaka Parish",/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/X2vKJ3QpDNv/v4rYP0sy3i6,6,X2vKJ3QpDNv
+EMIS,rvreiUhazP1,"Ayala Oya Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/NYuLJ3RVofk/rvreiUhazP1,6,NYuLJ3RVofk
+EMIS,FyHgu6jEIa4,"Ayamo(Barr Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/cknntfF4SWQ/FyHgu6jEIa4,6,cknntfF4SWQ
+EMIS,hFEipcOy2V8,"Ayamo(Okwerodot Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/pOnDsIydFl9/hFEipcOy2V8,6,pOnDsIydFl9
+EMIS,YE3gyzquedv,"Ayara Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/pOnDsIydFl9/YE3gyzquedv,6,pOnDsIydFl9
+EMIS,nGPuJ5rx9i4,"Ayavu(Ogoko Subcounty) Parish",/KJPN4PduBWe/ToANlYyRiKb/bLoH4VbxCGI/IAkdv8lnkij/MyFQ3RGzoea/nGPuJ5rx9i4,6,MyFQ3RGzoea
+EMIS,MasK6ts0HxW,"Ayavu(Vurra Subcounty) Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/viHdGLaij6G/ky99bitbP4Z/MasK6ts0HxW,6,ky99bitbP4Z
+EMIS,gC2jjHeb04m,"Ayeolyec Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/frGOo5VaLWP/gC2jjHeb04m,6,frGOo5VaLWP
+EMIS,lKVEV7P4iTi,"Ayera Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/hYG3R7JZ67R/PfQn5EuMhjD/lKVEV7P4iTi,6,PfQn5EuMhjD
+EMIS,du1Y1uZ22Er,"Ayiko Parish",/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw/bAeEQRpZomY/aiZBJGGrsyK/du1Y1uZ22Er,6,aiZBJGGrsyK
+EMIS,JxLiRXXB8gA,"Ayiko Ward",/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw/bAeEQRpZomY/hlVvMlVb4q1/JxLiRXXB8gA,6,hlVvMlVb4q1
+EMIS,wclIoE3nyaa,"Ayila Parish",/KJPN4PduBWe/ToANlYyRiKb/uqUyTPvQKII/WzCTxqL56PX/bH7sNzWjO1I/wclIoE3nyaa,6,bH7sNzWjO1I
+EMIS,robJWb80Pq9,"Ayipe Parish",/KJPN4PduBWe/ToANlYyRiKb/iqsaGItA68C/nDE4TWIlT2y/YBr5cMjuDLU/robJWb80Pq9,6,YBr5cMjuDLU
+EMIS,k1EkLdorIRP,"Ayira Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/cknntfF4SWQ/k1EkLdorIRP,6,cknntfF4SWQ
+EMIS,x7xaLhEny9E,"Ayiri Parish",/KJPN4PduBWe/ToANlYyRiKb/QYiQ2KqgCxj/IWyZ8SIUBMF/MxT03MDmrwo/x7xaLhEny9E,6,MxT03MDmrwo
+EMIS,iMs2BZqX8GW,"Ayiro Parish",/KJPN4PduBWe/ToANlYyRiKb/W0kQBddyGyh/DlWICmN329w/IGMBVLbbY0R/iMs2BZqX8GW,6,IGMBVLbbY0R
+EMIS,SO1bsZUIsAh,"Ayola Parish",/KJPN4PduBWe/rn2uTdRyUbh/TM6ccNxawqy/qUhuL9OJHWh/UBoZcAoeJeT/SO1bsZUIsAh,6,UBoZcAoeJeT
+EMIS,W6K4QGMDrMG,"Ayuni Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/F0oTeW1Sqgv/W6K4QGMDrMG,6,F0oTeW1Sqgv
+EMIS,LAoZUzSIGp9,"Ayuri Parish",/KJPN4PduBWe/ToANlYyRiKb/yKjxFBHrGgw/YSFmAjdcrQU/eAvexvVjXXA/LAoZUzSIGp9,6,eAvexvVjXXA
+EMIS,BcAfFP0xkuX,"Ayuu Alali Parish",/KJPN4PduBWe/yXncUmqtQYF/xy0M4HhjXtD/StQcQsGYdz1/meHlYEr7A6O/BcAfFP0xkuX,6,meHlYEr7A6O
+EMIS,hQZdFRjFGxa,"Azapi Parish",/KJPN4PduBWe/ToANlYyRiKb/yKjxFBHrGgw/YSFmAjdcrQU/ruE1HvI9RB8/hQZdFRjFGxa,6,ruE1HvI9RB8
+EMIS,tuQPo8oRKrT,"BUTANDA S.S",/KJPN4PduBWe/YPWYLd0d3k3/zBIpPzKYFLp/AH60q5JkYuf/MqxICx18Vmn/tuQPo8oRKrT,6,MqxICx18Vmn
+EMIS,J6Omn0OhXET,"Bacere Parish",/KJPN4PduBWe/ToANlYyRiKb/QYiQ2KqgCxj/IWyZ8SIUBMF/LhFKmQKG00E/J6Omn0OhXET,6,LhFKmQKG00E
+EMIS,F3TqEqo8gny,"Bageya Parish",/KJPN4PduBWe/GdYvXsZ4rB6/F3ccON3OCsL/eEjiTDMCNZl/kfjSjmcsdIn/F3TqEqo8gny,6,kfjSjmcsdIn
+EMIS,SueIZQTD2Kl,"Bajjo Parish",/KJPN4PduBWe/HOjHt8pjWWH/tr9XWtYsL5P/zyTu5GWQuz4/TdUrd5x7NsE/SueIZQTD2Kl,6,TdUrd5x7NsE
+EMIS,xLihqgXiXhc,"Bakihareire Parish",/KJPN4PduBWe/LCiSfhGKLEU/hAoe9dhZh9V/qz2RsZSk025/h4OYi3nn9Kt/xLihqgXiXhc,6,h4OYi3nn9Kt
+EMIS,Xe1qXoQwitV,"Bakijjulula Parish",/KJPN4PduBWe/HOjHt8pjWWH/Q7PaNIbyZII/RmD5YUUgPp8/Y25KdV1upRy/Xe1qXoQwitV,6,Y25KdV1upRy
+EMIS,GC2xWAhz0bN,"Bakijulula Parish",/KJPN4PduBWe/HOjHt8pjWWH/ahyi8Uq4vaj/kR7Xp49FXj4/EZLcxGHO5pJ/GC2xWAhz0bN,6,EZLcxGHO5pJ
+EMIS,zwiRymbCAmg,"Bakka Parish",/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/PK9Fwv2Vpud/zwiRymbCAmg,6,PK9Fwv2Vpud
+EMIS,vJUqlM1fJTn,"Balabala Parish",/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/My6ziB0LYjG/vJUqlM1fJTn,6,My6ziB0LYjG
+EMIS,LkGCQueysBX,"Balawoli Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oyygQ2STBST/WKdAEgwdWZr/TWFn6JHwdhx/LkGCQueysBX,6,TWFn6JHwdhx
+EMIS,aJ5U32G6x72,"Balisanga Parish",/KJPN4PduBWe/HOjHt8pjWWH/ykxQEnZGXkj/ZRvfRulTD9I/rWfmieJWJoY/aJ5U32G6x72,6,rWfmieJWJoY
+EMIS,dam5DdFy9Fd,"Bamugolodde(Butuntumula Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/tr9XWtYsL5P/zyTu5GWQuz4/lAm1fZzSv9g/dam5DdFy9Fd,6,lAm1fZzSv9g
+EMIS,kwnSMLyfiD6,"Bamugolodde(Kalongo Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/aUcYGQCK9ub/TcOetqs9yjc/l3vz4oWsX26/kwnSMLyfiD6,6,l3vz4oWsX26
+EMIS,DuxKFC93tpJ,"Bamure Parish",/KJPN4PduBWe/ToANlYyRiKb/iqsaGItA68C/nDE4TWIlT2y/Tu2rJD7vMje/DuxKFC93tpJ,6,Tu2rJD7vMje
+EMIS,YWomYLzqkiz,"Bamusuuta(Kakooge Town Council) Parish",/KJPN4PduBWe/HOjHt8pjWWH/aUcYGQCK9ub/TcOetqs9yjc/wwHzYbhMTDS/YWomYLzqkiz,6,wwHzYbhMTDS
+EMIS,Ek08aHaXzVc,"Bamusuuta(Kiboga Town Council) Parish",/KJPN4PduBWe/HOjHt8pjWWH/GLHh0BXys9w/qoQdlQ3BlvB/FiGQZi0hdZx/Ek08aHaXzVc,6,FiGQZi0hdZx
+EMIS,D06WG6qzuwK,"Bamusuuta(Nabbaale Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/a0DfYpC2Rwl/cjk4b2j6aLE/YkIzw5ekiOO/D06WG6qzuwK,6,YkIzw5ekiOO
+EMIS,iy6OCeLTIiM,"Bananywa Parish",/KJPN4PduBWe/HOjHt8pjWWH/IVuiLJYABw6/Gs1LsiCV1C3/g61G16YwyCw/iy6OCeLTIiM,6,g61G16YwyCw
+EMIS,cGhrw4LfVsw,"Banda(Banda Subcounty(Kyankwanzi District)) Parish",/KJPN4PduBWe/HOjHt8pjWWH/IVuiLJYABw6/Gs1LsiCV1C3/nUO2ZWjWwDV/cGhrw4LfVsw,6,nUO2ZWjWwDV
+EMIS,CLSCTYY23ga,"Banda(Mende Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/PK9Fwv2Vpud/CLSCTYY23ga,6,PK9Fwv2Vpud
+EMIS,g9TuB8EEXxs,"Banda(Nakawa Division) Parish",/KJPN4PduBWe/HOjHt8pjWWH/aXmBzv61LbM/FtPH7HPJ4y1/QnkiZl7WtFR/g9TuB8EEXxs,6,QnkiZl7WtFR
+EMIS,Fq1pSNPxLqw,"Bangaladesh Parish",/KJPN4PduBWe/n90wmiOocDw/ZuQHWOaFQVM/w2z5HQFFbPY/sN6QVIjZ3Si/Fq1pSNPxLqw,6,sN6QVIjZ3Si
+EMIS,dTAzPYDgp6n,"Bango Parish",/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw/bAeEQRpZomY/hqRRpf543R8/dTAzPYDgp6n,6,hqRRpf543R8
+EMIS,SpeFPt5c37w,"Bangututi Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/NhJ7OKjBwpO/SpeFPt5c37w,6,NhJ7OKjBwpO
+EMIS,CprnFLD54Fl,"Banya(Amach Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/b62W7Du8SBv/CprnFLD54Fl,6,b62W7Du8SBv
+EMIS,cPQ7KDYMjsA,"Banya(Inomo Subcounty) Parish",/KJPN4PduBWe/n90wmiOocDw/gCN6sU5BjlR/YQofQVGhwAl/UgnKPKLjoP5/cPQ7KDYMjsA,6,UgnKPKLjoP5
+EMIS,yg6A589ga2T,"Bar Ogole Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/FN1kbZcv9n0/yg6A589ga2T,6,FN1kbZcv9n0
+EMIS,WH2HzqmAXIc,"Bar Onger Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/n5jh5Abvrnw/WH2HzqmAXIc,6,n5jh5Abvrnw
+EMIS,XjVmvHNWEYA,"Bar Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/cpdy4YSoIQn/XjVmvHNWEYA,6,cpdy4YSoIQn
+EMIS,ukZPBrEXYY6,"Bar-Rio Parish",/KJPN4PduBWe/n90wmiOocDw/xpIFdCMhVHG/AvtLMZ8q4ez/cpdy4YSoIQn/ukZPBrEXYY6,6,cpdy4YSoIQn
+EMIS,iodN98LXcNG,"Barahiija Parish",/KJPN4PduBWe/AISa21ffM1p/O9MoQcpZ4uA/QKGGlvS3b3D/U06YTVEltQB/iodN98LXcNG,6,U06YTVEltQB
+EMIS,b4mkvDnkHrj,"Barapwo Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/qRejDNgWktI/b4mkvDnkHrj,6,qRejDNgWktI
+EMIS,l4gVyGMnCy7,"Barawa Parish",/KJPN4PduBWe/LSCoCf6ibP8/aginheWSLef/Po8P6xe80Dy/Rs3LaqyvOVj/l4gVyGMnCy7,6,Rs3LaqyvOVj
+EMIS,CPDTlm4pykk,"Bardago Parish",/KJPN4PduBWe/n90wmiOocDw/p7EEgDEX3jT/soxn2fd2is1/ZA3LBUpRxvi/CPDTlm4pykk,6,ZA3LBUpRxvi
+EMIS,Sn1EX32Pudd,"Bardege Parish",/KJPN4PduBWe/yXncUmqtQYF/Gwk4wkLz7EW/F2gyHGKOZgR/kTswDBmRkXI/Sn1EX32Pudd,6,kTswDBmRkXI
+EMIS,qdKYzmx1p3L,"Bardek Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/hYG3R7JZ67R/poxdjKtb1dw/qdKYzmx1p3L,6,poxdjKtb1dw
+EMIS,AluRh6zsQmG,"Bardyang Parish",/KJPN4PduBWe/n90wmiOocDw/wMQ25dybdgH/JQS5nqalLHt/HIwCAP46Wfh/AluRh6zsQmG,6,HIwCAP46Wfh
+EMIS,amo4bi3DIbJ,"Baria Parish",/KJPN4PduBWe/ToANlYyRiKb/WyR8Eetj7Uw/bAeEQRpZomY/paXoFzmK65o/amo4bi3DIbJ,6,paXoFzmK65o
+EMIS,EiY0uA67TDc,"Baringa Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/WDAGI8IFpRb/EiY0uA67TDc,6,WDAGI8IFpRb
+EMIS,GbNjvxa0v8Y,"Barkalo Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/unpu0JZWBny/GbNjvxa0v8Y,6,unpu0JZWBny
+EMIS,At03HlfdmID,"Barocok Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/wArMrPxQ8Em/At03HlfdmID,6,wArMrPxQ8Em
+EMIS,YIBBeHSG8QM,"Barodilo Parish",/KJPN4PduBWe/n90wmiOocDw/JyZJhGXKeEq/MxlrhFbwmzK/u02CLxZxpNF/YIBBeHSG8QM,6,u02CLxZxpNF
+EMIS,cUiWZmGbiTS,"Barodugu Parish",/KJPN4PduBWe/n90wmiOocDw/aXjub1BYn1y/uAmyexH3IpN/eUUBIFKSV1A/cUiWZmGbiTS,6,eUUBIFKSV1A
+EMIS,u5FEGUkEzqG,"Barongin Parish",/KJPN4PduBWe/n90wmiOocDw/Y4LV8xqkv6J/yuZ66tsFybX/NYuLJ3RVofk/u5FEGUkEzqG,6,NYuLJ3RVofk
+EMIS,C9B5d7CnWMn,"Basar Parish",/KJPN4PduBWe/LSCoCf6ibP8/aginheWSLef/Po8P6xe80Dy/nMSe0NJZX6k/C9B5d7CnWMn,6,nMSe0NJZX6k
+EMIS,lw6LXSsuw26,"Base Camp Parish",/KJPN4PduBWe/AISa21ffM1p/aa8xVDzSpte/HxaSCqd3vpP/yrlBbJsKvhs/lw6LXSsuw26,6,yrlBbJsKvhs
+EMIS,u9dY3BVXYoW,"Basecamp I & Iii Parish",/KJPN4PduBWe/AISa21ffM1p/uCVQXAdKqL9/T86ULLnK3tp/dx6s6dnz6As/u9dY3BVXYoW,6,dx6s6dnz6As
+EMIS,sIvmfAL49i1,"Basecamp Ii & Iv Parish",/KJPN4PduBWe/AISa21ffM1p/uCVQXAdKqL9/T86ULLnK3tp/dx6s6dnz6As/sIvmfAL49i1,6,dx6s6dnz6As
+EMIS,YqAQJswisPb,"Batalika Parish",/KJPN4PduBWe/AISa21ffM1p/O9MoQcpZ4uA/QKGGlvS3b3D/nUDTMUrd2Ha/YqAQJswisPb,6,nUDTMUrd2Ha
+EMIS,nqEE8fWvH2h,"Bazaar(Arua Hill Division) Parish",/KJPN4PduBWe/ToANlYyRiKb/WcB3kLlgRTb/DoqDOSg4uWw/sbRC53zXmEc/nqEE8fWvH2h,6,sbRC53zXmEc
+EMIS,PGcQsg0aRfy,"Bazaar(Central Division(Lira District)) Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/U5xlYKglsii/PGcQsg0aRfy,6,U5xlYKglsii
+EMIS,j7VJDV4C8be,"Bazaar(Northern Divison Subcounty(Kumi District)) Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/mVia0FcPFQg/R6wwo8vaDE4/j7VJDV4C8be,6,R6wwo8vaDE4
+EMIS,w8Q3jf2tBM7,"Bazaar(Southern Division(Kabarole District)) Parish",/KJPN4PduBWe/AISa21ffM1p/m77oR1YJESj/g3ykLtsBobv/yPupETS2R28/w8Q3jf2tBM7,6,yPupETS2R28
+EMIS,Yc9sslBZkhQ,"Bbaale(Bbaale Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/ykxQEnZGXkj/ZRvfRulTD9I/VFVFMm2R9Jl/Yc9sslBZkhQ,6,VFVFMm2R9Jl
+EMIS,aEeQlwa2CH8,"Bbaale(Kibanda Subcounty(Kyotera District)) Parish",/KJPN4PduBWe/HOjHt8pjWWH/REJuxCmTwXG/dDf4awxjIgP/SxMKY6JULJc/aEeQlwa2CH8,6,SxMKY6JULJc
+EMIS,chHL7phMeew,"Bbaale(Kibanda Subcounty(Rakai District)) Parish",/KJPN4PduBWe/HOjHt8pjWWH/P8iz90eiIrW/W0g7xrcRykI/Jo688SFiDPC/chHL7phMeew,6,Jo688SFiDPC
+EMIS,ZGzd0f1HSte,"Bbajja Parish",/KJPN4PduBWe/HOjHt8pjWWH/ahyi8Uq4vaj/kR7Xp49FXj4/gszu51vW5Gv/ZGzd0f1HSte,6,gszu51vW5Gv
+EMIS,kGgthdqo0iT,"Bbale Mukwenda Parish",/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/HfPYnFUJ2UF/kGgthdqo0iT,6,HfPYnFUJ2UF
+EMIS,QHhcv5H7Vvz,"Bbambula Parish",/KJPN4PduBWe/HOjHt8pjWWH/Q7PaNIbyZII/RmD5YUUgPp8/i13X95kT6ms/QHhcv5H7Vvz,6,i13X95kT6ms
+EMIS,E7YJJCZwbOC,"Bbanda Parish",/KJPN4PduBWe/HOjHt8pjWWH/Q7PaNIbyZII/RmD5YUUgPp8/f3He04vFzYC/E7YJJCZwbOC,6,f3He04vFzYC
+EMIS,DFDbfHhmtim,"Bbembe Parish",/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/q9fQSK2SMNB/DFDbfHhmtim,6,q9fQSK2SMNB
+EMIS,ZrYjGVA9UYz,"Bbeta Parish",/KJPN4PduBWe/HOjHt8pjWWH/JrHILmtK0OU/r7KKVyslmyg/Qq3Qjo909Cr/ZrYjGVA9UYz,6,Qq3Qjo909Cr
+EMIS,NXZ6LcbRxlq,"Bbikka Ward",/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/BKwKRNi3kid/NXZ6LcbRxlq,6,BKwKRNi3kid
+EMIS,gnQK25WDO4w,"Bbinga Parish",/KJPN4PduBWe/HOjHt8pjWWH/x75Yh65MaUa/pmC5jsU3z0l/xCDEkPTwaoZ/gnQK25WDO4w,6,xCDEkPTwaoZ
+EMIS,BGRu5DGaDch,"Bbira Parish",/KJPN4PduBWe/HOjHt8pjWWH/Pvl4FVXO0RD/ChzhMks9PhZ/r9w4SzPaFwF/BGRu5DGaDch,6,r9w4SzPaFwF
+EMIS,Z6LhSCApC4G,"Bbongole Parish",/KJPN4PduBWe/HOjHt8pjWWH/YMMexeHFUay/EvatL0ZCpX1/V2yrTskdsuZ/Z6LhSCApC4G,6,V2yrTskdsuZ
+EMIS,iXJN5mns4u5,"Bbuuliro Parish",/KJPN4PduBWe/HOjHt8pjWWH/bIONCoCnt3Q/TxJlNF19mcN/Isf8imyDt99/iXJN5mns4u5,6,Isf8imyDt99
+EMIS,u8j4GPqu5za,"Bedmot B Parish",/KJPN4PduBWe/uUGeUQZ5nI4/B0G9cqixld8/xrMxjeJTmgb/GHewoTKyWov/u8j4GPqu5za,6,GHewoTKyWov
+EMIS,abmy0AR90Wz,"Besia Parish",/KJPN4PduBWe/ToANlYyRiKb/W0kQBddyGyh/DlWICmN329w/PfoXHUEUiLz/abmy0AR90Wz,6,PfoXHUEUiLz
+EMIS,oQfgecQu9iT,"Bethelehem Parish",/KJPN4PduBWe/HOjHt8pjWWH/REJuxCmTwXG/dDf4awxjIgP/frDNK7IRYJb/oQfgecQu9iT,6,frDNK7IRYJb
+EMIS,BPTiIdpAEA8,"Biafra Parish",/KJPN4PduBWe/uN4gXUciDZ8/eOJUW6OGpc7/ZDkI3wQ8eo0/IzJEdCX8RfY/BPTiIdpAEA8,6,IzJEdCX8RfY
+EMIS,tTvDVLMFGLq,"Bibbo Parish",/KJPN4PduBWe/HOjHt8pjWWH/x75Yh65MaUa/IKE0492PZTM/JoFMpeAT0ZN/tTvDVLMFGLq,6,JoFMpeAT0ZN
+EMIS,JISvUyRs4ga,"Bibia Parish",/KJPN4PduBWe/yXncUmqtQYF/C0RSe3EWBqU/SQ3IaVbkqiy/gDPHpdu63p8/JISvUyRs4ga,6,gDPHpdu63p8
+EMIS,q4xpn7znRhY,"Bidduku Parish",/KJPN4PduBWe/HOjHt8pjWWH/aSbgVKaeCP0/jCAFrPofXqk/MJvwE4uWuuU/q4xpn7znRhY,6,MJvwE4uWuuU
+EMIS,PkrE2EO2X99,"Bidibidi Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/WDAGI8IFpRb/PkrE2EO2X99,6,WDAGI8IFpRb
+EMIS,XVBZtJkvQ1z,"Bigaaga Parish",/KJPN4PduBWe/YPWYLd0d3k3/zBIpPzKYFLp/AH60q5JkYuf/MqxICx18Vmn/XVBZtJkvQ1z,6,MqxICx18Vmn
+EMIS,jjsdakP2PCm,"Bigada Parish",/KJPN4PduBWe/HOjHt8pjWWH/REJuxCmTwXG/dDf4awxjIgP/uEsTFEWyYX4/jjsdakP2PCm,6,uEsTFEWyYX4
+EMIS,x3JTHsS9daF,"Bigando Parish",/KJPN4PduBWe/AISa21ffM1p/O9MoQcpZ4uA/QKGGlvS3b3D/nUDTMUrd2Ha/x3JTHsS9daF,6,nUDTMUrd2Ha
+EMIS,RreXSma7j6Z,"Bigando(Kigulya Division) Parish",/KJPN4PduBWe/uUGeUQZ5nI4/xr8EMirOASp/yjMCULGOUsM/i2C6pi5WKbH/RreXSma7j6Z,6,i2C6pi5WKbH
+EMIS,DLHqysiKelr,"Bigando(Miirya Subcounty) Parish",/KJPN4PduBWe/uUGeUQZ5nI4/xr8EMirOASp/iKH8ccaqR3f/nN3nZkNBjoR/DLHqysiKelr,6,nN3nZkNBjoR
+EMIS,IzRUnZJpYDB,"Bigodi Parish",/KJPN4PduBWe/AISa21ffM1p/uCVQXAdKqL9/T86ULLnK3tp/Gxm74MjGncs/IzRUnZJpYDB,6,Gxm74MjGncs
+EMIS,hVD0N76ACgh,"Biguli Parish",/KJPN4PduBWe/AISa21ffM1p/uCVQXAdKqL9/T86ULLnK3tp/JgM3tzmEPYl/hVD0N76ACgh,6,JgM3tzmEPYl
+EMIS,rQvieHynLi6,"Bigungiro Parish",/KJPN4PduBWe/YPWYLd0d3k3/wZrfAgC3WrU/XyPNrZ1HaCO/M0bUD9uCC6G/rQvieHynLi6,6,M0bUD9uCC6G
+EMIS,uessisr1Oc1,"Bigutsyo Parish",/KJPN4PduBWe/LCiSfhGKLEU/AS2Seq1grGE/itkqnx06qk9/YQdwLVHRjD4/uessisr1Oc1,6,YQdwLVHRjD4
+EMIS,hqoBCFrIcVj,"Bihanga(Bihanga Subcounty(Kamwenge District)) Parish",/KJPN4PduBWe/AISa21ffM1p/uCVQXAdKqL9/T86ULLnK3tp/fnDs5Z7V2Fe/hqoBCFrIcVj,6,fnDs5Z7V2Fe
+EMIS,D3ESX5ph57R,"Bihanga(Nyamarebe Subcounty) Parish",/KJPN4PduBWe/LCiSfhGKLEU/r8WLxW9JwsS/PMpJZxcf7Gh/Az5O2hgjusV/D3ESX5ph57R,6,Az5O2hgjusV
+EMIS,fng8P1c0gTl,"Biharwe Parish",/KJPN4PduBWe/LCiSfhGKLEU/auswb7JO9wY/GbmcH3jozjp/LZl1UzjimOD/fng8P1c0gTl,6,LZl1UzjimOD
+EMIS,S5rMJegth1N,"Bihomborwa Parish",/KJPN4PduBWe/YPWYLd0d3k3/aphcy5JTnd6/HZEO3rwb0uK/Yx6YELU4zdS/S5rMJegth1N,6,Yx6YELU4zdS
+EMIS,xuvdnJPUJNW,"Biiso Parish",/KJPN4PduBWe/uUGeUQZ5nI4/CQTmrrriwOq/Q7TLXorrk7p/BqHmuD3Q2o3/xuvdnJPUJNW,6,BqHmuD3Q2o3
+EMIS,iXiNR4iKPBj,"Bijaaba Parish",/KJPN4PduBWe/HOjHt8pjWWH/aqpd0Y9eXZ2/MtpxB0Th7G3/ZxjlAt2tCRr/iXiNR4iKPBj,6,ZxjlAt2tCRr
+EMIS,i1HJx5FA78b,"Bijengye Parish",/KJPN4PduBWe/LCiSfhGKLEU/It5UGwdHAPF/GLTjCpzrHdi/cobD3bAEAaP/i1HJx5FA78b,6,cobD3bAEAaP
+EMIS,INBNPYlpcwW,"Bijubwe Parish",/KJPN4PduBWe/LCiSfhGKLEU/qf9xWZu7Dq8/WwquhSr63BA/W9tLK3sI1w3/INBNPYlpcwW,6,W9tLK3sI1w3
+EMIS,g3o0kigfDSm,"Bikko Parish",/KJPN4PduBWe/HOjHt8pjWWH/GLHh0BXys9w/qoQdlQ3BlvB/miiCKIllz44/g3o0kigfDSm,6,miiCKIllz44
+EMIS,Sf24WakDcl2,"Bikone Parish",/KJPN4PduBWe/AISa21ffM1p/aa8xVDzSpte/w6AuTSRpYRj/tStnNF0l8qZ/Sf24WakDcl2,6,tStnNF0l8qZ
+EMIS,kSIPJMJpVbz,"Bikongozo Parish",/KJPN4PduBWe/YPWYLd0d3k3/tugqr4dY6wq/lCwMeapfpzt/Y8YjfqplnFA/kSIPJMJpVbz,6,Y8YjfqplnFA
+EMIS,ssAGD5ixrhb,"Bikonzi Parish",/KJPN4PduBWe/uUGeUQZ5nI4/xr8EMirOASp/iKH8ccaqR3f/u6C4dXDrWni/ssAGD5ixrhb,6,u6C4dXDrWni
+EMIS,HABtNxvGILV,"Bikungu Parish",/KJPN4PduBWe/LCiSfhGKLEU/FLygHiUd2UW/wVH43w4g72W/nUjFvFQKNeN/HABtNxvGILV,6,nUjFvFQKNeN
+EMIS,RT1Adv2Emtx,"Bikunya Parish",/KJPN4PduBWe/AISa21ffM1p/aa8xVDzSpte/w6AuTSRpYRj/zWc9zoN9qow/RT1Adv2Emtx,6,zWc9zoN9qow
+EMIS,cuMp0VYnLC4,"Bilewu Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/mExRnAqmVlG/cuMp0VYnLC4,6,mExRnAqmVlG
+EMIS,vhuhzP6jMMo,"Bilewu Parish",/KJPN4PduBWe/ToANlYyRiKb/W1JM2Qdhcv3/FzwEQSijllI/P9hrOiHyAHz/vhuhzP6jMMo,6,P9hrOiHyAHz
+EMIS,Qm33IKKAaWa,"Bimara Parish",/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/pyAySEYO0ts/Qm33IKKAaWa,6,pyAySEYO0ts
+EMIS,QbyPrYUCW75,"Bingo Parish",/KJPN4PduBWe/DmeAF6ZFSzz/MtpE3CH6vq3/Y5bcujoUkwE/GWNycq8EC5B/QbyPrYUCW75,6,GWNycq8EC5B
+EMIS,S1Wn2okivek,"Binikira(Kassanda Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/Pvl4FVXO0RD/ChzhMks9PhZ/mR0B7HF8gkt/S1Wn2okivek,6,mR0B7HF8gkt
+EMIS,UrRf6kA8Y6c,"Binikira(Mpasaana Subcounty) Parish",/KJPN4PduBWe/uUGeUQZ5nI4/Lnewt3iIJaK/wdaeimPDcAe/W9Is8wp50mn/UrRf6kA8Y6c,6,W9Is8wp50mn
+EMIS,WCAOLOKsPYN,"Binunda Parish",/KJPN4PduBWe/AISa21ffM1p/O9MoQcpZ4uA/QKGGlvS3b3D/U06YTVEltQB/WCAOLOKsPYN,6,U06YTVEltQB
+EMIS,ZH36FASekCD,"Binya Parish",/KJPN4PduBWe/yXncUmqtQYF/S5fvUXgY54J/hzu0iHelGx4/SdhfByUFo35/ZH36FASekCD,6,SdhfByUFo35
+EMIS,HC2pkieVLhh,"Birambo Parish",/KJPN4PduBWe/YPWYLd0d3k3/zBIpPzKYFLp/AH60q5JkYuf/fp9veTFBzij/HC2pkieVLhh,6,fp9veTFBzij
+EMIS,glr7amcPCpP,"Birongo Parish",/KJPN4PduBWe/LCiSfhGKLEU/r8WLxW9JwsS/PMpJZxcf7Gh/cf5jADTbjlU/glr7amcPCpP,6,cf5jADTbjlU
+EMIS,lRCAtLod7cc,"Birungu Parish",/KJPN4PduBWe/uUGeUQZ5nI4/PJFtfCyp6Rb/wZnCbTgB4NC/RVXe4yrN84I/lRCAtLod7cc,6,RVXe4yrN84I
+EMIS,BVWBM6w9fNS,"Bisanje Parish",/KJPN4PduBWe/HOjHt8pjWWH/bIONCoCnt3Q/YianRphakZW/xJTY6aPBt8f/BVWBM6w9fNS,6,xJTY6aPBt8f
+EMIS,FraenhGWuNe,"Bisanje(Kabira Subcounty(Kyotera District)) Parish",/KJPN4PduBWe/HOjHt8pjWWH/REJuxCmTwXG/dDf4awxjIgP/ymomPcOOHRs/FraenhGWuNe,6,ymomPcOOHRs
+EMIS,JF3xxDoJRZP,"Bisanje(Kabonera Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/bIONCoCnt3Q/YianRphakZW/d7wKI4VxpCO/JF3xxDoJRZP,6,d7wKI4VxpCO
+EMIS,NjlJ8lQgqXR,"Bisheshe Parish",/KJPN4PduBWe/LCiSfhGKLEU/r8WLxW9JwsS/PBmhEEcXewT/VAaXCgmFIPc/NjlJ8lQgqXR,6,VAaXCgmFIPc
+EMIS,VTdbozogacV,"Bisho Parish",/KJPN4PduBWe/LSCoCf6ibP8/e8m9ZYMRoeR/iYVSxR1mvET/U3K8XR7Nkg3/VTdbozogacV,6,U3K8XR7Nkg3
+EMIS,ob0ELrDJXtr,"Bishozi Parish",/KJPN4PduBWe/LCiSfhGKLEU/AS2Seq1grGE/itkqnx06qk9/sv7N7kK4Cjv/ob0ELrDJXtr,6,sv7N7kK4Cjv
+EMIS,JdMaM6maYao,"Bison Maguria Parish",/KJPN4PduBWe/DmeAF6ZFSzz/KhT80mlwJ3Y/BvE89U4cLqG/RXyb9zLFiqf/JdMaM6maYao,6,RXyb9zLFiqf
+EMIS,ZWX94LfjaWr,"Bisozi Parish",/KJPN4PduBWe/AISa21ffM1p/uCVQXAdKqL9/T86ULLnK3tp/cM8cvhK4V5F/ZWX94LfjaWr,6,cM8cvhK4V5F
+EMIS,JMDFfUEXUd9,"Bitabago Parish",/KJPN4PduBWe/HOjHt8pjWWH/P8iz90eiIrW/W0g7xrcRykI/wFWJsimdLeH/JMDFfUEXUd9,6,wFWJsimdLeH
+EMIS,dLEpkQlGGkn,"Bitooma(Bitooma Subcounty) Parish",/KJPN4PduBWe/LCiSfhGKLEU/It5UGwdHAPF/GLTjCpzrHdi/F70xkJndNSK/dLEpkQlGGkn,6,F70xkJndNSK
+EMIS,lvnBMJV7lkd,"Bitooma(Katenga Subcounty) Parish",/KJPN4PduBWe/LCiSfhGKLEU/FLygHiUd2UW/wVH43w4g72W/ROttA6mJLQ9/lvnBMJV7lkd,6,ROttA6mJLQ9
+EMIS,PyBOCDZNBXk,"Bitsya(Bitsya Subcounty) Parish",/KJPN4PduBWe/LCiSfhGKLEU/sWoNWQZ9qrD/dX7S5qCW1Jp/oqx52Kzvo60/PyBOCDZNBXk,6,oqx52Kzvo60
+EMIS,HQbQjtYhdb1,"Bitsya(Rubindi Subcounty) Parish",/KJPN4PduBWe/LCiSfhGKLEU/auswb7JO9wY/z2yOS4aWqL4/Hdy7lT2S0TA/HQbQjtYhdb1,6,Hdy7lT2S0TA
+EMIS,FcIiYrv1loe,"Biwanga Parish",/KJPN4PduBWe/HOjHt8pjWWH/lzWuB6bCQeV/GMeimf9CeaV/MoO5H2n4Vtp/FcIiYrv1loe,6,MoO5H2n4Vtp
+EMIS,rKINl8Ub9S8,"Biwolobo Parish",/KJPN4PduBWe/HOjHt8pjWWH/aPRNSGUR3vk/qnfyOFOa3Fp/bf4tub8l9Nm/rKINl8Ub9S8,6,bf4tub8l9Nm
+EMIS,DYuNGQey7yD,"Biyaya Parish",/KJPN4PduBWe/ToANlYyRiKb/QYiQ2KqgCxj/IWyZ8SIUBMF/RLUgx1XEsNZ/DYuNGQey7yD,6,RLUgx1XEsNZ
+EMIS,bKA6tEh050y,"Boke Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/FldPzwXnjfK/bKA6tEh050y,6,FldPzwXnjfK
+EMIS,ukHnRG3aEPc,"Boke Parish",/KJPN4PduBWe/HOjHt8pjWWH/aXmBzv61LbM/FtPH7HPJ4y1/QnkiZl7WtFR/ukHnRG3aEPc,6,QnkiZl7WtFR
+EMIS,ROccoAADaAN,"Boke-Ber Parish",/KJPN4PduBWe/yXncUmqtQYF/Gwk4wkLz7EW/wsewxcNH3y2/OKIyTJatyIr/ROccoAADaAN,6,OKIyTJatyIr
+EMIS,MOpEPrGt29X,"Boliso Ii Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/EG52uC0azC3/MOpEPrGt29X,6,EG52uC0azC3
+EMIS,cTZtJcuS57s,"Boliso Parish",/KJPN4PduBWe/DmeAF6ZFSzz/WiVj4bEhX4P/YpQyE8oBqG8/bzv4H6D8GbA/cTZtJcuS57s,6,bzv4H6D8GbA
+EMIS,iHXMKp9TiN5,"Bolo Parish",/KJPN4PduBWe/yXncUmqtQYF/aBrjuZk0W31/ehlCmFnbce9/SUCaBwNMHAI/iHXMKp9TiN5,6,SUCaBwNMHAI
+EMIS,zDYP7zfML0z,"Boma  Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/mVia0FcPFQg/MSkaQMKYDGU/zDYP7zfML0z,6,MSkaQMKYDGU
+EMIS,SlRhvvHX2Aw,"Boma North Parish",/KJPN4PduBWe/uN4gXUciDZ8/A9kRCvmn6Co/e4nHgSy9hmT/Z5DKINbA58F/SlRhvvHX2Aw,6,Z5DKINbA58F
+EMIS,saO5XUNFzG5,"Boma South Parish",/KJPN4PduBWe/uN4gXUciDZ8/A9kRCvmn6Co/e4nHgSy9hmT/Z5DKINbA58F/saO5XUNFzG5,6,Z5DKINbA58F
+EMIS,UXm4MrdUMYK,"Boma(Southern Division(Kumi District)) Parish",/KJPN4PduBWe/rn2uTdRyUbh/saT18HClZoz/mVia0FcPFQg/MSkaQMKYDGU/UXm4MrdUMYK,6,MSkaQMKYDGU
+EMIS,fSJTZgt4u0N,"Boma(Wanale Division) Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/bvJ5pAHSYLN/VofaBVAy7VD/fSJTZgt4u0N,6,VofaBVAy7VD
+EMIS,AwljYhHscDQ,"Bombo Central Parish",/KJPN4PduBWe/HOjHt8pjWWH/tr9XWtYsL5P/zyTu5GWQuz4/ALKptqg10Gx/AwljYhHscDQ,6,ALKptqg10Gx
+EMIS,dS6Og9hnTHb,"Bongole Parish",/KJPN4PduBWe/HOjHt8pjWWH/YMMexeHFUay/EvatL0ZCpX1/dU7SyGUN35n/dS6Og9hnTHb,6,dU7SyGUN35n
+EMIS,ZCQrkJWH632,"Booma Parish",/KJPN4PduBWe/uUGeUQZ5nI4/CQTmrrriwOq/Q7TLXorrk7p/MTTcZX1iXks/ZCQrkJWH632,6,MTTcZX1iXks
+EMIS,vQBo0vbGYLB,"Boro Ward",/KJPN4PduBWe/ToANlYyRiKb/uqUyTPvQKII/WzCTxqL56PX/Yun6c0ulN0J/vQBo0vbGYLB,6,Yun6c0ulN0J
+EMIS,VLElxgXSmfL,"Boroboro East Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/FldPzwXnjfK/VLElxgXSmfL,6,FldPzwXnjfK
+EMIS,jp172qfyEH5,"Boroboro West Parish",/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Ku3UkPGHQ7U/FldPzwXnjfK/jp172qfyEH5,6,FldPzwXnjfK
+EMIS,AmUBOCDZ2yR,"Boroli Parish",/KJPN4PduBWe/ToANlYyRiKb/QYiQ2KqgCxj/IWyZ8SIUBMF/gCVodI7bO9l/AmUBOCDZ2yR,6,gCVodI7bO9l
+EMIS,VgVD2CWAVLe,"Boron Parish",/KJPN4PduBWe/LSCoCf6ibP8/aginheWSLef/zRunPyCqYTQ/BQgOi9wojr8/VgVD2CWAVLe,6,BQgOi9wojr8
+EMIS,bKwZZVSgjN3,"Bright Hill P.S",/KJPN4PduBWe/GdYvXsZ4rB6/gUaoj8Geuao/EIaJ4t9qBLj/v8Eqzu6z4JB/bKwZZVSgjN3,6,v8Eqzu6z4JB
+EMIS,ZYYmRfLiXKM,"Brim Parish",/KJPN4PduBWe/LSCoCf6ibP8/e8m9ZYMRoeR/iYVSxR1mvET/C2u6gVK2d0g/ZYYmRfLiXKM,6,C2u6gVK2d0g
+EMIS,LVpJFz2USao,"Bubaare Parish",/KJPN4PduBWe/YPWYLd0d3k3/wZrfAgC3WrU/XyPNrZ1HaCO/v8q2pU93M5T/LVpJFz2USao,6,v8q2pU93M5T
+EMIS,d6ysVcAZtHm,"Bubago Parish",/KJPN4PduBWe/GdYvXsZ4rB6/esIUe2tQAtL/S5i69hf3We0/p1pe5wqVQ0E/d6ysVcAZtHm,6,p1pe5wqVQ0E
+EMIS,EUrectK4mtQ,"Bubajjwe Parish",/KJPN4PduBWe/HOjHt8pjWWH/ykxQEnZGXkj/ZRvfRulTD9I/XEgFaUXNSif/EUrectK4mtQ,6,XEgFaUXNSif
+EMIS,cFjxfY9wU3G,"Bubalya(Busolwe Town Council) Parish",/KJPN4PduBWe/DmeAF6ZFSzz/MtpE3CH6vq3/Y5bcujoUkwE/mrLaXm4CCo0/cFjxfY9wU3G,6,mrLaXm4CCo0
+EMIS,lp8o29KijkW,"Bubalya(Nabukalu Subcounty) Parish",/KJPN4PduBWe/GdYvXsZ4rB6/gUaoj8Geuao/EIaJ4t9qBLj/z9l7XzOFvDE/lp8o29KijkW,6,z9l7XzOFvDE
+EMIS,E9vIsvB329J,"Bubanda Parish",/KJPN4PduBWe/HOjHt8pjWWH/lzWuB6bCQeV/n7bSmWC3q7e/RCy5FUEo3or/E9vIsvB329J,6,RCy5FUEo3or
+EMIS,V4oMAKP0HmF,"Bubango Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/mu7Nj32ygV7/V4oMAKP0HmF,6,mu7Nj32ygV7
+EMIS,egzO8A1IG3a,"Bubango Parish",/KJPN4PduBWe/uUGeUQZ5nI4/tM3DsJxMaMX/s0mATIPXTLz/rJhMRDfFbhn/egzO8A1IG3a,6,rJhMRDfFbhn
+EMIS,hAQtxSMIknD,"Bubbeza Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/LYHr3I3zPTA/hAQtxSMIknD,6,LYHr3I3zPTA
+EMIS,goaWcprrKUp,"Bubbinge Parish",/KJPN4PduBWe/DmeAF6ZFSzz/MtpE3CH6vq3/Y5bcujoUkwE/GWNycq8EC5B/goaWcprrKUp,6,GWNycq8EC5B
+EMIS,BFWicY5V30V,"Bubeke Parish",/KJPN4PduBWe/HOjHt8pjWWH/JrHILmtK0OU/r7KKVyslmyg/s8cI883v23k/BFWicY5V30V,6,s8cI883v23k
+EMIS,jfdfkD6ZueE,"Bubenge Parish",/KJPN4PduBWe/GdYvXsZ4rB6/AIonX4LaJeU/O7nXDIUyf8m/aqfT6Qivbgx/jfdfkD6ZueE,6,aqfT6Qivbgx
+EMIS,lazUKV5jgiZ,"Bubentsye Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/zfaY6jsTqxs/lazUKV5jgiZ,6,zfaY6jsTqxs
+EMIS,aQNgra0ECc8,"Bubera Parish",/KJPN4PduBWe/DmeAF6ZFSzz/Oyxwe3iDqpR/qbcf2KCBfjY/p0PPaN7zcZz/aQNgra0ECc8,6,p0PPaN7zcZz
+EMIS,x2eGnQ8lndB,"Bubetsye Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/yNUJWDaZwG5/x2eGnQ8lndB,6,yNUJWDaZwG5
+EMIS,Ewmkn1eLPA0,"Bubikala Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/vLAFPE05jv2/Ewmkn1eLPA0,6,vLAFPE05jv2
+EMIS,BWv5mnlhX22,"Bubinge Parish",/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/s2a0yLa3g2f/BWv5mnlhX22,6,s2a0yLa3g2f
+EMIS,xmdjJIKs1A2,"Bubirabi Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/j4d2ajRrMtT/xmdjJIKs1A2,6,j4d2ajRrMtT
+EMIS,GXpjb9QuQ5a,"Bubogo Parish",/KJPN4PduBWe/uUGeUQZ5nI4/L5WBetpBpY3/qqknBMoNlV9/Q9eZIn4O0Ix/GXpjb9QuQ5a,6,Q9eZIn4O0Ix
+EMIS,dxPPvWUaXnk,"Bubomboli  Parish",/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/EXaJJw2ANRi/dxPPvWUaXnk,6,EXaJJw2ANRi
+EMIS,w9e6BUQQPWf,"Bubomboli Parish",/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/EXaJJw2ANRi/w9e6BUQQPWf,6,EXaJJw2ANRi
+EMIS,XC55ulGqAmZ,"Bubonyi Parish",/KJPN4PduBWe/GdYvXsZ4rB6/AIonX4LaJeU/O7nXDIUyf8m/kYgo3cbi4kU/XC55ulGqAmZ,6,kYgo3cbi4kU
+EMIS,ae7YELvKbIs,"Buboolo Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/OOY3u8H2M7y/ae7YELvKbIs,6,OOY3u8H2M7y
+EMIS,qBU5cUkyNgv,"Bubotyo Parish",/KJPN4PduBWe/AISa21ffM1p/aa8xVDzSpte/w6AuTSRpYRj/d2SoxovqSNp/qBU5cUkyNgv,6,d2SoxovqSNp
+EMIS,naEHbQHflUE,"Bubukasha Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/oS2impR38Yq/naEHbQHflUE,6,oS2impR38Yq
+EMIS,iqsSQBGqm3d,"Bubulo(Buwangani Town Council) Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/JBltuLSy7fM/iqsSQBGqm3d,6,JBltuLSy7fM
+EMIS,U7wSeqE39jn,"Bubulo(Manafwa Town Council) Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/WjayutfXyHs/U7wSeqE39jn,6,WjayutfXyHs
+EMIS,G23NN5EI14b,"Bubungi Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/eVV3XAhotrw/G23NN5EI14b,6,eVV3XAhotrw
+EMIS,tf0cQn2nilx,"Bubutu Town Board Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/e00OFM3J6Kw/tf0cQn2nilx,6,e00OFM3J6Kw
+EMIS,kZcX1AMqT40,"Bubuubi Parish",/KJPN4PduBWe/HOjHt8pjWWH/tr9XWtYsL5P/zyTu5GWQuz4/cPR9LTHRAdE/kZcX1AMqT40,6,cPR9LTHRAdE
+EMIS,Pz9LMAurY2I,"Bubuye Parish",/KJPN4PduBWe/YPWYLd0d3k3/aPhSZRinfbg/Va2CQJHrKHU/so7JfhilaTw/Pz9LMAurY2I,6,so7JfhilaTw
+EMIS,HmvXp54YVJY,"Bubwaya Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/WjayutfXyHs/HmvXp54YVJY,6,WjayutfXyHs
+EMIS,EJJA2N832ml,"Bubwe Parish",/KJPN4PduBWe/uUGeUQZ5nI4/CQTmrrriwOq/Q7TLXorrk7p/BqHmuD3Q2o3/EJJA2N832ml,6,BqHmuD3Q2o3
+EMIS,zJKR2G6M1HG,"Bubyangu Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/eWCIMYahchu/zJKR2G6M1HG,6,eWCIMYahchu
+EMIS,f1kA3jUAbkf,"Buchicha Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/bjZ2sKrEbQN/f1kA3jUAbkf,6,bjZ2sKrEbQN
+EMIS,I7iIkYbWzXz,"Buchimo Parish",/KJPN4PduBWe/GdYvXsZ4rB6/Ut0ysYGEipO/U7ci8r046Ix/iSOSEP4kkji/I7iIkYbWzXz,6,iSOSEP4kkji
+EMIS,qeo7xEvZdH6,"Buchumba Parish",/KJPN4PduBWe/GdYvXsZ4rB6/Ut0ysYGEipO/U7ci8r046Ix/e54EE25IiiQ/qeo7xEvZdH6,6,e54EE25IiiQ
+EMIS,dxSWy5uRcsr,"Bucooco Parish",/KJPN4PduBWe/HOjHt8pjWWH/Pvl4FVXO0RD/ChzhMks9PhZ/wejqTv5jKwn/dxSWy5uRcsr,6,wejqTv5jKwn
+EMIS,Q9Y04arPj4v,"Bucundura Parish",/KJPN4PduBWe/YPWYLd0d3k3/fsP0Wxie1UW/YgZ43xoSa1c/P6L6j5QFXj9/Q9Y04arPj4v,6,P6L6j5QFXj9
+EMIS,hzF3KIuz5rr,"Bucuni Parish",/KJPN4PduBWe/AISa21ffM1p/O9MoQcpZ4uA/QKGGlvS3b3D/uE7rosIR64r/hzF3KIuz5rr,6,uE7rosIR64r
+EMIS,Fas7rgluw7v,"Bucuuhya Parish",/KJPN4PduBWe/uUGeUQZ5nI4/tM3DsJxMaMX/s0mATIPXTLz/OtWJ6Wuzo89/Fas7rgluw7v,6,OtWJ6Wuzo89
+EMIS,eC9ZIngR12Y,"Budaka(Budaka Town Council) Parish",/KJPN4PduBWe/DmeAF6ZFSzz/kb7iUQISRlx/fTvcVmXptT0/D7telrVDpiR/eC9ZIngR12Y,6,D7telrVDpiR
+EMIS,v3iODryWcvd,"Budaka(Kitoba Subcounty) Parish",/KJPN4PduBWe/uUGeUQZ5nI4/PJFtfCyp6Rb/wZnCbTgB4NC/RVXe4yrN84I/v3iODryWcvd,6,RVXe4yrN84I
+EMIS,kV1zQXAsJ4F,"Budatu Parish",/KJPN4PduBWe/GdYvXsZ4rB6/esIUe2tQAtL/S5i69hf3We0/Png8qyMfzKO/kV1zQXAsJ4F,6,Png8qyMfzKO
+EMIS,BWZ46jy9vR9,"Budde Parish",/KJPN4PduBWe/HOjHt8pjWWH/a3LMKP8z8Xj/qNEhw0Y6RTu/qo3l81aGuyG/BWZ46jy9vR9,6,qo3l81aGuyG
+EMIS,wzJoaD1dZVU,"Buddo Ward",/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/lHFA2AbZrsS/wzJoaD1dZVU,6,lHFA2AbZrsS
+EMIS,OjsKVRcV9Jz,"Budhabangula Parish",/KJPN4PduBWe/GdYvXsZ4rB6/hn1AlYtF1Pu/JDYStMoTzwL/R2ra0Y9xReu/OjsKVRcV9Jz,6,R2ra0Y9xReu
+EMIS,wgBjQFjTz64,"Budhatemwa Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oyygQ2STBST/WKdAEgwdWZr/xv3af5LyVpC/wgBjQFjTz64,6,xv3af5LyVpC
+EMIS,Dn0KoblcywO,"Budhaya Parish",/KJPN4PduBWe/GdYvXsZ4rB6/gUaoj8Geuao/EIaJ4t9qBLj/v8Eqzu6z4JB/Dn0KoblcywO,6,v8Eqzu6z4JB
+EMIS,odFX6OFeJRK,"Budiba Parish",/KJPN4PduBWe/AISa21ffM1p/z8D9ER36EKN/TENWSIiYNhp/hA8ukljVYou/odFX6OFeJRK,6,hA8ukljVYou
+EMIS,cdUo3OGZfhC,"Budidi Parish",/KJPN4PduBWe/GdYvXsZ4rB6/Ut0ysYGEipO/U7ci8r046Ix/AkvXpONHSOG/cdUo3OGZfhC,6,AkvXpONHSOG
+EMIS,S2mnS5NEqck,"Budima Parish",/KJPN4PduBWe/GdYvXsZ4rB6/aJR2ZxSH7g4/YIS8yVKNyty/cMfDgMuCwE4/S2mnS5NEqck,6,cMfDgMuCwE4
+EMIS,GDxgXNchFG6,"Budimo Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/pPdsWk1nnxm/GDxgXNchFG6,6,pPdsWk1nnxm
+EMIS,JqWYdDG5uA0,"Budini Parish",/KJPN4PduBWe/GdYvXsZ4rB6/kJCEJnXLgnh/Bb6REeyUHPT/CFdd7ZWkC3g/JqWYdDG5uA0,6,CFdd7ZWkC3g
+EMIS,zE616iYZB8q,"Budomero(Budomero Subcounty) Parish",/KJPN4PduBWe/GdYvXsZ4rB6/kJCEJnXLgnh/Bb6REeyUHPT/KAVIdXXZj24/zE616iYZB8q,6,KAVIdXXZj24
+EMIS,TJHzc8eaVrY,"Budomero(Ivukula Subcounty) Parish",/KJPN4PduBWe/GdYvXsZ4rB6/esIUe2tQAtL/S5i69hf3We0/bp78LWJ5a1t/TJHzc8eaVrY,6,bp78LWJ5a1t
+EMIS,cuBFhBuLeWS,"Budondo Parish",/KJPN4PduBWe/GdYvXsZ4rB6/hn1AlYtF1Pu/JDYStMoTzwL/AbQqzPDoeus/cuBFhBuLeWS,6,AbQqzPDoeus
+EMIS,ZyD25leKhI2,"Buduma Parish",/KJPN4PduBWe/GdYvXsZ4rB6/Ut0ysYGEipO/U7ci8r046Ix/kAwYONBH69u/ZyD25leKhI2,6,kAwYONBH69u
+EMIS,cIFmnWE4psr,"Buduma Parish",/KJPN4PduBWe/GdYvXsZ4rB6/gUaoj8Geuao/EIaJ4t9qBLj/ZJqNc7Uxk12/cIFmnWE4psr,6,ZJqNc7Uxk12
+EMIS,NJZsMNZk1qP,"Budumba Parish",/KJPN4PduBWe/DmeAF6ZFSzz/MtpE3CH6vq3/Y5bcujoUkwE/B32CdZvgaUl/NJZsMNZk1qP,6,B32CdZvgaUl
+EMIS,RFMJBF0mbZT,"Budumbuli East Parish",/KJPN4PduBWe/GdYvXsZ4rB6/aJR2ZxSH7g4/RUhu2wZ92uR/q6ZtxViGen3/RFMJBF0mbZT,6,q6ZtxViGen3
+EMIS,JCTXF0rEZJS,"Budumbuli West Parish",/KJPN4PduBWe/GdYvXsZ4rB6/aJR2ZxSH7g4/RUhu2wZ92uR/q6ZtxViGen3/JCTXF0rEZJS,6,q6ZtxViGen3
+EMIS,ZkLt1Qt9vNq,"Budusu Parish",/KJPN4PduBWe/DmeAF6ZFSzz/MtpE3CH6vq3/Y5bcujoUkwE/B32CdZvgaUl/ZkLt1Qt9vNq,6,B32CdZvgaUl
+EMIS,etgbVFqTLWw,"Budwale Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/Grmtpg6ekz9/etgbVFqTLWw,6,Grmtpg6ekz9
+EMIS,jQBsMPOxrUs,"Bufooto Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/sUG8WtV9s94/jQBsMPOxrUs,6,sUG8WtV9s94
+EMIS,TD7jQrrtsfH,"Bufukhula Central Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/ultOGuAHzgW/TD7jQrrtsfH,6,ultOGuAHzgW
+EMIS,EU8K6oF3MLe,"Bufukhula(Bushiribo Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/pdFTdCRJfzS/EU8K6oF3MLe,6,pdFTdCRJfzS
+EMIS,plqa8fvGUHJ,"Bufukhula(Busiu Town Council) Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/ultOGuAHzgW/plqa8fvGUHJ,6,ultOGuAHzgW
+EMIS,CZxpcrna1Rf,"Bufukhula(Nabbongo Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/auLatLbcOxf/sPJwfBA12aC/ZUJj5lo118U/CZxpcrna1Rf,6,ZUJj5lo118U
+EMIS,msj57JyOjXa,"Bufukhula(Nyondo Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/axgZnXJboBo/msj57JyOjXa,6,axgZnXJboBo
+EMIS,zPybru5NDi5,"Bufulubi Parish",/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/VrN4YeR370f/zPybru5NDi5,6,VrN4YeR370f
+EMIS,E56pypBGOeW,"Bufuma Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/oS2impR38Yq/E56pypBGOeW,6,oS2impR38Yq
+EMIS,YNPIm3VgzvK,"Bufumbo Parish",/KJPN4PduBWe/LSCoCf6ibP8/auLatLbcOxf/sPJwfBA12aC/xM2evix8FSh/YNPIm3VgzvK,6,xM2evix8FSh
+EMIS,p5rmZPiOtQB,"Bufumbula(Busukuya Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/P8V6M3O5OzP/p5rmZPiOtQB,6,P8V6M3O5OzP
+EMIS,ldaGFUGIB52,"Bufumbula(Nabbongo Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/auLatLbcOxf/sPJwfBA12aC/ZUJj5lo118U/ldaGFUGIB52,6,ZUJj5lo118U
+EMIS,jU9vpNlmc2K,"Bufumira Parish",/KJPN4PduBWe/HOjHt8pjWWH/JrHILmtK0OU/r7KKVyslmyg/cgJHaFpm6fl/jU9vpNlmc2K,6,cgJHaFpm6fl
+EMIS,aiJkVMYl8VO,"Bufunda  Parish",/KJPN4PduBWe/LCiSfhGKLEU/r8WLxW9JwsS/PBmhEEcXewT/l8IVPcrzGaa/aiJkVMYl8VO,6,l8IVPcrzGaa
+EMIS,R51L4jXiqhC,"Bufunda Parish",/KJPN4PduBWe/LCiSfhGKLEU/r8WLxW9JwsS/PBmhEEcXewT/l8IVPcrzGaa/R51L4jXiqhC,6,l8IVPcrzGaa
+EMIS,SYu5m0vZSWc,"Bufupa Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/OOY3u8H2M7y/SYu5m0vZSWc,6,OOY3u8H2M7y
+EMIS,GQvt2AGiB1b,"Bufutsa Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/eVV3XAhotrw/GQvt2AGiB1b,6,eVV3XAhotrw
+EMIS,DksPTHGy7ks,"Bufuuja Parish",/KJPN4PduBWe/DmeAF6ZFSzz/MtpE3CH6vq3/Y5bcujoUkwE/kGH3uij2fju/DksPTHGy7ks,6,kGH3uij2fju
+EMIS,uFvG7MLMuHd,"Bufuya Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/BJcjoE63o4X/uFvG7MLMuHd,6,BJcjoE63o4X
+EMIS,dk53RVF8bkY,"Bugaara Parish",/KJPN4PduBWe/LCiSfhGKLEU/It5UGwdHAPF/GLTjCpzrHdi/NtoB4rqfccV/dk53RVF8bkY,6,NtoB4rqfccV
+EMIS,ZHSAaDwQRLL,"Bugabira Parish",/KJPN4PduBWe/HOjHt8pjWWH/bIONCoCnt3Q/YianRphakZW/pkR6wHb99cR/ZHSAaDwQRLL,6,pkR6wHb99cR
+EMIS,ZbfWMlfjkR4,"Bugadde Ward",/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/Vzfp8g62doJ/ZbfWMlfjkR4,6,Vzfp8g62doJ
+EMIS,uBbwv94blVg,"Bugalo Parish",/KJPN4PduBWe/DmeAF6ZFSzz/MtpE3CH6vq3/Y5bcujoUkwE/GWNycq8EC5B/uBbwv94blVg,6,GWNycq8EC5B
+EMIS,fWxNOPN4J8B,"Bugambakimu Parish",/KJPN4PduBWe/HOjHt8pjWWH/aSbgVKaeCP0/jCAFrPofXqk/VaH29d9J9DI/fWxNOPN4J8B,6,VaH29d9J9DI
+EMIS,HxK4nf7qKoB,"Bugambe Parish",/KJPN4PduBWe/uUGeUQZ5nI4/L5WBetpBpY3/qqknBMoNlV9/pLtAU0fZNav/HxK4nf7qKoB,6,pLtAU0fZNav
+EMIS,h6Mnai5VJ0A,"Bugambi Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/ibbAWyvtGJN/h6Mnai5VJ0A,6,ibbAWyvtGJN
+EMIS,j5bPhWWyiE4,"Bugana(Bukana Subcounty) Parish",/KJPN4PduBWe/GdYvXsZ4rB6/Ut0ysYGEipO/U7ci8r046Ix/kAwYONBH69u/j5bPhWWyiE4,6,kAwYONBH69u
+EMIS,NNNNtpjZ5ni,"Bugana(Buliisa Town Council) Parish",/KJPN4PduBWe/uUGeUQZ5nI4/CQTmrrriwOq/Q7TLXorrk7p/yFVA9V9ZMAy/NNNNtpjZ5ni,6,yFVA9V9ZMAy
+EMIS,vz94N9VSy3o,"Bugando Parish",/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/tvPS9gxdC8O/vz94N9VSy3o,6,tvPS9gxdC8O
+EMIS,Inm4Swkmq8R,"Bugangari Parish",/KJPN4PduBWe/YPWYLd0d3k3/tugqr4dY6wq/lCwMeapfpzt/zlYNPre8OdH/Inm4Swkmq8R,6,zlYNPre8OdH
+EMIS,JYq5vJRNgbL,"Buganikere Parish",/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/olvMjWKwojt/JYq5vJRNgbL,6,olvMjWKwojt
+EMIS,bat1P0MKX6O,"Buganza Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oyygQ2STBST/WKdAEgwdWZr/xv3af5LyVpC/bat1P0MKX6O,6,xv3af5LyVpC
+EMIS,BzXeNaMaquo,"Bugarama(Bisheshe Division) Parish",/KJPN4PduBWe/LCiSfhGKLEU/r8WLxW9JwsS/PBmhEEcXewT/VAaXCgmFIPc/BzXeNaMaquo,6,VAaXCgmFIPc
+EMIS,b16HtE7ZCot,"Bugarama(Buhara Subcounty) Parish",/KJPN4PduBWe/YPWYLd0d3k3/zBIpPzKYFLp/AH60q5JkYuf/WlGCQqN7h0F/b16HtE7ZCot,6,WlGCQqN7h0F
+EMIS,TYqajtrJkWn,"Bugarama(Kaharo Subcounty) Parish",/KJPN4PduBWe/YPWYLd0d3k3/zBIpPzKYFLp/AH60q5JkYuf/Sa1xrK9rRPq/TYqajtrJkWn,6,Sa1xrK9rRPq
+EMIS,EHuTvORCO9a,"Bugarihe Parish",/KJPN4PduBWe/LCiSfhGKLEU/AS2Seq1grGE/itkqnx06qk9/PnqE6NI0v1v/EHuTvORCO9a,6,PnqE6NI0v1v
+EMIS,ld4M3hhY2D2,"Bugashe Parish",/KJPN4PduBWe/LCiSfhGKLEU/auswb7JO9wY/GbmcH3jozjp/lBQ705uOfsm/ld4M3hhY2D2,6,lBQ705uOfsm
+EMIS,wNha1doG4e6,"Bugatisa Parish",/KJPN4PduBWe/LSCoCf6ibP8/auLatLbcOxf/sPJwfBA12aC/xDICMKEA4Uw/wNha1doG4e6,6,xDICMKEA4Uw
+EMIS,jLfFr0ZdAqn,"Bugaya(Bugaya Subcounty(Buyende District)) Parish",/KJPN4PduBWe/GdYvXsZ4rB6/F3ccON3OCsL/eEjiTDMCNZl/mtgqGbT4DX5/jLfFr0ZdAqn,6,mtgqGbT4DX5
+EMIS,P2vMj0C5659,"Bugaya(Magambo Subcounty) Parish",/KJPN4PduBWe/LCiSfhGKLEU/fS71jg1WYPk/W7c468DjQPF/RCMFiKsuNhi/P2vMj0C5659,6,RCMFiKsuNhi
+EMIS,tv0PFRksx2C,"Bugayi Parish",/KJPN4PduBWe/GdYvXsZ4rB6/gUaoj8Geuao/EIaJ4t9qBLj/ZJqNc7Uxk12/tv0PFRksx2C,6,ZJqNc7Uxk12
+EMIS,E0YF72Py9br,"Bugegege Parish",/KJPN4PduBWe/DmeAF6ZFSzz/MtpE3CH6vq3/Y5bcujoUkwE/q09HTwzax1L/E0YF72Py9br,6,q09HTwzax1L
+EMIS,nMM5JzXgNQM,"Bugere Parish",/KJPN4PduBWe/HOjHt8pjWWH/bIONCoCnt3Q/TxJlNF19mcN/Isf8imyDt99/nMM5JzXgNQM,6,Isf8imyDt99
+EMIS,T3rAJ3oj7DO,"Bugeso Parish",/KJPN4PduBWe/GdYvXsZ4rB6/gUaoj8Geuao/EIaJ4t9qBLj/Zv5IDUV57i8/T3rAJ3oj7DO,6,Zv5IDUV57i8
+EMIS,Zi7VFU2d7bs,"Bugeywa Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oyygQ2STBST/WKdAEgwdWZr/kW099ec4vTg/Zi7VFU2d7bs,6,kW099ec4vTg
+EMIS,RshMyHGvxnV,"Buggala Parish",/KJPN4PduBWe/HOjHt8pjWWH/JrHILmtK0OU/r7KKVyslmyg/D6VQRtVAZib/RshMyHGvxnV,6,D6VQRtVAZib
+EMIS,Goi8lxFedrx,"Bughaghura Parish",/KJPN4PduBWe/AISa21ffM1p/aa8xVDzSpte/w6AuTSRpYRj/s1X0pHiF67i/Goi8lxFedrx,6,s1X0pHiF67i
+EMIS,iKOxtN3N5PH,"Bugiboni Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/xlXrEtLNqwB/iKOxtN3N5PH,6,xlXrEtLNqwB
+EMIS,anUxl29WwSn,"Bugido Parish",/KJPN4PduBWe/AISa21ffM1p/a9tQqo1rSj7/OUZqicQNnab/zBdAvyuy8us/anUxl29WwSn,6,zBdAvyuy8us
+EMIS,E88QDTIGX0E,"Bugimunye Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/oUtk6aSMZuv/E88QDTIGX0E,6,oUtk6aSMZuv
+EMIS,cYJPZ6RW0qx,"Bugiri A Parish",/KJPN4PduBWe/GdYvXsZ4rB6/gUaoj8Geuao/EIaJ4t9qBLj/q9TiLl6Fzp5/cYJPZ6RW0qx,6,q9TiLl6Fzp5
+EMIS,MoPYWfnEkwq,"Bugiri Parish",/KJPN4PduBWe/DmeAF6ZFSzz/Oyxwe3iDqpR/qbcf2KCBfjY/w3KNVaBexSV/MoPYWfnEkwq,6,w3KNVaBexSV
+EMIS,sgRXYF9GY5i,"Bugitimwa Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/xlXrEtLNqwB/sgRXYF9GY5i,6,xlXrEtLNqwB
+EMIS,j7tPez6xbT6,"Bugobero Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/x7m5kxRRbjp/j7tPez6xbT6,6,x7m5kxRRbjp
+EMIS,dxtO3rzVGD6,"Bugobero Town Board(Bugobero Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/h4BXrGv9ocr/dxtO3rzVGD6,6,h4BXrGv9ocr
+EMIS,UpDATSy1R43,"Bugobero Town Board(Bukhofu Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/eiCjVTzTMA6/UpDATSy1R43,6,eiCjVTzTMA6
+EMIS,S64ZzSbunIF,"Bugobi Parish",/KJPN4PduBWe/GdYvXsZ4rB6/esIUe2tQAtL/S5i69hf3We0/IFoPjblzDGE/S64ZzSbunIF,6,IFoPjblzDGE
+EMIS,CaazCHLBdru,"Bugobya Parish",/KJPN4PduBWe/GdYvXsZ4rB6/aJR2ZxSH7g4/YIS8yVKNyty/zWm5PG5DuKc/CaazCHLBdru,6,zWm5PG5DuKc
+EMIS,LraR2nXAK6u,"Bugodi Parish",/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/mXkgYpPVevL/LraR2nXAK6u,6,mXkgYpPVevL
+EMIS,KtES2LyJmrJ,"Bugogo Parish",/KJPN4PduBWe/AISa21ffM1p/a9tQqo1rSj7/OUZqicQNnab/HR4dBuD8bkr/KtES2LyJmrJ,6,HR4dBuD8bkr
+EMIS,nLFbfcAxrqY,"Bugoigo Parish",/KJPN4PduBWe/uUGeUQZ5nI4/CQTmrrriwOq/Q7TLXorrk7p/MTTcZX1iXks/nLFbfcAxrqY,6,MTTcZX1iXks
+EMIS,TmMQihHACHD,"Bugolobi Parish",/KJPN4PduBWe/HOjHt8pjWWH/aXmBzv61LbM/FtPH7HPJ4y1/QnkiZl7WtFR/TmMQihHACHD,6,QnkiZl7WtFR
+EMIS,yRQlh0tV3Tm,"Bugomba Parish",/KJPN4PduBWe/GdYvXsZ4rB6/hn1AlYtF1Pu/JDYStMoTzwL/dDeiTWKphda/yRQlh0tV3Tm,6,dDeiTWKphda
+EMIS,j4hNy98Q91x,"Bugombe Parish",/KJPN4PduBWe/HOjHt8pjWWH/a0DfYpC2Rwl/cjk4b2j6aLE/D2qryRFLqBX/j4hNy98Q91x,6,D2qryRFLqBX
+EMIS,yNaIZXrczGa,"Bugombwa Parish",/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/YPSNIjxrsC2/yNaIZXrczGa,6,YPSNIjxrsC2
+EMIS,IqLLNf0XP6w,"Bugomola Parish",/KJPN4PduBWe/HOjHt8pjWWH/ahyi8Uq4vaj/kR7Xp49FXj4/oB0Sfs9os6F/IqLLNf0XP6w,6,oB0Sfs9os6F
+EMIS,hrsppkJsvs6,"Bugomolwa Parish",/KJPN4PduBWe/HOjHt8pjWWH/IVuiLJYABw6/Gs1LsiCV1C3/sMayBKzAD9O/hrsppkJsvs6,6,sMayBKzAD9O
+EMIS,FzREBpZYjuO,"Bugona Parish",/KJPN4PduBWe/HOjHt8pjWWH/P8iz90eiIrW/W0g7xrcRykI/EjRGtLZSrKK/FzREBpZYjuO,6,EjRGtLZSrKK
+EMIS,GJ0143knVCc,"Bugondha(Mbulamuti Subcounty) Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oyygQ2STBST/WKdAEgwdWZr/zoJDrUqFBIl/GJ0143knVCc,6,zoJDrUqFBIl
+EMIS,MB6vRhfI6Qz,"Bugondha(Namwendwa Subcounty) Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oyygQ2STBST/WKdAEgwdWZr/aBWUBhzXWat/MB6vRhfI6Qz,6,aBWUBhzXWat
+EMIS,DXNJFq5yGbI,"Bugondo Parish",/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/OEWhwSnx6tP/DXNJFq5yGbI,6,OEWhwSnx6tP
+EMIS,DadJkt9nJam,"Bugondo(Bugondo Subcounty) Parish",/KJPN4PduBWe/rn2uTdRyUbh/zJfpujxC1kD/KNPVL257sX3/ulJAtodMnHH/DadJkt9nJam,6,ulJAtodMnHH
+EMIS,m8s7q6zew7S,"Bugongi(Kambuga Subcounty) Parish",/KJPN4PduBWe/YPWYLd0d3k3/aphcy5JTnd6/HZEO3rwb0uK/g78mxumm2id/m8s7q6zew7S,6,g78mxumm2id
+EMIS,dlGaypZ917a,"Bugongi(Nyakitunda Subcounty) Parish",/KJPN4PduBWe/LCiSfhGKLEU/UaR7OHycj8c/wY01hFv321X/aIhcPath8rs/dlGaypZ917a,6,aIhcPath8rs
+EMIS,VjZ747nAAHl,"Bugongo Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oNxpMjveyZt/XuMHk3Sn6h5/MAXaSec8b0w/VjZ747nAAHl,6,MAXaSec8b0w
+EMIS,dvXv3riRkUW,"Bugongo Parish",/KJPN4PduBWe/LCiSfhGKLEU/FLygHiUd2UW/wVH43w4g72W/RKVrCXCdXE6/dvXv3riRkUW,6,RKVrCXCdXE6
+EMIS,AMAGMEGQhKm,"Bugono Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oNxpMjveyZt/XuMHk3Sn6h5/xxv769zfmul/AMAGMEGQhKm,6,xxv769zfmul
+EMIS,Q4PkJlA8WeA,"Bugonyoka Parish",/KJPN4PduBWe/GdYvXsZ4rB6/hn1AlYtF1Pu/JDYStMoTzwL/R2ra0Y9xReu/Q4PkJlA8WeA,6,R2ra0Y9xReu
+EMIS,DAPmD9knUbN,"Bugonza Parish",/KJPN4PduBWe/GdYvXsZ4rB6/kJCEJnXLgnh/Bb6REeyUHPT/S5XOi6K4NDA/DAPmD9knUbN,6,S5XOi6K4NDA
+EMIS,CKGYQgBqBSu,"Bugonzi(Bukulula Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/ahyi8Uq4vaj/kR7Xp49FXj4/mVoAEst0E8o/CKGYQgBqBSu,6,mVoAEst0E8o
+EMIS,LwKb9h4v8Cb,"Bugonzi(Kitenga Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/lzWuB6bCQeV/n7bSmWC3q7e/T0PDVxmPAAY/LwKb9h4v8Cb,6,T0PDVxmPAAY
+EMIS,DCWRfhFfCUN,"Bugosa Parish",/KJPN4PduBWe/DmeAF6ZFSzz/MtpE3CH6vq3/Y5bcujoUkwE/QrAotPuTN7F/DCWRfhFfCUN,6,QrAotPuTN7F
+EMIS,qzudIcQ890u,"Bugoto Parish",/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/fA4gHLINj8q/qzudIcQ890u,6,fA4gHLINj8q
+EMIS,XqP9kCaqY3t,"Bugoye(Bugoye Subcounty) Parish",/KJPN4PduBWe/AISa21ffM1p/aa8xVDzSpte/w6AuTSRpYRj/AYfi2oE3u4p/XqP9kCaqY3t,6,AYfi2oE3u4p
+EMIS,HqP5QqE9vRy,"Bugoye(Ntenjeru Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/a0DfYpC2Rwl/cjk4b2j6aLE/MI2UQLYO6Rk/HqP5QqE9vRy,6,MI2UQLYO6Rk
+EMIS,Y8rWgYnoORN,"Bugube Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/oUtk6aSMZuv/Y8rWgYnoORN,6,oUtk6aSMZuv
+EMIS,qCsYrnEeMbE,"Bugubo Parish",/KJPN4PduBWe/GdYvXsZ4rB6/gUaoj8Geuao/EIaJ4t9qBLj/q9TiLl6Fzp5/qCsYrnEeMbE,6,q9TiLl6Fzp5
+EMIS,ST6qMKhOClJ,"Buguluma Parish",/KJPN4PduBWe/HOjHt8pjWWH/IVuiLJYABw6/Gs1LsiCV1C3/wB8iLliALBw/ST6qMKhOClJ,6,wB8iLliALBw
+EMIS,ahXuasw28Gz,"Bugulumbya Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oyygQ2STBST/WKdAEgwdWZr/e0Qi2kDQtXR/ahXuasw28Gz,6,e0Qi2kDQtXR
+EMIS,hc8fTxTSeMg,"Bugumba Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oNxpMjveyZt/c4SN5oolqma/Qe8WhmlTxPD/hc8fTxTSeMg,6,Qe8WhmlTxPD
+EMIS,hRR4c822qbp,"Bugumya Parish",/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/fA4gHLINj8q/hRR4c822qbp,6,fA4gHLINj8q
+EMIS,U0CEV9eoQuL,"Bugunga Parish",/KJPN4PduBWe/GdYvXsZ4rB6/gUaoj8Geuao/EIaJ4t9qBLj/q9TiLl6Fzp5/U0CEV9eoQuL,6,q9TiLl6Fzp5
+EMIS,SpGLt9gCgZY,"Bugusege(Buwalasi Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/LYHr3I3zPTA/SpGLt9gCgZY,6,LYHr3I3zPTA
+EMIS,HmJXJRNKb6D,"Bugusege(Buwasa Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/IWIefld5N0t/HmJXJRNKb6D,6,IWIefld5N0t
+EMIS,jksSbvR8XVJ,"Bugwa Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/Qi6w6mDQjHc/jksSbvR8XVJ,6,Qi6w6mDQjHc
+EMIS,GvvUrAxQ8F8,"Bugwagi(Buwasa Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/IWIefld5N0t/GvvUrAxQ8F8,6,IWIefld5N0t
+EMIS,IeT0tLcXc1Z,"Bugwagi(Nalusala Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/GDcfvxJSiyF/IeT0tLcXc1Z,6,GDcfvxJSiyF
+EMIS,QoGytIaad3e,"Bugweri Town Council Parish",/KJPN4PduBWe/GdYvXsZ4rB6/AIonX4LaJeU/O7nXDIUyf8m/IkD9ZRLlnOK/QoGytIaad3e,6,IkD9ZRLlnOK
+EMIS,yBu70Q8kJ86,"Bugwimbi Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/l2pliJkH1vR/yBu70Q8kJ86,6,l2pliJkH1vR
+EMIS,TXCnNak6axt,"Bugyera Parish",/KJPN4PduBWe/YPWYLd0d3k3/tugqr4dY6wq/lCwMeapfpzt/djp8m31m7Oa/TXCnNak6axt,6,djp8m31m7Oa
+EMIS,JiUeloccgCn,"Buhabeba Parish",/KJPN4PduBWe/DmeAF6ZFSzz/MtpE3CH6vq3/Y5bcujoUkwE/mrLaXm4CCo0/JiUeloccgCn,6,mrLaXm4CCo0
+EMIS,aKrLqbHMRtU,"Buhanama Parish",/KJPN4PduBWe/LCiSfhGKLEU/hAoe9dhZh9V/qz2RsZSk025/msmOKLOqGs3/aKrLqbHMRtU,6,msmOKLOqGs3
+EMIS,c9DM1Yo2hmM,"Buhanama Ward",/KJPN4PduBWe/LCiSfhGKLEU/hAoe9dhZh9V/qz2RsZSk025/QZbBfxNOPYu/c9DM1Yo2hmM,6,QZbBfxNOPYu
+EMIS,lqzmd7mjLlI,"Buhara Parish",/KJPN4PduBWe/YPWYLd0d3k3/zBIpPzKYFLp/AH60q5JkYuf/WlGCQqN7h0F/lqzmd7mjLlI,6,WlGCQqN7h0F
+EMIS,eWRwCwvOInR,"Buharambo Parish",/KJPN4PduBWe/LCiSfhGKLEU/FLygHiUd2UW/wVH43w4g72W/C2o35ZnhPSn/eWRwCwvOInR,6,C2o35ZnhPSn
+EMIS,aGie1qxMMCK,"Buhasaba Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/q3TZaSsNLoG/aGie1qxMMCK,6,q3TZaSsNLoG
+EMIS,vJytjSP8k72,"Buhatiro Parish",/KJPN4PduBWe/AISa21ffM1p/aa8xVDzSpte/w6AuTSRpYRj/d2SoxovqSNp/vJytjSP8k72,6,d2SoxovqSNp
+EMIS,E81mjDwbO7a,"Buhatuba Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/jqMjvXO9Ebt/E81mjDwbO7a,6,jqMjvXO9Ebt
+EMIS,Eg4DnLXyDPK,"Buhaza Parish",/KJPN4PduBWe/AISa21ffM1p/O9MoQcpZ4uA/QKGGlvS3b3D/U06YTVEltQB/Eg4DnLXyDPK,6,U06YTVEltQB
+EMIS,qZQO3NvtgMz,"Buhehe Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/q3TZaSsNLoG/qZQO3NvtgMz,6,q3TZaSsNLoG
+EMIS,ooe2qcfX4UW,"Buhemba Parish",/KJPN4PduBWe/GdYvXsZ4rB6/Ut0ysYGEipO/U7ci8r046Ix/bYsjpOoHozq/ooe2qcfX4UW,6,bYsjpOoHozq
+EMIS,TrECpSLsmav,"Buhimba East Parish",/KJPN4PduBWe/uUGeUQZ5nI4/L5WBetpBpY3/qqknBMoNlV9/bzDpPnvXdAJ/TrECpSLsmav,6,bzDpPnvXdAJ
+EMIS,E1zUk7gfcoI,"Buhimba West Parish",/KJPN4PduBWe/uUGeUQZ5nI4/L5WBetpBpY3/qqknBMoNlV9/bzDpPnvXdAJ/E1zUk7gfcoI,6,bzDpPnvXdAJ
+EMIS,EeqbbHuxK1a,"Buhobe Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/mu7Nj32ygV7/EeqbbHuxK1a,6,mu7Nj32ygV7
+EMIS,fB6h9Cf4iLC,"Buhonda Parish",/KJPN4PduBWe/uUGeUQZ5nI4/Lnewt3iIJaK/wdaeimPDcAe/fGWmrYvoN92/fB6h9Cf4iLC,6,fGWmrYvoN92
+EMIS,GFGHch7CPYD,"Buhozi Parish",/KJPN4PduBWe/YPWYLd0d3k3/aPhSZRinfbg/Va2CQJHrKHU/ZRhi7O381Vn/GFGHch7CPYD,6,ZRhi7O381Vn
+EMIS,KqiCAp2B6FV,"Buhuhira Parish",/KJPN4PduBWe/AISa21ffM1p/aa8xVDzSpte/w6AuTSRpYRj/dF349u51O0x/KqiCAp2B6FV,6,dF349u51O0x
+EMIS,WgPs4QLp355,"Buhuka Parish",/KJPN4PduBWe/uUGeUQZ5nI4/L5WBetpBpY3/qqknBMoNlV9/EiZ3YJoqb4k/WgPs4QLp355,6,EiZ3YJoqb4k
+EMIS,klYU9wpC0aF,"Buhumbu Parish",/KJPN4PduBWe/YPWYLd0d3k3/aPhSZRinfbg/Va2CQJHrKHU/ZRhi7O381Vn/klYU9wpC0aF,6,ZRhi7O381Vn
+EMIS,VpGa5RHad2y,"Buhumi Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/mu7Nj32ygV7/VpGa5RHad2y,6,mu7Nj32ygV7
+EMIS,RTDbXWxMxiC,"Buhumuriro Parish",/KJPN4PduBWe/YPWYLd0d3k3/wZrfAgC3WrU/XyPNrZ1HaCO/PFw8BIMDvgR/RTDbXWxMxiC,6,PFw8BIMDvgR
+EMIS,Ne4kgS5Hm6o,"Buhuna Parish",/KJPN4PduBWe/AISa21ffM1p/aa8xVDzSpte/w6AuTSRpYRj/zWc9zoN9qow/Ne4kgS5Hm6o,6,zWc9zoN9qow
+EMIS,agnYQFb3q5x,"Buhundu Parish",/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/ru5fIhvFKPG/agnYQFb3q5x,6,ru5fIhvFKPG
+EMIS,zrQgo3JiyBu,"Buhunga(Buhunga Subcounty) Parish",/KJPN4PduBWe/YPWYLd0d3k3/tugqr4dY6wq/lCwMeapfpzt/nGFCFBYbrXg/zrQgo3JiyBu,6,nGFCFBYbrXg
+EMIS,vqcaFwkYZ8G,"Buhunga(Maliba Subcounty) Parish",/KJPN4PduBWe/AISa21ffM1p/aa8xVDzSpte/w6AuTSRpYRj/tStnNF0l8qZ/vqcaFwkYZ8G,6,tStnNF0l8qZ
+EMIS,ghP2ctsEt7V,"Buikwe A Parish",/KJPN4PduBWe/HOjHt8pjWWH/x75Yh65MaUa/pmC5jsU3z0l/AD9Bt7WSNTz/ghP2ctsEt7V,6,AD9Bt7WSNTz
+EMIS,eRsvjCc8dDn,"Buikwe B Parish",/KJPN4PduBWe/HOjHt8pjWWH/x75Yh65MaUa/pmC5jsU3z0l/AD9Bt7WSNTz/eRsvjCc8dDn,6,AD9Bt7WSNTz
+EMIS,KU5iffC6QRt,"Buikwe C Parish",/KJPN4PduBWe/HOjHt8pjWWH/x75Yh65MaUa/pmC5jsU3z0l/AD9Bt7WSNTz/KU5iffC6QRt,6,AD9Bt7WSNTz
+EMIS,ZncGw7X8Y53,"Buirimbi Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/RE4DznM5adN/ZncGw7X8Y53,6,RE4DznM5adN
+EMIS,QnCSYj22iOX,"Bujaaja Parish",/KJPN4PduBWe/uUGeUQZ5nI4/Lnewt3iIJaK/wdaeimPDcAe/W9Is8wp50mn/QnCSYj22iOX,6,W9Is8wp50mn
+EMIS,JYpS4rWLu8Q,"Bujaayu Parish",/KJPN4PduBWe/HOjHt8pjWWH/Q7PaNIbyZII/RmD5YUUgPp8/tGWcOrlyW0j/JYpS4rWLu8Q,6,tGWcOrlyW0j
+EMIS,Za9OirxX6jl,"Bujaga Parish",/KJPN4PduBWe/LCiSfhGKLEU/tsugXWRXwGu/tGvXodWgT2c/ybmwY18nYSG/Za9OirxX6jl,6,ybmwY18nYSG
+EMIS,yEVUlg8LfrO,"Bujengwe Parish",/KJPN4PduBWe/YPWYLd0d3k3/aphcy5JTnd6/HZEO3rwb0uK/JxSsSMWHIax/yEVUlg8LfrO,6,JxSsSMWHIax
+EMIS,rqZ4g0IiEhq,"Bujjabe Parish",/KJPN4PduBWe/HOjHt8pjWWH/aUcYGQCK9ub/TcOetqs9yjc/dzy7YJOMUSB/rqZ4g0IiEhq,6,dzy7YJOMUSB
+EMIS,jQTHCroqBpc,"Bujogoro Parish",/KJPN4PduBWe/uUGeUQZ5nI4/tM3DsJxMaMX/s0mATIPXTLz/Ic3ULGifgRF/jQTHCroqBpc,6,Ic3ULGifgRF
+EMIS,QT9BbaG36Ll,"Bujongobe Parish",/KJPN4PduBWe/AISa21ffM1p/uCVQXAdKqL9/T86ULLnK3tp/Gxm74MjGncs/QT9BbaG36Ll,6,Gxm74MjGncs
+EMIS,v5laImQNrO5,"Bujubuli Parish",/KJPN4PduBWe/AISa21ffM1p/a9tQqo1rSj7/OUZqicQNnab/zBdAvyuy8us/v5laImQNrO5,6,zBdAvyuy8us
+EMIS,w5Tq8XXZ0q6,"Bujumba Parish",/KJPN4PduBWe/HOjHt8pjWWH/JrHILmtK0OU/r7KKVyslmyg/ovr7PfaJ6ZW/w5Tq8XXZ0q6,6,ovr7PfaJ6ZW
+EMIS,DTtSmsYqwxi,"Bujumiro Parish",/KJPN4PduBWe/AISa21ffM1p/qKmESX5Owwr/TtezF5swtCr/cbgpd5X2Wyj/DTtSmsYqwxi,6,cbgpd5X2Wyj
+EMIS,bYTt3jcFzCv,"Bujuura Parish",/KJPN4PduBWe/uUGeUQZ5nI4/PJFtfCyp6Rb/pwN4lfDu9e1/mSFVnzKt9An/bYTt3jcFzCv,6,mSFVnzKt9An
+EMIS,hEzBblSBr92,"Bujwanga Parish",/KJPN4PduBWe/GdYvXsZ4rB6/Ut0ysYGEipO/U7ci8r046Ix/e54EE25IiiQ/hEzBblSBr92,6,e54EE25IiiQ
+EMIS,g66fW7Wo9mx,"Bukabooli Parish",/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/fA4gHLINj8q/g66fW7Wo9mx,6,fA4gHLINj8q
+EMIS,bu6s3tlHdyw,"Bukahengere Parish",/KJPN4PduBWe/LSCoCf6ibP8/wJ2a6YKDFZW/lhli6rI1yug/l2pliJkH1vR/bu6s3tlHdyw,6,l2pliJkH1vR
+EMIS,fYPtZWnlpd0,"Bukalabwa Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oNxpMjveyZt/XuMHk3Sn6h5/PkX3J68BAyD/fYPtZWnlpd0,6,PkX3J68BAyD
+EMIS,N6T12nNrYwV,"Bukalango Ward",/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/ztmKU5fkigt/N6T12nNrYwV,6,ztmKU5fkigt
+EMIS,NgI2G6ksqli,"Bukalasa Parish",/KJPN4PduBWe/HOjHt8pjWWH/tr9XWtYsL5P/zyTu5GWQuz4/zqNbrnkcO6x/NgI2G6ksqli,6,zqNbrnkcO6x
+EMIS,fd7s2qy8MoT,"Bukalasi Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/d5oajk2aLiW/fd7s2qy8MoT,6,d5oajk2aLiW
+EMIS,mWQIssoIotO,"Bukaleba Parish",/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/cb19xb8BO6Q/mWQIssoIotO,6,cb19xb8BO6Q
+EMIS,XAFNlzAli0J,"Bukalenzi Parish",/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/s2a0yLa3g2f/XAFNlzAli0J,6,s2a0yLa3g2f
+EMIS,Isg4TAtYVsi,"Bukaligwoko Parish",/KJPN4PduBWe/DmeAF6ZFSzz/kb7iUQISRlx/fTvcVmXptT0/zFBTGUokEuW/Isg4TAtYVsi,6,zFBTGUokEuW
+EMIS,VM3BobQixeA,"Bukamba(Bukamba Subcounty) Parish",/KJPN4PduBWe/GdYvXsZ4rB6/kJCEJnXLgnh/Bb6REeyUHPT/Zuna5FsdfTg/VM3BobQixeA,6,Zuna5FsdfTg
+EMIS,DVRHLgSXlu1,"Bukamba(Nazigo Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/ykxQEnZGXkj/ZRvfRulTD9I/BV035kYRFn3/DVRHLgSXlu1,6,BV035kYRFn3
+EMIS,jyGY7WSpEvk,"Bukambagga Parish",/KJPN4PduBWe/HOjHt8pjWWH/tr9XWtYsL5P/zyTu5GWQuz4/lAm1fZzSv9g/jyGY7WSpEvk,6,lAm1fZzSv9g
+EMIS,egETcoBweVj,"Bukandula Parish",/KJPN4PduBWe/HOjHt8pjWWH/lQj3yMM1lI7/hqED5VkFfjC/QLANlG8vUtL/egETcoBweVj,6,QLANlG8vUtL
+EMIS,XGUxQFOVzjS,"Bukangama Parish",/KJPN4PduBWe/AISa21ffM1p/g8M1cWRJZV6/BoZWTmSrtlc/ru5fIhvFKPG/XGUxQFOVzjS,6,ru5fIhvFKPG
+EMIS,xtKaQxk5HdQ,"Bukangara Parish",/KJPN4PduBWe/AISa21ffM1p/aa8xVDzSpte/w6AuTSRpYRj/e1rG7DwHwt3/xtKaQxk5HdQ,6,e1rG7DwHwt3
+EMIS,EjSDosCDlDN,"Bukango Parish",/KJPN4PduBWe/HOjHt8pjWWH/Ame30QOwuX6/QbriWJLiboB/JUPc73n0jj8/EjSDosCDlDN,6,JUPc73n0jj8
+EMIS,QuAxgclgO0k,"Bukango Parish",/KJPN4PduBWe/HOjHt8pjWWH/Ame30QOwuX6/QbriWJLiboB/jRrgRpKWI58/QuAxgclgO0k,6,jRrgRpKWI58
+EMIS,OU8FTDH6VeZ,"Bukara Parish",/KJPN4PduBWe/AISa21ffM1p/iTfbtn6JUsN/hVqgC4tll1v/fuiSyEX3mWX/OU8FTDH6VeZ,6,fuiSyEX3mWX
+EMIS,ilWGm5chmyq,"Bukari(Bukibokolo Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/RE4DznM5adN/ilWGm5chmyq,6,RE4DznM5adN
+EMIS,lvBNaTxjCR2,"Bukari(Kashenshero Subcounty) Parish",/KJPN4PduBWe/LCiSfhGKLEU/FLygHiUd2UW/wVH43w4g72W/ECo3QCG4ljM/lvBNaTxjCR2,6,ECo3QCG4ljM
+EMIS,xhtsi9jr6p5,"Bukasa Ward (Wakiso Town Council)",/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/mXBvJBtJJZS/xhtsi9jr6p5,6,mXBvJBtJJZS
+EMIS,gYF91cRoFBg,"Bukasa(Kimenyedde Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/a0DfYpC2Rwl/cjk4b2j6aLE/WlXLKXDjkXv/gYF91cRoFBg,6,WlXLKXDjkXv
+EMIS,yrej3nInflT,"Bukasa(Kituntu Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/YMMexeHFUay/EvatL0ZCpX1/sah7H9lFefh/yrej3nInflT,6,sah7H9lFefh
+EMIS,hq56iEOCMS5,"Bukasa(Makindye Division) Parish",/KJPN4PduBWe/HOjHt8pjWWH/aXmBzv61LbM/FtPH7HPJ4y1/TTCJOLbdHIk/hq56iEOCMS5,6,TTCJOLbdHIk
+EMIS,BjPxPNPQXoh,"Bukasa(Nkokonjeru Town Council) Parish",/KJPN4PduBWe/HOjHt8pjWWH/x75Yh65MaUa/pmC5jsU3z0l/oEIIRG8U5WP/BjPxPNPQXoh,6,oEIIRG8U5WP
+EMIS,tgTKxbMhpXo,"Bukasakya Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/HGjJfyOGTpA/tgTKxbMhpXo,6,HGjJfyOGTpA
+EMIS,Q2A4TEu7zAk,"Bukatabira Parish",/KJPN4PduBWe/GdYvXsZ4rB6/mv4gKtY0qW8/HwUbu7wPaVy/tSwz19SGiY4/Q2A4TEu7zAk,6,tSwz19SGiY4
+EMIS,yNwPlmSNN40,"Bukatikoko Parish",/KJPN4PduBWe/DmeAF6ZFSzz/Oyxwe3iDqpR/qbcf2KCBfjY/lyzVduzvs8W/yNwPlmSNN40,6,lyzVduzvs8W
+EMIS,R1n4VzcNNgZ,"Bukatu Parish",/KJPN4PduBWe/GdYvXsZ4rB6/gUaoj8Geuao/EIaJ4t9qBLj/v8Eqzu6z4JB/R1n4VzcNNgZ,6,v8Eqzu6z4JB
+EMIS,b33CjfNfXw5,"Bukaya Ward",/KJPN4PduBWe/HOjHt8pjWWH/x75Yh65MaUa/hVVnrPWOw3F/qPLQOL2CAQa/b33CjfNfXw5,6,qPLQOL2CAQa
+EMIS,JUokQVT4CgW,"Bukaye Parish",/KJPN4PduBWe/GdYvXsZ4rB6/oNxpMjveyZt/XuMHk3Sn6h5/PkX3J68BAyD/JUokQVT4CgW,6,PkX3J68BAyD
+EMIS,MXIIFYN0mMC,"Bukedea  Parish",/KJPN4PduBWe/rn2uTdRyUbh/tdZbtg9sZkO/Pf8NPQB7A7K/NNqOmFcvmKq/MXIIFYN0mMC,6,NNqOmFcvmKq
+EMIS,dJXEnOspSYP,"Bukedea Parish",/KJPN4PduBWe/rn2uTdRyUbh/tdZbtg9sZkO/Pf8NPQB7A7K/NNqOmFcvmKq/dJXEnOspSYP,6,NNqOmFcvmKq
+EMIS,z7N2iix1ecO,"Bukeeka Parish",/KJPN4PduBWe/HOjHt8pjWWH/tr9XWtYsL5P/zyTu5GWQuz4/ism2u2yc1IM/z7N2iix1ecO,6,ism2u2yc1IM
+EMIS,nvbVZVkiuTV,"Bukeemo(Lwakhakha Town Council) Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/DMS7enl8TGe/nvbVZVkiuTV,6,DMS7enl8TGe
+EMIS,odx7Y5s0ThD,"Bukeemo(Magale Town Council) Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/jjEtQ4PgCeW/odx7Y5s0ThD,6,jjEtQ4PgCeW
+EMIS,dvlD1whmB9K,"Bukemba Parish",/KJPN4PduBWe/HOjHt8pjWWH/YMMexeHFUay/EvatL0ZCpX1/sah7H9lFefh/dvlD1whmB9K,6,sah7H9lFefh
+EMIS,pRiPpoqH0qq,"Bukendi Parish",/KJPN4PduBWe/GdYvXsZ4rB6/hn1AlYtF1Pu/JDYStMoTzwL/R2ra0Y9xReu/pRiPpoqH0qq,6,R2ra0Y9xReu
+EMIS,Z5VL2TUc9fk,"Bukenga Parish",/KJPN4PduBWe/GdYvXsZ4rB6/esIUe2tQAtL/S5i69hf3We0/zVFGtLwJXRR/Z5VL2TUc9fk,6,zVFGtLwJXRR
+EMIS,IHSHXcr8ap0,"Bukenye Parish",/KJPN4PduBWe/DmeAF6ZFSzz/Oyxwe3iDqpR/qbcf2KCBfjY/vf2qYpJiY4a/IHSHXcr8ap0,6,vf2qYpJiY4a
+EMIS,qerfWAFkxeB,"Bukere Parish",/KJPN4PduBWe/AISa21ffM1p/a9tQqo1rSj7/OUZqicQNnab/gbJKfnHdq7P/qerfWAFkxeB,6,gbJKfnHdq7P
+EMIS,cgs6Q1jSB7T,"Bukerere Parish",/KJPN4PduBWe/HOjHt8pjWWH/a0DfYpC2Rwl/G71iHIZOrMf/ylHhXhDCVZR/cgs6Q1jSB7T,6,ylHhXhDCVZR
+EMIS,veSGALyUqk1,"Bukerere Parish",/KJPN4PduBWe/HOjHt8pjWWH/aIahLLmtvgT/jkxUPB5hu2P/cMWONMXD5rY/veSGALyUqk1,6,cMWONMXD5rY
+EMIS,ftcHc2dxSyS,"Bukesa(Central Division(Kampala District)) Parish",/KJPN4PduBWe/HOjHt8pjWWH/aXmBzv61LbM/FtPH7HPJ4y1/h71UT3b9pHh/ftcHc2dxSyS,6,h71UT3b9pHh
+EMIS,vPtDtH9lRgn,"Bukesa(Ngando Subcounty) Parish",/KJPN4PduBWe/HOjHt8pjWWH/a3LMKP8z8Xj/qNEhw0Y6RTu/E2tZzzNUgGl/vPtDtH9lRgn,6,E2tZzzNUgGl
+EMIS,SE6OnSsilEy,"Bukewa(Buhemba Subcounty) Parish",/KJPN4PduBWe/GdYvXsZ4rB6/Ut0ysYGEipO/U7ci8r046Ix/bYsjpOoHozq/SE6OnSsilEy,6,bYsjpOoHozq
+EMIS,pLbD7Q7CmQB,"Bukewa(Buwagogo Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/fufJUuBNAo7/pLbD7Q7CmQB,6,fufJUuBNAo7
+EMIS,s0GxDwVQ1aU,"Bukhabikula(Bukhabusi Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/jRUucsFDSsc/s0GxDwVQ1aU,6,jRUucsFDSsc
+EMIS,SGUTUj3dvse,"Bukhabikula(Tsekululu Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/qFq1LtinVdZ/SGUTUj3dvse,6,qFq1LtinVdZ
+EMIS,iIk1NM5rdS4,"Bukhabusi Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/jRUucsFDSsc/iIk1NM5rdS4,6,jRUucsFDSsc
+EMIS,BbFb9wga16F,"Bukhalu Parish",/KJPN4PduBWe/LSCoCf6ibP8/auLatLbcOxf/sPJwfBA12aC/OdGhntPP37l/BbFb9wga16F,6,OdGhntPP37l
+EMIS,tDQaNYFBoYZ,"Bukhamunyu Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/LOIRiRoxJBE/tDQaNYFBoYZ,6,LOIRiRoxJBE
+EMIS,ZmGIIHYHDKx,"Bukhatondi Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/EZUx6CKHgHB/ZmGIIHYHDKx,6,EZUx6CKHgHB
+EMIS,L38WHfXulYp,"Bukhaukha Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/eVV3XAhotrw/L38WHfXulYp,6,eVV3XAhotrw
+EMIS,fzRLhKzpKlb,"Bukhaweka Town Board Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/vLAFPE05jv2/fzRLhKzpKlb,6,vLAFPE05jv2
+EMIS,L6249Pq3L0e,"Bukhaweka(Bukhaweka Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/vLAFPE05jv2/L6249Pq3L0e,6,vLAFPE05jv2
+EMIS,xPYAjBKe9mm,"Bukhaweka(Bukiabi Subcounty) Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/n95xBlryFaC/xPYAjBKe9mm,6,n95xBlryFaC
+EMIS,DsjJYBB3Xpd,"Bukhofu Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/eiCjVTzTMA6/DsjJYBB3Xpd,6,eiCjVTzTMA6
+EMIS,lwQTaYuK49W,"Bukhoma Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/saVcRxckt2t/lwQTaYuK49W,6,saVcRxckt2t
+EMIS,yuMri0mTR9w,"Bukhonzo Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/saVcRxckt2t/yuMri0mTR9w,6,saVcRxckt2t
+EMIS,trEHMEU1675,"Bukhubalo Parish",/KJPN4PduBWe/DmeAF6ZFSzz/lkuO79O6mRx/OT2UCm5IqDD/wTZtpTiA4Vi/trEHMEU1675,6,wTZtpTiA4Vi
+EMIS,vK9xeWRaLCF,"Bukhumwa Parish",/KJPN4PduBWe/LSCoCf6ibP8/yuo5ielNL7W/IHytnJA6ymo/BJcjoE63o4X/vK9xeWRaLCF,6,BJcjoE63o4X
+EMIS,ir6eeN0a84q,"Bukhura Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/LUmNSarRSpu/ir6eeN0a84q,6,LUmNSarRSpu
+EMIS,Kxi3gLLxZpu,"Bukhwaya Parish",/KJPN4PduBWe/LSCoCf6ibP8/JIZDvNlIhXS/yz8IJSFfuZo/eiCjVTzTMA6/Kxi3gLLxZpu,6,eiCjVTzTMA6
+EMIS,KHRLXNSzvlM,"Bukiabi Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/n95xBlryFaC/KHRLXNSzvlM,6,n95xBlryFaC
+EMIS,zELKn28AWJT,"Bukibayi Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/DMS7enl8TGe/zELKn28AWJT,6,DMS7enl8TGe
+EMIS,IYWTtJ7xP9I,"Bukibeti Parish",/KJPN4PduBWe/LSCoCf6ibP8/TGzZPOmbgn8/xa69Xo2qBkN/jjEtQ4PgCeW/IYWTtJ7xP9I,6,jjEtQ4PgCeW
+EMIS,SSUMdgSL7U7,"Bukibino Parish",/KJPN4PduBWe/LSCoCf6ibP8/AhwgeZQYj16/sxZq4APrd4I/EZUx6CKHgHB/SSUMdgSL7U7,6,EZUx6CKHgHB

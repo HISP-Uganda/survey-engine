@@ -206,10 +206,10 @@ try {
         
         /* Enhanced Dashboard Header */
         .dashboard-welcome {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+            color: black;
             padding: 2.5rem 2rem;
-            border-radius: 20px;
+            border-radius: 0px;
             margin-bottom: 2rem;
             box-shadow: 0 15px 35px rgba(102, 126, 234, 0.15);
             position: relative;

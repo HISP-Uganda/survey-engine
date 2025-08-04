@@ -115,6 +115,110 @@ try {
         transform: translateY(-2px);
         box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
     }
+    
+    /* Modal z-index fixes for navbar compatibility */
+    #detailsModal {
+        z-index: 2000 !important;
+    }
+    
+    #detailsModal .modal-backdrop {
+        z-index: 1999 !important;
+    }
+    
+    .modal-backdrop.show {
+        z-index: 1999 !important;
+    }
+    
+    /* Ensure modal content is above navbar */
+    #detailsModal .modal-dialog {
+        z-index: 2001 !important;
+        position: relative;
+    }
+    
+    /* Custom Modal Styles - Independent of Bootstrap */
+    .payload-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+    }
+    
+    .payload-modal-dialog {
+        max-width: 90%;
+        max-height: 90%;
+        width: 1200px;
+        margin: auto;
+        position: relative;
+    }
+    
+    .payload-modal-content {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .payload-modal-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .payload-modal-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        flex: 1;
+    }
+    
+    .payload-modal-close {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 0;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+    }
+    
+    .payload-modal-close:hover {
+        background-color: #f8f9fa;
+        color: #dc3545;
+    }
+    
+    .payload-modal-body {
+        padding: 2rem;
+        flex: 1;
+        overflow-y: auto;
+    }
+    
+    .payload-modal-footer {
+        padding: 1rem 2rem;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: flex-end;
+        background: #f8f9fa;
+    }
 </style>
 
 <div class="tab-header mb-4">
@@ -199,7 +303,6 @@ try {
                                 ?>
                                 <?php if ($payload || $response): ?>
                                     <button type="button" class="btn btn-sm btn-info view-details-btn"
-                                            data-bs-toggle="modal" data-bs-target="#detailsModal"
                                             data-payload="<?= htmlspecialchars(json_encode($payload, JSON_PRETTY_PRINT), ENT_QUOTES, 'UTF-8') ?>"
                                             data-response="<?= htmlspecialchars(json_encode($response, JSON_PRETTY_PRINT), ENT_QUOTES, 'UTF-8') ?>">
                                         <i class="fas fa-eye me-1"></i>View
@@ -231,25 +334,25 @@ try {
     </div>
 <?php endif; ?>
 
-<!-- Details Modal -->
-<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-dark" id="detailsModalLabel">
+<!-- Details Modal - Custom Implementation -->
+<div id="payloadModal" class="payload-modal-overlay" style="display: none;">
+    <div class="payload-modal-dialog">
+        <div class="payload-modal-content">
+            <div class="payload-modal-header">
+                <h5 class="payload-modal-title">
                     <i class="fas fa-code me-2"></i>Submission Details
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="payload-modal-close" onclick="PayloadModal.hide()">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="payload-modal-body">
                 <h6 class="text-dark"><i class="fas fa-upload me-2 text-primary"></i>Payload Sent:</h6>
                 <pre class="code-block" id="modal-payload"></pre>
                 
                 <h6 class="mt-4 text-dark"><i class="fas fa-download me-2 text-success"></i>DHIS2 Response:</h6>
                 <pre class="code-block" id="modal-response"></pre>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <div class="payload-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="PayloadModal.hide()">
                     <i class="fas fa-times me-1"></i>Close
                 </button>
             </div>
@@ -258,33 +361,95 @@ try {
 </div>
 
 <script>
-    // Handle modal display for payload details
+    // Custom Modal Implementation - Completely Independent of Bootstrap
+    window.PayloadModal = {
+        show: function(payloadData, responseData) {
+            var modal = document.getElementById('payloadModal');
+            var modalPayload = document.getElementById('modal-payload');
+            var modalResponse = document.getElementById('modal-response');
+            
+            if (!modal || !modalPayload || !modalResponse) return;
+            
+            // Populate modal content
+            try {
+                modalPayload.textContent = payloadData && payloadData !== 'null' ? 
+                    JSON.stringify(JSON.parse(payloadData), null, 2) : 
+                    'No payload recorded or payload is not valid JSON.';
+            } catch (e) {
+                modalPayload.textContent = 'Invalid JSON payload data.';
+            }
+            
+            try {
+                modalResponse.textContent = responseData && responseData !== 'null' ? 
+                    JSON.stringify(JSON.parse(responseData), null, 2) : 
+                    'No response recorded or response is not valid JSON.';
+            } catch (e) {
+                modalResponse.textContent = 'Invalid JSON response data.';
+            }
+            
+            // Show modal with animation
+            modal.style.display = 'flex';
+            modal.style.opacity = '0';
+            
+            setTimeout(function() {
+                modal.style.transition = 'opacity 0.3s ease';
+                modal.style.opacity = '1';
+            }, 10);
+            
+            // Disable body scroll
+            document.body.style.overflow = 'hidden';
+        },
+        
+        hide: function() {
+            var modal = document.getElementById('payloadModal');
+            if (!modal) return;
+            
+            // Hide modal with animation
+            modal.style.transition = 'opacity 0.3s ease';
+            modal.style.opacity = '0';
+            
+            setTimeout(function() {
+                modal.style.display = 'none';
+                modal.style.transition = '';
+            }, 300);
+            
+            // Re-enable body scroll
+            document.body.style.overflow = '';
+        }
+    };
+    
+    // Initialize view button handlers when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
-        var detailsModal = document.getElementById('detailsModal');
-        if (detailsModal) {
-            detailsModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
+        // Handle view button clicks - completely separate from navbar
+        document.addEventListener('click', function(e) {
+            var button = e.target.closest('.view-details-btn');
+            if (button) {
+                e.preventDefault();
+                e.stopPropagation();
+                
                 var payloadData = button.getAttribute('data-payload');
                 var responseData = button.getAttribute('data-response');
-                var modalPayload = detailsModal.querySelector('#modal-payload');
-                var modalResponse = detailsModal.querySelector('#modal-response');
                 
-                try {
-                    modalPayload.textContent = payloadData && payloadData !== 'null' ? 
-                        JSON.stringify(JSON.parse(payloadData), null, 2) : 
-                        'No payload recorded or payload is not valid JSON.';
-                } catch (e) {
-                    modalPayload.textContent = 'Invalid JSON payload data.';
+                PayloadModal.show(payloadData, responseData);
+            }
+        });
+        
+        // Handle Escape key to close modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var modal = document.getElementById('payloadModal');
+                if (modal && modal.style.display !== 'none') {
+                    PayloadModal.hide();
                 }
-                
-                try {
-                    modalResponse.textContent = responseData && responseData !== 'null' ? 
-                        JSON.stringify(JSON.parse(responseData), null, 2) : 
-                        'No response recorded or response is not valid JSON.';
-                } catch (e) {
-                    modalResponse.textContent = 'Invalid JSON response data.';
-                }
-            });
-        }
+            }
+        });
+        
+        // Handle click outside modal to close
+        document.addEventListener('click', function(e) {
+            var modal = document.getElementById('payloadModal');
+            if (e.target === modal) {
+                PayloadModal.hide();
+            }
+        });
     });
 </script>

@@ -151,14 +151,14 @@ function getQuestionAnalysis($pdo, $surveyId) {
     // Get response distribution
     $sql = "
         SELECT 
-            sr.response_text as response,
+            sr.response_value as response,
             COUNT(*) as count
         FROM submission_response sr
         JOIN submission sub ON sr.submission_id = sub.id
         WHERE sub.survey_id = :survey_id 
         AND sr.question_id = :question_id
         $dateFilter
-        GROUP BY sr.response_text
+        GROUP BY sr.response_value
         ORDER BY count DESC
     ";
     
@@ -210,13 +210,13 @@ function calculateQuestionStats($pdo, $surveyId, $questionId, $questionType, $da
     
     // Most common response
     $mostCommonSql = "
-        SELECT sr.response_text
+        SELECT sr.response_value
         FROM submission_response sr
         JOIN submission sub ON sr.submission_id = sub.id
         WHERE sub.survey_id = :survey_id 
         AND sr.question_id = :question_id
         $dateFilter
-        GROUP BY sr.response_text
+        GROUP BY sr.response_value
         ORDER BY COUNT(*) DESC
         LIMIT 1
     ";
@@ -229,12 +229,12 @@ function calculateQuestionStats($pdo, $surveyId, $questionId, $questionType, $da
     $averageScore = null;
     if (in_array($questionType, ['rating', 'number', 'integer', 'decimal'])) {
         $avgSql = "
-            SELECT AVG(CAST(sr.response_text AS DECIMAL(10,2))) as avg_score
+            SELECT AVG(CAST(sr.response_value AS DECIMAL(10,2))) as avg_score
             FROM submission_response sr
             JOIN submission sub ON sr.submission_id = sub.id
             WHERE sub.survey_id = :survey_id 
             AND sr.question_id = :question_id
-            AND sr.response_text REGEXP '^[0-9]+(\\.[0-9]+)?$'
+            AND sr.response_value REGEXP '^[0-9]+(\\.[0-9]+)?$'
             $dateFilter
         ";
         

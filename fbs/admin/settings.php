@@ -326,7 +326,7 @@ $message = [];
     <?php include 'components/aside.php'; ?>
 
     <div class="main-content position-relative border-radius-lg">
-      <?php include 'components/navbar.php'; ?>     
+         <?php include 'components/navbar.php'; ?>
 
        <div class="d-flex align-items-center flex-grow-1 py-3 px-2 header-container-light">
     <nav aria-label="breadcrumb" class="flex-grow-1">

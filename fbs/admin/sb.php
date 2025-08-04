@@ -57,11 +57,14 @@ function insertOptionSetValueAndMapping(PDO $conn, int $optionSetId, array $opti
 
     // Map option to DHIS2 if code exists
     if (!empty($option['code'])) {
-        // Check if mapping exists
+        // Check if mapping exists (using trimmed values to prevent whitespace issues)
+        $localValue = trim($option['name']);
+        $dhis2Code = trim($option['code']);
+        
         $stmt = $conn->prepare("SELECT id FROM dhis2_option_set_mapping WHERE local_value = ? AND dhis2_option_code = ? AND dhis2_option_set_id = ?");
         $stmt->execute([
-            $option['name'],
-            $option['code'],
+            $localValue,
+            $dhis2Code,
             $dhis2OptionSetId
         ]);
 
@@ -69,8 +72,8 @@ function insertOptionSetValueAndMapping(PDO $conn, int $optionSetId, array $opti
             try {
                 $stmt = $conn->prepare("INSERT INTO dhis2_option_set_mapping (local_value, dhis2_option_code, dhis2_option_set_id) VALUES (?, ?, ?)");
                 $stmt->execute([
-                    $option['name'],
-                    $option['code'],
+                    $localValue, // Trimmed to prevent mapping issues
+                    $dhis2Code,  // Trimmed to prevent mapping issues
                     $dhis2OptionSetId
                 ]);
             } catch (PDOException $e) {
@@ -90,14 +93,26 @@ function insertOptionSetValueAndMapping(PDO $conn, int $optionSetId, array $opti
  */
 function getPrograms($instance, $programType = null)
 {
-    $filter = '';
-    if ($programType === 'event') {
-        $filter = '&filter=programType:eq:WITHOUT_REGISTRATION';
-    } elseif ($programType === 'tracker') {
-        $filter = '&filter=programType:eq:WITH_REGISTRATION';
+    try {
+        $filter = '';
+        if ($programType === 'event') {
+            $filter = '&filter=programType:eq:WITHOUT_REGISTRATION';
+        } elseif ($programType === 'tracker') {
+            $filter = '&filter=programType:eq:WITH_REGISTRATION';
+        }
+        
+        $programs = dhis2_get('programs?fields=id,name,programType' . $filter, $instance);
+        
+        if ($programs === null) {
+            error_log("WARNING: DHIS2 programs API call returned null for instance '$instance'. Possible timeout or connection issue.");
+            return [];
+        }
+        
+        return $programs['programs'] ?? [];
+    } catch (Exception $e) {
+        error_log("ERROR: Failed to get programs from DHIS2 instance '$instance': " . $e->getMessage());
+        return [];
     }
-    $programs = dhis2_get('programs?fields=id,name,programType' . $filter, $instance);
-    return $programs['programs'] ?? [];
 }
 
 /**
@@ -105,8 +120,19 @@ function getPrograms($instance, $programType = null)
  */
 function getDatasets($instance)
 {
-    $datasets = dhis2_get('dataSets?fields=id,name', $instance);
-    return $datasets['dataSets'] ?? [];
+    try {
+        $datasets = dhis2_get('dataSets?fields=id,name', $instance);
+        
+        if ($datasets === null) {
+            error_log("WARNING: DHIS2 datasets API call returned null for instance '$instance'. Possible timeout or connection issue.");
+            return [];
+        }
+        
+        return $datasets['dataSets'] ?? [];
+    } catch (Exception $e) {
+        error_log("ERROR: Failed to get datasets from DHIS2 instance '$instance': " . $e->getMessage());
+        return [];
+    }
 }
 
 /**
@@ -136,9 +162,14 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
         'trackedEntityTypeId' => null // NEW: Stores the DHIS2 Tracked Entity Type UID
     ];
 
-    if ($domain === 'tracker') {
-        if ($programType === 'tracker') { // WITH_REGISTRATION program
-          $programInfo = dhis2_get('programs/' . $programId . '?fields=id,name,programType,categoryCombo[id,name],programTrackedEntityAttributes[trackedEntityAttribute[id,name,formName,optionSet[id,name]]],programStages[id,name,programStageDataElements[dataElement[id,name,formName,optionSet[id,name]]]],trackedEntityType[id]', $instance);
+    try {
+        if ($domain === 'tracker') {
+            if ($programType === 'tracker') { // WITH_REGISTRATION program
+              $programInfo = dhis2_get('programs/' . $programId . '?fields=id,name,programType,categoryCombo[id,name],programTrackedEntityAttributes[trackedEntityAttribute[id,name,formName,optionSet[id,name]]],programStages[id,name,programStageDataElements[dataElement[id,name,formName,optionSet[id,name]]]],trackedEntityType[id]', $instance);
+              
+              if ($programInfo === null) {
+                  throw new Exception("Failed to fetch program details for program ID '$programId'. DHIS2 server may be unavailable or experiencing timeouts.");
+              }
 
             $result['program'] = [
                 'id' => $programInfo['id'],
@@ -190,6 +221,10 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
             }
         } elseif ($programType === 'event') { // WITHOUT_REGISTRATION program
             $programInfo = dhis2_get('programs/' . $programId . '?fields=id,name,programType,categoryCombo[id,name],programStages[id,name,programStageDataElements[dataElement[id,name,formName,optionSet[id,name]]]]', $instance); // Added formName
+            
+            if ($programInfo === null) {
+                throw new Exception("Failed to fetch event program details for program ID '$programId'. DHIS2 server may be unavailable or experiencing timeouts.");
+            }
 
             $result['program'] = [
                 'id' => $programInfo['id'],
@@ -226,6 +261,10 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
         }
     } elseif ($domain === 'aggregate') {
         $datasetInfo = dhis2_get('dataSets/' . $programId . '?fields=id,name,categoryCombo[id,name,categoryOptionCombos[id,name]],dataSetElements[dataElement[id,name,categoryCombo[id,name,categoryOptionCombos[id,name]]]]', $instance);
+        
+        if ($datasetInfo === null) {
+            throw new Exception("Failed to fetch dataset details for dataset ID '$programId'. DHIS2 server may be unavailable or experiencing timeouts.");
+        }
         $result['program'] = [
             'id' => $datasetInfo['id'],
             'name' => $datasetInfo['name']
@@ -295,6 +334,20 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
     }
 
     return $result;
+    
+    } catch (Exception $e) {
+        error_log("ERROR: Failed to get program details from DHIS2: " . $e->getMessage());
+        // Return a basic error result structure
+        return [
+            'program' => null,
+            'dataElements' => [],
+            'attributes' => [],
+            'optionSets' => [],
+            'categoryCombo' => null,
+            'trackedEntityTypeId' => null,
+            'error' => $e->getMessage()
+        ];
+    }
 }
 
 
@@ -644,7 +697,13 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
                     </option>
                     <?php endforeach;
                 } catch (Exception $e) {
-                    echo '<option value="">Error: ' . htmlspecialchars($e->getMessage()) . '</option>';
+                    $errorMsg = $e->getMessage();
+                    // Provide user-friendly error messages for common issues
+                    if (strpos($errorMsg, 'timeout') !== false || strpos($errorMsg, 'unavailable') !== false) {
+                        echo '<option value="">DHIS2 server timeout - please try again</option>';
+                    } else {
+                        echo '<option value="">Error loading programs: ' . htmlspecialchars($errorMsg) . '</option>';
+                    }
                 }
                 ?>
             </select>
@@ -841,7 +900,25 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
                 <?php
             }
         } catch (Exception $e) {
-            echo '<div class="alert alert-danger">Error: ' . htmlspecialchars($e->getMessage()) . '</div>';
+            $errorMsg = $e->getMessage();
+            // Provide user-friendly error messages for common issues
+            if (strpos($errorMsg, 'timeout') !== false || strpos($errorMsg, 'unavailable') !== false) {
+                echo '<div class="alert alert-warning">
+                    <h5><i class="fas fa-exclamation-triangle me-2"></i>DHIS2 Server Timeout</h5>
+                    <p>The DHIS2 server is taking longer than expected to respond. This may be due to:</p>
+                    <ul>
+                        <li>High server load</li>
+                        <li>Network connectivity issues</li>
+                        <li>Large program/dataset with many data elements</li>
+                    </ul>
+                    <p><strong>Please try refreshing the page or selecting a different program.</strong></p>
+                </div>';
+            } else {
+                echo '<div class="alert alert-danger">
+                    <h5><i class="fas fa-exclamation-circle me-2"></i>Error Loading Program Details</h5>
+                    <p>' . htmlspecialchars($errorMsg) . '</p>
+                </div>';
+            }
         }
     }
     ?>
@@ -1408,8 +1485,16 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
 
                     document.getElementById('dhis2-survey-container').innerHTML = '<div class=\"text-center py-5\"><div class=\"spinner-border text-primary\" role=\"status\"></div><p class=\"mt-3\">Loading DHIS2 details...</p></div>';
                     
-                    fetch(url + '&ajax=1')
-                    .then(res => res.text())
+                    // Add timeout and retry functionality
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 second timeout
+                    
+                    fetch(url + '&ajax=1', { signal: controller.signal })
+                    .then(res => {
+                        clearTimeout(timeoutId);
+                        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                        return res.text();
+                    })
                     .then(html => {
                       document.getElementById('dhis2-survey-container').innerHTML = html;
                       
@@ -1447,8 +1532,32 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
                       initializeSelectionControls();
                     })
                     .catch(error => {
+                      clearTimeout(timeoutId);
                       console.error('Error loading DHIS2 survey form:', error);
-                      document.getElementById('dhis2-survey-container').innerHTML = '<div class=\"alert alert-danger\">Failed to load DHIS2 form. Please try again.</div>';
+                      
+                      let errorMessage = 'Failed to load DHIS2 form.';
+                      let isTimeout = false;
+                      
+                      if (error.name === 'AbortError') {
+                        errorMessage = 'Request timed out - DHIS2 server is taking too long to respond.';
+                        isTimeout = true;
+                      } else if (error.message.includes('500')) {
+                        errorMessage = 'DHIS2 server error - the server may be experiencing issues.';
+                      } else if (error.message.includes('HTTP')) {
+                        errorMessage = `Connection error: ${error.message}`;
+                      }
+                      
+                      const retryButton = isTimeout || error.message.includes('500') ? 
+                        '<button class="btn btn-outline-primary btn-sm mt-2" onclick="loadDHIS2SurveyForm(' + JSON.stringify(params) + ')"><i class="fas fa-redo me-1"></i> Retry</button>' : '';
+                      
+                      document.getElementById('dhis2-survey-container').innerHTML = `
+                        <div class="alert alert-warning">
+                          <h5><i class="fas fa-exclamation-triangle me-2"></i>Loading Issue</h5>
+                          <p>${errorMessage}</p>
+                          ${isTimeout ? '<p><small>Large programs may take longer to load. Try again or select a different program.</small></p>' : ''}
+                          ${retryButton}
+                        </div>
+                      `;
                     });
                   }
 

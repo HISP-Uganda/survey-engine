@@ -225,16 +225,127 @@ if (!$surveyId) {
         }
 
 
-        /* Survey List Cards - Simplified */
+        /* Survey List Cards - Enhanced */
         .survey-card { 
-            background-color: #f8f9fa !important;
-            border: 1px solid #dee2e6 !important;
-            box-shadow: none !important;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+            border: 1px solid #e3e6f0 !important;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 320px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .survey-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .survey-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 1rem 3rem rgba(58, 59, 69, 0.25) !important;
+            border-color: #b8c5d6 !important;
+        }
+        
+        .survey-card:hover::before {
+            opacity: 1;
+        }
+        
+        /* Ensure equal card heights */
+        .survey-card .card-body {
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Stats box styling */
+        .survey-card .bg-light {
+            background: linear-gradient(135deg, #f1f3f4 0%, #e8eaf6 100%) !important;
+            border: 1px solid #e0e4e7;
             transition: all 0.3s ease;
         }
-        .survey-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
+        
+        .survey-card:hover .bg-light {
+            background: linear-gradient(135deg, #e8f4f8 0%, #d1ecf1 100%) !important;
+            border-color: #bee5eb;
+        }
+        
+        /* Button improvements */
+        .survey-card .btn {
+            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+        
+        .survey-card .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .survey-card .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .survey-card .btn-outline-info {
+            border-color: #17a2b8;
+            color: #17a2b8;
+            background: transparent;
+        }
+        
+        .survey-card .btn-outline-info:hover {
+            background: #17a2b8;
+            border-color: #17a2b8;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* Icon styling */
+        .survey-card .icon-shape {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            transition: all 0.3s ease;
+        }
+        
+        .survey-card:hover .icon-shape {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Grid improvements */
+        .row.g-4 {
+            margin: 0 -12px;
+        }
+        
+        .row.g-4 > * {
+            padding: 0 12px;
+            margin-bottom: 24px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1199px) {
+            .survey-card {
+                min-height: 300px;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .survey-card {
+                min-height: 280px;
+            }
+            
+            .survey-card .card-body {
+                min-height: 260px;
+                padding: 1.5rem !important;
+            }
         }
         .survey-card .text-gradient.text-primary {
             background-image: linear-gradient(195deg, #42424a 0%, #1a1a1a 100%) !important;
@@ -476,45 +587,58 @@ if (!$surveyId) {
                                         <p class="text-muted">There are no surveys available to display.</p>
                                     </div>
                                 <?php else: ?>
-                                    <div class="row p-4">
+                                    <div class="row p-4 g-4">
                                         <?php foreach ($surveys as $survey): ?>
-                                            <div class="col-xl-3 col-md-6 mb-xl-4 mb-4">
-                                                <div class="card survey-card" style="height: 280px; border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); transition: all 0.3s ease;">
-                                                    <div class="card-body p-3 d-flex flex-column">
+                                            <div class="col-lg-4 col-md-6 col-sm-12">
+                                                <div class="card survey-card h-100" style="border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); transition: all 0.3s ease; border-radius: 16px; overflow: hidden;">
+                                                    <div class="card-body p-4 d-flex flex-column h-100">
+                                                        <!-- Icon Section -->
                                                         <div class="text-center mb-3">
-                                                            <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md mx-auto" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                                            <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md mx-auto" 
+                                                                 style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
                                                                 <i class="fas fa-poll text-lg text-white"></i>
                                                             </div>
                                                         </div>
-                                                        <div class="text-center mb-3">
-                                                            <h5 class="font-weight-bolder mb-1 text-primary"><?php echo htmlspecialchars($survey['name']); ?></h5>
-                                                            <p class="text-sm text-muted mb-2">Survey ID: #<?php echo $survey['id']; ?></p>
+                                                        
+                                                        <!-- Title Section -->
+                                                        <div class="text-center mb-3 flex-grow-0">
+                                                            <h5 class="font-weight-bolder mb-2 text-primary" style="font-size: 1.1rem; line-height: 1.3; min-height: 2.6rem; display: flex; align-items: center; justify-content: center;">
+                                                                <?php echo htmlspecialchars($survey['name']); ?>
+                                                            </h5>
+                                                            <p class="text-sm text-muted mb-0">Survey ID: #<?php echo $survey['id']; ?></p>
                                                         </div>
-                                                        <div class="text-center mb-3">
-                                                            <div class="row">
-                                                                <div class="col-12">
-                                                                    <div class="d-flex flex-column align-items-center">
-                                                                        <span class="text-2xl font-weight-bolder text-success"><?php echo number_format($survey['submission_count']); ?></span>
-                                                                        <span class="text-sm text-muted">Total Submissions</span>
-                                                                    </div>
+                                                        
+                                                        <!-- Stats Section -->
+                                                        <div class="text-center mb-3 flex-grow-1 d-flex flex-column justify-content-center">
+                                                            <div class="bg-light rounded-lg p-3 mb-2">
+                                                                <span class="text-2xl font-weight-bolder text-success d-block" style="font-size: 2rem;">
+                                                                    <?php echo number_format($survey['submission_count']); ?>
+                                                                </span>
+                                                                <span class="text-sm text-muted">Total Submissions</span>
+                                                            </div>
+                                                            
+                                                            <?php if ($survey['last_submission']): ?>
+                                                                <div class="text-center">
+                                                                    <small class="text-muted d-flex align-items-center justify-content-center">
+                                                                        <i class="fas fa-clock me-1"></i>
+                                                                        Last: <?php echo date('M d, Y', strtotime($survey['last_submission'])); ?>
+                                                                    </small>
                                                                 </div>
-                                                            </div>
+                                                            <?php endif; ?>
                                                         </div>
-                                                        <?php if ($survey['last_submission']): ?>
-                                                            <div class="text-center mb-3">
-                                                                <p class="text-xs text-muted mb-0">
-                                                                    <i class="fas fa-clock me-1"></i>
-                                                                    Last: <?php echo date('M d, Y', strtotime($survey['last_submission'])); ?>
-                                                                </p>
-                                                            </div>
-                                                        <?php endif; ?>
-                                                        <div class="mt-auto">
-                                                            <div class="d-flex justify-content-center gap-2">
-                                                                <a href="records.php?survey_id=<?php echo $survey['id']; ?>" class="btn btn-primary btn-sm mb-0">
-                                                                    <i class="fas fa-list me-1"></i>View Records
+                                                        
+                                                        <!-- Buttons Section - Fixed at bottom -->
+                                                        <div class="mt-auto pt-3">
+                                                            <div class="d-flex flex-column gap-2">
+                                                                <a href="records.php?survey_id=<?php echo $survey['id']; ?>" 
+                                                                   class="btn btn-primary btn-sm w-100" 
+                                                                   style="border-radius: 8px; font-weight: 600;">
+                                                                    <i class="fas fa-list me-2"></i>View Records
                                                                 </a>
-                                                                <a href="survey_dashboard.php?survey_id=<?php echo $survey['id']; ?>" class="btn btn-info btn-sm mb-0">
-                                                                    <i class="fas fa-chart-line me-1"></i>Dashboard
+                                                                <a href="survey_dashboard.php?survey_id=<?php echo $survey['id']; ?>" 
+                                                                   class="btn btn-outline-info btn-sm w-100" 
+                                                                   style="border-radius: 8px; font-weight: 600;">
+                                                                    <i class="fas fa-chart-line me-2"></i>Dashboard
                                                                 </a>
                                                             </div>
                                                         </div>
