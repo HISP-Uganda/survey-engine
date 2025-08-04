@@ -47,14 +47,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     // Hash the password securely
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                    
+                    // Check if this is the first user (will become Super Admin)
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM admin_users");
+                    $stmt->execute();
+                    $userCount = $stmt->fetchColumn();
+                    
+                    // First user gets Super Admin role (role_id = 1), others get Admin role (role_id = 2)
+                    $role_id = ($userCount == 0) ? 1 : 2;
+                    $role_name = ($userCount == 0) ? 'Super Administrator' : 'Administrator';
 
-                    // Insert new admin user into the database
-                    $stmt = $pdo->prepare("INSERT INTO admin_users (username, password, email) VALUES (?, ?, ?)");
-                    $success = $stmt->execute([$username, $hashed_password, $email]);
+                    // Insert new admin user into the database with appropriate role
+                    $stmt = $pdo->prepare("INSERT INTO admin_users (username, password, email, role_id, status) VALUES (?, ?, ?, ?, 1)");
+                    $success = $stmt->execute([$username, $hashed_password, $email, $role_id]);
 
                     if ($success) {
                         // Set a success message in session before redirecting
-                        $_SESSION['success_message'] = "Account created successfully! Please log in.";
+                        if ($userCount == 0) {
+                            $_SESSION['success_message'] = "Super Administrator account created successfully! You now have full system access. Please log in.";
+                        } else {
+                            $_SESSION['success_message'] = "Administrator account created successfully! Please log in.";
+                        }
                         header("Location: login.php"); // Redirect to the login page
                         exit(); // Crucial to stop script execution after redirect
                     } else {

@@ -6,6 +6,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit();
 }
+require_once 'includes/session_timeout.php';
 
 require 'connect.php'; // Ensures $pdo is available
 
@@ -17,9 +18,23 @@ $surveyName = '';
 $startDateParam = $_GET['start_date'] ?? '';
 $endDateParam = $_GET['end_date'] ?? '';
 
-// Fetch all surveys if no survey_id is provided
+// Fetch all surveys if no survey_id is provided - with submission counts
 if (!$surveyId) {
-    $surveys = $pdo->query("SELECT id, name FROM survey")->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    $surveys = $pdo->query("
+        SELECT 
+            s.id, 
+            s.name, 
+            COUNT(sub.id) AS submission_count,
+            MAX(sub.created) AS last_submission
+        FROM 
+            survey s 
+        LEFT JOIN 
+            submission sub ON s.id = sub.survey_id 
+        GROUP BY 
+            s.id, s.name
+        ORDER BY 
+            s.name ASC
+    ")->fetchAll(PDO::FETCH_ASSOC) ?: [];
 } else {
     // Fetch submissions for the selected survey
     $sortBy = $_GET['sort'] ?? 'created_desc';
@@ -39,19 +54,12 @@ if (!$surveyId) {
             SELECT
                 s.id,
                 s.uid,
-                s.age,
-                s.sex,
-                s.period,
-                su.name AS service_unit_name,
                 l.name AS location_name,
-                o.name AS ownership_name,
                 s.created,
                 COUNT(sr.id) AS response_count
             FROM submission s
             LEFT JOIN submission_response sr ON s.id = sr.submission_id
-            LEFT JOIN service_unit su ON s.service_unit_id = su.id
             LEFT JOIN location l ON s.location_id = l.id
-            LEFT JOIN owner o ON s.ownership_id = o.id
             WHERE s.survey_id = :survey_id
         ";
         
@@ -67,7 +75,7 @@ if (!$surveyId) {
             $params['end_date'] = $endDateParam . ' 23:59:59';   // End of the day
         }
 
-        $sql .= " GROUP BY s.id, su.name, l.name, o.name ORDER BY $orderBy";
+        $sql .= " GROUP BY s.id, l.name ORDER BY $orderBy";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
@@ -217,16 +225,24 @@ if (!$surveyId) {
         }
 
 
-        /* Survey List Cards (card-blog) */
-        .card-blog { 
-            background-color: #f8f9fa !important; /* Slightly off-white for distinction */
-            border: 1px solid #dee2e6 !important; /* Light border */
+        /* Survey List Cards - Simplified */
+        .survey-card { 
+            background-color: #f8f9fa !important;
+            border: 1px solid #dee2e6 !important;
             box-shadow: none !important;
             transition: all 0.3s ease;
         }
-        .card-blog:hover {
+        .survey-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
+        }
+        .survey-card .text-gradient.text-primary {
+            background-image: linear-gradient(195deg, #42424a 0%, #1a1a1a 100%) !important;
+            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text;
+        }
+        .survey-card h5 {
+            color: #212529 !important;
         }
         .card-blog .text-gradient.text-primary {
             background-image: linear-gradient(195deg, #42424a 0%, #1a1a1a 100%) !important; /* Dark gradient for headings */
@@ -388,6 +404,32 @@ if (!$surveyId) {
             background-color: #5a6268;
             border-color: #545b62;
         }
+        .header-container-light {
+        background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .breadcrumb-link-light {
+        color: #475569 !important;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    .breadcrumb-link-light:hover {
+        color: #1e293b !important;
+    }
+    .breadcrumb-item-active-light {
+        color: #1e293b !important;
+        font-weight: 700;
+    }
+    .navbar-title-light {
+        color: #1e293b;
+        text-shadow: none;
+        /* The margin is now handled by the Bootstrap class mt-1 */
+    }
     </style>
 </head>
 <body class="g-sidenav-show bg-gray-100">
@@ -395,25 +437,25 @@ if (!$surveyId) {
 
     <div class="main-content position-relative border-radius-lg">
        
+      <?php include 'components/navbar.php'; ?>
         
-        <div class="d-flex align-items-center flex-grow-1 page-title-section">
-            <nav aria-label="breadcrumb" class="flex-grow-1">
-                <ol class="breadcrumb mb-0 navbar-breadcrumb" style="background: transparent;">
-                    <li class="breadcrumb-item">
-                        <a href="main" class="breadcrumb-link">
-                            <i class="fas fa-home me-1"></i>Home
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active navbar-breadcrumb-active" aria-current="page">
-                        Survey Submissions
-                    </li>
-                </ol>
-                <h5 class="navbar-title mb-0">
-                    Survey Submissions
-                </h5>
-            </nav>
-        </div>
-        
+     <div class="d-flex align-items-center flex-grow-1 page-title-section header-container-light">
+    <nav aria-label="breadcrumb" class="flex-grow-1">
+        <ol class="breadcrumb mb-1 navbar-breadcrumb" style="background: transparent;">
+            <li class="breadcrumb-item">
+                <a href="main" class="breadcrumb-link-light">
+                    <i class="fas fa-home me-1" style="color: #475569;"></i>Home
+                </a>
+            </li>
+            <li class="breadcrumb-item active navbar-breadcrumb-active breadcrumb-item-active-light" aria-current="page">
+                Survey Submissions
+            </li>
+        </ol>
+        <h5 class="navbar-title mb-0 mt-1 navbar-title-light" style="font-weight: 700;">
+            Survey Submissions
+        </h5>
+    </nav>
+</div>
         <div class="container-fluid py-4">
             <div class="row">
                 <div class="col-12">
@@ -437,17 +479,44 @@ if (!$surveyId) {
                                     <div class="row p-4">
                                         <?php foreach ($surveys as $survey): ?>
                                             <div class="col-xl-3 col-md-6 mb-xl-4 mb-4">
-                                                <div class="card card-blog card-plain">
-                                                    <div class="card-body p-3">
-                                                        <div class="d-flex flex-column">
-                                                            <h5 class="mb-1 text-gradient text-primary">
-                                                                <?php echo htmlspecialchars($survey['name']); ?>
-                                                            </h5>
-                                                            <a href="records.php?survey_id=<?php echo $survey['id']; ?>" 
-                                                               class="btn btn-outline-primary btn-sm mt-3">
-                                                                View Submissions
-                                                                <i class="fas fa-arrow-right ms-1"></i>
-                                                            </a>
+                                                <div class="card survey-card" style="height: 280px; border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); transition: all 0.3s ease;">
+                                                    <div class="card-body p-3 d-flex flex-column">
+                                                        <div class="text-center mb-3">
+                                                            <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md mx-auto" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                                                <i class="fas fa-poll text-lg text-white"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-center mb-3">
+                                                            <h5 class="font-weight-bolder mb-1 text-primary"><?php echo htmlspecialchars($survey['name']); ?></h5>
+                                                            <p class="text-sm text-muted mb-2">Survey ID: #<?php echo $survey['id']; ?></p>
+                                                        </div>
+                                                        <div class="text-center mb-3">
+                                                            <div class="row">
+                                                                <div class="col-12">
+                                                                    <div class="d-flex flex-column align-items-center">
+                                                                        <span class="text-2xl font-weight-bolder text-success"><?php echo number_format($survey['submission_count']); ?></span>
+                                                                        <span class="text-sm text-muted">Total Submissions</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <?php if ($survey['last_submission']): ?>
+                                                            <div class="text-center mb-3">
+                                                                <p class="text-xs text-muted mb-0">
+                                                                    <i class="fas fa-clock me-1"></i>
+                                                                    Last: <?php echo date('M d, Y', strtotime($survey['last_submission'])); ?>
+                                                                </p>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                        <div class="mt-auto">
+                                                            <div class="d-flex justify-content-center gap-2">
+                                                                <a href="records.php?survey_id=<?php echo $survey['id']; ?>" class="btn btn-primary btn-sm mb-0">
+                                                                    <i class="fas fa-list me-1"></i>View Records
+                                                                </a>
+                                                                <a href="survey_dashboard.php?survey_id=<?php echo $survey['id']; ?>" class="btn btn-info btn-sm mb-0">
+                                                                    <i class="fas fa-chart-line me-1"></i>Dashboard
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -533,12 +602,7 @@ if (!$surveyId) {
                                                 <tr>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">UID</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Age</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Sex</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Period</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Service Unit</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Location</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ownership</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Responses</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Created</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
@@ -554,22 +618,7 @@ if (!$surveyId) {
                                                             <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['uid']); ?></p>
                                                         </td>
                                                         <td>
-                                                            <p class="text-xs font-weight-bold mb-0"><?php echo $submission['age'] ?? 'N/A'; ?></p>
-                                                        </td>
-                                                        <td>
-                                                            <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['sex'] ?? 'N/A'); ?></p>
-                                                        </td>
-                                                        <td>
-                                                            <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['period'] ?? 'N/A'); ?></p>
-                                                        </td>
-                                                        <td>
-                                                            <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['service_unit_name'] ?? 'N/A'); ?></p>
-                                                        </td>
-                                                        <td>
                                                             <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['location_name'] ?? 'N/A'); ?></p>
-                                                        </td>
-                                                        <td>
-                                                            <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['ownership_name'] ?? 'N/A'); ?></p>
                                                         </td>
                                                         <td>
                                                             <span class="badge badge-sm bg-gradient-success"><?php echo $submission['response_count']; ?></span>
@@ -654,29 +703,47 @@ if (!$surveyId) {
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: `id=${submissionId}&action=delete`
+                        body: `id=${submissionId}`
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire(
-                                'Deleted!',
-                                'The submission has been deleted.',
-                                'success'
-                            ).then(() => location.reload());
-                        } else {
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        console.log('Response headers:', response.headers);
+                        return response.text();
+                    })
+                    .then(text => {
+                        console.log('Raw response:', text);
+                        try {
+                            const data = JSON.parse(text);
+                            console.log('Parsed data:', data);
+                            if (data.success) {
+                                const nextId = data.next_submission_id || 'N/A';
+                                Swal.fire(
+                                    'Deleted!',
+                                    `Submission deleted successfully! Next submission ID will be: ${nextId}`,
+                                    'success'
+                                ).then(() => location.reload());
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    data.message || 'Failed to delete submission.',
+                                    'error'
+                                );
+                            }
+                        } catch (e) {
+                            console.error('JSON parse error:', e);
+                            console.error('Response text:', text);
                             Swal.fire(
                                 'Error!',
-                                data.message || 'Failed to delete submission.',
+                                'Invalid response from server.',
                                 'error'
                             );
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
+                        console.error('Fetch error:', error);
                         Swal.fire(
                             'Error!',
-                            'An error occurred while deleting the submission.',
+                            'Network error occurred while deleting the submission.',
                             'error'
                         );
                     });

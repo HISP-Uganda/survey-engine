@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit();
 }
-
+require_once 'includes/session_timeout.php';
 require 'connect.php';
 require 'dhis2/dhis2_shared.php';
 
@@ -20,8 +20,8 @@ $message = [];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Locations</title>
-    <link rel="icon" href="argon-dashboard-master/assets/img/brand/favicon.png" type="image/png">
+    <title>Admin - Settings</title>
+    <link rel="icon" type="image/png" href="argon-dashboard-master/assets/img/istock3.png">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/nucleo-icons.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/nucleo-svg.css" rel="stylesheet">
@@ -71,32 +71,32 @@ $message = [];
 
         /* --- FUTURISTIC DESIGN STYLES START HERE --- */
 
-        /* Overall Darker Background */
+        /* Overall Lighter Background */
         body.bg-gray-100 {
-            background-color: #bfbfbf !important; /* Dark blue/black background */
+            background-color: #f8fafc !important; /* Light gray/white background */
         }
 
         /* Main Content Area */
         .main-content {
-            background-color: #bfbfbf; /* Slightly lighter dark for content area */
+            background-color: #f8fafc; /* Light background for content area */
         }
         .container-fluid.py-4 {
-            background-color: #bfbfbf; /* Ensure content background matches */
+            background-color: #ffffff; /* White content background */
             border-radius: 1rem;
             padding: 2rem !important; /* More padding */
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3); /* Inner shadow for depth */
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08); /* Subtle outer shadow */
         }
 
-        /* Text Colors for Dark Background */
+        /* Text Colors for Light Background */
         .container-fluid h4, .container-fluid h5, .container-fluid h6,
         .container-fluid p, .container-fluid label, .container-fluid strong, .container-fluid small {
-            color: #e2e8f0; /* Light gray text for readability */
+            color: #1e293b; /* Dark text for readability on light background */
         }
         .text-muted {
-            color: #94a3b8 !important; /* Muted text slightly lighter */
+            color: #64748b !important; /* Muted text for light theme */
         }
         .breadcrumb-link, .breadcrumb-item.active {
-            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for breadcrumbs */
+            text-shadow: none; /* Remove shadow for light theme */
         }
 
         /* Page Title Section */
@@ -104,119 +104,172 @@ $message = [];
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7), 0 0 5px #ffd700; /* More pronounced glow for title */
         }
 
-        /* Tab Navigation Wrapper (the container for the pills) */
+        /* Vertical Tab Navigation Wrapper - Stable Version */
         .nav-wrapper {
-            background: rgba(15, 23, 42, 0.7); /* Dark semi-transparent background */
-            backdrop-filter: blur(5px); /* Frosted glass effect */
-            border-radius: 1rem; /* Rounded corners */
-            padding: 0.75rem; /* Padding inside the wrapper */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 215, 0, 0.1); /* Subtle glow effect */
-            display: flex; /* Use flexbox for centering */
-            justify-content: center; /* Center the pills */
-            margin-bottom: 2rem; /* Space below the nav wrapper */
+            background: #ffffff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .nav-pills {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.5rem;
         }
 
         .nav-pills .nav-item {
-            margin: 0 0.5rem; /* Space between individual pills */
-        }
-
-        /* Default Tab Link Style */
-        .nav-pills .nav-link {
-            color: #e2e8f0; /* Light text for inactive tabs */
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem; /* More rounded pill shape */
-            transition: all 0.3s ease; /* Smooth transitions for all states */
-            background: transparent; /* Default transparent background */
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
-            position: relative;
-            overflow: hidden; /* For shimmer effect */
-        }
-
-        /* Tab Link Hover State */
-        .nav-pills .nav-link:hover {
-            color: #fff;
-            background: rgba(30, 41, 59, 0.5); /* Slightly darker on hover */
-            border-color: rgba(255, 215, 0, 0.3); /* Yellowish hover border */
-            transform: translateY(-2px); /* Slight lift effect on hover */
-        }
-
-        /* Active Tab Link Style */
-        .nav-pills .nav-link.active {
-            color: #0f172a !important; /* Dark text for active tab */
-            background: linear-gradient(45deg, #ffd700, #ffdb58) !important; /* Gold gradient for active */
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4), 0 0 10px rgba(255, 215, 0, 0.6) !important; /* Stronger glow */
-            border-color: #ffd700 !important; /* Solid gold border */
-            font-weight: 700;
-            transform: scale(1.02); /* Slightly larger */
-            z-index: 1; /* Bring active tab to front */
-        }
-
-        /* Optional: Subtle shimmering effect on active tab */
-        .nav-pills .nav-link.active::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
+            margin: 0;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: all 0.8s ease;
         }
-        .nav-pills .nav-link.active:hover::before {
-            left: 100%; /* Shimmer slides across */
+
+        /* Default Tab Link Style - Stable Version */
+        .nav-pills .nav-link {
+            color: #64748b;
+            font-weight: 500;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease-in-out;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin: 0;
         }
+
+        /* Tab Link Hover State - Stable */
+        .nav-pills .nav-link:hover {
+            color: #1e293b;
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            text-decoration: none;
+        }
+
+        /* Active Tab Link Style - Stable */
+        .nav-pills .nav-link.active {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, #3b82f6, #1e40af) !important;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3) !important;
+            border-color: #3b82f6 !important;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        /* Remove any conflicting pseudo-elements */
+        .nav-pills .nav-link::before,
+        .nav-pills .nav-link::after {
+            display: none;
+        }
+
+        /* Ensure stable positioning and prevent layout shifts */
+        .nav-pills .nav-link {
+            transform: none !important;
+            position: static !important;
+            overflow: visible !important;
+        }
+        
+        .nav-pills .nav-link:hover,
+        .nav-pills .nav-link.active {
+            transform: none !important;
+        }
+        
+        /* Override Bootstrap nav-pills defaults that might cause instability */
+        .nav-pills .nav-link:not(.active) {
+            background-color: #f8fafc !important;
+        }
+        
+        /* Ensure consistent height for all nav items */
+        .nav-pills .nav-item {
+            min-height: auto;
+        }
+        
+        /* Fix flexbox alignment issues */
+        .nav-pills .nav-link i {
+            margin-right: 0.5rem;
+            width: 1rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        /* Ensure HR elements are not clickable and don't inherit nav styling */
+        .nav-wrapper hr {
+            pointer-events: none !important;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0)) !important;
+            border: none !important;
+            height: 1px !important;
+            margin: 1rem 0 !important;
+            cursor: default !important;
+            position: relative !important;
+            z-index: -1 !important;
+        }
+        
+        .nav-wrapper hr:hover {
+            background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0)) !important;
+            border: none !important;
+        }
+
+        /* Prevent any pseudo-elements or empty spaces from being clickable */
+        .nav-wrapper *:empty {
+            pointer-events: none !important;
+        }
+
 
         /* Tab Content Area */
         .tab-content {
-            background-color: #1a202c; /* Dark background for tab content */
+            background-color: #ffffff; /* White background for tab content */
             border-radius: 0.75rem;
-            padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+            padding: 2rem;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08); /* Light shadow for depth */
+            border: 1px solid #e2e8f0; /* Light border */
         }
 
         /* Adjustments for elements within tabs (like forms, tables, cards) */
         .form-select, .form-control {
-            background-color: #2d3748 !important; /* Darker input fields */
-            color: #e2e8f0 !important;
-            border: 1px solid #4a5568 !important;
+            background-color: #ffffff !important; /* White input fields */
+            color: #1e293b !important;
+            border: 1px solid #cbd5e1 !important;
         }
         .form-select:focus, .form-control:focus {
-            border-color: #ffd700 !important; /* Gold focus border */
-            box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25) !important; /* Gold glow on focus */
+            border-color: #3b82f6 !important; /* Blue focus border */
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important; /* Blue glow on focus */
         }
         .card {
-            background-color: #2d3748 !important;
-            border: 1px solid #4a5568 !important;
-            color: #e2e8f0 !important;
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
         }
         .card-header, .table-secondary {
-            background-color: #1a202c !important; /* Darker header for cards/tables */
-            color: #e2e8f0 !important;
+            background-color: #f8fafc !important; /* Light header for cards/tables */
+            color: #1e293b !important;
         }
         .table-striped > tbody > tr:nth-of-type(odd) > * {
-            background-color: #2a3340 !important; /* Darker stripes for tables */
+            background-color: #f8fafc !important; /* Light stripes for tables */
         }
         .table {
-            color: #e2e8f0 !important; /* Light text for table content */
+            color: #1e293b !important; /* Dark text for table content */
         }
         .table thead th {
-            border-bottom: 1px solid #4a5568 !important; /* Darker header border */
+            border-bottom: 1px solid #cbd5e1 !important; /* Light header border */
         }
         .table tbody tr {
-            border-bottom: 1px solid #3b4556 !important; /* Darker row separator */
+            border-bottom: 1px solid #e2e8f0 !important; /* Light row separator */
         }
 
         /* Button Styling to Fit Theme */
         .btn-primary {
-            background-color: #ffd700 !important; /* Gold primary button */
-            border-color: #ffd700 !important;
-            color: #0f172a !important; /* Dark text on gold */
+            background-color: #3b82f6 !important; /* Blue primary button */
+            border-color: #3b82f6 !important;
+            color: #ffffff !important; /* White text on blue */
         }
         .btn-primary:hover {
-            background-color: #ffdb58 !important;
-            border-color: #ffdb58 !important;
-            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+            background-color: #2563eb !important;
+            border-color: #2563eb !important;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         }
         .btn-success { /* Green for success actions like 'Load Location Table' */
             background-color: #28a745 !important;
@@ -241,6 +294,31 @@ $message = [];
             color: #6c757d !important;
         }
 
+          /* Reusable CSS classes for the light theme */
+    .header-container-light {
+        background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    .breadcrumb-link-light {
+        color: #475569 !important;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    .breadcrumb-link-light:hover {
+        color: #1e293b !important;
+    }
+    .breadcrumb-item-active-light {
+        color: #1e293b !important;
+        font-weight: 700;
+    }
+    .navbar-title-light {
+        color: #1e293b;
+        text-shadow: none;
+    }
         /* --- FUTURISTIC DESIGN STYLES END HERE --- */
     </style>
 </head>
@@ -248,43 +326,79 @@ $message = [];
     <?php include 'components/aside.php'; ?>
 
     <div class="main-content position-relative border-radius-lg">
-     
+      <?php include 'components/navbar.php'; ?>     
 
-        <div class="d-flex align-items-center flex-grow-1 py-3 px-2" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
-            <nav aria-label="breadcrumb" class="flex-grow-1">
-                <ol class="breadcrumb mb-1 navbar-breadcrumb" style="background: transparent;">
-                    <li class="breadcrumb-item">
-                        <a href="main" class="breadcrumb-link" style="color: #ffd700; font-weight: 600;">
-                            <i class="fas fa-home me-1" style="color: #ffd700;"></i>Home
+       <div class="d-flex align-items-center flex-grow-1 py-3 px-2 header-container-light">
+    <nav aria-label="breadcrumb" class="flex-grow-1">
+        <ol class="breadcrumb mb-1 navbar-breadcrumb" style="background: transparent;">
+            <li class="breadcrumb-item">
+                <a href="main" class="breadcrumb-link-light">
+                    <i class="fas fa-home me-1" style="color: #475569;"></i>Home
+                </a>
+            </li>
+            <li class="breadcrumb-item active navbar-breadcrumb-active breadcrumb-item-active-light" aria-current="page">
+                <?= htmlspecialchars($pageTitle ?? 'Settings') ?>
+            </li>
+        </ol>
+        <h4 class="navbar-title mb-0 mt-1 navbar-title-light" style="font-weight: 700;">
+                    <?= htmlspecialchars($pageTitle ?? 'Settings') ?>
+        </h4>
+    </nav>
+</div>
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="nav-wrapper">
+                        <ul class="nav nav-pills flex-column" id="tabs-text" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'view') ? 'active' : '' ?>" href="?tab=view">
+                            <i class="fas fa-sitemap me-2"></i>Org-Unit Viewer
                         </a>
                     </li>
-                    <li class="breadcrumb-item active navbar-breadcrumb-active" aria-current="page" style="color: #fff; font-weight: 700;">
-                        <?= htmlspecialchars($pageTitle ?? 'Settings') ?>
-                    </li>
-                </ol>
-                <h4 class="navbar-title mb-0 mt-1" style="color: #fff; text-shadow: 0 1px 8px #1e3c72, 0 0 2px #ffd700; font-weight: 700;">
-                    <?= htmlspecialchars($pageTitle ?? 'Settings') ?>
-                </h4>
-            </nav>
-        </div>
-
-        <div class="container-fluid py-4">
-            <div class="nav-wrapper">
-                <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="tabs-text" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'view') ? 'active' : '' ?>" href="?tab=view">Org-Unit Viewer</a>
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'load') ? 'active' : '' ?>" href="?tab=load">
+                            <i class="fas fa-download me-2"></i>Org-Unit Importer
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'load') ? 'active' : '' ?>" href="?tab=load">Org-Unit Importer</a>
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'new') ? 'active' : '' ?>" href="?tab=new">
+                            <i class="fas fa-search me-2"></i>DHIS2-Programs-Fetcher
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'new') ? 'active' : '' ?>" href="?tab=new">DHIS2-Programs-Fetcher</a>
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'questions') ? 'active' : '' ?>" href="?tab=questions">
+                            <i class="fas fa-link me-2"></i>Mapping-Interface
+                        </a>
+                    </li>
+                        </ul>
+                        
+                        <hr class="horizontal light my-3">
+                        
+                        <ul class="nav nav-pills flex-column" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'profile') ? 'active' : '' ?>" href="?tab=profile">
+                            <i class="fas fa-user-circle me-2"></i>Profile Settings
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'questions') ? 'active' : '' ?>" href="?tab=questions">Mapping-Interface</a>
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'users') ? 'active' : '' ?>" href="?tab=users">
+                            <i class="fas fa-users-cog me-2"></i>User Management
+                        </a>
                     </li>
-                </ul>
-            </div>
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'config') ? 'active' : '' ?>" href="?tab=config">
+                            <i class="fas fa-cogs me-2"></i>DHIS2 Configuration
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'payload_checker') ? 'active' : '' ?>" href="?tab=payload_checker">
+                            <i class="fas fa-bug me-2"></i>Payload Checker
+                        </a>
+                    </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-9">
 
             <?php if (!empty($message)) : ?>
                 <div class="alert alert-<?= $message['type'] == 'success' ? 'success' : 'danger' ?> mt-4">
@@ -292,7 +406,7 @@ $message = [];
                 </div>
             <?php endif; ?>
 
-            <div class="tab-content mt-3">
+                    <div class="tab-content">
                 <?php
                 // Only include the active tab's content for better performance and clarity
                 switch ($activeTab) {
@@ -308,12 +422,26 @@ $message = [];
                     case 'questions':
                         include 'dhis2/questions.php';
                         break;
+                    case 'profile':
+                        include 'settings/profile_tab.php';
+                        break;
+                    case 'users':
+                        include 'settings/users_tab.php';
+                        break;
+                    case 'config':
+                        include 'settings/config_tab.php';
+                        break;
+                    case 'payload_checker':
+                        include 'settings/payload_checker_tab.php';
+                        break;
                     default:
                         // Optional: show a "not found" or default message
                         echo '<div class="alert alert-warning">Tab not found.</div>';
                         break;
                 }
                 ?>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -321,14 +449,27 @@ $message = [];
  
 
     <!-- Core JS Files -->
-    <script src="argon-dashboard-master/assets/js/core/popper.min.js"></script>
-    <script src="argon-dashboard-master/assets/js/core/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="argon-dashboard-master/assets/js/plugins/perfect-scrollbar.min.js"></script>
     <script src="argon-dashboard-master/assets/js/plugins/smooth-scrollbar.min.js"></script>
     <script src="argon-dashboard-master/assets/js/plugins/sweetalert2.all.min.js"></script>
-    <script src="argon-dashboard-master/assets/js/argon-dashboard.js"></script>
     <script>
     // Place any global JS here, or keep per-tab scripts inside their respective PHP includes!
+    
+    // Ensure clean navigation behavior
+    document.addEventListener('DOMContentLoaded', function() {
+        // Make HR elements completely non-interactive
+        const hrElements = document.querySelectorAll('.nav-wrapper hr');
+        hrElements.forEach(function(hr) {
+            hr.style.pointerEvents = 'none';
+            hr.style.cursor = 'default';
+            hr.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            });
+        });
+    });
     </script>
 </body>
 </html>

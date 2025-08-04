@@ -63,17 +63,10 @@ try {
         SELECT
             s.id,
             s.uid,
-            s.age,
-            s.sex,
-            s.period,
-            su.name AS service_unit_name,
             l.name AS location_name,
-            o.name AS ownership_name,
             s.created
         FROM submission s
-        LEFT JOIN service_unit su ON s.service_unit_id = su.id
         LEFT JOIN location l ON s.location_id = l.id
-        LEFT JOIN owner o ON s.ownership_id = o.id
         WHERE s.survey_id = :survey_id
     ";
 
@@ -121,7 +114,7 @@ try {
 $exportData = [];
 
 $headers = [
-    'Submission ID', 'UID', 'Age', 'Sex', 'Period', 'Service Unit', 'Location', 'Ownership', 'Date Submitted'
+    'Submission ID', 'UID', 'Location', 'Date Submitted'
 ];
 foreach ($questions as $question) { $headers[] = $question['label']; }
 $exportData[] = $headers;
@@ -144,10 +137,9 @@ foreach ($submissions as $submission) {
     foreach ($responses as $response) { $groupedResponses[$response['question_id']][] = $response['response_value']; }
 
     $row = [
-        $submission['id'], $submission['uid'], $submission['age'] ?? 'N/A', $submission['sex'] ?? 'N/A',
-        $submission['period'] ?? 'N/A', $submission['service_unit_name'] ?? 'N/A',
-        $submission['location_name'] ?? 'N/A', $submission['ownership_name'] ?? 'N/A',
-        date('Y-m-d H:i:s', strtotime($submission['created']))
+        $submission['id'], $submission['uid'],
+        $submission['location_name'] ?? 'N/A',
+        $submission['created']
     ];
     foreach ($questions as $question) {
         $responseValues = $groupedResponses[$question['id']] ?? [];
@@ -157,7 +149,7 @@ foreach ($submissions as $submission) {
 }
 
 // Remove empty columns (unchanged logic)
-$fieldsToCheck = ['Age', 'Sex', 'Period', 'Service Unit', 'Location', 'Ownership'];
+$fieldsToCheck = ['Location'];
 $headerIndexesToRemove = [];
 foreach ($fieldsToCheck as $field) {
     $headerIndex = array_search($field, $headers);

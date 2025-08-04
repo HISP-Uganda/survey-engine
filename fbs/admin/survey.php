@@ -6,6 +6,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit();
 }
+require_once 'includes/session_timeout.php';
 
 require 'connect.php';
 
@@ -94,30 +95,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/argon-dashboard.min.css" rel="stylesheet">
 </head>
+<style>
+    /* Reusable CSS classes for the light theme */
+    .header-container-light {
+        background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    .breadcrumb-link-light {
+        color: #475569 !important;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    .breadcrumb-link-light:hover {
+        color: #1e293b !important;
+    }
+    .breadcrumb-item-active-light {
+        color: #1e293b !important;
+        font-weight: 700;
+    }
+    .navbar-title-light {
+        color: #1e293b;
+        text-shadow: none;
+    }
+    </style>
 <body class="g-sidenav-show bg-gray-100">
     <?php include 'components/aside.php'; ?>
     
     <main class="main-content position-relative border-radius-lg">
-       
+         <?php include 'components/navbar.php'; ?>
 
            <!-- Page Title Section -->
-      <div class="d-flex align-items-center flex-grow-1 py-3 px-2" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
-            <nav aria-label="breadcrumb" class="flex-grow-1">
-                <ol class="breadcrumb mb-1 navbar-breadcrumb" style="background: transparent;">
-                    <li class="breadcrumb-item">
-                        <a href="main" class="breadcrumb-link" style="color: #ffd700; font-weight: 600;">
-                            <i class="fas fa-home me-1" style="color: #ffd700;"></i>Home
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active navbar-breadcrumb-active" aria-current="page" style="color: #fff; font-weight: 700;">
-                        <?= htmlspecialchars($pageTitle ?? 'Survey') ?>
-                    </li>
-                </ol>
-                <h4 class="navbar-title mb-0 mt-1" style="color: #fff; text-shadow: 0 1px 8px #1e3c72, 0 0 2px #ffd700; font-weight: 700;">
-                    <?= htmlspecialchars($pageTitle ?? 'Survey') ?>
-                </h4>
-            </nav>
-        </div>
+     <div class="d-flex align-items-center flex-grow-1 py-3 px-2 header-container-light">
+    <nav aria-label="breadcrumb" class="flex-grow-1">
+        <ol class="breadcrumb mb-1 navbar-breadcrumb" style="background: transparent;">
+            <li class="breadcrumb-item">
+                <a href="main" class="breadcrumb-link-light">
+                    <i class="fas fa-home me-1" style="color: #475569;"></i>Home
+                </a>
+            </li>
+            <li class="breadcrumb-item active navbar-breadcrumb-active breadcrumb-item-active-light" aria-current="page">
+                <?= htmlspecialchars($pageTitle ?? 'Survey') ?>
+            </li>
+        </ol>
+        <h4 class="navbar-title mb-0 mt-1 navbar-title-light" style="font-weight: 700;">
+            <?= htmlspecialchars($pageTitle ?? 'Survey') ?>
+        </h4>
+    </nav>
+</div>
         <div class="container-fluid py-4">
             <!-- Alerts -->
             <div id="alerts-container">
@@ -163,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }, 10000);
                 });
             </script>
-
+ 
            
 
             <!-- Existing Surveys Card -->
@@ -182,7 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 document.getElementById('configAccessBtn').addEventListener('click', function() {
                                     var pwd = prompt('Enter password to access config:');
                                     if (pwd === 'config') {
-                                        window.location.href = 'config.php';
+                                        window.location.href = 'settings.php?tab=config';
                                     } else if (pwd !== null) {
                                         alert('Incorrect password.');
                                     }

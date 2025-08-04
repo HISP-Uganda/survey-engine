@@ -19,12 +19,12 @@
         background-color: rgba(255, 255, 255, 0.1);
     }
     .org-unit-node span {
-        color: #e2e8f0; /* Light text for OU names */
+        color: #1e293b; /* Dark text for OU names */
         font-weight: 500;
         flex-grow: 1; /* Allows name to take available space */
     }
     .org-unit-node small {
-        color: #94a3b8 !important; /* Muted text for UID and level */
+        color: #64748b !important; /* Muted text for UID and level */
         font-size: 0.8em;
         margin-left: 0.5rem;
     }
@@ -33,7 +33,7 @@
     .tree-toggle {
         cursor: pointer;
         transition: transform 0.2s ease;
-        color: #ffd700; /* Gold color for expand/collapse icon */
+        color: #3b82f6; /* Blue color for expand/collapse icon */
         font-size: 0.8em;
         width: 1.5rem; /* Fixed width to prevent jumping */
         text-align: center;
@@ -42,7 +42,7 @@
         transform: rotate(90deg); /* Rotate icon when expanded */
     }
     .fa-circle-dot { /* Style for leaf nodes (no children) */
-        color: #94a3b8; /* Muted color */
+        color: #64748b; /* Muted color */
         font-size: 0.6em;
         width: 1.5rem; /* Align with toggles */
         text-align: center;
@@ -50,52 +50,52 @@
 
     /* Accordion Customization for Instance Keys */
     .accordion-item {
-        background-color: #2d3748; /* Dark background for accordion items */
-        border: 1px solid #4a5568; /* Subtle border */
+        background-color: #ffffff; /* White background for accordion items */
+        border: 1px solid #e2e8f0; /* Light border */
         margin-bottom: 1rem;
         border-radius: 0.5rem;
         overflow: hidden; /* Ensures border-radius applies to children */
     }
     .accordion-header {
-        background-color: #1a202c; /* Darker header for accordion */
+        background-color: #f8fafc; /* Light header for accordion */
         padding: 0.75rem 1.25rem;
-        border-bottom: 1px solid #4a5568;
+        border-bottom: 1px solid #e2e8f0;
     }
     .accordion-button {
         background-color: transparent !important;
-        color: #e2e8f0 !important;
+        color: #1e293b !important;
         font-weight: 600;
         font-size: 1.1rem;
         padding: 0.75rem 1.25rem;
         transition: all 0.2s ease;
     }
     .accordion-button:not(.collapsed) {
-        color: #ffd700 !important; /* Gold for expanded header */
-        background-color: #1a202c !important; /* Keep dark background */
+        color: #3b82f6 !important; /* Blue for expanded header */
+        background-color: #f8fafc !important; /* Keep light background */
         box-shadow: none;
-        border-bottom: 1px solid #ffd700; /* Gold line under expanded header */
+        border-bottom: 1px solid #3b82f6; /* Blue line under expanded header */
     }
     .accordion-button::after {
-        filter: invert(1); /* Invert caret color for dark background */
+        filter: none; /* No inversion for light background */
     }
     .accordion-body {
         padding: 1.25rem;
-        color: #e2e8f0; /* Default text color in body */
+        color: #1e293b; /* Dark text color in body */
     }
 
     /* Specific table styles (if you decide to keep the flat table elsewhere) */
     .table-hover tbody tr:hover {
-        background-color: rgba(255, 255, 255, 0.08); /* Lighter hover for dark tables */
+        background-color: #f1f5f9; /* Light hover for light tables */
     }
 </style>
 
 <div class="tab-header mb-4">
-    <h3 class="text-white"><i class="fas fa-sitemap me-2 text-primary"></i> Organization Unit Hierarchy Viewer</h3>
+    <h3 class="text-dark"><i class="fas fa-sitemap me-2 text-primary"></i> Organization Unit Hierarchy Viewer</h3>
 </div>
 
 <div class="card futuristic-card shadow-lg">
-    <div class="card-header bg-dark-gradient py-3">
-        <h4 class="mb-0 text-white">
+    <div class="card-header bg-light py-3">
+        <h4 class="mb-0 text-dark">
             <i class="fas fa-globe me-2 text-info"></i>
             Locations by DHIS2 Instance
         </h4>
@@ -200,7 +200,7 @@
         <?php else : ?>
             <div class="text-center py-5">
                 <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
-                <h4>No locations found</h4>
+                <h4 class="text-dark">No locations found</h4>
                 <p class="text-muted">Please load metadata from DHIS2 to populate organization units.</p>
                 <a href="?tab=load" class="btn btn-primary mt-3">
                     <i class="fas fa-sync-alt me-2"></i> Load Metadata

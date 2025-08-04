@@ -10,7 +10,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit();
 }
-
+require_once 'includes/session_timeout.php';
 require_once 'connect.php'; // This line is already present and correct.
 
 // Add a check to ensure $pdo object is available from connect.php
@@ -21,6 +21,7 @@ if (!isset($pdo)) {
 }
 
 require_once 'dhis2/dhis2_shared.php'; // Ensure this provides getDhis2Config() and dhis2_get()
+require_once 'includes/question_helper.php'; // Question reusability functions
 
 $success_message = null;
 $error_message = null;
@@ -177,7 +178,8 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
                             $de = $psde['dataElement'];
                             $result['dataElements'][$de['id']] = [
                                 'name' => $de['formName'] ?? $de['name'],
-                                'optionSet' => $de['optionSet'] ?? null
+                                'optionSet' => $de['optionSet'] ?? null,
+                                'programStage' => $stage['id'] // Store which program stage this DE belongs to
                             ];
                             if (!empty($de['optionSet'])) {
                                 $result['optionSets'][$de['optionSet']['id']] = $de['optionSet'];
@@ -206,7 +208,8 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
                             $de = $psde['dataElement'];
                             $result['dataElements'][$de['id']] = [
                                 'name' => $de['formName'] ?? $de['name'],
-                                'optionSet' => $de['optionSet'] ?? null
+                                'optionSet' => $de['optionSet'] ?? null,
+                                'programStage' => $stage['id'] // Store which program stage this DE belongs to
                             ];
                             if (!empty($de['optionSet'])) {
                                 $result['optionSets'][$de['optionSet']['id']] = $de['optionSet'];
@@ -294,13 +297,13 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
     return $result;
 }
 
+
 // Handle form submission for creating survey (both local and DHIS2)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
         if (isset($_POST['create_local_survey'])) {
-            // This section remains unchanged as it pertains to local surveys.
             $surveyName = trim($_POST['local_survey_name']);
             if (empty($surveyName)) {
                 throw new Exception("Survey name cannot be empty.");
@@ -412,22 +415,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $questionLabel = $attr['formName'] ?? $attr['name'];
 
-                    // Use $attr['name'] for label
-                    $stmt = $pdo->prepare("INSERT INTO question (label, question_type, is_required) VALUES (?, ?, 1)");
-                    $stmt->execute([$questionLabel, $questionType]); 
-                    $questionId = $pdo->lastInsertId();
+                    // Use question reusability system
+                    $questionId = getOrCreateQuestion($pdo, $questionLabel, $questionType, true, $attrId);
 
                     $stmt = $pdo->prepare("INSERT INTO survey_question (survey_id, question_id, position) VALUES (?, ?, ?)");
                     $stmt->execute([$surveyId, $questionId, $position]);
                     $position++; // Increment position
 
-                    // Map to dhis2_attribute_id
-                    $stmt = $pdo->prepare("INSERT INTO question_dhis2_mapping (question_id, dhis2_attribute_id, dhis2_option_set_id) VALUES (?, ?, ?)");
-                    $stmt->execute([
+                    // Create or update DHIS2 mapping
+                    createOrUpdateDHIS2Mapping(
+                        $pdo,
                         $questionId,
-                        $attrId, // Tracked Entity Attribute UID
-                        $attr['optionSet']['id'] ?? null
-                    ]);
+                        null, // dhis2_dataelement_id
+                        $attrId, // dhis2_attribute_id
+                        $attr['optionSet']['id'] ?? null // dhis2_option_set_id
+                    );
 
                     if (!empty($attr['optionSet']) && !empty($attr['options'])) {
                         $optionSetId = getOrCreateOptionSetId($pdo, $attr['optionSet']['name']);
@@ -500,21 +502,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // This assumes `getProgramDetails` now fetches 'formName'.
                 $questionLabel = $element['formName'] ?? $element['name']; 
                 
-                $stmt = $pdo->prepare("INSERT INTO question (label, question_type, is_required) VALUES (?, ?, 1)");
-                $stmt->execute([$questionLabel, $questionType]); // Using $questionLabel
-                $questionId = $pdo->lastInsertId();
+                // Use question reusability system
+                $questionId = getOrCreateQuestion($pdo, $questionLabel, $questionType, true, $deId);
 
                 $stmt = $pdo->prepare("INSERT INTO survey_question (survey_id, question_id, position) VALUES (?, ?, ?)");
                 $stmt->execute([$surveyId, $questionId, $position]);
                 $position++; // Increment position
 
-                // This maps to dhis2_dataelement_id
-                $stmt = $pdo->prepare("INSERT INTO question_dhis2_mapping (question_id, dhis2_dataelement_id, dhis2_option_set_id) VALUES (?, ?, ?)");
-                $stmt->execute([
+                // Create or update DHIS2 mapping
+                createOrUpdateDHIS2Mapping(
+                    $pdo,
                     $questionId,
-                    $deId, // Data Element UID
-                    $element['optionSet']['id'] ?? null
-                ]);
+                    $deId, // dhis2_dataelement_id
+                    null, // dhis2_attribute_id
+                    $element['optionSet']['id'] ?? null, // dhis2_option_set_id
+                    $element['programStage'] ?? null // dhis2_program_stage_id
+                );
 
                 if (!empty($element['optionSet']) && !empty($element['options'])) {
                     $optionSetId = getOrCreateOptionSetId($pdo, $element['optionSet']['name']);
@@ -951,6 +954,91 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
     .alert {
       margin-bottom: 20px;
     }
+    
+    /* Enhanced Survey Type Selection Cards */
+    .survey-type-card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 15px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .survey-type-card:hover {
+      border-color: var(--primary-color);
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(102, 126, 234, 0.15);
+    }
+
+    .survey-type-card.selected {
+      border-color: var(--primary-color) !important;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(255, 255, 255, 1) 100%) !important;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+    }
+
+    .survey-type-card .icon {
+      font-size: 3rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .survey-type-card .badge {
+      font-size: 0.75rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* Animation Classes */
+    .fade-in {
+      animation: fadeIn 0.6s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-in {
+      animation: slideIn 0.4s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Card Ripple Effect */
+    .ripple-effect {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(102, 126, 234, 0.3);
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      pointer-events: none;
+      width: 20px;
+      height: 20px;
+      margin-left: -10px;
+      margin-top: -10px;
+    }
+
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -985,15 +1073,13 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
     <div class="container-fluid py-4">
       <div class="row">
         <div class="col-12">
-          <div class="card shadow-lg mb-5">
-            <div class="card-header pb-0 text-center bg-gradient-primary text-white rounded-top">
+          <div class="card shadow-lg mb-5 fade-in">
+            <div class="card-header pb-0 text-center">
               <h1 class="mb-1">
-                <span class="text-white">
-                  <i class="fas fa-exclamation-circle me-2" style="color: #000; 8px #fff;"></i>
-                  Create New Survey
-                </span>
+                <i class="fas fa-poll me-2"></i>
+                Create New Survey
               </h1>
-              <p class="mb-0">Choose how you want to create your survey</p>
+              <p class="mb-0">Choose how you want to create your survey and start collecting valuable insights</p>
             </div>
             <div class="card-body px-4">
 
@@ -1002,9 +1088,24 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
                   <?= htmlspecialchars($success_message) ?>
                 </div>
                 <script>
-                  setTimeout(function() {
-                    window.location.href = 'survey.php';
-                  }, 2000);
+                  // Enhanced success redirect with loading indicator
+                  const successAlert = document.getElementById('success-alert');
+                  if (successAlert) {
+                    let countdown = 3;
+                    const updateText = () => {
+                      successAlert.innerHTML = `<?= htmlspecialchars($success_message) ?> <br><small class="mt-2 d-block">Redirecting in ${countdown} seconds...</small>`;
+                      countdown--;
+                      if (countdown >= 0) {
+                        setTimeout(updateText, 1000);
+                      } else {
+                        showLoadingOverlay('Redirecting to surveys...');
+                        setTimeout(() => {
+                          window.location.href = 'survey.php';
+                        }, 500);
+                      }
+                    };
+                    updateText();
+                  }
                 </script>
               <?php endif; ?>
 
@@ -1016,63 +1117,61 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
 
               <?php if (!isset($_GET['survey_source'])): ?>
                 <div class="row justify-content-center mb-4">
-                  <div class="col-md-8 mb-4">
-                    <form method="get" action="" id="basic-survey-details-form">
-                      <div class="card p-4 shadow-sm mb-3">
-                        <h4 class="mb-3 text-primary">Survey Details</h4>
-                        <div class="mb-3">
-                          <label class="form-label">Survey Type <span class="text-danger">*</span></label>
-                          <select name="survey_source" class="form-control" id="survey-type-select" required>
-                            <option value="">-- Select Survey Type --</option>
-                            <option value="local">Local Survey</option>
-                            <option value="dhis2">DHIS2 Program/Dataset</option>
-                          </select>
-                        </div>
-                        <div class="mb-3">
-                          <label class="form-label">Description</label>
-                          <textarea name="survey_description" class="form-control" rows="2"></textarea>
-                        </div>
-                        </div>
-                      <div class="row" id="survey-type-buttons" style="display:none;">
-                        <div class="col-md-6 mb-3">
-                          <button type="submit" name="survey_source" value="local" class="w-100 btn btn-outline-primary py-4 shadow-sm" style="border-radius: 16px; border-width: 2px;">
-                            <div class="mb-2" style="font-size: 2.5rem;">
-                              <i class="fa-solid fa-pen-to-square"></i>
+                  <div class="col-lg-10 mb-4">
+                    <div class="preview-section fade-in">
+                      <h4 class="mb-4"><i class="fas fa-info-circle me-2"></i>Survey Creation Options</h4>
+                      <div class="row g-4">
+                        <div class="col-md-6">
+                          <a href="?survey_source=local" class="text-decoration-none">
+                            <div class="survey-type-card slide-in">
+                              <div class="icon">
+                                <i class="fas fa-edit"></i>
+                              </div>
+                              <h5 class="fw-bold mb-2">Local Survey</h5>
+                              <p class="text-muted mb-3">Create a custom survey with your own questions and design</p>
+                              <div class="badge bg-success">Quick Setup</div>
                             </div>
-                            <div class="fw-bold" style="font-size: 1.3rem;">Local Survey</div>
-                            <div class="text-secondary mt-2">Create a custom survey with your own questions</div>
-                          </button>
+                          </a>
                         </div>
-                        <div class="col-md-6 mb-3">
-                          <button type="submit" name="survey_source" value="dhis2" class="w-100 btn btn-outline-primary py-4 shadow-sm" style="border-radius: 16px; border-width: 2px;">
-                            <div class="mb-2" style="font-size: 2.5rem;">
-                              <i class="fa-solid fa-database"></i>
+                        <div class="col-md-6">
+                          <a href="?survey_source=dhis2" class="text-decoration-none">
+                            <div class="survey-type-card slide-in" style="animation-delay: 0.2s;">
+                              <div class="icon">
+                                <i class="fas fa-database"></i>
+                              </div>
+                              <h5 class="fw-bold mb-2">DHIS2 Integration</h5>
+                              <p class="text-muted mb-3">Import from existing DHIS2 programs or datasets</p>
+                              <div class="badge bg-info">Advanced</div>
                             </div>
-                            <div class="fw-bold" style="font-size: 1.3rem;">DHIS2 Program/Dataset</div>
-                            <div class="text-secondary mt-2">Import from DHIS2 program or dataset</div>
-                          </button>
+                          </a>
                         </div>
                       </div>
-                    </form>
+                    </div>
                   </div>
                 </div>
                 <script>
-                  // Hide buttons, show only after survey type is selected (if you want to use buttons instead of dropdown submit)
+                  // Simple hover effects for survey type cards
                   document.addEventListener('DOMContentLoaded', function() {
-                    var surveyTypeSelect = document.getElementById('survey-type-select');
-                    var buttonsRow = document.getElementById('survey-type-buttons');
-                    if (surveyTypeSelect && buttonsRow) {
-                      surveyTypeSelect.onchange = function() {
-                        // If you want to show buttons after selection, uncomment below:
-                        // buttonsRow.style.display = this.value ? '' : 'none';
-                        // If you want to submit on select, submit the form:
-                        if (this.value) {
-                          document.getElementById('basic-survey-details-form').submit();
-                        }
-                      };
-                      // Initially hidden
-                      buttonsRow.style.display = 'none';
-                    }
+                    document.querySelectorAll('.survey-type-card').forEach(card => {
+                      const parentLink = card.closest('a');
+                      
+                      card.addEventListener('mouseenter', function() {
+                        this.style.borderColor = 'var(--primary-color)';
+                        this.style.transform = 'translateY(-3px)';
+                      });
+                      
+                      card.addEventListener('mouseleave', function() {
+                        this.style.borderColor = '#e2e8f0';
+                        this.style.transform = 'translateY(0)';
+                      });
+                      
+                      // Add loading state on click
+                      if (parentLink) {
+                        parentLink.addEventListener('click', function(e) {
+                          showLoadingOverlay('Loading survey setup...');
+                        });
+                      }
+                    });
                   });
                 </script>
                 <div class="text-center mt-4">
@@ -1090,7 +1189,9 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
                     <h2 class="mb-1">Local Survey Details</h2>
                     <div class="text-secondary mb-3">Enter the details for your local survey</div>
                   </div>
-                  <form method="POST" action="" class="p-3 rounded bg-light shadow-sm">
+                  <form method="POST" action="sb.php" class="p-3 rounded bg-light shadow-sm">
+                    <input type="hidden" name="survey_source" value="local">
+                    <input type="hidden" name="create_local_survey" value="1">
                     <div class="row mb-4">
                       <div class="col-md-6">
                         <div class="form-group mb-3">
@@ -1227,7 +1328,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
                     </div>
 
                     <div class="text-center mt-4">
-                      <button type="submit" name="create_local_survey" class="btn btn-primary action-btn shadow">
+                      <button type="submit" class="btn btn-primary action-btn shadow">
                         <i class="fas fa-check me-2"></i> Create Survey
                       </button>
                     </div>
@@ -1297,22 +1398,22 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
                   <div id="dhis2-survey-container">
                     </div>
                   <script>
-                  // AJAX loader for DHIS2 survey creation
+                  // Simple working DHIS2 form loader
                   function loadDHIS2SurveyForm(params = {}) {
-                    let url = '<?= basename($_SERVER['PHP_SELF']) ?>?survey_source=dhis2';
+                    let url = 'sb.php?survey_source=dhis2';
                     if (params.dhis2_instance) url += '&dhis2_instance=' + encodeURIComponent(params.dhis2_instance);
                     if (params.domain) url += '&domain=' + encodeURIComponent(params.domain);
-                    // Add program_type to the URL parameters
                     if (params.program_type) url += '&program_type=' + encodeURIComponent(params.program_type);
                     if (params.program_id) url += '&program_id=' + encodeURIComponent(params.program_id);
 
-
-                    document.getElementById('dhis2-survey-container').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3">Loading DHIS2 details...</p></div>';
+                    document.getElementById('dhis2-survey-container').innerHTML = '<div class=\"text-center py-5\"><div class=\"spinner-border text-primary\" role=\"status\"></div><p class=\"mt-3\">Loading DHIS2 details...</p></div>';
+                    
                     fetch(url + '&ajax=1')
                     .then(res => res.text())
                     .then(html => {
                       document.getElementById('dhis2-survey-container').innerHTML = html;
-                      // Re-attach event listeners for selects within the newly loaded content
+                      
+                      // Reattach event listeners
                       let instanceSel = document.getElementById('dhis2-instance-select');
                       if (instanceSel) instanceSel.onchange = function() {
                         loadDHIS2SurveyForm({dhis2_instance: this.value});
@@ -1324,13 +1425,12 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
                           domain: this.value
                         });
                       };
-                      // New: Event listener for Program Type Select
                       let programTypeSel = document.getElementById('program-type-select');
                       if (programTypeSel) programTypeSel.onchange = function() {
                         loadDHIS2SurveyForm({
                           dhis2_instance: document.getElementById('dhis2-instance-select').value,
                           domain: document.getElementById('domain-select').value,
-                          program_type: this.value // Pass the selected program type
+                          program_type: this.value
                         });
                       };
                       let progSel = document.getElementById('program-select');
@@ -1338,18 +1438,17 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
                         loadDHIS2SurveyForm({
                           dhis2_instance: document.getElementById('dhis2-instance-select').value,
                           domain: document.getElementById('domain-select').value,
-                          program_type: document.getElementById('program-type-select') ? document.getElementById('program-type-select').value : null, // Ensure program_type is passed
+                          program_type: document.getElementById('program-type-select') ? document.getElementById('program-type-select').value : null,
                           program_id: this.value
                         });
                       };
-
-
-                      // Initialize selection controls after content is loaded
+                      
+                      // Initialize selection controls
                       initializeSelectionControls();
                     })
                     .catch(error => {
-                        console.error('Error loading DHIS2 survey form:', error);
-                        document.getElementById('dhis2-survey-container').innerHTML = '<div class="alert alert-danger">Failed to load DHIS2 form. Please try again.</div>';
+                      console.error('Error loading DHIS2 survey form:', error);
+                      document.getElementById('dhis2-survey-container').innerHTML = '<div class=\"alert alert-danger\">Failed to load DHIS2 form. Please try again.</div>';
                     });
                   }
 
@@ -1478,6 +1577,113 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
   <script src="argon-dashboard-master/assets/js/plugins/perfect-scrollbar.min.js"></script>
   <script src="argon-dashboard-master/assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="argon-dashboard-master/assets/js/argon-dashboard.min.js"></script>
+
+  <!-- Global Loading Overlay -->
+  <div id="global-loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner">
+      <div class="spinner-border" role="status"></div>
+      <div class="loading-text" id="loading-text">Processing...</div>
+    </div>
+  </div>
+
+  <script>
+    // Global loading overlay functions
+    function showLoadingOverlay(message = 'Loading...') {
+      const overlay = document.getElementById('global-loading-overlay');
+      const loadingText = document.getElementById('loading-text');
+      if (overlay && loadingText) {
+        loadingText.textContent = message;
+        overlay.style.display = 'flex';
+      }
+    }
+    
+    function hideLoadingOverlay() {
+      const overlay = document.getElementById('global-loading-overlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+    }
+    
+    // Enhanced form submission with loading states
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add loading states to all form submissions
+      const forms = document.querySelectorAll('form');
+      forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+          const submitBtn = form.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            submitBtn.disabled = true;
+            
+            // Show global loading after a short delay
+            setTimeout(() => {
+              if (form.querySelector('[name="create_survey"]') || form.querySelector('[name="create_local_survey"]')) {
+                showLoadingOverlay('Creating survey, please wait...');
+              } else {
+                showLoadingOverlay('Loading next step...');
+              }
+            }, 100);
+            
+            // Restore button state if form submission fails
+            setTimeout(() => {
+              if (submitBtn.disabled) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                hideLoadingOverlay();
+              }
+            }, 30000);
+          }
+        });
+      });
+      
+      // Handle browser back/forward navigation
+      window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+          hideLoadingOverlay();
+          // Re-enable any disabled buttons
+          document.querySelectorAll('button[disabled]').forEach(btn => {
+            btn.disabled = false;
+          });
+        }
+      });
+      
+      // Add connection status monitoring
+      let isOnline = navigator.onLine;
+      
+      window.addEventListener('online', function() {
+        if (!isOnline) {
+          isOnline = true;
+          const offlineAlert = document.getElementById('offline-alert');
+          if (offlineAlert) {
+            offlineAlert.remove();
+          }
+        }
+      });
+      
+      window.addEventListener('offline', function() {
+        isOnline = false;
+        const alertDiv = document.createElement('div');
+        alertDiv.id = 'offline-alert';
+        alertDiv.className = 'alert alert-warning alert-dismissible fade show position-fixed';
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 10000; max-width: 300px;';
+        alertDiv.innerHTML = `
+          <i class="fas fa-wifi-slash me-2"></i>
+          <strong>Connection Lost</strong><br>
+          <small>Please check your internet connection</small>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+          if (alertDiv.parentNode) {
+            alertDiv.remove();
+          }
+        }, 10000);
+      });
+    });
+  </script>
 
 </body>
 </html>

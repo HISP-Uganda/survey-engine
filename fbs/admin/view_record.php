@@ -20,18 +20,13 @@ $stmt = $pdo->prepare("
     SELECT 
         s.id, 
         s.uid, 
-        s.age,
-        s.sex,
-        s.period,
-        su.name AS service_unit_name,
         l.name AS location_name,
-        o.name AS ownership_name,
         surv.name AS survey_name,
         s.created
     FROM submission s
-    LEFT JOIN service_unit su ON s.service_unit_id = su.id
+  
     LEFT JOIN location l ON s.location_id = l.id
-    LEFT JOIN owner o ON s.ownership_id = o.id
+    
     LEFT JOIN survey surv ON s.survey_id = surv.id
     WHERE s.id = :submission_id
 ");
@@ -217,29 +212,10 @@ foreach ($responses as $response) {
                         <p class="detail-value"><?php echo htmlspecialchars($submission['survey_name']); ?></p>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Age:</span>
-                        <p class="detail-value"><?php echo $submission['age'] ?? 'N/A'; ?></p>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Sex:</span>
-                        <p class="detail-value"><?php echo htmlspecialchars($submission['sex'] ?? 'N/A'); ?></p>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Reporting Period:</span>
-                        <p class="detail-value"><?php echo htmlspecialchars($submission['period'] ?? 'N/A'); ?></p>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Service Unit:</span>
-                        <p class="detail-value"><?php echo htmlspecialchars($submission['service_unit_name'] ?? 'N/A'); ?></p>
-                    </div>
-                    <div class="detail-item">
                         <span class="detail-label">Location:</span>
                         <p class="detail-value"><?php echo htmlspecialchars($submission['location_name'] ?? 'N/A'); ?></p>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Ownership:</span>
-                        <p class="detail-value"><?php echo htmlspecialchars($submission['ownership_name'] ?? 'N/A'); ?></p>
-                    </div>
+                   
                     <div class="detail-item">
                         <span class="detail-label">Date Submitted:</span>
                         <p class="detail-value"><?php echo date('M j, Y g:i A', strtotime($submission['created'])); ?></p>

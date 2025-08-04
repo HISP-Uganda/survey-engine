@@ -14,6 +14,12 @@ function buildDhis2Url(string $base, string $endpoint): string {
     if (preg_match('#^https?://#i', $endpoint)) {
         return $endpoint;
     }
+    
+    // If endpoint already starts with /api/, don't add it again
+    if (strpos($endpoint, '/api/') === 0) {
+        return rtrim($base, '/') . $endpoint;
+    }
+    
     return rtrim($base, '/') . '/api/' . ltrim($endpoint, '/');
 }
 
@@ -125,8 +131,12 @@ function dhis2Curl($fullUrl, $instance, $method = 'GET', $data = null) {
     }
 
     error_log("DHIS2 API call: $method $fullUrl");
+    if ($data) {
+        error_log("DHIS2 Payload: " . json_encode($data, JSON_PRETTY_PRINT));
+    }
+    
     $ch = curl_init();
-   $options = [
+    $options = [
         CURLOPT_URL => $fullUrl,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST => strtoupper($method),
@@ -137,9 +147,11 @@ function dhis2Curl($fullUrl, $instance, $method = 'GET', $data = null) {
         ],
         CURLOPT_VERBOSE => true,
         CURLOPT_STDERR => fopen('php://temp', 'w+'),
-        CURLOPT_SSL_VERIFYPEER => false, // Keep for now for debugging, but remove in production!
-        CURLOPT_SSL_VERIFYHOST => 0,      // Keep for now for debugging, but remove in production!
-        CURLOPT_FOLLOWLOCATION => true // <<< THIS IS THE CRUCIAL LINE
+        CURLOPT_SSL_VERIFYPEER => true,   // Enable SSL verification for security
+        CURLOPT_SSL_VERIFYHOST => 2,      // Verify hostname matches certificate
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT => 60,            // Set timeout to 60 seconds
+        CURLOPT_CONNECTTIMEOUT => 30      // Connection timeout
     ];
 
     if (in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'])) {
@@ -153,11 +165,26 @@ function dhis2Curl($fullUrl, $instance, $method = 'GET', $data = null) {
     curl_setopt_array($ch, $options);
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    $curlErrno = curl_errno($ch);
+
+    // If SSL verification fails, try again with SSL disabled (for local/dev environments)
+    if ($response === false && ($curlErrno === 60 || $curlErrno === 77)) {
+        error_log("SSL verification failed (Error $curlErrno), retrying with SSL disabled...");
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        $curlErrno = curl_errno($ch);
+    }
 
     if ($response === false) {
         rewind($options[CURLOPT_STDERR]);
         $verboseLog = stream_get_contents($options[CURLOPT_STDERR]);
-        error_log("CURL Error: " . curl_error($ch) . "\nHTTP Code: $httpCode\nVerbose log: " . $verboseLog);
+        
+        error_log("CURL Error (Code: $curlErrno): $curlError\nHTTP Code: $httpCode\nURL: $fullUrl\nVerbose log: " . $verboseLog);
+        
         fclose($options[CURLOPT_STDERR]);
         curl_close($ch);
         return null;
@@ -169,8 +196,21 @@ function dhis2Curl($fullUrl, $instance, $method = 'GET', $data = null) {
     curl_close($ch);
 
     error_log("HTTP Status: $httpCode");
-    error_log("DHIS2 Response (first 500 chars): " . substr($response, 0, 500));
-    return json_decode($response, true);
+    error_log("DHIS2 Response (first 1000 chars): " . substr($response, 0, 1000));
+    
+    // Check for non-2xx HTTP status codes
+    if ($httpCode < 200 || $httpCode >= 300) {
+        error_log("HTTP Error: Received status code $httpCode for $method $fullUrl");
+        // Still return the decoded response so error handling can process it
+    }
+    
+    $decoded = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        error_log("JSON Decode Error: " . json_last_error_msg() . "\nRaw response: " . $response);
+        return null;
+    }
+    
+    return $decoded;
 }
 
 /**
@@ -236,6 +276,28 @@ function dhis2_delete($endpoint, $instance) {
     }
     $fullUrl = buildDhis2Url($config['url'], $endpoint);
     return dhis2Curl($fullUrl, $instance, 'DELETE');
+}
+
+/**
+ * Check DHIS2 tracker job status.
+ * @param string $jobId The job ID returned from tracker submission
+ * @param string $instance DHIS2 instance key
+ * @return array|null Job status information
+ */
+function dhis2_check_job_status($jobId, $instance) {
+    $endpoint = "/api/tracker/jobs/$jobId";
+    return dhis2_get($endpoint, $instance);
+}
+
+/**
+ * Get detailed DHIS2 tracker job report with errors.
+ * @param string $jobId The job ID returned from tracker submission
+ * @param string $instance DHIS2 instance key
+ * @return array|null Detailed job report with validation errors
+ */
+function dhis2_get_job_report($jobId, $instance) {
+    $endpoint = "/api/tracker/jobs/$jobId/report";
+    return dhis2_get($endpoint, $instance);
 }
 
 ?>

@@ -51,7 +51,7 @@ class DHIS2MappingInterface {
         $initialDataset = $_GET['dataset'] ?? '';
         ?>
         <div class="tab-header mb-4">
-            <h3 class="text-white"><i class="fas fa-search me-2 text-primary"></i>Check DHIS2 Mapping Status</h3>
+            <h3 class="text-dark"><i class="fas fa-search me-2 text-primary"></i>Check DHIS2 Mapping Status</h3>
         </div>
 
         <div class="card futuristic-card shadow-lg">
@@ -61,7 +61,7 @@ class DHIS2MappingInterface {
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-control-label text-white">Select DHIS2 Instance</label>
+                                <label class="form-control-label text-dark">Select DHIS2 Instance</label>
                                 <select name="dhis2_instance" id="dhis2_instance_select" class="form-control form-select">
                                     <option value="">-- Select Instance --</option>
                                     <?php
@@ -82,7 +82,7 @@ class DHIS2MappingInterface {
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label text-white">Data Domain</label>
+                            <label class="form-label text-dark">Data Domain</label>
                             <select name="domain" id="domain_select" class="form-select" <?= empty($initialInstance) ? 'disabled' : '' ?>>
                                 <option value="">-- Select Domain --</option>
                                 <option value="tracker" <?= $initialDomain === 'tracker' ? 'selected' : '' ?>>Tracker</option>
@@ -93,7 +93,7 @@ class DHIS2MappingInterface {
 
                     <div class="row mb-4" id="programDatasetSection" style="display: <?= (!empty($initialInstance) && !empty($initialDomain)) ? 'block' : 'none' ?>;">
                         <div class="col-md-12">
-                            <label class="form-label text-white" id="programDatasetLabel">Program/Data Set</label>
+                            <label class="form-label text-dark" id="programDatasetLabel">Program/Data Set</label>
                             <select name="<?= $initialDomain === 'tracker' ? 'program' : 'dataset' ?>" id="program_dataset_select" class="form-select" <?= (empty($initialProgram) && empty($initialDataset)) ? 'disabled' : '' ?>>
                                 <option value="">-- Select --</option>
                                 </select>
@@ -106,7 +106,7 @@ class DHIS2MappingInterface {
 
                 <div id="mappingStatusResults" class="mt-4">
                     <?php if (!empty($initialInstance) && !empty($initialDomain) && (!empty($initialProgram) || !empty($initialDataset))): ?>
-                        <div class="text-center text-white py-4">
+                        <div class="text-center text-dark py-4">
                             <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
                             <p class="mt-2">Loading mapping status...</p>
                         </div>
@@ -123,7 +123,7 @@ class DHIS2MappingInterface {
         // Design applied to this section's elements as well
         ?>
         <div class="tab-header mb-4">
-            <h3 class="text-white"><i class="fas fa-map me-2 text-primary"></i>Map DHIS2 Data Elements to Questions</h3>
+            <h3 class="text-dark"><i class="fas fa-map me-2 text-primary"></i>Map DHIS2 Data Elements to Questions</h3>
         </div>
 
         <div class="card futuristic-card shadow-lg">
@@ -139,7 +139,7 @@ class DHIS2MappingInterface {
                             <?php $this->renderQuestionListForMapping(); ?>
                         <?php endif; ?>
                     <?php else: ?>
-                        <div class="alert alert-info futuristic-alert text-white">
+                        <div class="alert alert-info futuristic-alert">
                             <i class="fas fa-info-circle me-2"></i> Select a DHIS2 Instance, Domain, and Program/Dataset on the "Check DHIS2 Mapping Status" tab to configure mappings here.
                         </div>
                     <?php endif; ?>
@@ -169,7 +169,7 @@ class DHIS2MappingInterface {
 
                 // Function to show loading spinner within a target element
                 function showLoading(element, message = 'Loading...') {
-                    element.innerHTML = `<div class="text-center text-white py-4">
+                    element.innerHTML = `<div class="text-center text-dark py-4">
                                             <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
                                             <p class="mt-2">${message}</p>
                                          </div>`;
@@ -233,14 +233,14 @@ class DHIS2MappingInterface {
 
                             } else {
                                 programDatasetSelect.innerHTML = '<option value="">-- No items found --</option>';
-                                mappingStatusResults.innerHTML = `<div class="alert alert-warning futuristic-alert text-white">No ${domain === 'tracker' ? 'programs' : 'datasets'} found for this instance.</div>`;
+                                mappingStatusResults.innerHTML = `<div class="alert alert-warning futuristic-alert">No ${domain === 'tracker' ? 'programs' : 'datasets'} found for this instance.</div>`;
                             }
                         })
                         .catch(error => {
                             console.error('Error loading programs/datasets:', error);
                             programDatasetSelect.innerHTML = '<option value="">-- Error loading --</option>';
                             programDatasetLoadingSpinner.style.display = 'none'; // Hide spinner
-                            mappingStatusResults.innerHTML = `<div class="alert alert-danger futuristic-alert text-white">Error loading ${domain === 'tracker' ? 'programs' : 'datasets'}. Please try again.</div>`;
+                            mappingStatusResults.innerHTML = `<div class="alert alert-danger futuristic-alert">Error loading ${domain === 'tracker' ? 'programs' : 'datasets'}. Please try again.</div>`;
                         });
                 }
 
@@ -283,7 +283,7 @@ class DHIS2MappingInterface {
                         })
                         .catch(error => {
                             console.error('Error loading mapping status:', error);
-                            mappingStatusResults.innerHTML = `<div class="alert alert-danger futuristic-alert text-white">Error loading mapping status. Please try again.</div>`;
+                            mappingStatusResults.innerHTML = `<div class="alert alert-danger futuristic-alert">Error loading mapping status. Please try again.</div>`;
                         });
                 }
 
@@ -323,8 +323,8 @@ class DHIS2MappingInterface {
         $selectedSurvey = $_GET['survey_id'] ?? '';
         ?>
         <div class="mb-4">
-            <label class="form-label text-white">Selected Survey</label>
-            <p class="form-control-plaintext text-white">
+            <label class="form-label text-dark">Selected Survey</label>
+            <p class="form-control-plaintext text-dark">
             <?php
             $surveyStmt = $this->pdo->prepare("SELECT name FROM survey WHERE id = ?");
             $surveyStmt->execute([$selectedSurvey]);
@@ -348,9 +348,9 @@ class DHIS2MappingInterface {
         $optionSetMappings = $this->getOptionSetMappings(array_keys($optionSets));
 
         if (empty($questions)): ?>
-            <div class="alert alert-info text-center py-4 futuristic-alert text-white">
+            <div class="alert alert-info text-center py-4 futuristic-alert">
                 <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
-                <h4 class="text-white">No Questions Found in This Survey</h4>
+                <h4 class="text-dark">No Questions Found in This Survey</h4>
                 <p class="mb-0">This survey doesn't contain any questions yet.</p>
             </div>
         <?php else: ?>
@@ -368,7 +368,7 @@ class DHIS2MappingInterface {
                         <?php foreach ($questions as $question): ?>
                             <tr>
                                 <td>
-                                    <strong class="text-white"><?= htmlspecialchars($question['label']) ?></strong><br>
+                                    <strong class="text-dark"><?= htmlspecialchars($question['label']) ?></strong><br>
                                     <small class="text-muted"><?= htmlspecialchars($question['question_type']) ?></small>
                                 </td>
                                 <td>
@@ -412,18 +412,18 @@ class DHIS2MappingInterface {
                             <tr class="option-set-details" id="options-<?= $question['id'] ?>" style="display:none;">
                                 <td colspan="4">
                                     <div class="p-3 bg-secondary rounded">
-                                        <h6 class="mb-3 text-white"><i class="fas fa-list-ul me-2"></i>Option Set Values</h6>
+                                        <h6 class="mb-3 text-dark"><i class="fas fa-list-ul me-2"></i>Option Set Values</h6>
                                         <div class="options-container" id="options-container-<?= $question['id'] ?>">
                                             <?php
                                             if (!empty($question['dhis2_option_set_id']) && !empty($optionSetMappings[$question['dhis2_option_set_id']])) {
                                                 echo '<div class="table-responsive">';
                                                 echo '<table class="table table-sm table-striped mb-0">';
-                                                echo '<thead><tr><th class="text-white">DHIS2 Option Code</th><th class="text-white">Local Value</th></tr></thead>';
+                                                echo '<thead><tr><th class="text-dark">DHIS2 Option Code</th><th class="text-dark">Local Value</th></tr></thead>';
                                                 echo '<tbody>';
                                                 foreach ($optionSetMappings[$question['dhis2_option_set_id']] as $option) {
                                                     echo '<tr>';
-                                                    echo '<td class="text-white">'.htmlspecialchars($option['dhis2_option_code']).'</td>';
-                                                    echo '<td class="text-white">'.htmlspecialchars($option['local_value']).'</td>';
+                                                    echo '<td class="text-dark">'.htmlspecialchars($option['dhis2_option_code']).'</td>';
+                                                    echo '<td class="text-dark">'.htmlspecialchars($option['local_value']).'</td>';
                                                     echo '</tr>';
                                                 }
                                                 echo '</tbody></table></div>';
@@ -464,7 +464,7 @@ class DHIS2MappingInterface {
         $optionSetMappings = $this->getOptionSetMappings(array_keys($optionSets));
 
         if (!$question): ?>
-            <div class="alert alert-warning futuristic-alert text-white">
+            <div class="alert alert-warning futuristic-alert">
                 <i class="fas fa-exclamation-triangle me-2"></i> Question not found.
             </div>
         <?php else: ?>
@@ -475,14 +475,14 @@ class DHIS2MappingInterface {
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-white">Question Details</h6>
-                            <p class="text-white"><strong>Label:</strong> <?= htmlspecialchars($question['label']) ?></p>
-                            <p class="text-white"><strong>Type:</strong> <?= htmlspecialchars($question['question_type']) ?></p>
+                            <h6 class="text-dark">Question Details</h6>
+                            <p class="text-dark"><strong>Label:</strong> <?= htmlspecialchars($question['label']) ?></p>
+                            <p class="text-dark"><strong>Type:</strong> <?= htmlspecialchars($question['question_type']) ?></p>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-white">DHIS2 Mapping</h6>
+                            <h6 class="text-dark">DHIS2 Mapping</h6>
                             <div class="mb-3">
-                                <label class="form-label text-white">Data Element</label>
+                                <label class="form-label text-dark">Data Element</label>
                                 <select name="single_mapping[data_element]" class="form-select">
                                     <option value="">-- Not Mapped --</option>
                                     <?php foreach ($dataElements as $id => $element): ?>
@@ -495,7 +495,7 @@ class DHIS2MappingInterface {
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label text-white">Option Set</label>
+                                <label class="form-label text-dark">Option Set</label>
                                 <select name="single_mapping[option_set]" class="form-select">
                                     <option value="">-- No Option Set --</option>
                                     <?php foreach ($optionSets as $id => $set): ?>
@@ -513,13 +513,13 @@ class DHIS2MappingInterface {
 
                     <?php if (!empty($question['dhis2_option_set_id'])): ?>
                     <div class="mt-4">
-                        <h6 class="text-white">Option Set Values</h6>
+                        <h6 class="text-dark">Option Set Values</h6>
                         <div class="table-responsive">
                             <table class="table table-sm table-striped">
                                 <thead>
                                     <tr>
-                                        <th class="text-white">DHIS2 Option Code</th>
-                                        <th class="text-white">Local Value</th>
+                                        <th class="text-dark">DHIS2 Option Code</th>
+                                        <th class="text-dark">Local Value</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -527,8 +527,8 @@ class DHIS2MappingInterface {
                                     if (!empty($optionSetMappings[$question['dhis2_option_set_id']])) {
                                         foreach ($optionSetMappings[$question['dhis2_option_set_id']] as $option) {
                                             echo '<tr>';
-                                            echo '<td class="text-white">'.htmlspecialchars($option['dhis2_option_code']).'</td>';
-                                            echo '<td class="text-white">'.htmlspecialchars($option['local_value']).'</td>';
+                                            echo '<td class="text-dark">'.htmlspecialchars($option['dhis2_option_code']).'</td>';
+                                            echo '<td class="text-dark">'.htmlspecialchars($option['local_value']).'</td>';
                                             echo '</tr>';
                                         }
                                     } else {

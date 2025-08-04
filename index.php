@@ -522,7 +522,7 @@
                 <div class="logo">FormBase</div>
                 <nav class="nav-buttons">
                     <a href="fbs/admin/login" class="btn btn-secondary">Sign In</a>
-                    <a href="fbs/admin/register" class="btn btn-primary">Get Started</a>
+                    <!-- <a href="fbs/admin/register" class="btn btn-primary">Get Started</a> -->
                 </nav>
             </div>
         </div>
@@ -535,7 +535,7 @@
                     <h1>Professional Survey Management</h1>
                     <p>Create, deploy, and analyze surveys with enterprise-grade features, seamless DHIS2 integration, and advanced analytics capabilities.</p>
                     <div class="hero-buttons">
-                        <a href="fbs/admin/register" class="btn btn-white btn-large">Start Free Trial</a>
+                        <!-- <a href="fbs/admin/register" class="btn btn-white btn-large">Start Free Trial</a> -->
                         <a href="#features" class="btn btn-secondary btn-large">Learn More</a>
                     </div>
                 </div>
@@ -612,7 +612,7 @@
                     <h2>Ready to Transform Your Data Collection?</h2>
                     <p>Join thousands of organizations worldwide who trust FormBase for their survey management needs.</p>
                     <div class="cta-buttons">
-                        <a href="fbs/admin/register" class="btn btn-white btn-large">Start Free Trial</a>
+                        <!-- <a href="fbs/admin/register" class="btn btn-white btn-large">Start Free Trial</a> -->
                         <a href="fbs/admin/login" class="btn btn-secondary btn-large">Sign In</a>
                     </div>
                 </div>

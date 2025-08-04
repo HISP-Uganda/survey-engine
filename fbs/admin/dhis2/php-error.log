@@ -1,65 +1,290 @@
-[28-Jul-2025 07:04:49 UTC] Attempting to get DHIS2 config for provided key: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+[01-Aug-2025 07:44:56 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:44:56 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
                     FROM dhis2_instances 
                     WHERE instance_key = :key AND status = 1 
                     LIMIT 1
-[28-Jul-2025 07:04:49 UTC] Binding parameter :key with value: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] Successfully retrieved DHIS2 config for key: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] Attempting to get DHIS2 config for provided key: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+[01-Aug-2025 07:44:56 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:44:56 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:44:56 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:44:56 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
                     FROM dhis2_instances 
                     WHERE instance_key = :key AND status = 1 
                     LIMIT 1
-[28-Jul-2025 07:04:49 UTC] Binding parameter :key with value: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] Successfully retrieved DHIS2 config for key: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] Attempting to get DHIS2 config for provided key: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+[01-Aug-2025 07:44:56 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:44:56 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:44:56 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:44:56 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
                     FROM dhis2_instances 
                     WHERE instance_key = :key AND status = 1 
                     LIMIT 1
-[28-Jul-2025 07:04:49 UTC] Binding parameter :key with value: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] Successfully retrieved DHIS2 config for key: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] DHIS2 API call: GET https://hmis.moh.go.ug/api/organisationUnitLevels?fields=id,level,displayName
-[28-Jul-2025 07:04:49 UTC] Attempting to get DHIS2 config for provided key: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+[01-Aug-2025 07:44:56 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:44:56 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:44:56 UTC] DHIS2 API call: GET https://tests.dhis2.hispuganda.org/hmis/api/programs?fields=id,name
+[01-Aug-2025 07:44:56 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:44:56 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
                     FROM dhis2_instances 
                     WHERE instance_key = :key AND status = 1 
                     LIMIT 1
-[28-Jul-2025 07:04:49 UTC] Binding parameter :key with value: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] Successfully retrieved DHIS2 config for key: 'eHMIS'
-[28-Jul-2025 07:04:49 UTC] CURL Error: Could not resolve host: hmis.moh.go.ug
+[01-Aug-2025 07:44:56 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:44:56 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:44:57 UTC] HTTP Status: 200
+[01-Aug-2025 07:44:57 UTC] DHIS2 Response (first 1000 chars): {"pager":{"page":1,"total":21,"pageSize":50,"pageCount":1},"programs":[{"name":" Acute Flaccid Paralysis Case Investigation Form","id":"NKQRhkoc4bj"},{"name":"ERR - Emergency Response Roster","id":"L5FI50iZjzt"},{"name":"ET00-Event Test FBS","id":"HnpFrrx9oHb"},{"name":"HFA - Healthcare system accessibility","id":"rSLqsO4n9ds"},{"name":"HFA - Healthcare system preparedness","id":"YbZsCH0wrp2"},{"name":"HMIS 016 - Maternal Perinatal Death Review monthly report","id":"M9iSvQgzYVM"},{"name":"HMIS 100 - Medical Certificate of Cause of Death","id":"vf8dN49jprI"},{"name":"HMIS 101 - Health Facility Physical Inventory Report","id":"qLXolImKO4p"},{"name":"HMIS 102 - Health Facility Equipment Inventory Report","id":"DysyMchxKuu"},{"name":"HMIS 107 -  Health Unit Population and Annual Report","id":"h4n7b1HjSnX"},{"name":"HMIS MAL 001- Malaria Entomological Surveillance ","id":"NPzEcFPfQWF"},{"name":"HMIS MAL 003 - Daily Spray Operator Form : Totals","id":"zQZss0QIRq4"},{"name":"HMIS MCH 004 - Ma
+[01-Aug-2025 07:45:10 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:45:10 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:45:10 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:45:10 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:45:10 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:45:10 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:45:10 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:45:10 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:45:10 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:45:10 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:45:10 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:45:10 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:45:10 UTC] DHIS2 API call: GET https://tests.dhis2.hispuganda.org/hmis/api/organisationUnitLevels?fields=id,level,displayName
+[01-Aug-2025 07:45:10 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:45:10 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:45:10 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:45:10 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:45:40 UTC] CURL Error (Code: 28): Operation timed out after 30001 milliseconds with 0 out of 0 bytes received
 HTTP Code: 0
-Verbose log: * Could not resolve host: hmis.moh.go.ug
+URL: https://tests.dhis2.hispuganda.org/hmis/api/organisationUnitLevels?fields=id,level,displayName
+Verbose log: *   Trying 84.46.240.218:443...
+* Connected to tests.dhis2.hispuganda.org (84.46.240.218) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*  CAfile: /Applications/MAMP/Library/OpenSSL/certs/cacert.pem
+*  CApath: none
+* Operation timed out after 30001 milliseconds with 0 out of 0 bytes received
 * Closing connection 0
 
-[28-Jul-2025 07:04:51 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
-[28-Jul-2025 07:04:51 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+[01-Aug-2025 07:45:49 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
                     FROM dhis2_instances 
                     WHERE instance_key = :key AND status = 1 
                     LIMIT 1
-[28-Jul-2025 07:04:51 UTC] Binding parameter :key with value: 'UiO'
-[28-Jul-2025 07:04:51 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
-[28-Jul-2025 07:04:51 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
-[28-Jul-2025 07:04:51 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+[01-Aug-2025 07:45:49 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
                     FROM dhis2_instances 
                     WHERE instance_key = :key AND status = 1 
                     LIMIT 1
-[28-Jul-2025 07:04:51 UTC] Binding parameter :key with value: 'UiO'
-[28-Jul-2025 07:04:51 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
-[28-Jul-2025 07:04:51 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
-[28-Jul-2025 07:04:51 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+[01-Aug-2025 07:45:49 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
                     FROM dhis2_instances 
                     WHERE instance_key = :key AND status = 1 
                     LIMIT 1
-[28-Jul-2025 07:04:51 UTC] Binding parameter :key with value: 'UiO'
-[28-Jul-2025 07:04:51 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
-[28-Jul-2025 07:04:51 UTC] DHIS2 API call: GET https://tests.dhis2.hispuganda.org/hmis/api/organisationUnitLevels?fields=id,level,displayName
-[28-Jul-2025 07:04:51 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
-[28-Jul-2025 07:04:51 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+[01-Aug-2025 07:45:49 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] DHIS2 API call: GET https://emisuganda.org/emis/api/organisationUnitLevels?fields=id,level,displayName
+[01-Aug-2025 07:45:49 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
                     FROM dhis2_instances 
                     WHERE instance_key = :key AND status = 1 
                     LIMIT 1
-[28-Jul-2025 07:04:51 UTC] Binding parameter :key with value: 'UiO'
-[28-Jul-2025 07:04:51 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
-[28-Jul-2025 07:04:52 UTC] HTTP Status: 200
-[28-Jul-2025 07:04:52 UTC] DHIS2 Response (first 500 chars): {"pager":{"page":1,"total":5,"pageSize":50,"pageCount":1},"organisationUnitLevels":[{"level":3,"displayName":"District","id":"iITwmH31lPe"},{"level":5,"displayName":"Health Facility","id":"Sg9YZ6o7bCQ"},{"level":1,"displayName":"National","id":"Qwwy9GM6dFu"},{"level":2,"displayName":"Region","id":"CfnWgqkxbyg"},{"level":4,"displayName":"Sub County/Town Council/Div","id":"NGXlJhHTDdV"}]}
+[01-Aug-2025 07:45:49 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:45:49 UTC] HTTP Status: 200
+[01-Aug-2025 07:45:49 UTC] DHIS2 Response (first 1000 chars): {"pager":{"page":1,"total":8,"pageSize":50,"pageCount":1},"organisationUnitLevels":[{"level":3,"displayName":"District","id":"rIJqxNmVvMR"},{"level":8,"displayName":"Level 8","id":"JEg76BKStvd"},{"level":4,"displayName":"MC/CC/DLG","id":"QsWp5TJdnn6"},{"level":1,"displayName":"National","id":"tK8wKE2QH6p"},{"level":6,"displayName":"Parishes","id":"RfPeRkILLJJ"},{"level":2,"displayName":"Region","id":"e0b1slUmwcK"},{"level":7,"displayName":"Schools","id":"OT9v7uJbcKb"},{"level":5,"displayName":"Subcounty/Div/TC","id":"DAbGWDPmsIf"}]}
+[01-Aug-2025 07:45:57 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:45:57 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:45:57 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:45:57 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:45:57 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:45:57 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:45:57 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:45:57 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:45:57 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:45:57 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:45:57 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:45:57 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:45:57 UTC] DHIS2 API call: GET https://emisuganda.org/emis/api/organisationUnits?fields=id,name,path,level,parent[id]&filter=level:eq:2&paging=false
+[01-Aug-2025 07:45:57 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:45:57 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:45:57 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:45:57 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:45:58 UTC] HTTP Status: 200
+[01-Aug-2025 07:45:58 UTC] DHIS2 Response (first 1000 chars): {"organisationUnits":[{"name":"Acholi Region","parent":{"id":"KJPN4PduBWe"},"path":"/KJPN4PduBWe/yXncUmqtQYF","id":"yXncUmqtQYF","level":2},{"name":"Ankole Region","parent":{"id":"KJPN4PduBWe"},"path":"/KJPN4PduBWe/LCiSfhGKLEU","id":"LCiSfhGKLEU","level":2},{"name":"Buganda Region","parent":{"id":"KJPN4PduBWe"},"path":"/KJPN4PduBWe/HOjHt8pjWWH","id":"HOjHt8pjWWH","level":2},{"name":"Bukedi Region","parent":{"id":"KJPN4PduBWe"},"path":"/KJPN4PduBWe/DmeAF6ZFSzz","id":"DmeAF6ZFSzz","level":2},{"name":"Bunyoro Region","parent":{"id":"KJPN4PduBWe"},"path":"/KJPN4PduBWe/uUGeUQZ5nI4","id":"uUGeUQZ5nI4","level":2},{"name":"Busoga Region","parent":{"id":"KJPN4PduBWe"},"path":"/KJPN4PduBWe/GdYvXsZ4rB6","id":"GdYvXsZ4rB6","level":2},{"name":"Elgon Region","parent":{"id":"KJPN4PduBWe"},"path":"/KJPN4PduBWe/LSCoCf6ibP8","id":"LSCoCf6ibP8","level":2},{"name":"Karamoja Region","parent":{"id":"KJPN4PduBWe"},"path":"/KJPN4PduBWe/uN4gXUciDZ8","id":"uN4gXUciDZ8","level":2},{"name":"Kigezi Region","parent
+[01-Aug-2025 07:46:11 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:46:11 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:46:11 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:46:11 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:46:11 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:46:11 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:46:11 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:46:11 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:46:11 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:46:11 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:46:11 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:46:11 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:46:11 UTC] DHIS2 API call: GET https://emisuganda.org/emis/api/organisationUnits?fields=id,name,path,level,parent[id]&filter=level:eq:6&paging=false
+[01-Aug-2025 07:46:11 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[01-Aug-2025 07:46:11 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:46:11 UTC] Binding parameter :key with value: 'EMIS'
+[01-Aug-2025 07:46:11 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[01-Aug-2025 07:46:13 UTC] HTTP Status: 200
+[01-Aug-2025 07:46:13 UTC] DHIS2 Response (first 1000 chars): {"organisationUnits":[{"name":"Aakum Parish","parent":{"id":"hVZeyZ0q28u"},"path":"/KJPN4PduBWe/rn2uTdRyUbh/cSrCFjPKqcG/i11SZTLQap4/hVZeyZ0q28u/ftq8bJq7cj0","id":"ftq8bJq7cj0","level":6},{"name":"Aarapoo Parish","parent":{"id":"nffZS6pdMhZ"},"path":"/KJPN4PduBWe/rn2uTdRyUbh/zJfpujxC1kD/KNPVL257sX3/nffZS6pdMhZ/z3nGsD2oPvw","id":"z3nGsD2oPvw","level":6},{"name":"Abaji Parish","parent":{"id":"mfBJZtzMb9k"},"path":"/KJPN4PduBWe/ToANlYyRiKb/A4aGXEfdb8P/x6VPaGLg6q1/mfBJZtzMb9k/Osy6bw8b3Ra","id":"Osy6bw8b3Ra","level":6},{"name":"Abakadyak Parish","parent":{"id":"bM9rKCuKbpb"},"path":"/KJPN4PduBWe/yXncUmqtQYF/xy0M4HhjXtD/StQcQsGYdz1/bM9rKCuKbpb/TyVEgF5FlTL","id":"TyVEgF5FlTL","level":6},{"name":"Abala Parish","parent":{"id":"K48w2kQQvUA"},"path":"/KJPN4PduBWe/n90wmiOocDw/Lj8t70RYnEt/Z6jOVYoS7Le/K48w2kQQvUA/p5LFbBGgNW0","id":"p5LFbBGgNW0","level":6},{"name":"Abalang(Alwa Subcounty) Parish","parent":{"id":"jXXa0PTeTUQ"},"path":"/KJPN4PduBWe/rn2uTdRyUbh/QoRZB7xc3j9/PUyNDCs6OkV/jXXa0PTeTUQ/jqRbqIY
+[01-Aug-2025 07:48:56 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:48:56 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:48:56 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:48:56 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:48:56 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:48:56 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:48:56 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:48:56 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:48:56 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:48:56 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:48:56 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:48:56 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:48:56 UTC] DHIS2 API call: GET https://tests.dhis2.hispuganda.org/hmis/api/programs?fields=id,name
+[01-Aug-2025 07:48:56 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:48:56 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:48:56 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:48:56 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:48:56 UTC] HTTP Status: 200
+[01-Aug-2025 07:48:56 UTC] DHIS2 Response (first 1000 chars): {"pager":{"page":1,"total":21,"pageSize":50,"pageCount":1},"programs":[{"name":" Acute Flaccid Paralysis Case Investigation Form","id":"NKQRhkoc4bj"},{"name":"ERR - Emergency Response Roster","id":"L5FI50iZjzt"},{"name":"ET00-Event Test FBS","id":"HnpFrrx9oHb"},{"name":"HFA - Healthcare system accessibility","id":"rSLqsO4n9ds"},{"name":"HFA - Healthcare system preparedness","id":"YbZsCH0wrp2"},{"name":"HMIS 016 - Maternal Perinatal Death Review monthly report","id":"M9iSvQgzYVM"},{"name":"HMIS 100 - Medical Certificate of Cause of Death","id":"vf8dN49jprI"},{"name":"HMIS 101 - Health Facility Physical Inventory Report","id":"qLXolImKO4p"},{"name":"HMIS 102 - Health Facility Equipment Inventory Report","id":"DysyMchxKuu"},{"name":"HMIS 107 -  Health Unit Population and Annual Report","id":"h4n7b1HjSnX"},{"name":"HMIS MAL 001- Malaria Entomological Surveillance ","id":"NPzEcFPfQWF"},{"name":"HMIS MAL 003 - Daily Spray Operator Form : Totals","id":"zQZss0QIRq4"},{"name":"HMIS MCH 004 - Ma
+[01-Aug-2025 07:49:04 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:04 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:04 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:04 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:04 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:04 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:04 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:04 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:04 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:04 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:04 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:04 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:04 UTC] DHIS2 API call: GET https://tests.dhis2.hispuganda.org/hmis/api/programs/HnpFrrx9oHb?fields=id,name,programStages[programStageDataElements[dataElement[id,name,optionSet[id,name]]]
+[01-Aug-2025 07:49:04 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:04 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:04 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:04 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:06 UTC] HTTP Status: 200
+[01-Aug-2025 07:49:06 UTC] DHIS2 Response (first 1000 chars): {"name":"ET00-Event Test FBS","id":"HnpFrrx9oHb","programStages":[{"programStageDataElements":[{"dataElement":{"name":"ET01-Were you profitable or unprofitable? ","optionSet":{"name":"PN","id":"e5qCaIWZ5kh"},"id":"e0i4FDCAcYg"}},{"dataElement":{"name":"ET02-Did you make progress or zero?","optionSet":{"name":"PZ","id":"LuXSDSyk1Xs"},"id":"Feqp9e2BERl"}},{"dataElement":{"name":"ET03-Where you successful or unsuccessful","optionSet":{"name":"US","id":"iDMUdSfXlte"},"id":"Pfcr4QaeQxM"}},{"dataElement":{"name":"ET04-Honestly Impact","id":"XT66dIe68dt"}}]}]}
+[01-Aug-2025 07:49:15 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:15 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:15 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:15 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:15 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:15 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:15 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:15 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:15 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:15 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:15 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:15 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:15 UTC] DHIS2 API call: GET https://tests.dhis2.hispuganda.org/hmis/api/programs/rSLqsO4n9ds?fields=id,name,programStages[programStageDataElements[dataElement[id,name,optionSet[id,name]]]
+[01-Aug-2025 07:49:15 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:15 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:15 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:15 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:16 UTC] HTTP Status: 200
+[01-Aug-2025 07:49:16 UTC] DHIS2 Response (first 1000 chars): {"name":"HFA - Healthcare system accessibility","id":"rSLqsO4n9ds","programStages":[{"programStageDataElements":[{"dataElement":{"name":"HFA - Medical generalist practitioners","id":"sUUqDmgFaNE"}},{"dataElement":{"name":"HFA - Medical specialist practitioners","id":"fh98eysSUv5"}},{"dataElement":{"name":"HFA - Paramedical practitioners (e.g. clinical officers)","id":"lmWi0Mrae0j"}},{"dataElement":{"name":"HFA - Nursing professionals","id":"DxCLTk69Equ"}},{"dataElement":{"name":"HFA - Midwifery professionals","id":"jO2vIvEaOmQ"}},{"dataElement":{"name":"HFA - Nurse-midwife (dual trained) professionals","id":"i3tsjGOn5rR"}},{"dataElement":{"name":"HFA - Medical / pathology laboratory technicians","id":"xpXAoWMDgQD"}},{"dataElement":{"name":"HFA - Pharmacists (professional)","id":"Y0mbI5izW7p"}},{"dataElement":{"name":"HFA - Pharmacy technicians/assistants","id":"jId2hmmkFp2"}},{"dataElement":{"name":"HFA - Traditional and complementary medical professional","id":"lnWgWyauQBz"}},{"dataEl
+[01-Aug-2025 07:49:30 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:30 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:30 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:30 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:30 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:30 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:30 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:30 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:30 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:30 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:30 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:30 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:30 UTC] DHIS2 API call: GET https://tests.dhis2.hispuganda.org/hmis/api/programs/HnpFrrx9oHb?fields=id,name,programStages[programStageDataElements[dataElement[id,name,optionSet[id,name]]]
+[01-Aug-2025 07:49:30 UTC] Attempting to get DHIS2 config for provided key: 'UiO'
+[01-Aug-2025 07:49:30 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[01-Aug-2025 07:49:30 UTC] Binding parameter :key with value: 'UiO'
+[01-Aug-2025 07:49:30 UTC] Successfully retrieved DHIS2 config for key: 'UiO'
+[01-Aug-2025 07:49:31 UTC] HTTP Status: 200
+[01-Aug-2025 07:49:31 UTC] DHIS2 Response (first 1000 chars): {"name":"ET00-Event Test FBS","id":"HnpFrrx9oHb","programStages":[{"programStageDataElements":[{"dataElement":{"name":"ET01-Were you profitable or unprofitable? ","optionSet":{"name":"PN","id":"e5qCaIWZ5kh"},"id":"e0i4FDCAcYg"}},{"dataElement":{"name":"ET02-Did you make progress or zero?","optionSet":{"name":"PZ","id":"LuXSDSyk1Xs"},"id":"Feqp9e2BERl"}},{"dataElement":{"name":"ET03-Where you successful or unsuccessful","optionSet":{"name":"US","id":"iDMUdSfXlte"},"id":"Pfcr4QaeQxM"}},{"dataElement":{"name":"ET04-Honestly Impact","id":"XT66dIe68dt"}}]}]}

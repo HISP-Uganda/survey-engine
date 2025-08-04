@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit();
 }
-
+require_once 'includes/session_timeout.php';
 require 'connect.php';
 
 // IMPORTANT: This file assumes a working database connection via 'connect.php'.
@@ -341,6 +341,173 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
             background-color: #f8f9fa;
             border-radius: 8px;
             border: 1px dashed #dee2e6;
+        }
+
+        /* Enhanced Modern Design Elements */
+        
+        /* Improved Button Styling */
+        .btn {
+            border-radius: 10px !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            border: none;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #6ab7ff 0%, #0770c1 100%);
+        }
+        
+        /* Enhanced Question Item with Gradient Border */
+        .question-item {
+            position: relative;
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid transparent;
+            background-clip: padding-box;
+        }
+        
+        .question-item:before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #74b9ff);
+            border-radius: 8px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .question-item:hover:before {
+            opacity: 0.1;
+        }
+        
+        /* Improved Search Input */
+        .search-container .form-control {
+            border-radius: 25px !important;
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .search-container .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: #ffffff;
+        }
+        
+        /* Enhanced Question Number Badges */
+        .question-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-right: 12px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Improved Drag Handle */
+        .drag-handle {
+            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 6px;
+            padding: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .drag-handle:hover {
+            background: linear-gradient(145deg, #e9ecef 0%, #dee2e6 100%);
+            color: #495057;
+            transform: scale(1.1);
+        }
+        
+        /* Enhanced Card Headers */
+        .card-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+            border-bottom: 2px solid #667eea !important;
+        }
+        
+        .card-header h3 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+        
+        /* Improved Questions Panel Container */
+        .questions-panel-container {
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid #e9ecef;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Scrollbar Styling */
+        .questions-panel-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .questions-panel-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .questions-panel-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+        
+        .questions-panel-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        
+        /* Enhanced Page Title Section */
+        .page-title-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .page-title-section .breadcrumb-link,
+        .page-title-section .breadcrumb-item.active {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+        
+        .page-title-section .breadcrumb-item a i {
+            color: #74b9ff !important;
+        }
+        
+        .page-title-section .navbar-title {
+            color: white !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>

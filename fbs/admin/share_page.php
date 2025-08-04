@@ -6,7 +6,9 @@ require_once 'connect.php'; // Make sure the path is correct
 
 // Get survey_id from the URL
 $surveyId = $_GET['survey_id'] ?? null;
-$surveyUrl = $_GET['url'] ?? ''; // Get the survey URL to embed in QR code
+
+// **** REMOVED: No longer expecting 'url' parameter from preview_form.php ****
+// $qrCodeTargetUrl = $_GET['url'] ?? '';
 
 if (!$surveyId) {
     die("Survey ID is missing.");
@@ -15,43 +17,36 @@ if (!$surveyId) {
 // Fetch survey details (just 'name' for default title)
 $defaultSurveyTitle = 'Ministry of Health Client Satisfaction Feedback Tool';
 
-// Use the $pdo object from connect.php
-// Check if $pdo was successfully created in connect.php
 if (isset($pdo)) {
     try {
         $surveyStmt = $pdo->prepare("SELECT name FROM survey WHERE id = ?");
         if ($surveyStmt) {
-            $surveyStmt->execute([$surveyId]); // Use array for prepared statement parameters with PDO
+            $surveyStmt->execute([$surveyId]);
             $row = $surveyStmt->fetch(PDO::FETCH_ASSOC);
             if ($row) {
                 $defaultSurveyTitle = htmlspecialchars($row['name']);
             }
         }
     } catch (PDOException $e) {
-        // Log the error, but allow the page to load with default values
         error_log("Database Query failed in share_page.php (survey name fetch): " . $e->getMessage());
     }
 }
 
-// Fetch survey settings from the database
+// Fetch survey settings from the database (rest of this logic remains the same)
 $surveySettings = [];
-
-// Ensure $pdo is set before attempting to use it for settings
 if (isset($pdo)) {
     try {
         $settingsStmt = $pdo->prepare("SELECT * FROM survey_settings WHERE survey_id = ?");
         if ($settingsStmt) {
-            $settingsStmt->execute([$surveyId]); // Use array for prepared statement parameters with PDO
+            $settingsStmt->execute([$surveyId]);
             $existingSettings = $settingsStmt->fetch(PDO::FETCH_ASSOC);
 
             if ($existingSettings) {
                 $surveySettings = $existingSettings;
-                // Ensure 'title_text' is set, default to $defaultSurveyTitle if not in settings
                 if (!isset($surveySettings['title_text'])) {
                     $surveySettings['title_text'] = $defaultSurveyTitle;
                 }
             } else {
-                // Fallback to hardcoded defaults if no settings found
                 $surveySettings = [
                     'logo_path' => 'asets/asets/img/loog.jpg',
                     'show_logo' => 1,
@@ -67,14 +62,12 @@ if (isset($pdo)) {
                     'show_qr_instructions_share' => 1,
                     'footer_note_text' => 'Thank you for helping us improve our services.',
                     'show_footer_note_share' => 1,
-                    'title_text' => $defaultSurveyTitle, // Use default survey title if no custom title in settings
+                    'title_text' => $defaultSurveyTitle,
                 ];
             }
         }
     } catch (PDOException $e) {
-        // Log the error for debugging
         error_log("Database Query failed in share_page.php (survey settings fetch): " . $e->getMessage());
-        // If DB query fails, fall back to basic defaults
         $surveySettings = [
             'logo_path' => 'asets/asets/img/loog.jpg',
             'show_logo' => 1,
@@ -94,7 +87,6 @@ if (isset($pdo)) {
         ];
     }
 } else {
-    // If $pdo was not even set (meaning connect.php failed), use basic defaults
     error_log("PDO connection not established in share_page.php. Using default settings.");
     $surveySettings = [
         'logo_path' => 'asets/asets/img/loog.jpg',
@@ -115,24 +107,37 @@ if (isset($pdo)) {
     ];
 }
 
-// --- START: Dynamic Base Path for QR URL ---
-$scriptName = $_SERVER['SCRIPT_NAME']; // e.g., /fbs/admin/share_page.php or /survey-engine/share_page.php
-$basePath = dirname($scriptName);     // e.g., /fbs/admin or /survey-engine
+// **** THIS IS THE NEW CRITICAL LOGIC FOR DYNAMIC URL CONSTRUCTION ****
 
-// Ensure a trailing slash if it's not the root directory
-if ($basePath !== '/') {
-    $basePath .= '/';
+// Get the scheme (http or https)
+$scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+
+// Get the host (e.g., localhost, example.com)
+$host = $_SERVER['HTTP_HOST'];
+
+// Get the base path of the current script.
+// This handles cases where your application is in a subfolder (e.g., example.com/myapp/)
+$scriptPath = $_SERVER['SCRIPT_NAME']; // e.g., /fbs/admin/share_page.php
+$basePath = dirname($scriptPath);     // e.g., /fbs/admin
+
+// **** ADJUSTMENT START ****
+// If share_page.php and survey_page.php are in the SAME directory (e.g., both in 'admin/'):
+$finalBaseDir = $basePath; // Use the current directory's path
+
+// Ensure a trailing slash for the base directory unless it's the root
+if ($finalBaseDir !== '/') {
+    $finalBaseDir .= '/';
+} else {
+    // If it's root, ensure it's just '/'
+    $finalBaseDir = '/';
 }
-// --- END: Dynamic Base Path for QR URL ---
 
-// The URL for the QR code generation
-// Use the URL passed from preview_form.php ($surveyUrl), or construct it if not provided
-$qrUrl = $surveyUrl ? $surveyUrl : 
-         (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . 
-         "://" . $_SERVER['HTTP_HOST'] . 
-         $basePath . 
-         "survey_page.php?survey_id=" . $surveyId;
 
+// Construct the full URL for survey_page.php
+$qrCodeTargetUrl = $scheme . "://" . $host . $finalBaseDir . "survey_page.php?survey_id=" . $surveyId;
+
+// You can add a check here for debugging to see what $qrCodeTargetUrl becomes
+error_log("QR Code Target URL: " . $qrCodeTargetUrl);
 
 ?>
 <!DOCTYPE html>
@@ -144,7 +149,8 @@ $qrUrl = $surveyUrl ? $surveyUrl :
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Your existing CSS here (copied from your provided code) */
+     
+        
         :root {
             --primary-blue: #007bff;
             --dark-blue: #0056b3;
@@ -168,7 +174,7 @@ $qrUrl = $surveyUrl ? $surveyUrl :
             color: var(--text-color-dark);
             line-height: 1.6;
         }
-        
+
 
         .feedback-container {
             background: white;
@@ -420,7 +426,7 @@ $qrUrl = $surveyUrl ? $surveyUrl :
                 <span><?php echo htmlspecialchars($surveySettings['qr_instructions_text'] ?? 'Scan this QR Code to Give Your Feedback<br>on Services Received'); ?></span>
             </div>
 
-            <a href="<?php echo htmlspecialchars($qrUrl); ?>" class="go-to-survey-button">
+            <a href="<?php echo htmlspecialchars($qrCodeTargetUrl); ?>" class="go-to-survey-button">
                 <i class="fas fa-external-link-alt"></i> Go to Survey Page
             </a>
         </div>
@@ -434,14 +440,14 @@ $qrUrl = $surveyUrl ? $surveyUrl :
     <script>
         // Data passed from PHP
         const phpSurveyId = <?php echo json_encode($surveyId); ?>;
-        const phpSurveyUrl = <?php echo json_encode($qrUrl); ?>; // This is the URL for the QR code
-        const phpSurveySettings = <?php echo json_encode($surveySettings); ?>; // Pass all settings for potential future use
+        // The target URL is now fully constructed by PHP
+        const phpQrCodeTargetUrl = <?php echo json_encode($qrCodeTargetUrl); ?>;
+        const phpSurveySettings = <?php echo json_encode($surveySettings); ?>;
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Generate QR code
-            if (phpSurveyUrl && document.getElementById('qr-code')) {
+            if (phpQrCodeTargetUrl && document.getElementById('qr-code')) {
                 new QRCode(document.getElementById('qr-code'), {
-                    text: phpSurveyUrl,
+                    text: phpQrCodeTargetUrl,
                     width: 200,
                     height: 200,
                     colorDark: "#000000",
@@ -451,14 +457,7 @@ $qrUrl = $surveyUrl ? $surveyUrl :
             } else {
                 document.getElementById('qr-code').innerHTML = '<p style="color:red; text-align:center;">Error: QR code URL missing.</p>';
             }
-
-            // PHP has already applied all settings directly into the HTML.
-            // No additional JS needed here to apply visual changes on page load.
         });
-
-        // The downloadPage function is no longer needed since we are redirecting directly.
-        // You can remove it entirely if it's not used elsewhere.
-        // If you need the download functionality for something else, keep it but remove the button's onclick attribute.
     </script>
 </body>
 </html>

@@ -32,7 +32,7 @@ $surveyIdFromSession = $_SESSION['submitted_survey_id'] ?? null; // Get survey_i
 $submission = null; // Initialize to null
 try {
     $stmt = $pdo->prepare("
-        SELECT id, age, sex, period, service_unit_id, location_id, ownership_id, survey_id
+        SELECT id, location_id, survey_id
         FROM submission
         WHERE uid = ?
     ");
@@ -90,46 +90,7 @@ if ($surveyId) {
     }
 }
 
-$serviceUnitName = null;
-$ownershipName = null;
-$age = $submission['age'] ?? null;
-$sex = $submission['sex'] ?? null;
-$period = $submission['period'] ?? null;
-
-// Only fetch these specific details if the survey type is 'local' AND the IDs are not null
-if ($surveyType === 'local') {
-    // Get service unit name
-    $serviceUnitId = $submission['service_unit_id'] ?? null;
-    if ($serviceUnitId !== null) {
-        try {
-            $stmt = $pdo->prepare("SELECT name FROM service_unit WHERE id = ?");
-            $stmt->execute([$serviceUnitId]);
-            $serviceUnit = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($serviceUnit) {
-                $serviceUnitName = $serviceUnit['name'];
-            }
-        } catch (PDOException $e) {
-            error_log("Database error fetching service unit name: " . $e->getMessage());
-            // $serviceUnitName remains null
-        }
-    }
-
-    // Get ownership name
-    $ownershipId = $submission['ownership_id'] ?? null;
-    if ($ownershipId !== null) {
-        try {
-            $stmt = $pdo->prepare("SELECT name FROM owner WHERE id = ?");
-            $stmt->execute([$ownershipId]);
-            $ownership = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($ownership) {
-                $ownershipName = $ownership['name'];
-            }
-        } catch (PDOException $e) {
-            error_log("Database error fetching ownership name: " . $e->getMessage());
-            // $ownershipName remains null
-        }
-    }
-}
+// Removed hardcoded demographic fields - these are now handled as regular survey questions
 
 // Get responses
 $responses = [];
@@ -409,38 +370,7 @@ unset($_SESSION['submitted_survey_id']);
                     </tr>
                     <?php endif; ?>
 
-                    <?php if ($surveyType === 'local'): // Conditionally display for 'local' ?>
-                        <?php if ($serviceUnitName !== null): ?>
-                        <tr id="serviceUnitRow">
-                            <th>Service Unit</th>
-                            <td><?php echo htmlspecialchars($serviceUnitName); ?></td>
-                        </tr>
-                        <?php endif; ?>
-                        <?php if ($age !== null): ?>
-                        <tr id="ageRow">
-                            <th>Age</th>
-                            <td><?php echo htmlspecialchars($age); ?></td>
-                        </tr>
-                        <?php endif; ?>
-                        <?php if ($sex !== null): ?>
-                        <tr id="sexRow">
-                            <th>Sex</th>
-                            <td><?php echo htmlspecialchars($sex); ?></td>
-                        </tr>
-                        <?php endif; ?>
-                        <?php if ($period !== null): ?>
-                        <tr id="dateRow">
-                            <th>Date</th>
-                            <td><?php echo htmlspecialchars(date('d/m/Y', strtotime($period))); ?></td>
-                        </tr>
-                        <?php endif; ?>
-                        <?php if ($ownershipName !== null): ?>
-                        <tr id="ownershipRow">
-                            <th>Ownership</th>
-                            <td><?php echo htmlspecialchars($ownershipName); ?></td>
-                        </tr>
-                        <?php endif; ?>
-                    <?php endif; ?>
+                    <!-- Removed hardcoded demographic fields - these are now shown in the responses section -->
                 </table>
             </div>
 
@@ -489,13 +419,7 @@ unset($_SESSION['submitted_survey_id']);
             const surveyTitleThankYou = document.getElementById('survey-title-thankyou');
 
 
-            // --- DOM Elements for Conditional Submission Details (for JavaScript control if needed) ---
-            // These are now less critical for hiding as PHP handles it, but kept for consistency
-            const serviceUnitRow = document.getElementById('serviceUnitRow');
-            const ageRow = document.getElementById('ageRow');
-            const sexRow = document.getElementById('sexRow');
-            const dateRow = document.getElementById('dateRow');
-            const ownershipRow = document.getElementById('ownershipRow');
+            // Removed hardcoded demographic field references
 
 
             /**

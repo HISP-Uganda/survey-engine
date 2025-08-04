@@ -3,6 +3,7 @@ session_start();
 
 // Include the database connection file
 require_once 'connect.php'; // Make sure the path is correct relative to this file
+require_once 'includes/skip_logic_helper.php';
 
 // Check if $pdo object is available from connect.php
 if (!isset($pdo)) {
@@ -63,70 +64,67 @@ try {
 
     if ($existingSettings) {
         $surveySettings = $existingSettings;
+        // Keep raw values - let JavaScript handle conversion for better debugging
+        // This ensures we can see exactly what's in the database
+        error_log("Raw database settings loaded: " . json_encode($existingSettings));
     } else {
-        // Fallback to hardcoded defaults if no settings found (should be rare if preview_form.php works)
+        // Fallback to conservative defaults - most elements hidden by default
         $surveySettings = [
             'logo_path' => 'asets/asets/img/loog.jpg',
-            'show_logo' => 1,
+            'show_logo' => true,
             'flag_black_color' => '#000000',
             'flag_yellow_color' => '#FCD116',
             'flag_red_color' => '#D21034',
-            'show_flag_bar' => 1,
+            'show_flag_bar' => true,
             'title_text' => $defaultSurveyTitle,
-            'show_title' => 1,
+            'show_title' => true,
             'subheading_text' => $translations['subheading'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.',
-            'show_subheading' => 1,
-            'show_submit_button' => 1,
+            'show_subheading' => true,
+            'show_submit_button' => true,
             'rating_instruction1_text' => $translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.',
             'rating_instruction2_text' => $translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent',
-            'show_rating_instructions' => 1,
-            'show_facility_section' => 1,
-            'show_location_row_general' => 1,
-            'show_location_row_period_age' => 1,
-            'show_ownership_section' => 1,
+            'show_rating_instructions' => ($surveyType === 'local'), // Only show for local surveys
+            'show_facility_section' => true,
             'republic_title_text' => 'THE REPUBLIC OF UGANDA',
-            'show_republic_title_share' => 1,
+            'show_republic_title_share' => true,
             'ministry_subtitle_text' => 'MINISTRY OF HEALTH',
-            'show_ministry_subtitle_share' => 1,
+            'show_ministry_subtitle_share' => true,
             'qr_instructions_text' => 'Scan this QR Code to Give Your Feedback on Services Received',
-            'show_qr_instructions_share' => 1,
+            'show_qr_instructions_share' => false, // Hidden by default
             'footer_note_text' => 'Thank you for helping us improve our services.',
-            'show_footer_note_share' => 1,
-            'selected_instance_key' => null, // Ensure these are part of the fallback if DB row doesn't exist
+            'show_footer_note_share' => false, // Hidden by default
+            'selected_instance_key' => null,
             'selected_hierarchy_level' => null,
         ];
     }
 } catch (PDOException $e) {
     error_log("Database error fetching survey settings in survey_page.php: " . $e->getMessage());
-    // Fallback to hardcoded defaults if DB fetch fails
+    // Fallback to conservative defaults on error
     $surveySettings = [
         'logo_path' => 'asets/asets/img/loog.jpg',
-        'show_logo' => 1,
+        'show_logo' => true,
         'flag_black_color' => '#000000',
         'flag_yellow_color' => '#FCD116',
         'flag_red_color' => '#D21034',
-        'show_flag_bar' => 1,
+        'show_flag_bar' => true,
         'title_text' => $defaultSurveyTitle,
-        'show_title' => 1,
+        'show_title' => true,
         'subheading_text' => $translations['subheading'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.',
-        'show_subheading' => 1,
-        'show_submit_button' => 1,
+        'show_subheading' => true,
+        'show_submit_button' => true,
         'rating_instruction1_text' => $translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.',
         'rating_instruction2_text' => $translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent',
-        'show_rating_instructions' => 1,
-        'show_facility_section' => 1,
-        'show_location_row_general' => 1,
-        'show_location_row_period_age' => 1,
-        'show_ownership_section' => 1,
+        'show_rating_instructions' => ($surveyType === 'local'),
+        'show_facility_section' => true,
         'republic_title_text' => 'THE REPUBLIC OF UGANDA',
-        'show_republic_title_share' => 1,
+        'show_republic_title_share' => true,
         'ministry_subtitle_text' => 'MINISTRY OF HEALTH',
-        'show_ministry_subtitle_share' => 1,
+        'show_ministry_subtitle_share' => true,
         'qr_instructions_text' => 'Scan this QR Code to Give Your Feedback on Services Received',
-        'show_qr_instructions_share' => 1,
+        'show_qr_instructions_share' => false,
         'footer_note_text' => 'Thank you for helping us improve our services.',
-        'show_footer_note_share' => 1,
-        'selected_instance_key' => null, // Ensure these are part of the fallback
+        'show_footer_note_share' => false,
+        'selected_instance_key' => null,
         'selected_hierarchy_level' => null,
     ];
 }
@@ -135,6 +133,21 @@ try {
 // Extract selected instance key and hierarchy level from survey settings
 $selectedInstanceKey = $surveySettings['selected_instance_key'] ?? null;
 $selectedHierarchyLevel = $surveySettings['selected_hierarchy_level'] ?? null;
+
+// Debug: Log the survey settings being applied
+error_log("Survey ID: $surveyId, Survey Type: $surveyType");
+error_log("Survey Settings: " . json_encode($surveySettings));
+
+// Debug visibility values specifically
+$debugInfo = [
+    'show_logo' => $surveySettings['show_logo'] ?? 'not set',
+    'show_flag_bar' => $surveySettings['show_flag_bar'] ?? 'not set',
+    'show_title' => $surveySettings['show_title'] ?? 'not set',
+    'show_subheading' => $surveySettings['show_subheading'] ?? 'not set',
+    'show_facility_section' => $surveySettings['show_facility_section'] ?? 'not set',
+    'show_rating_instructions' => $surveySettings['show_rating_instructions'] ?? 'not set',
+];
+error_log("Visibility Debug: " . json_encode($debugInfo));
 
 // Hierarchy Level Mapping (Fixed to Level X) - needed for display logic
 $hierarchyLevels = [];
@@ -146,7 +159,7 @@ for ($i = 1; $i <= 8; $i++) {
 $questionsArray = [];
 try {
     $questionsStmt = $pdo->prepare("
-        SELECT q.id, q.label, q.question_type, q.is_required, q.translations, q.option_set_id, sq.position
+        SELECT q.id, q.label, q.question_type, q.is_required, q.translations, q.option_set_id, q.validation_rules, q.skip_logic, q.min_selections, q.max_selections, sq.position
         FROM question q
         JOIN survey_question sq ON q.id = sq.question_id
         WHERE sq.survey_id = ?
@@ -196,12 +209,65 @@ unset($option);
     <title><?php echo htmlspecialchars($surveySettings['title_text'] ?? $defaultSurveyTitle); ?></title>
     <link rel="stylesheet" href="../styles.css">
     <style>
-        /* Your existing CSS (copied from your provided code) */
+        /* Rich text content styling */
+        .rich-text-content {
+            font-family: inherit;
+            line-height: 1.5;
+        }
+        
+        .rich-text-content p {
+            margin: 8px 0;
+        }
+        
+        .rich-text-content strong {
+            font-weight: bold;
+        }
+        
+        .rich-text-content em {
+            font-style: italic;
+        }
+        
+        .rich-text-content ul, .rich-text-content ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .rich-text-content li {
+            margin: 4px 0;
+        }
+        
+        /* Enhanced subheading styling */
+        .subheading {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            max-width: 100%;
+            line-height: 1.5;
+            margin: 15px 0;
+            padding: 10px 0;
+            box-sizing: border-box;
+        }
+        
+        /* Enhanced responsive body styles */
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background-color: #f8f9fa;
             margin: 0;
             padding: 0;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* Enhanced container styles - made bigger like preview_form */
+        .container {
+            max-width: 1200px !important;
+            margin: 20px auto !important;
+            padding: 30px !important;
+            background: #fff !important;
+            border-radius: 12px !important;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08) !important;
+            border: 1px solid #e9ecef !important;
+            width: 95% !important;
         }
         .question-number {
             font-weight: bold;
@@ -252,9 +318,35 @@ unset($option);
         .flag-yellow { background-color: #FCD116; }
         .flag-red { background-color: #D21034; }
 
-        /* Utility class for hiding elements */
+        /* Enhanced utility classes for hiding elements */
         .hidden-element {
             display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            position: absolute !important;
+            left: -9999px !important;
+        }
+        
+        /* Force visibility when elements should be shown */
+        .show-element {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: static !important;
+            left: auto !important;
+        }
+        
+        /* For flex elements that need to be shown */
+        .show-flex {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: static !important;
+            left: auto !important;
         }
 
         /* Top controls for language and print (if you want to keep them) */
@@ -370,35 +462,897 @@ unset($option);
 .star:focus {
     outline: 2px solid #1976d2;
 }
-        /* Styles for the new searchable dropdown in survey_page */
+        /* Enhanced searchable dropdown styling */
         .searchable-dropdown {
             position: relative;
+            width: 100%;
         }
+        
+        #facility-search {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.4;
+            background: #fff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            box-sizing: border-box;
+        }
+        
+        #facility-search:focus {
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+            outline: none;
+        }
+        
         .dropdown-results {
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
-            border: 1px solid #ddd;
+            border: 2px solid #e9ecef;
             border-top: none;
-            border-radius: 0 0 4px 4px;
+            border-radius: 0 0 8px 8px;
             background-color: #fff;
             position: absolute;
             width: 100%;
-            z-index: 100;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 16px;
             box-sizing: border-box;
         }
+        
         .dropdown-item {
-            padding: 8px 10px;
+            padding: 12px 16px;
             cursor: pointer;
             transition: background-color 0.2s;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 16px;
+            line-height: 1.4;
+            color: #333;
         }
+        
         .dropdown-item:hover {
-            background-color: #f0f0f0;
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .dropdown-item:last-child {
+            border-bottom: none;
         }
         .hierarchy-path .path-display {
             font-size: 0.9em;
             color: #555;
             margin-top: 5px;
             word-break: break-all;
+        }
+
+        /* Enhanced responsive design for form elements */
+        .enhanced-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 12px 0;
+            padding: 0;
+        }
+
+        .enhanced-option {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-height: 44px;
+        }
+
+        .enhanced-option:hover {
+            background: #e3f2fd;
+            border-color: #1976d2;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+        }
+
+        .enhanced-option input[type="radio"],
+        .enhanced-option input[type="checkbox"] {
+            margin: 0 12px 0 0;
+            transform: scale(1.2);
+            accent-color: #1976d2;
+            flex-shrink: 0;
+        }
+
+        .enhanced-option label {
+            margin: 0;
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .enhanced-option input:checked + label {
+            color: #1976d2;
+            font-weight: 600;
+        }
+
+        .enhanced-option input:focus {
+            outline: 2px solid #1976d2;
+            outline-offset: 2px;
+        }
+
+        /* Form group enhancements */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group .radio-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .required-indicator {
+            color: #dc3545 !important;
+            font-weight: bold;
+        }
+
+        /* Location row responsive improvements */
+        .location-row {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 20px !important;
+            margin-bottom: 20px !important;
+        }
+
+        /* Form control enhancements - improved dropdown styling */
+        .form-control, input[type="text"], input[type="number"], select, textarea {
+            padding: 12px !important;
+            border: 2px solid #e9ecef !important;
+            border-radius: 8px !important;
+            font-size: 16px !important;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+            background: #fff !important;
+            min-height: 44px !important;
+            line-height: 1.4 !important;
+        }
+
+        /* Enhanced dropdown styling for better text visibility */
+        select.form-control {
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px;
+            padding-right: 40px !important;
+        }
+
+        /* Dropdown results container improvements */
+        .dropdown-results {
+            max-height: 300px !important;
+            overflow-y: auto !important;
+            border: 2px solid #e9ecef !important;
+            border-top: none !important;
+            border-radius: 0 0 8px 8px !important;
+            background-color: #fff !important;
+            position: absolute !important;
+            width: 100% !important;
+            z-index: 1000 !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+            font-size: 16px !important;
+        }
+
+        .dropdown-item {
+            padding: 12px 16px !important;
+            cursor: pointer !important;
+            transition: background-color 0.2s !important;
+            border-bottom: 1px solid #f1f3f4 !important;
+            font-size: 16px !important;
+            line-height: 1.4 !important;
+            color: #333 !important;
+        }
+
+        .dropdown-item:hover {
+            background-color: #e3f2fd !important;
+            color: #1976d2 !important;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none !important;
+        }
+
+        .form-control:focus, input:focus, select:focus, textarea:focus {
+            border-color: #1976d2 !important;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1) !important;
+            outline: none !important;
+        }
+
+        /* Mobile-first responsive design */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px !important;
+                padding: 20px !important;
+                border-radius: 8px !important;
+                width: calc(100% - 20px) !important;
+            }
+
+            .enhanced-options {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .enhanced-option {
+                padding: 14px;
+                min-height: 48px;
+            }
+
+            .location-row {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+            }
+
+            .form-group .radio-label {
+                font-size: 1rem;
+            }
+
+            .logo-container img {
+                height: 120px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 5px !important;
+                padding: 16px !important;
+                border-radius: 8px !important;
+                width: calc(100% - 10px) !important;
+                box-sizing: border-box !important;
+            }
+
+            .enhanced-options {
+                gap: 8px;
+            }
+
+            .enhanced-option {
+                padding: 12px;
+                font-size: 15px;
+            }
+
+            .form-control, input, select, textarea {
+                font-size: 16px !important; /* Prevents zoom on iOS */
+                padding: 14px !important;
+            }
+
+            .logo-container img {
+                height: 100px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            .subheading {
+                font-size: 14px;
+            }
+        }
+
+        /* Large screen optimizations */
+        @media (min-width: 1200px) {
+            .enhanced-options {
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            }
+        }
+
+        /* ===== ENHANCED FORM FIELD STYLES ===== */
+        
+        /* Base form container for all field types */
+        .form-field-container {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .form-field-container:focus-within {
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+        }
+        
+        /* Field labels */
+        .field-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .field-label .required-indicator {
+            color: #dc3545;
+            margin-left: 4px;
+        }
+        
+        /* Base input styling for all text-based inputs */
+        .enhanced-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 16px;
+            line-height: 1.5;
+            background: #fff;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        
+        .enhanced-input:focus {
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+            outline: none;
+        }
+        
+        .enhanced-input:disabled {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        /* Specific input type styling */
+        input[type="text"].enhanced-input,
+        input[type="email"].enhanced-input,
+        input[type="tel"].enhanced-input,
+        input[type="url"].enhanced-input,
+        input[type="number"].enhanced-input,
+        input[type="date"].enhanced-input,
+        input[type="datetime-local"].enhanced-input,
+        input[type="time"].enhanced-input,
+        input[type="month"].enhanced-input,
+        input[type="color"].enhanced-input,
+        input[type="file"].enhanced-input {
+            min-height: 48px;
+        }
+        
+        /* Textarea styling */
+        textarea.enhanced-input {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        /* Select dropdown styling */
+        select.enhanced-input {
+            min-height: 48px;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+        
+        /* Radio and checkbox group containers */
+        .radio-checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .radio-checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-height: 48px;
+        }
+        
+        .radio-checkbox-item:hover {
+            background: #e3f2fd;
+            border-color: #1976d2;
+        }
+        
+        .radio-checkbox-item input[type="radio"],
+        .radio-checkbox-item input[type="checkbox"] {
+            margin: 0 12px 0 0;
+            transform: scale(1.2);
+            accent-color: #1976d2;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .radio-checkbox-item label {
+            margin: 0;
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        
+        .radio-checkbox-item input:checked + label {
+            color: #1976d2;
+            font-weight: 600;
+        }
+        
+        /* Rating scales */
+        .rating-scale-container {
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+        
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .scale-options {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .scale-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 40px;
+            padding: 8px;
+            cursor: pointer;
+        }
+        
+        .scale-option input[type="radio"] {
+            margin: 0 0 8px 0;
+            transform: scale(1.3);
+            accent-color: #1976d2;
+        }
+        
+        .scale-option span {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        /* Star rating enhanced */
+        .star-rating-enhanced {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+        
+        .star-enhanced {
+            font-size: 28px;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        
+        .star-enhanced:hover,
+        .star-enhanced.selected {
+            color: #ffd700;
+            transform: scale(1.1);
+        }
+        
+        .star-enhanced:focus {
+            outline: 2px solid #1976d2;
+            outline-offset: 2px;
+        }
+        
+        /* Input groups for currency, percentage */
+        .input-group-enhanced {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+        }
+        
+        .input-group-enhanced .enhanced-input {
+            border-radius: 6px 0 0 6px;
+            border-right: none;
+        }
+        
+        .input-group-text-enhanced {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: #e9ecef;
+            border: 2px solid #e9ecef;
+            border-left: none;
+            border-radius: 0 6px 6px 0;
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+        }
+        
+        .input-group-enhanced:focus-within .input-group-text-enhanced {
+            border-color: #1976d2;
+        }
+        
+        /* File upload styling */
+        input[type="file"].enhanced-input {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        
+        input[type="file"].enhanced-input::-webkit-file-upload-button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin-right: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        input[type="file"].enhanced-input::-webkit-file-upload-button:hover {
+            background: #1565c0;
+        }
+        
+        /* Color input styling */
+        input[type="color"].enhanced-input {
+            width: 80px;
+            height: 48px;
+            padding: 4px;
+            cursor: pointer;
+        }
+        
+        /* Signature pad */
+        .signature-container {
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            padding: 16px;
+            background: #fff;
+            margin-top: 8px;
+        }
+        
+        .signature-canvas {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: #fff;
+            width: 100%;
+            max-width: 500px;
+            height: 200px;
+        }
+        
+        .signature-controls {
+            margin-top: 12px;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .signature-clear-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s ease;
+        }
+        
+        .signature-clear-btn:hover {
+            background: #5a6268;
+        }
+        
+        /* Coordinates input */
+        .coordinates-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .coordinates-btn {
+            grid-column: 1 / -1;
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 8px;
+            transition: background 0.2s ease;
+        }
+        
+        .coordinates-btn:hover {
+            background: #1565c0;
+        }
+        
+        /* Form group enhanced styling */
+        .form-group.enhanced {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .form-group.enhanced:focus-within {
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+        }
+        
+        /* Enhanced styling for existing form elements */
+        .form-group .form-control {
+            padding: 12px 16px !important;
+            border: 2px solid #e9ecef !important;
+            border-radius: 6px !important;
+            transition: all 0.2s ease !important;
+            min-height: 48px !important;
+        }
+        
+        .form-group .form-control:focus {
+            border-color: #1976d2 !important;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1) !important;
+        }
+        
+        /* Enhanced input group styling */
+        .input-group {
+            display: flex;
+            align-items: stretch;
+        }
+        
+        .input-group .form-control {
+            border-radius: 6px 0 0 6px !important;
+            border-right: none !important;
+        }
+        
+        .input-group-text {
+            background: #e9ecef !important;
+            border: 2px solid #e9ecef !important;
+            border-left: none !important;
+            border-radius: 0 6px 6px 0 !important;
+            font-weight: 600 !important;
+            color: #495057 !important;
+            padding: 12px 16px !important;
+        }
+        
+        .input-group:focus-within .input-group-text {
+            border-color: #1976d2 !important;
+        }
+        
+        /* Enhanced likert scale styling */
+        .likert-scale {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        
+        .likert-scale .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .likert-scale .scale-options {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .likert-scale .scale-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 44px;
+            padding: 12px 8px;
+            background: #fff;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .likert-scale .scale-option:hover {
+            background: #e3f2fd;
+            border-color: #1976d2;
+        }
+        
+        .likert-scale .scale-option input[type="radio"] {
+            margin: 0 0 8px 0;
+            transform: scale(1.3);
+            accent-color: #1976d2;
+        }
+        
+        .likert-scale .scale-option span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        /* Enhanced NPS styling */
+        .nps-scale {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        
+        .nps-scale .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .nps-scale .scale-options {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .nps-scale .scale-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 36px;
+            padding: 8px 6px;
+            background: #fff;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .nps-scale .scale-option:hover {
+            background: #e3f2fd;
+            border-color: #1976d2;
+        }
+        
+        .nps-scale .scale-option input[type="radio"] {
+            margin: 0 0 6px 0;
+            transform: scale(1.2);
+            accent-color: #1976d2;
+        }
+        
+        .nps-scale .scale-option span {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        /* Enhanced star rating input */
+        .star-rating-input {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 8px;
+            text-align: center;
+        }
+        
+        .star-rating-input .stars {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .star-rating-input .star {
+            font-size: 32px;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        
+        .star-rating-input .star:hover,
+        .star-rating-input .star.selected {
+            color: #ffd700;
+            transform: scale(1.1);
+        }
+        
+        /* Responsive design for enhanced fields */
+        @media (max-width: 768px) {
+            .radio-checkbox-group {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .radio-checkbox-item {
+                padding: 16px;
+                min-height: 52px;
+            }
+            
+            .likert-scale .scale-options,
+            .nps-scale .scale-options {
+                gap: 6px;
+                justify-content: center;
+            }
+            
+            .likert-scale .scale-option,
+            .nps-scale .scale-option {
+                min-width: 36px;
+                padding: 8px 6px;
+            }
+            
+            .star-rating-input .star {
+                font-size: 28px;
+                padding: 6px;
+            }
+            
+            .coordinates-container {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .form-group.enhanced {
+                padding: 16px;
+                margin-bottom: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .form-field-container,
+            .form-group.enhanced {
+                padding: 12px;
+                margin-bottom: 16px;
+            }
+            
+            .enhanced-input {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 14px 16px;
+            }
+            
+            .radio-checkbox-item {
+                padding: 14px;
+                min-height: 56px;
+            }
+            
+            .likert-scale .scale-options,
+            .nps-scale .scale-options {
+                gap: 4px;
+            }
+            
+            .likert-scale .scale-option,
+            .nps-scale .scale-option {
+                min-width: 32px;
+                padding: 6px 4px;
+            }
+            
+            .star-rating-input .star {
+                font-size: 24px;
+                padding: 4px;
+            }
         }
     </style>
 </head>
@@ -408,7 +1362,7 @@ unset($option);
 
 
 
-        <div class="header-section" id="logo-section" style="display: <?php echo ($surveySettings['show_logo'] ?? true) ? 'block' : 'none'; ?>;">
+        <div class="header-section" id="logo-section">
             <div class="logo-container">
              <img id="moh-logo"
      src="<?php echo htmlspecialchars($surveySettings['logo_path'] ?? '/assets/img/logo.jpg'); ?>"
@@ -416,27 +1370,27 @@ unset($option);
      style="background: #fff; border: 1px solid #ccc; padding: 8px; border-radius: 8px; max-width: 100%; height: 170px; object-fit: contain;"
      onerror="this.onerror=null;this.src='/assets/img/logo.jpg';">
             </div>
-            <div class="title" id="republic-title" style="display: <?php echo ($surveySettings['show_republic_title_share'] ?? true) ? 'block' : 'none'; ?>;"><?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? 'THE REPUBLIC OF UGANDA'); ?></div>
-            <div class="subtitle" id="ministry-subtitle" style="display: <?php echo ($surveySettings['show_ministry_subtitle_share'] ?? true) ? 'block' : 'none'; ?>;"><?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? 'MINISTRY OF HEALTH'); ?></div>
+            <div class="title" id="republic-title"><?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? 'THE REPUBLIC OF UGANDA'); ?></div>
+            <div class="subtitle" id="ministry-subtitle"><?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? 'MINISTRY OF HEALTH'); ?></div>
         </div>
 
-        <div class="flag-bar" id="flag-bar" style="display: <?php echo ($surveySettings['show_flag_bar'] ?? true) ? 'flex' : 'none'; ?>;">
+        <div class="flag-bar" id="flag-bar">
             <div class="flag-black" id="flag-black-color" style="background-color: <?php echo htmlspecialchars($surveySettings['flag_black_color'] ?? '#000000'); ?>;"></div>
             <div class="flag-yellow" id="flag-yellow-color" style="background-color: <?php echo htmlspecialchars($surveySettings['flag_yellow_color'] ?? '#FCD116'); ?>;"></div>
             <div class="flag-red" id="flag-red-color" style="background-color: <?php echo htmlspecialchars($surveySettings['flag_red_color'] ?? '#D21034'); ?>;"></div>
         </div>
 
-        <h2 id="survey-title" data-translate="title" style="display: <?php echo ($surveySettings['show_title'] ?? true) ? 'block' : 'none'; ?>;"><?php echo htmlspecialchars($surveySettings['title_text'] ?? $defaultSurveyTitle); ?></h2>
-        <h3 id="survey-subtitle" data-translate="client_satisfaction_tool"><?php echo $translations['client_satisfaction_tool'] ?? 'USER FEEDBACK TOOL'; ?></h3>
-        <p class="subheading" id="survey-subheading" data-translate="subheading" style="display: <?php echo ($surveySettings['show_subheading'] ?? true) ? 'block' : 'none'; ?>;">
-            <?php echo htmlspecialchars($surveySettings['subheading_text'] ?? $translations['subheading'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.'); ?>
-        </p>
+        <h2 id="survey-title" data-translate="title"><?php echo htmlspecialchars($surveySettings['title_text'] ?? $defaultSurveyTitle); ?></h2>
+       
+        <div class="subheading rich-text-content" id="survey-subheading" data-translate="subheading">
+            <?php echo $surveySettings['subheading_text'] ?? $translations['subheading'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.'; ?>
+        </div>
 
         <form action="survey_page_submit.php" method="POST" onsubmit="return validateForm()">
             <input type="hidden" name="survey_id" value="<?php echo htmlspecialchars($surveyId); ?>">
             <input type="hidden" name="submission_language" value="<?php echo htmlspecialchars($language); ?>">
 
-            <div class="facility-section" id="facility-section" style="display: <?php echo ($surveySettings['show_facility_section'] ?? true) ? 'block' : 'none'; ?>;">
+            <div class="facility-section" id="facility-section">
                 <div class="form-group">
                     <label for="facility-search">Locations:</label>
                     <div class="searchable-dropdown">
@@ -458,79 +1412,29 @@ unset($option);
             </select>
 
             <?php if ($surveyType === 'local'): ?>
-
-                <div class="location-row" id="location-row-general" style="display: <?php echo ($surveySettings['show_location_row_general'] ?? true) ? 'flex' : 'none'; ?>;">
-                    <div class="form-group">
-                        <label for="serviceUnit" data-translate="service_unit"><?php echo $translations['service_unit'] ?? 'Service Unit'; ?>:</label>
-                        <select id="serviceUnit" name="serviceUnit">
-                            <option value="">none selected</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="sex" data-translate="sex"><?php echo $translations['sex'] ?? 'Sex'; ?>:</label>
-                        <select id="sex" name="sex">
-                            <option value="" disabled selected>none selected</option>
-                            <option value="Male" data-translate="male"><?php echo $translations['male'] ?? 'Male'; ?></option>
-                            <option value="Female" data-translate="female"><?php echo $translations['female'] ?? 'Female'; ?></option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="location-row" id="location-row-period-age" style="display: <?php echo ($surveySettings['show_location_row_period_age'] ?? true) ? 'flex' : 'none'; ?>;">
-                    <div class="reporting-period-container">
-                        <label for="reporting_period" data-translate="reporting_period"><?php echo $translations['reporting_period'] ?? 'Present Day'; ?></label>
-                        <input
-                            type="date"
-                            id="reporting_period"
-                            name="reporting_period"
-                            value="<?php echo date('Y-m-d'); ?>"
-                            readonly
-                            style="background-color: #f5f5f5; cursor: not-allowed;"
-                        >
-                        <span class="placeholder-text">Current date is automatically selected</span>
-                    </div>
-
-                    <div class="form-group" style="width: 400px; padding: 0px;">
-                        <label for="age" data-translate="age"><?php echo $translations['age'] ?? 'Age'; ?>:</label>
-                        <input
-                            type="number"
-                            id="age"
-                            name="age"
-                            min="14"
-                            max="99"
-                            onblur="this.value = Math.max(14, Math.min(99, parseInt(this.value) || ''))"
-                            oninvalid="this.setCustomValidity('Please enter an age between 14 and 99')"
-                            oninput="this.setCustomValidity('')"
-                        >
-                    </div>
-                </div>
-
-                <div class="radio-group" id="ownership-section" style="display: <?php echo ($surveySettings['show_ownership_section'] ?? true) ? 'block' : 'none'; ?>;">
-                    <label class="radio-label" data-translate="ownership"><?php echo $translations['ownership'] ?? 'Ownership'; ?></label>
-                    <div class="radio-options" id="ownership-options">
-                    </div>
-                </div>
-                <p id="rating-instruction-1" data-translate="rating_instruction" style="display: <?php echo ($surveySettings['show_rating_instructions'] ?? true) ? 'block' : 'none'; ?>;"><?php echo htmlspecialchars($surveySettings['rating_instruction1_text'] ?? $translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.'); ?></p>
-                <p id="rating-instruction-2" data-translate="rating_scale" style="color: red; font-size: 12px; font-style: italic; display: <?php echo ($surveySettings['show_rating_instructions'] ?? true) ? 'block' : 'none'; ?>;"><?php echo htmlspecialchars($surveySettings['rating_instruction2_text'] ?? $translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent'); ?></p>
+                <!-- Removed hardcoded demographic fields - these should be survey questions instead -->
+                <p id="rating-instruction-1" data-translate="rating_instruction"><?php echo htmlspecialchars($surveySettings['rating_instruction1_text'] ?? $translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.'); ?></p>
+                <p id="rating-instruction-2" data-translate="rating_scale" style="color: red; font-size: 12px; font-style: italic;"><?php echo htmlspecialchars($surveySettings['rating_instruction2_text'] ?? $translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent'); ?></p>
 
             <?php endif; ?>
            <div id="validation-message" style="display:none; color: #fff; background: #e74c3c; padding: 10px; border-radius: 4px; margin-bottom: 15px;"></div>
            <?php foreach ($questionsArray as $index => $question): ?>
-            <div class="form-group survey-question"
+            <div class="form-group survey-question enhanced"
                  data-question-index="<?php echo $index; ?>"
+                 data-question-id="<?php echo $question['id']; ?>"
+                 data-question-type="<?php echo $question['question_type']; ?>"
                  style="display: none;">
-                <div class="radio-label">
-                    <span class="question-number"><?php echo ($index + 1) . '.'; ?></span>
+                <div class="radio-label field-label">
+                    <span class="question-number" data-question-original="<?php echo ($index + 1); ?>"><?php echo ($index + 1) . '.'; ?></span>
                     <?php echo htmlspecialchars($question['label']); ?>
                     <?php if ($question['is_required']): ?>
-                        <span class="required-indicator" style="color: red;">*</span>
+                        <span class="required-indicator">*</span>
                     <?php endif; ?>
                 </div>
                 <?php if ($question['question_type'] == 'radio'): ?>
-                    <div class="radio-options" style="display: flex; flex-wrap: wrap; gap: 12px;">
+                    <div class="radio-options enhanced-options">
                         <?php foreach ($question['options'] as $option): ?>
-                           <div class="radio-option" style="flex: 1 1 220px; min-width: 180px;">
+                           <div class="radio-option enhanced-option">
                                 <input type="radio"
                                        id="option_<?php echo $question['id']; ?>_<?php echo $option['id']; ?>"
                                        name="question_<?php echo $question['id']; ?>"
@@ -543,43 +1447,49 @@ unset($option);
                         <?php endforeach; ?>
                     </div>
                 <?php elseif ($question['question_type'] == 'checkbox'): ?>
-                    <div class="radio-options">
-                       <div class="checkbox-options" style="display: flex; flex-wrap: wrap; gap: 12px;">
+                    <div class="checkbox-options enhanced-options" 
+                         data-question-id="<?php echo $question['id']; ?>"
+                         data-min-selections="<?php echo $question['min_selections'] ?? 1; ?>"
+                         data-max-selections="<?php echo $question['max_selections'] ?? ''; ?>"
+                         data-required="<?php echo $question['is_required'] ? 'true' : 'false'; ?>">
                         <?php foreach ($question['options'] as $option): ?>
-                            <div class="checkbox-option" style="flex: 1 1 220px; min-width: 180px;">
+                            <div class="checkbox-option enhanced-option">
                                 <input type="checkbox"
                                        id="option_<?php echo $question['id']; ?>_<?php echo $option['id']; ?>"
                                        name="question_<?php echo $question['id']; ?>[]"
                                        value="<?php echo htmlspecialchars($option['option_value']); ?>"
-                                       <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                                       class="checkbox-input"
+                                       data-question-id="<?php echo $question['id']; ?>">
                                 <label for="option_<?php echo $question['id']; ?>_<?php echo $option['id']; ?>">
                                     <?php echo htmlspecialchars($option['option_value']); ?>
                                 </label>
                             </div>
                         <?php endforeach; ?>
-                        </div>
                     </div>
 
 
                 <?php elseif ($question['question_type'] == 'select'): ?>
-                    <select class="form-control" name="question_<?php echo $question['id']; ?>" style="width: 60%;" <?php echo $question['is_required'] ? 'required' : ''; ?>>
-                        <option value="">Select an option</option>
-                        <?php foreach ($question['options'] as $option): ?>
-                            <option value="<?php echo htmlspecialchars($option['option_value']); ?>">
-                                <?php echo htmlspecialchars($option['option_value']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <div style="max-width: 400px;">
+                        <select class="form-control enhanced-input" name="question_<?php echo $question['id']; ?>" <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                            <option value="">Select an option</option>
+                            <?php foreach ($question['options'] as $option): ?>
+                                <option value="<?php echo htmlspecialchars($option['option_value']); ?>">
+                                    <?php echo htmlspecialchars($option['option_value']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 <?php elseif ($question['question_type'] == 'text'): ?>
                     <input type="text"
-                           class="form-control"
+                           class="form-control enhanced-input"
                            name="question_<?php echo $question['id']; ?>"
+                           placeholder="Enter your answer..."
                            <?php echo $question['is_required'] ? 'required' : ''; ?>>
                 <?php elseif ($question['question_type'] == 'textarea'): ?>
-                    <textarea class="form-control"
+                    <textarea class="form-control enhanced-input"
                               name="question_<?php echo $question['id']; ?>"
-                              rows="3"
-                              style="width: 80%;"
+                              rows="4"
+                              placeholder="Enter your detailed response..."
                               <?php echo $question['is_required'] ? 'required' : ''; ?>></textarea>
 
                 <?php elseif ($question['question_type'] == 'rating'): ?>
@@ -603,6 +1513,268 @@ unset($option);
                value=""
                <?php echo $question['is_required'] ? 'required' : ''; ?>>
     </div>
+
+                    <!-- New Question Types -->
+                    <?php elseif ($question['question_type'] == 'number'): ?>
+                        <div style="max-width: 300px;">
+                            <input type="number"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   placeholder="Enter number..."
+                                   <?php 
+                                   $validation = $question['validation_rules'] ? json_decode($question['validation_rules'], true) : [];
+                                   if (isset($validation['min'])) echo 'min="' . $validation['min'] . '"';
+                                   if (isset($validation['max'])) echo 'max="' . $validation['max'] . '"';
+                                   if (isset($validation['decimals'])) echo 'step="' . (1 / pow(10, $validation['decimals'])) . '"';
+                                   echo $question['is_required'] ? 'required' : '';
+                                   ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'integer'): ?>
+                        <div style="max-width: 300px;">
+                            <input type="number"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   step="1"
+                                   placeholder="Enter whole number..."
+                                   <?php 
+                                   $validation = $question['validation_rules'] ? json_decode($question['validation_rules'], true) : [];
+                                   if (isset($validation['min'])) echo 'min="' . $validation['min'] . '"';
+                                   if (isset($validation['max'])) echo 'max="' . $validation['max'] . '"';
+                                   echo $question['is_required'] ? 'required' : '';
+                                   ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'decimal'): ?>
+                        <div style="max-width: 300px;">
+                            <input type="number"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   placeholder="Enter decimal number..."
+                                   <?php 
+                                   $validation = $question['validation_rules'] ? json_decode($question['validation_rules'], true) : [];
+                                   $decimals = $validation['decimals'] ?? 2;
+                                   echo 'step="' . (1 / pow(10, $decimals)) . '"';
+                                   if (isset($validation['min'])) echo 'min="' . $validation['min'] . '"';
+                                   if (isset($validation['max'])) echo 'max="' . $validation['max'] . '"';
+                                   echo $question['is_required'] ? 'required' : '';
+                                   ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'percentage'): ?>
+                        <div class="input-group-enhanced" style="max-width: 200px;">
+                            <input type="number"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   min="0" max="100" step="0.01"
+                                   placeholder="0.00"
+                                   <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                            <span class="input-group-text-enhanced">%</span>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'date'): ?>
+                        <div style="max-width: 250px;">
+                            <input type="date"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   <?php 
+                                   $validation = $question['validation_rules'] ? json_decode($question['validation_rules'], true) : [];
+                                   if (isset($validation['min_date'])) echo 'min="' . $validation['min_date'] . '"';
+                                   if (isset($validation['max_date'])) echo 'max="' . $validation['max_date'] . '"';
+                                   echo $question['is_required'] ? 'required' : '';
+                                   ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'email'): ?>
+                        <div style="max-width: 400px;">
+                            <input type="email"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   placeholder="email@example.com"
+                                   <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'phone'): ?>
+                        <div style="max-width: 300px;">
+                            <input type="tel"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   placeholder="+1 (555) 123-4567"
+                                   <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'likert_scale'): ?>
+                        <div class="likert-scale">
+                            <?php 
+                            $validation = $question['validation_rules'] ? json_decode($question['validation_rules'], true) : [];
+                            $range = explode('-', $validation['scale_range'] ?? '1-5');
+                            $lowLabel = $validation['low_label'] ?? 'Strongly Disagree';
+                            $highLabel = $validation['high_label'] ?? 'Strongly Agree';
+                            ?>
+                            <div class="scale-labels" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span style="font-size: 12px; color: #666;"><?php echo htmlspecialchars($lowLabel); ?></span>
+                                <span style="font-size: 12px; color: #666;"><?php echo htmlspecialchars($highLabel); ?></span>
+                            </div>
+                            <div class="scale-options" style="display: flex; gap: 15px;">
+                                <?php for ($i = $range[0]; $i <= $range[1]; $i++): ?>
+                                    <label class="scale-option" style="display: flex; flex-direction: column; align-items: center;">
+                                        <input type="radio" name="question_<?php echo $question['id']; ?>" value="<?php echo $i; ?>" <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                                        <span style="margin-top: 5px; font-size: 14px;"><?php echo $i; ?></span>
+                                    </label>
+                                <?php endfor; ?>
+                            </div>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'datetime'): ?>
+                        <div style="max-width: 300px;">
+                            <input type="datetime-local"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'time'): ?>
+                        <div style="max-width: 200px;">
+                            <input type="time"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'year'): ?>
+                        <div style="max-width: 150px;">
+                            <input type="number"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   min="1900" max="2030" step="1"
+                                   placeholder="YYYY"
+                                   <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'month'): ?>
+                        <div style="max-width: 200px;">
+                            <input type="month"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'url'): ?>
+                        <div style="max-width: 400px;">
+                            <input type="url"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   placeholder="https://example.com"
+                                   <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'national_id'): ?>
+                        <div style="max-width: 300px;">
+                            <input type="text"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   placeholder="Enter National ID"
+                                   <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif (in_array($question['question_type'], ['country', 'region', 'city'])): ?>
+                        <div style="max-width: 400px;">
+                            <select class="form-control enhanced-input" name="question_<?php echo $question['id']; ?>" <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                                <option value="">Select <?php echo ucfirst(str_replace('_', ' ', $question['question_type'])); ?></option>
+                                <?php if (!empty($question['options'])): ?>
+                                    <?php foreach ($question['options'] as $option): ?>
+                                        <option value="<?php echo htmlspecialchars($option['option_value']); ?>">
+                                            <?php echo htmlspecialchars($option['option_value']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'postal_code'): ?>
+                        <div style="max-width: 200px;">
+                            <input type="text"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   placeholder="Enter postal code"
+                                   <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'currency'): ?>
+                        <div class="input-group-enhanced" style="max-width: 200px;">
+                            <span class="input-group-text-enhanced">$</span>
+                            <input type="number"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   step="0.01" min="0"
+                                   placeholder="0.00"
+                                   <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'file_upload'): ?>
+                        <div style="max-width: 400px;">
+                            <input type="file"
+                                   class="form-control enhanced-input"
+                                   name="question_<?php echo $question['id']; ?>"
+                                   <?php 
+                                   $validation = $question['validation_rules'] ? json_decode($question['validation_rules'], true) : [];
+                                   if (isset($validation['file_types'])) {
+                                       $acceptTypes = array_map(function($type) { return '.' . $type; }, $validation['file_types']);
+                                       echo 'accept="' . implode(',', $acceptTypes) . '"';
+                                   }
+                                   echo $question['is_required'] ? 'required' : '';
+                                   ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'net_promoter_score'): ?>
+                        <div class="nps-scale">
+                            <div class="scale-labels" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span style="font-size: 12px; color: #666;">Not at all likely</span>
+                                <span style="font-size: 12px; color: #666;">Extremely likely</span>
+                            </div>
+                            <div class="scale-options" style="display: flex; gap: 10px;">
+                                <?php for ($i = 0; $i <= 10; $i++): ?>
+                                    <label class="scale-option" style="display: flex; flex-direction: column; align-items: center;">
+                                        <input type="radio" name="question_<?php echo $question['id']; ?>" value="<?php echo $i; ?>" <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                                        <span style="margin-top: 5px; font-size: 12px;"><?php echo $i; ?></span>
+                                    </label>
+                                <?php endfor; ?>
+                            </div>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'star_rating'): ?>
+                        <div class="star-rating-input">
+                            <div class="stars" style="font-size: 24px;">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <span class="star" data-value="<?php echo $i; ?>" style="cursor: pointer; color: #ddd;" data-question-id="<?php echo $question['id']; ?>">★</span>
+                                <?php endfor; ?>
+                            </div>
+                            <input type="hidden" name="question_<?php echo $question['id']; ?>" value="" <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'signature'): ?>
+                        <div class="signature-container">
+                            <canvas class="signature-canvas" width="400" height="200"></canvas>
+                            <div class="signature-controls">
+                                <button type="button" class="signature-clear-btn" onclick="clearSignature(this)">Clear Signature</button>
+                            </div>
+                            <input type="hidden" name="question_<?php echo $question['id']; ?>" value="" <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'coordinates'): ?>
+                        <div class="coordinates-container">
+                            <input type="number" class="form-control enhanced-input" placeholder="Latitude" step="any" id="lat_<?php echo $question['id']; ?>">
+                            <input type="number" class="form-control enhanced-input" placeholder="Longitude" step="any" id="lng_<?php echo $question['id']; ?>">
+                            <button type="button" class="coordinates-btn" onclick="getCurrentLocation(<?php echo $question['id']; ?>)">Get Current Location</button>
+                            <input type="hidden" name="question_<?php echo $question['id']; ?>" value="" <?php echo $question['is_required'] ? 'required' : ''; ?>>
+                        </div>
+
+                    <?php elseif ($question['question_type'] == 'color'): ?>
+                        <input type="color"
+                               class="form-control enhanced-input"
+                               name="question_<?php echo $question['id']; ?>"
+                               <?php echo $question['is_required'] ? 'required' : ''; ?>>
+
 <?php endif; ?>
 
 
@@ -823,7 +1995,7 @@ unset($option);
             }
 
             // --- Pagination logic for survey questions ---
-            const QUESTIONS_PER_PAGE = 20;
+            const QUESTIONS_PER_PAGE = 30;
             // Select questions directly; no need for a global 'questions' variable that could be overwritten
             const allSurveyQuestions = Array.from(document.querySelectorAll('.form-group.survey-question'));
             const totalQuestions = allSurveyQuestions.length; // Use total questions from DOM
@@ -857,6 +2029,11 @@ unset($option);
                 if (totalQuestions === 0 || totalPages === 1) {
                     nextBtn.style.display = 'none';
                     submitBtn.style.display = 'inline-block'; // Or whatever default submit display is
+                }
+                
+                // Reapply skip logic after showing page
+                if (typeof applyAllSkipLogic === 'function') {
+                    setTimeout(applyAllSkipLogic, 50);
                 }
             }
 
@@ -961,9 +2138,131 @@ unset($option);
                 this.submit();
             });
 
+            // Apply survey settings visibility controls
+            applyVisibilitySettings();
+            
             // Initial load: Show the first page and fetch locations
             showPage(currentPage);
             fetchLocationsForSurveyPage(); // Call this function on page load
+            
+            // Initialize skip logic after page setup
+            if (typeof initializeSkipLogic === 'function') {
+                setTimeout(initializeSkipLogic, 100); // Small delay to ensure DOM is ready
+            }
+            
+            function applyVisibilitySettings() {
+                // Get survey settings from PHP
+                const settings = <?php echo json_encode($surveySettings); ?>;
+                const surveyType = "<?php echo $surveyType; ?>";
+                
+                console.log('Raw settings from database:', settings);
+                console.log('Survey type:', surveyType);
+                
+                // Convert values to proper booleans (handle string '0', '1', 0, 1, true, false)
+                function toBool(value) {
+                    if (value === null || value === undefined) return false;
+                    if (typeof value === 'boolean') return value;
+                    if (typeof value === 'string') return value === '1' || value.toLowerCase() === 'true';
+                    if (typeof value === 'number') return value === 1;
+                    return false;
+                }
+                
+                // Apply visibility for each element with proper boolean conversion
+                const visibilityMap = {
+                    'logo-section': toBool(settings.show_logo),
+                    'flag-bar': toBool(settings.show_flag_bar),
+                    'survey-title': toBool(settings.show_title),
+                    'survey-subheading': toBool(settings.show_subheading),
+                    'republic-title': toBool(settings.show_republic_title_share),
+                    'ministry-subtitle': toBool(settings.show_ministry_subtitle_share),
+                    'facility-section': toBool(settings.show_facility_section),
+                    'rating-instruction-1': toBool(settings.show_rating_instructions) && (surveyType === 'local'),
+                    'rating-instruction-2': toBool(settings.show_rating_instructions) && (surveyType === 'local'),
+                    'submit-button-final': toBool(settings.show_submit_button)
+                };
+                
+                console.log('Processed visibility map:', visibilityMap);
+                
+                // Apply visibility settings
+                Object.keys(visibilityMap).forEach(elementId => {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        const shouldShow = visibilityMap[elementId];
+                        
+                        // Remove any existing visibility classes first
+                        element.classList.remove('hidden-element', 'show-element', 'show-flex');
+                        
+                        if (shouldShow) {
+                            // Show the element - reset all hiding styles
+                            element.style.removeProperty('height');
+                            element.style.removeProperty('margin');
+                            element.style.removeProperty('padding');
+                            element.style.removeProperty('overflow');
+                            element.style.removeProperty('position');
+                            element.style.removeProperty('left');
+                            element.style.visibility = 'visible';
+                            element.style.opacity = '1';
+                            
+                            if (elementId === 'flag-bar' || elementId.includes('location-row')) {
+                                element.style.display = 'flex';
+                                element.classList.add('show-flex');
+                            } else {
+                                element.style.display = 'block';
+                                element.classList.add('show-element');
+                            }
+                        } else {
+                            // Hide the element completely
+                            element.classList.add('hidden-element');
+                            // Force hide with multiple methods
+                            element.style.setProperty('display', 'none', 'important');
+                            element.style.setProperty('visibility', 'hidden', 'important');
+                            element.style.setProperty('opacity', '0', 'important');
+                            element.style.setProperty('height', '0', 'important');
+                            element.style.setProperty('max-height', '0', 'important');
+                            element.style.setProperty('margin', '0', 'important');
+                            element.style.setProperty('padding', '0', 'important');
+                            element.style.setProperty('overflow', 'hidden', 'important');
+                            element.style.setProperty('position', 'absolute', 'important');
+                            element.style.setProperty('left', '-9999px', 'important');
+                        }
+                        
+                        // Debug the field mapping
+                        let fieldName = elementId.replace('-', '_');
+                        
+                        console.log(`Element ${elementId}: ${shouldShow ? 'SHOWN' : 'HIDDEN'} (field: ${fieldName}, raw value: ${settings[fieldName]}, converted: ${shouldShow})`);
+                    } else {
+                        console.warn(`Element with ID ${elementId} not found`);
+                    }
+                });
+                
+                // Special handling for survey type-specific elements
+                if (surveyType === 'dhis2') {
+                    console.log('DHIS2 survey detected - hiding local-only elements');
+                    // Force hide local-only elements for DHIS2 surveys
+                    const localOnlyElements = ['rating-instruction-1', 'rating-instruction-2'];
+                    localOnlyElements.forEach(elementId => {
+                        const element = document.getElementById(elementId);
+                        if (element) {
+                            element.classList.add('hidden-element');
+                            element.style.display = 'none';
+                            console.log(`Force hiding ${elementId} for DHIS2 survey`);
+                        }
+                    });
+                }
+                
+                // Final verification - log all element states
+                setTimeout(() => {
+                    Object.keys(visibilityMap).forEach(elementId => {
+                        const element = document.getElementById(elementId);
+                        if (element) {
+                            const computedStyle = window.getComputedStyle(element);
+                            console.log(`Final state - ${elementId}: display=${computedStyle.display}, visibility=${computedStyle.visibility}, classes=[${element.className}]`);
+                            
+                            // Debug logging cleaned up - no longer referencing unused database columns
+                        }
+                    });
+                }, 100);
+            }
 
 
             // Star rating logic (existing code, ensure it's here)
@@ -1033,8 +2332,261 @@ unset($option);
                 });
             });
         });
+
+        // Checkbox validation for min/max selections
+        function validateCheckboxGroups() {
+            let allValid = true;
+            const checkboxGroups = document.querySelectorAll('.checkbox-options[data-required="true"]');
+            
+            checkboxGroups.forEach(group => {
+                const questionId = group.getAttribute('data-question-id');
+                const minSelections = parseInt(group.getAttribute('data-min-selections') || 1);
+                const maxSelections = group.getAttribute('data-max-selections');
+                const checkboxes = group.querySelectorAll('input[type="checkbox"]');
+                const checkedBoxes = group.querySelectorAll('input[type="checkbox"]:checked');
+                
+                // Remove previous error styling
+                group.style.border = '';
+                group.style.backgroundColor = '';
+                
+                // Check minimum selections
+                if (checkedBoxes.length < minSelections) {
+                    group.style.border = '2px solid #dc3545';
+                    group.style.backgroundColor = '#f8d7da';
+                    allValid = false;
+                    
+                    // Show error message
+                    let errorMsg = group.querySelector('.checkbox-error-msg');
+                    if (!errorMsg) {
+                        errorMsg = document.createElement('div');
+                        errorMsg.className = 'checkbox-error-msg';
+                        errorMsg.style.color = '#dc3545';
+                        errorMsg.style.fontSize = '12px';
+                        errorMsg.style.marginTop = '5px';
+                        group.appendChild(errorMsg);
+                    }
+                    errorMsg.textContent = `Please select at least ${minSelections} option${minSelections > 1 ? 's' : ''}.`;
+                } else if (maxSelections && checkedBoxes.length > parseInt(maxSelections)) {
+                    group.style.border = '2px solid #dc3545';
+                    group.style.backgroundColor = '#f8d7da';
+                    allValid = false;
+                    
+                    // Show error message
+                    let errorMsg = group.querySelector('.checkbox-error-msg');
+                    if (!errorMsg) {
+                        errorMsg = document.createElement('div');
+                        errorMsg.className = 'checkbox-error-msg';
+                        errorMsg.style.color = '#dc3545';
+                        errorMsg.style.fontSize = '12px';
+                        errorMsg.style.marginTop = '5px';
+                        group.appendChild(errorMsg);
+                    }
+                    errorMsg.textContent = `Please select no more than ${maxSelections} option${maxSelections > 1 ? 's' : ''}.`;
+                } else {
+                    // Remove error message if validation passes
+                    const errorMsg = group.querySelector('.checkbox-error-msg');
+                    if (errorMsg) {
+                        errorMsg.remove();
+                    }
+                }
+            });
+            
+            return allValid;
+        }
+
+        // Add event listeners to checkbox inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxInputs = document.querySelectorAll('.checkbox-input');
+            checkboxInputs.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const questionId = this.getAttribute('data-question-id');
+                    const group = document.querySelector(`.checkbox-options[data-question-id="${questionId}"]`);
+                    if (group && group.getAttribute('data-required') === 'true') {
+                        validateCheckboxGroups();
+                    }
+                });
+            });
+
+            // Star rating functionality
+            const stars = document.querySelectorAll('.star-rating-input .star');
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const questionId = this.getAttribute('data-question-id');
+                    const value = this.getAttribute('data-value');
+                    const hiddenInput = document.querySelector(`input[name="question_${questionId}"]`);
+                    const starContainer = this.parentElement;
+                    
+                    // Update hidden input
+                    hiddenInput.value = value;
+                    
+                    // Update star display
+                    const allStars = starContainer.querySelectorAll('.star');
+                    allStars.forEach((s, index) => {
+                        if (index < value) {
+                            s.style.color = '#ffd700'; // Gold color for selected
+                        } else {
+                            s.style.color = '#ddd'; // Gray color for unselected
+                        }
+                    });
+                });
+            });
+
+            // Coordinates functionality
+            window.getCurrentLocation = function(questionId) {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        document.getElementById(`lat_${questionId}`).value = position.coords.latitude;
+                        document.getElementById(`lng_${questionId}`).value = position.coords.longitude;
+                        
+                        // Update hidden input
+                        const hiddenInput = document.querySelector(`input[name="question_${questionId}"]`);
+                        hiddenInput.value = `${position.coords.latitude},${position.coords.longitude}`;
+                    });
+                } else {
+                    alert("Geolocation is not supported by this browser.");
+                }
+            };
+
+            // Signature functionality placeholder
+            window.clearSignature = function(button) {
+                const canvas = button.parentElement.previousElementSibling;
+                const context = canvas.getContext('2d');
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Clear hidden input
+                const hiddenInput = button.parentElement.parentElement.querySelector('input[type="hidden"]');
+                hiddenInput.value = '';
+            };
+        });
+
+        // Override form submission to include checkbox validation
+        const originalSubmit = HTMLFormElement.prototype.submit;
+        HTMLFormElement.prototype.submit = function() {
+            if (validateCheckboxGroups()) {
+                originalSubmit.call(this);
+            } else {
+                // Scroll to first error
+                const firstError = document.querySelector('.checkbox-options[style*="border: 2px solid"]');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        };
+
+        // Add submit event listener to forms
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (!validateCheckboxGroups()) {
+                        e.preventDefault();
+                        // Scroll to first error
+                        const firstError = document.querySelector('.checkbox-options[style*="border: 2px solid"]');
+                        if (firstError) {
+                            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                });
+            });
+        });
     </script>
+    
+    <!-- Skip Logic JavaScript -->
+    <script>
+        <?php echo generateSkipLogicJS($surveyId, $pdo); ?>
+    </script>
+    
+    <!-- Dynamic Question Numbering JavaScript -->
+    <script>
+        function updateQuestionNumbering() {
+            const visibleQuestions = document.querySelectorAll('.survey-question[style*="block"], .survey-question:not([style*="none"])');
+            let questionNumber = 1;
+            
+            visibleQuestions.forEach(function(questionElement) {
+                const numberSpan = questionElement.querySelector('.question-number');
+                if (numberSpan) {
+                    // Get numbering style from settings (default to numeric)
+                    const numberingStyle = '<?php echo $surveySettings['numbering_style'] ?? 'numeric'; ?>';
+                    const showNumbering = <?php echo json_encode($surveySettings['show_numbering'] ?? true); ?>;
+                    
+                    if (showNumbering) {
+                        let displayNumber = '';
+                        switch (numberingStyle) {
+                            case 'alphabetic_lower':
+                                displayNumber = String.fromCharCode(96 + questionNumber) + '.'; // a, b, c...
+                                break;
+                            case 'alphabetic_upper':
+                                displayNumber = String.fromCharCode(64 + questionNumber) + '.'; // A, B, C...
+                                break;
+                            case 'roman_lower':
+                                displayNumber = toRoman(questionNumber).toLowerCase() + '.'; // i, ii, iii...
+                                break;
+                            case 'roman_upper':
+                                displayNumber = toRoman(questionNumber) + '.'; // I, II, III...
+                                break;
+                            case 'none':
+                                displayNumber = '';
+                                break;
+                            case 'numeric':
+                            default:
+                                displayNumber = questionNumber + '.'; // 1, 2, 3...
+                                break;
+                        }
+                        numberSpan.textContent = displayNumber;
+                        numberSpan.style.display = displayNumber ? 'inline' : 'none';
+                    } else {
+                        numberSpan.style.display = 'none';
+                    }
+                    questionNumber++;
+                }
+            });
+        }
+        
+        // Roman numeral conversion function
+        function toRoman(num) {
+            const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+            const symbols = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
+            let result = '';
+            for (let i = 0; i < values.length; i++) {
+                while (num >= values[i]) {
+                    result += symbols[i];
+                    num -= values[i];
+                }
+            }
+            return result;
+        }
+        
+        // Update numbering when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateQuestionNumbering();
+        });
+        
+        // Update numbering whenever skip logic shows/hides questions
+        document.addEventListener('skipLogicUpdate', function() {
+            updateQuestionNumbering();
+        });
+        
+        // Also update on any question visibility change
+        const observer = new MutationObserver(function(mutations) {
+            let shouldUpdate = false;
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    if (mutation.target.classList.contains('survey-question')) {
+                        shouldUpdate = true;
+                    }
+                }
+            });
+            if (shouldUpdate) {
+                setTimeout(updateQuestionNumbering, 50); // Small delay to ensure all changes are processed
+            }
+        });
+        
+        // Observe all question elements for style changes
+        document.querySelectorAll('.survey-question').forEach(function(question) {
+            observer.observe(question, { attributes: true, attributeFilter: ['style'] });
+        });
+    </script>
+    
     <script defer src="survey_page.js"></script>
-    <script defer src="../translations.js"></script>
 </body>
 </html>

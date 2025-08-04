@@ -7,39 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Removed the "new FacilitySearch();" line as it's no longer needed.
 
-    // Fetch service units (if they are still needed and their HTML is in survey_page.php)
-    fetch('../get_service_units.php')
-        .then(response => response.json())
-        .then(data => {
-            const select = document.getElementById('serviceUnit');
-            if (select) { // Ensure element exists
-                select.innerHTML = '<option value="">none selected</option>';
-                data.forEach(unit => {
-                    select.innerHTML += `<option value="${unit.id}">${unit.name}</option>`;
-                });
-            }
-        })
-        .catch(error => console.error('Service units error:', error));
-
-    // Fetch ownership options (if they are still needed and their HTML is in survey_page.php)
-    fetch('../get_ownership_options.php')
-        .then(response => response.json())
-        .then(data => {
-            const container = document.getElementById('ownership-options');
-            if (container) { // Ensure element exists
-                container.innerHTML = ''; // Clear existing options before adding
-                data.forEach(option => {
-                    container.innerHTML += `
-                        <label class="radio-option">
-                            <input type="radio" name="ownership" value="${option.id}"
-                                   class="radio" data-translate="${option.name.toLowerCase()}"/>
-                            <span>${option.name}</span>
-                        </label>
-                    `;
-                });
-            }
-        })
-        .catch(error => console.error('Ownership options error:', error));
+    // Service units and ownership options are now loaded directly in survey_page.php
+    // These fetches have been removed as the files no longer exist and data is handled elsewhere
 
 
     // Initialize date picker (if still needed)

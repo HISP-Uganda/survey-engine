@@ -65,13 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt = null; // Close statement by setting to null
     // --- End fetch survey type ---
 
-    // Initialize optional variables. They will be null if not provided in POST.
-    // Ensure these columns are set to NULLABLE in your database schema.
-    $age = isset($_POST['age']) && $_POST['age'] !== '' ? intval($_POST['age']) : null;
-    $sex = isset($_POST['sex']) && $_POST['sex'] !== '' ? sanitize($_POST['sex']) : null; // Use refactored sanitize
-    $reportingPeriod = isset($_POST['reporting_period']) && $_POST['reporting_period'] !== '' ? sanitize($_POST['reporting_period']) : null; // Use refactored sanitize
-    $serviceUnitId = isset($_POST['serviceUnit']) && $_POST['serviceUnit'] !== '' ? intval($_POST['serviceUnit']) : null;
-    $ownershipId = isset($_POST['ownership']) && $_POST['ownership'] !== '' ? intval($_POST['ownership']) : null;
+    // Removed hardcoded demographic fields - these are now handled as regular survey questions
     $locationId = isset($_POST['facility_id']) && $_POST['facility_id'] !== '' ? intval($_POST['facility_id']) : null;
 
     // Begin transaction using $pdo
@@ -82,25 +76,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $insertSubmission = $pdo->prepare("
             INSERT INTO submission (
                 uid,
-                age,
-                sex,
-                period,
-                service_unit_id,
                 location_id,
-                ownership_id,
                 survey_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?)
         ");
 
         // Execute with an array of parameters. PDO handles types automatically.
         $insertSubmission->execute([
             $uid,
-            $age,
-            $sex,
-            $reportingPeriod,
-            $serviceUnitId,
             $locationId,
-            $ownershipId,
             $surveyId
         ]);
 

@@ -19,14 +19,14 @@ $orgUnitsFetched = false; // Always false on initial load, AJAX will handle
     /* Add specific styles for the load.php components here if needed,
        or rely on the global styles from settings.php which are already futuristic. */
 
-    /* Adjust checkbox background color to be darker */
-    .form-check-input.bg-dark {
-        background-color: #3b4556 !important; /* Darker grey for checkboxes */
-        border-color: #4a5568 !important;
+    /* Adjust checkbox background color to be lighter */
+    .form-check-input.bg-light {
+        background-color: #ffffff !important; /* White for checkboxes */
+        border-color: #cbd5e1 !important;
     }
-    .form-check-input.bg-dark:checked {
-        background-color: #ffd700 !important; /* Gold when checked */
-        border-color: #ffd700 !important;
+    .form-check-input.bg-light:checked {
+        background-color: #3b82f6 !important; /* Blue when checked */
+        border-color: #3b82f6 !important;
     }
 
     /* Sticky table header for scrollable area */
@@ -34,8 +34,8 @@ $orgUnitsFetched = false; // Always false on initial load, AJAX will handle
         position: sticky;
         top: 0;
         z-index: 2; /* Ensure it's above other content in the scrollable div */
-        background-color: #1a202c !important; /* Re-apply background color for sticky header */
-        border-bottom: 1px solid #4a5568 !important; /* Ensure border is visible */
+        background-color: #f8fafc !important; /* Light background for sticky header */
+        border-bottom: 1px solid #cbd5e1 !important; /* Light border is visible */
     }
 
     /* Adjust button size further if "btn-lg" is not enough */
@@ -46,10 +46,10 @@ $orgUnitsFetched = false; // Always false on initial load, AJAX will handle
 
 </style>
 
-<div class="container-fluid py-4"> <h4 class="mb-4 text-white"><i class="fas fa-globe-africa me-2 text-primary"></i> Load Locations from DHIS2</h4>
+<div class="container-fluid py-4"> <h4 class="mb-4 text-dark"><i class="fas fa-globe-africa me-2 text-primary"></i> Load Locations from DHIS2</h4>
 
     <div class="card futuristic-card card-body mb-4 shadow-lg">
-        <div class="mb-3 text-white"><strong>Step 1:</strong> Select DHIS2 Instance</div>
+        <div class="mb-3 text-dark"><strong>Step 1:</strong> Select DHIS2 Instance</div>
         <select name="dhis2_instance" id="dhis2_instance_select" class="form-select" required>
             <option value="">-- Select Instance --</option>
             <?php foreach ($instances as $inst): ?>
@@ -61,7 +61,7 @@ $orgUnitsFetched = false; // Always false on initial load, AJAX will handle
     </div>
 
     <div id="levelSelectionContainer" class="card futuristic-card card-body mb-4 shadow-lg" style="display:none;">
-        <div class="mb-3 text-white"><strong>Step 2:</strong> Select OrgUnit Level</div>
+        <div class="mb-3 text-dark"><strong>Step 2:</strong> Select OrgUnit Level</div>
         <select name="org_level" id="org_level_select" class="form-select" required>
             <option value="">-- Select Level --</option>
             </select>
@@ -77,7 +77,7 @@ $orgUnitsFetched = false; // Always false on initial load, AJAX will handle
 
     <div id="orgUnitsTableContainer">
         <?php if ($selectedInstance && $selectedLevel): // Show initial spinner if instance and level are pre-selected ?>
-            <div class="text-center text-white py-4">
+            <div class="text-center text-dark py-4">
                 <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
                 <p class="mt-2">Loading organisation units...</p>
             </div>
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Helper function to show loading spinner in a given element
     function showLoading(element, message = 'Loading...') {
-        element.innerHTML = `<div class="text-center text-white py-4">
+        element.innerHTML = `<div class="text-center text-dark py-4">
                                 <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
                                 <p class="mt-2">${message}</p>
                              </div>`;
