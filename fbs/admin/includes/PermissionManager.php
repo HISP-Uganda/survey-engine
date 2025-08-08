@@ -100,6 +100,32 @@ class PermissionManager {
     }
     
     /**
+     * Check if user is super user/admin
+     * Super users are identified by role_name 'super_user' or 'admin' or role_id 1
+     */
+    public function isSuperUser() {
+        if (!$this->userRole) {
+            return false;
+        }
+        
+        // Check by role name or role ID
+        return (
+            $this->userRole['name'] === 'super_user' || 
+            $this->userRole['name'] === 'admin' || 
+            $this->userRole['id'] == 1
+        );
+    }
+    
+    /**
+     * Check if user can delete items
+     * Only super users can delete
+     */
+    public function canDelete() {
+        return $this->isSuperUser();
+    }
+    
+    
+    /**
      * Get all user permissions
      */
     public function getUserPermissions() {

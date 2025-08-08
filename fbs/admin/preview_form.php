@@ -239,9 +239,11 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $defaultSurveyTitle; ?></title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../styles.css">
+    <title><?php echo $defaultSurveyTitle; ?> - Preview</title>
+    <link href="argon-dashboard-master/assets/css/nucleo-icons.css" rel="stylesheet">
+    <link href="argon-dashboard-master/assets/css/nucleo-svg.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="argon-dashboard-master/assets/css/argon-dashboard.min.css" rel="stylesheet">
     <style>
         /* Existing CSS from your previous code */
         body {
@@ -935,12 +937,428 @@ try {
                 padding: 4px;
             }
         }
+
+        /* Toast notification styles */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 10000;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateX(300px);
+            transition: all 0.3s ease;
+            font-size: 14px;
+            min-width: 250px;
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast-notification.error {
+            background: #dc3545;
+        }
+
+        /* Improved styling for left sidebar controls */
+        .card-body input[type="text"],
+        .card-body textarea,
+        .card-body input[type="color"],
+        .card-body input[type="file"],
+        .card-body select {
+            width: 100% !important;
+            padding: 10px 12px !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            color: #495057 !important;
+            background-color: #fff !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 6px !important;
+            margin-bottom: 12px !important;
+            box-sizing: border-box;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .card-body input[type="text"]:focus,
+        .card-body textarea:focus,
+        .card-body select:focus {
+            border-color: #80bdff !important;
+            outline: 0 !important;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+        }
+
+        .card-body textarea {
+            min-height: 80px !important;
+            resize: vertical;
+        }
+
+        .card-body label {
+            font-weight: 600 !important;
+            color: #344767 !important;
+            font-size: 14px !important;
+            margin-bottom: 6px !important;
+            display: block;
+        }
+
+        .card-body .checkbox-group label {
+            font-weight: 500 !important;
+            font-size: 14px !important;
+            display: flex !important;
+            align-items: center;
+        }
+
+        .card-body .checkbox-group input[type="checkbox"] {
+            margin-right: 8px !important;
+            width: auto !important;
+            margin-bottom: 0 !important;
+        }
+
+        .card-body .char-counter {
+            font-size: 12px !important;
+            color: #6c757d !important;
+            margin-top: -8px !important;
+            margin-bottom: 12px !important;
+        }
+
+        .card-body .setting-group {
+            margin-bottom: 20px !important;
+        }
+
+        .card-body .filter-group {
+            margin-bottom: 15px !important;
+        }
+
+        .card-body .accordion-header {
+            background-color: #f8f9fa !important;
+            border: 1px solid #dee2e6 !important;
+            color: #495057 !important;
+            font-weight: 600 !important;
+            padding: 12px 15px !important;
+            font-size: 14px !important;
+        }
+
+        .card-body .accordion-content {
+            border: 1px solid #dee2e6 !important;
+            border-top: none !important;
+            padding: 15px !important;
+            background-color: #fff !important;
+        }
+
+        /* Prevent horizontal scrolling and ensure static layout */
+        body {
+            overflow-x: hidden !important;
+        }
+        
+        .container-fluid {
+            overflow-x: hidden !important;
+            max-width: 100% !important;
+        }
+        
+        .row {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            max-width: 100% !important;
+        }
+        
+        .col-lg-5, .col-lg-7 {
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+            max-width: 100% !important;
+        }
+        
+        .card {
+            max-width: 100% !important;
+            word-wrap: break-word !important;
+        }
+        
+        .card-body {
+            overflow-x: hidden !important;
+        }
+        
+        /* Ensure form content doesn't overflow */
+        .preview-container {
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+        }
+        
+        /* Handle wide content gracefully */
+        * {
+            box-sizing: border-box !important;
+        }
+        
+        .form-control, textarea, input, select {
+            max-width: 100% !important;
+        }
     </style>
 </head>
-<body>
-    <div class="main-content">
-        <div class="container preview-container" id="form-content">
+<body class="g-sidenav-show bg-gray-100">
+    <?php include 'components/aside.php'; ?>
+    
+    <main class="main-content position-relative border-radius-lg">
+        <?php include 'components/navbar.php'; ?>
+        
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-cog me-2"></i>Preview Settings</h4>
+                        </div>
+                        <div class="card-body" style="max-height: 80vh; overflow-y: auto;">
+                            <div class="accordion-item">
+                                <button class="accordion-header">Branding & Appearance <i class="fas fa-chevron-down"></i></button>
+                                <div class="accordion-content">
+                                    <div class="setting-group">
+                                        <label for="logo-upload">Upload Logo:</label>
+                                        <input type="file" id="logo-upload" accept="image/*">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-logo" <?php echo $surveySettings['show_logo'] ? 'checked' : ''; ?>> Show Logo
+                                            </label>
+                                        </div>
+                                    </div>
 
+                                    <div class="setting-group">
+                                        <h4>Flag Bar Colors:</h4>
+                                        <label for="flag-black-color-picker">First Strip Color:</label>
+                                        <input type="color" id="flag-black-color-picker" value="#000000">
+                                        <label for="flag-yellow-color-picker">Second Strip Color:</label>
+                                        <input type="color" id="flag-yellow-color-picker" value="#FCD116">
+                                        <label for="flag-red-color-picker">Third Strip Color:</label>
+                                        <input type="color" id="flag-red-color-picker" value="#D21034">
+                                        <div class="checkbox-group">
+                                            <label>
+                                               <input type="checkbox" id="toggle-flag-bar" <?php echo $surveySettings['show_flag_bar'] ? 'checked' : ''; ?>> Show Color Bar
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <button class="accordion-header">Survey Content <i class="fas fa-chevron-down"></i></button>
+                                <div class="accordion-content">
+                                    <div class="setting-group">
+                                        <label for="edit-title">Survey Title:</label>
+                                        <input type="text" id="edit-title" value="<?php echo htmlspecialchars($surveySettings['title_text'] ?? ''); ?>">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-title" <?php echo $surveySettings['show_title'] ? 'checked' : ''; ?>> Show Title
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="setting-group">
+                                        <label for="edit-subheading">Survey Subheading:</label>
+                                        <textarea id="edit-subheading" rows="4" maxlength="1000"><?php echo htmlspecialchars($surveySettings['subheading_text'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.'); ?></textarea>
+                                        <div class="char-counter">
+                                            <span id="subheading-counter">0</span>/1000 characters
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-subheading" <?php echo $surveySettings['show_subheading'] ? 'checked' : ''; ?>> Show Subheading
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="setting-group" id="rating-instructions-control-group">
+                                        <label for="edit-rating-instruction-1">Rating Instruction 1:</label>
+                                        <textarea id="edit-rating-instruction-1" rows="2" maxlength="500"><?php echo htmlspecialchars($translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.'); ?></textarea>
+                                        <div class="char-counter">
+                                            <span id="rating1-counter">0</span>/500 characters
+                                        </div>
+                                        <label for="edit-rating-instruction-2">Rating Instruction 2:</label>
+                                        <textarea id="edit-rating-instruction-2" rows="2" maxlength="500"><?php echo htmlspecialchars($translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent'); ?></textarea>
+                                        <div class="char-counter">
+                                            <span id="rating2-counter">0</span>/500 characters
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-rating-instructions" <?php echo $surveySettings['show_rating_instructions'] ? 'checked' : ''; ?>> Show Rating Instructions
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <button class="accordion-header">Form Sections Visibility <i class="fas fa-chevron-down"></i></button>
+                                <div class="accordion-content">
+                                    <div class="setting-group" id="toggle-facility-section-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-facility-section" <?php echo $surveySettings['show_facility_section'] ? 'checked' : ''; ?>> Show Facility Section
+                                            </label>
+                                        </div>
+                                        <div class="filter-group" id="instance-key-filter-group">
+                                            <label for="control-instance-key-select">Filter by Instance:</label>
+                                            <select id="control-instance-key-select">
+                                                <option value="">All Instances</option>
+                                                <?php foreach ($instanceKeys as $key): ?>
+                                                    <option value="<?php echo htmlspecialchars($key); ?>" <?php echo (isset($surveySettings['selected_instance_key']) && $surveySettings['selected_instance_key'] == $key) ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($key); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group" id="hierarchy-level-filter-group">
+                                            <label for="control-hierarchy-level-select">Filter by Level:</label>
+                                            <select id="control-hierarchy-level-select">
+                                                <option value="">All Levels</option>
+                                                <?php foreach ($hierarchyLevels as $levelInt => $levelName): ?>
+                                                    <option value="<?php echo htmlspecialchars($levelInt); ?>" <?php echo (isset($surveySettings['selected_hierarchy_level']) && $surveySettings['selected_hierarchy_level'] == $levelInt) ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($levelName); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="setting-group" id="toggle-submit-button-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-submit-button" <?php echo $surveySettings['show_submit_button'] ? 'checked' : ''; ?>> Show Submit Button
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <button class="accordion-header">Share Page Settings <i class="fas fa-chevron-down"></i></button>
+                                <div class="accordion-content">
+                                    <div class="setting-group">
+                                        <label for="edit-logo-url">Logo URL (for Share Page):</label>
+                                        <input type="text" id="edit-logo-url" value="<?php echo htmlspecialchars($surveySettings['logo_path'] ?? 'asets/asets/img/loog.jpg'); ?>" readonly>
+                                        <div class="checkbox-group">
+                                            <label>
+                                               <input type="checkbox" id="toggle-logo-url" <?php echo $surveySettings['show_logo'] ? 'checked' : ''; ?>> Show Logo on Share Page
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label for="edit-republic-title-share">Republic Title (Share Page):</label>
+                                        <input type="text" id="edit-republic-title-share" value="<?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? 'THE REPUBLIC OF UGANDA'); ?>">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-republic-title-share" <?php echo $surveySettings['show_republic_title_share'] ? 'checked' : ''; ?>> Show Republic Title
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label for="edit-ministry-subtitle-share">Ministry Subtitle (Share Page):</label>
+                                        <input type="text" id="edit-ministry-subtitle-share" value="<?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? 'MINISTRY OF HEALTH'); ?>">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-ministry-subtitle-share" <?php echo $surveySettings['show_ministry_subtitle_share'] ? 'checked' : ''; ?>> Show Ministry Subtitle
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label for="edit-qr-instructions-share">QR Instructions Text (Share Page):</label>
+                                        <textarea id="edit-qr-instructions-share" rows="3" maxlength="500"><?php echo htmlspecialchars($surveySettings['qr_instructions_text'] ?? ''); ?></textarea>
+                                        <div class="char-counter">
+                                            <span id="qr-counter">0</span>/500 characters
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-qr-instructions-share" <?php echo $surveySettings['show_qr_instructions_share'] ? 'checked' : ''; ?>> Show QR Instructions
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label for="edit-footer-note-share">Footer Note Text (Share Page):</label>
+                                        <textarea id="edit-footer-note-share" rows="2" maxlength="500"><?php echo htmlspecialchars($surveySettings['footer_note_text'] ?? 'Thank you for helping us improve our services.'); ?></textarea>
+                                        <div class="char-counter">
+                                            <span id="footer-counter">0</span>/500 characters
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-footer-note-share" <?php echo $surveySettings['show_footer_note_share'] ? 'checked' : ''; ?>> Show Footer Note
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <button class="accordion-header">Question Numbering <i class="fas fa-chevron-down"></i></button>
+                                <div class="accordion-content">
+                                    <div class="setting-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-numbering" <?php echo ($surveySettings['show_numbering'] ?? true) ? 'checked' : ''; ?>> Show Question Numbers
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="setting-group">
+                                        <label for="numbering-style">Numbering Style:</label>
+                                        <select id="numbering-style">
+                                            <option value="numeric" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'numeric' ? 'selected' : ''; ?>>Numeric (1, 2, 3...)</option>
+                                            <option value="alphabetic_lower" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'alphabetic_lower' ? 'selected' : ''; ?>>Lowercase Letters (a, b, c...)</option>
+                                            <option value="alphabetic_upper" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'alphabetic_upper' ? 'selected' : ''; ?>>Uppercase Letters (A, B, C...)</option>
+                                            <option value="roman_lower" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'roman_lower' ? 'selected' : ''; ?>>Lowercase Roman (i, ii, iii...)</option>
+                                            <option value="roman_upper" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'roman_upper' ? 'selected' : ''; ?>>Uppercase Roman (I, II, III...)</option>
+                                            <option value="none" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'none' ? 'selected' : ''; ?>>No Numbering</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <button onclick="window.savePreviewSettings()" class="btn btn-success w-100 btn-sm">
+                                        <i class="fas fa-save me-1"></i>Save Settings
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button onclick="window.resetPreviewSettings()" class="btn btn-secondary w-100 btn-sm">
+                                        <i class="fas fa-undo me-1"></i>Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-tools me-2"></i>Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="survey_page.php?survey_id=<?= $surveyId ?>" class="btn btn-primary" target="_blank">
+                                    <i class="fas fa-external-link-alt me-2"></i>Open Form
+                                </a>
+                                <button onclick="copyShareLink()" class="btn btn-info">
+                                    <i class="fas fa-link me-2"></i>Copy Share Link
+                                </button>
+                                <a href="share_page.php?survey_id=<?= $surveyId ?>" class="btn btn-success">
+                                    <i class="fas fa-share me-2"></i>Share Page
+                                </a>
+                                <hr class="my-2">
+                                <a href="survey.php" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Surveys
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0"><?php echo htmlspecialchars($defaultSurveyTitle); ?> - Preview</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="container preview-container" id="form-content">
             <div class="header-section" id="logo-section">
                 <div class="logo-container">
                   <img id="moh-logo" src="<?php echo htmlspecialchars($surveySettings['logo_path'] ?? ''); ?>" alt="Ministry of Health Logo">
@@ -995,232 +1413,13 @@ try {
 
             <button type="submit" id="submit-button-preview">Submit</button>
         </div>
-
-        <div class="control-panel">
-            <h3>Preview Settings</h3>
-
-            <div class="accordion-item">
-                <button class="accordion-header">Branding & Appearance <i class="fas fa-chevron-down"></i></button>
-                <div class="accordion-content">
-                    <div class="setting-group">
-                        <label for="logo-upload">Upload Logo:</label>
-                        <input type="file" id="logo-upload" accept="image/*">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-logo" <?php echo $surveySettings['show_logo'] ? 'checked' : ''; ?>> Show Logo
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <h4>Flag Bar Colors:</h4>
-                        <label for="flag-black-color-picker">First Strip Color:</label>
-                        <input type="color" id="flag-black-color-picker" value="#000000">
-                        <label for="flag-yellow-color-picker">Second Strip Color:</label>
-                        <input type="color" id="flag-yellow-color-picker" value="#FCD116">
-                        <label for="flag-red-color-picker">Third Strip Color:</label>
-                        <input type="color" id="flag-red-color-picker" value="#D21034">
-                        <div class="checkbox-group">
-                            <label>
-                               <input type="checkbox" id="toggle-flag-bar" <?php echo $surveySettings['show_flag_bar'] ? 'checked' : ''; ?>> Show Color Bar
-                            </label>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="accordion-item">
-                <button class="accordion-header">Survey Content <i class="fas fa-chevron-down"></i></button>
-                <div class="accordion-content">
-
-                          <div class="setting-group">
-                            <label for="edit-title">Survey Title:</label><input type="text" id="edit-title" value="<?php echo htmlspecialchars($surveySettings['title_text'] ?? ''); ?>">
-                            <div class="checkbox-group">
-                                <label>
-                                    <input type="checkbox" id="toggle-title" <?php echo $surveySettings['show_title'] ? 'checked' : ''; ?>> Show Title
-                                </label>
-                            </div>
-                        </div>
-
-                    <div class="setting-group">
-                        <label for="edit-subheading">Survey Subheading:</label>
-                        <textarea id="edit-subheading" rows="4" maxlength="1000"><?php echo htmlspecialchars($surveySettings['subheading_text'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.'); ?></textarea>
-                        <div class="char-counter">
-                            <span id="subheading-counter">0</span>/1000 characters
-                        </div>
-
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-subheading" <?php echo $surveySettings['show_subheading'] ? 'checked' : ''; ?>> Show Subheading
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="setting-group" id="rating-instructions-control-group">
-                        <label for="edit-rating-instruction-1">Rating Instruction 1:</label>
-                        <textarea id="edit-rating-instruction-1" rows="2" maxlength="500"><?php echo htmlspecialchars($translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.'); ?></textarea>
-                        <div class="char-counter">
-                            <span id="rating1-counter">0</span>/500 characters
-                        </div>
-                        <label for="edit-rating-instruction-2">Rating Instruction 2:</label>
-                        <textarea id="edit-rating-instruction-2" rows="2" maxlength="500"><?php echo htmlspecialchars($translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent'); ?></textarea>
-                        <div class="char-counter">
-                            <span id="rating2-counter">0</span>/500 characters
-                        </div>
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-rating-instructions" <?php echo $surveySettings['show_rating_instructions'] ? 'checked' : ''; ?>> Show Rating Instructions
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item" id="form-sections-accordion-item">
-                <button class="accordion-header">Form Sections Visibility <i class="fas fa-chevron-down"></i></button>
-                <div class="accordion-content">
-                    <div class="setting-group" id="toggle-facility-section-group">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-facility-section" <?php echo $surveySettings['show_facility_section'] ? 'checked' : ''; ?>> Show Facility Section
-                            </label>
-                        </div>
-                        <div class="filter-group" id="instance-key-filter-group">
-                            <label for="control-instance-key-select">Filter by Instance:</label>
-                            <select id="control-instance-key-select">
-                                <option value="">All Instances</option>
-                                <?php foreach ($instanceKeys as $key): ?>
-                                    <option value="<?php echo htmlspecialchars($key); ?>" <?php echo (isset($surveySettings['selected_instance_key']) && $surveySettings['selected_instance_key'] == $key) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($key); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="filter-group" id="hierarchy-level-filter-group">
-                            <label for="control-hierarchy-level-select">Filter by Level:</label>
-                            <select id="control-hierarchy-level-select">
-                                <option value="">All Levels</option>
-                                <?php foreach ($hierarchyLevels as $levelInt => $levelName): ?>
-                                    <option value="<?php echo htmlspecialchars($levelInt); ?>" <?php echo (isset($surveySettings['selected_hierarchy_level']) && $surveySettings['selected_hierarchy_level'] == $levelInt) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($levelName); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        </div>
-
-
-                    <div class="setting-group" id="toggle-submit-button-group">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-submit-button" <?php echo $surveySettings['show_submit_button'] ? 'checked' : ''; ?>> Show Submit Button
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item">
-                <button class="accordion-header">Share Page Settings <i class="fas fa-chevron-down"></i></button>
-                <div class="accordion-content">
-                    <div class="setting-group">
-                        <label for="edit-logo-url">Logo URL (for Share Page):</label>
-                      <input type="text" id="edit-logo-url" value="<?php echo htmlspecialchars($surveySettings['logo_path'] ?? 'asets/asets/img/loog.jpg'); ?>" readonly>
-                                           <div class="checkbox-group">
-                            <label>
-                               <input type="checkbox" id="toggle-logo-url" <?php echo $surveySettings['show_logo'] ? 'checked' : ''; ?>> Show Logo on Share Page
-                            </label>
-                        </div>
-                    </div>
-                    <div class="setting-group">
-                        <label for="edit-republic-title-share">Republic Title (Share Page):</label>
-                       <input type="text" id="edit-republic-title-share" value="<?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? 'THE REPUBLIC OF UGANDA'); ?>">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-republic-title-share" <?php echo $surveySettings['show_republic_title_share'] ? 'checked' : ''; ?>> Show Republic Title
-                            </label>
-                        </div>
-                    </div>
-                    <div class="setting-group">
-                        <label for="edit-ministry-subtitle-share">Ministry Subtitle (Share Page):</label>
-                       <input type="text" id="edit-ministry-subtitle-share" value="<?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? 'MINISTRY OF HEALTH'); ?>">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-ministry-subtitle-share" <?php echo $surveySettings['show_ministry_subtitle_share'] ? 'checked' : ''; ?>> Show Ministry Subtitle
-                            </label>
-                        </div>
-                    </div>
-                    <div class="setting-group">
-                        <label for="edit-qr-instructions-share">QR Instructions Text (Share Page):</label>
-                        <textarea id="edit-qr-instructions-share" rows="3" maxlength="500"><?php echo htmlspecialchars($surveySettings['qr_instructions_text'] ?? ''); ?></textarea>
-                        <div class="char-counter">
-                            <span id="qr-counter">0</span>/500 characters
-                        </div>
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-qr-instructions-share" <?php echo $surveySettings['show_qr_instructions_share'] ? 'checked' : ''; ?>> Show QR Instructions
-                            </label>
-                        </div>
-                    </div>
-                    <div class="setting-group">
-                        <label for="edit-footer-note-share">Footer Note Text (Share Page):</label>
-                       <textarea id="edit-footer-note-share" rows="2" maxlength="500"><?php echo htmlspecialchars($surveySettings['footer_note_text'] ?? 'Thank you for helping us improve our services.'); ?></textarea>
-                        <div class="char-counter">
-                            <span id="footer-counter">0</span>/500 characters
-                        </div>
-
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-footer-note-share" <?php echo $surveySettings['show_footer_note_share'] ? 'checked' : ''; ?>> Show Footer Note
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item">
-                <button class="accordion-header">Question Numbering <i class="fas fa-chevron-down"></i></button>
-                <div class="accordion-content">
-                    <div class="setting-group">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-numbering" <?php echo ($surveySettings['show_numbering'] ?? true) ? 'checked' : ''; ?>> Show Question Numbers
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="setting-group">
-                        <label for="numbering-style">Numbering Style:</label>
-                        <select id="numbering-style">
-                            <option value="numeric" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') === 'numeric' ? 'selected' : ''; ?>>1, 2, 3...</option>
-                            <option value="alphabetic_lower" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') === 'alphabetic_lower' ? 'selected' : ''; ?>>a, b, c...</option>
-                            <option value="alphabetic_upper" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') === 'alphabetic_upper' ? 'selected' : ''; ?>>A, B, C...</option>
-                            <option value="roman_lower" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') === 'roman_lower' ? 'selected' : ''; ?>>i, ii, iii...</option>
-                            <option value="roman_upper" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') === 'roman_upper' ? 'selected' : ''; ?>>I, II, III...</option>
-                            <option value="none" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') === 'none' ? 'selected' : ''; ?>>No numbering</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <hr> 
-            <button onclick="window.savePreviewSettings()">Save Preview Settings</button>
-            <button onclick="window.resetPreviewSettings()">Reset Preview</button>
-            
         </div>
-    </div>
-
-    <div class="bottom-controls">
-        <button onclick="window.location.href='update_form?survey_id=<?php echo $surveyId; ?>'" class="action-button">
-            <i class="fas fa-arrow-left"></i> Back
-        </button>
-        <button id="share-btn" class="action-button">
-            <i class="fas fa-share"></i> Share
-        </button>
-        <button onclick="window.location.href='survey_page.php?survey_id=<?php echo $surveyId; ?>'" class="action-button">
-            <i class="fas fa-rocket"></i> Generate
-        </button>
-    </div>
+        
+    </main>
 
 <script>
     // --- 1. Global Functions (must be outside of DOMContentLoaded) ---
@@ -1232,28 +1431,80 @@ try {
 
     // Helper function for toast notifications
     function showToast(message, type = 'success') {
-        let toast = document.createElement('div');
+        // Use the new toast notification style
+        const existingToasts = document.querySelectorAll('.toast-notification');
+        existingToasts.forEach(toast => toast.remove());
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification' + (type === 'error' ? ' error' : '');
         toast.textContent = message;
-        toast.style.position = 'fixed';
-        toast.style.bottom = '180px';
-        toast.style.left = '50%';
-        toast.style.transform = 'translateX(-50%)';
-        toast.style.background = type === 'success' ? 'green' : 'red';
-        toast.style.color = '#fff';
-        toast.style.padding = '12px 28px';
-        toast.style.borderRadius = '6px';
-        toast.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-        toast.style.fontSize = '16px';
-        toast.style.zIndex = '2000';
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s';
 
         document.body.appendChild(toast);
-        setTimeout(() => { toast.style.opacity = '1'; }, 10);
+        
+        // Force reflow and add show class
         setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => { document.body.removeChild(toast); }, 400);
-        }, type === 'success' ? 1800 : 3000);
+            toast.classList.add('show');
+        }, 10);
+        
+        // Hide and remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Function to copy share link to clipboard
+    function copyShareLink() {
+        const scheme = window.location.protocol;
+        const host = window.location.host;
+        const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+        const shareUrl = scheme + '//' + host + basePath + 'share_page.php?survey_id=' + surveyId;
+        
+        console.log('Attempting to copy URL:', shareUrl); // Debug log
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(shareUrl).then(function() {
+                console.log('Successfully copied to clipboard'); // Debug log
+                showToast('✅ Share link copied to clipboard!', 'success');
+            }, function(err) {
+                console.error('Clipboard API failed:', err);
+                fallbackCopyTextToClipboard(shareUrl);
+            });
+        } else {
+            console.log('Clipboard API not available, using fallback'); // Debug log
+            fallbackCopyTextToClipboard(shareUrl);
+        }
+    }
+
+    function fallbackCopyTextToClipboard(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            console.log('Fallback copy result:', successful); // Debug log
+            if (successful) {
+                showToast('✅ Share link copied to clipboard!', 'success');
+            } else {
+                showToast('❌ Failed to copy share link', 'error');
+            }
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+            showToast('❌ Failed to copy share link', 'error');
+        }
+
+        document.body.removeChild(textArea);
     }
     
     // Function to handle saving settings
@@ -1944,6 +2195,10 @@ try {
     });
 </script>
 
-<script defer src="survey_page.js"></script>
+    <script src="argon-dashboard-master/assets/js/core/popper.min.js"></script>
+    <script src="argon-dashboard-master/assets/js/core/bootstrap.min.js"></script>
+    <script src="argon-dashboard-master/assets/js/plugins/perfect-scrollbar.min.js"></script>
+    <script src="argon-dashboard-master/assets/js/plugins/smooth-scrollbar.min.js"></script>
+    <script defer src="survey_page.js"></script>
 </body>
 </html>

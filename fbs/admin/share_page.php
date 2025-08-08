@@ -426,7 +426,7 @@ error_log("QR Code Target URL: " . $qrCodeTargetUrl);
                 <span><?php echo htmlspecialchars($surveySettings['qr_instructions_text'] ?? 'Scan this QR Code to Give Your Feedback<br>on Services Received'); ?></span>
             </div>
 
-            <a href="<?php echo htmlspecialchars($qrCodeTargetUrl); ?>" class="go-to-survey-button">
+            <a href="<?php echo htmlspecialchars($qrCodeTargetUrl); ?>" class="go-to-survey-button" target="_blank">
                 <i class="fas fa-external-link-alt"></i> Go to Survey Page
             </a>
         </div>

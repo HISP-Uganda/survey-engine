@@ -1,12 +1,12 @@
 <?php
 session_start();
-// The path for dhis2_submit.php needs to be correct relative to this file.
-// If dhis2 is a folder inside fbs, and this file is in fbs/admin, then this path is wrong.
-// It should probably be something like:
-// require_once '../dhis2/dhis2_submit.php'; // If dhis2 is a sibling of admin
-require_once 'dhis2/dhis2_submit.php'; // Adjust this path if dhis2/dhis2_submit.php is in a different location.
-                                        // For example, if dhis2 is inside fbs, and survey_page_submit.php
-                                        // is in fbs/admin, then '../dhis2/' would navigate up to fbs/ then down to dhis2/
+// Include DHIS2 submission handler only if file exists
+$dhis2_submit_path = 'dhis2/dhis2_submit.php';
+if (file_exists($dhis2_submit_path)) {
+    require_once $dhis2_submit_path;
+} else {
+    error_log("DHIS2 submission handler not found at: " . $dhis2_submit_path);
+}
 
 
 // Include the connect.php file which provides the $pdo object
@@ -140,33 +140,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Commit transaction using $pdo
         $pdo->commit();
 
-        // Store UID in session to prevent resubmission
+        // Store UID and survey ID in session to prevent resubmission
         $_SESSION['submitted_uid'] = $uid;
+        $_SESSION['submitted_survey_id'] = $surveyId;
 
-        // --- DHIS2 Submission Logic (Now applies to all types, but checks for config) ---
-        try {
-            // Ensure DHIS2SubmissionHandler can accept $pdo
-            // You might need to adjust the DHIS2SubmissionHandler constructor if it was expecting a mysqli object.
-            $dhis2Submitter = new DHIS2SubmissionHandler($pdo, $surveyId); // Pass $pdo
+        // --- DHIS2 Submission Logic (Only for DHIS2 surveys) ---
+        if ($surveyType === 'dhis2') {
+            try {
+                // Ensure DHIS2SubmissionHandler can accept $pdo
+                $dhis2Submitter = new DHIS2SubmissionHandler($pdo, $surveyId); // Pass $pdo
 
-            if ($dhis2Submitter->isReadyForSubmission()) {
-                $result = $dhis2Submitter->processSubmission($submissionId);
+                if ($dhis2Submitter->isReadyForSubmission()) {
+                    $result = $dhis2Submitter->processSubmission($submissionId);
 
-                if (!$result['success']) {
-                    error_log("DHIS2 submission failed for submission ID $submissionId (Survey ID: $surveyId): " . $result['message']);
+                    if (!$result['success']) {
+                        error_log("DHIS2 submission failed for submission ID $submissionId (Survey ID: $surveyId): " . $result['message']);
+                    } else {
+                        error_log("DHIS2 submission successful for submission ID $submissionId (Survey ID: $surveyId): " . $result['message']);
+                    }
                 } else {
-                    error_log("DHIS2 submission successful or already processed for submission ID $submissionId (Survey ID: $surveyId): " . $result['message']);
+                    error_log("Skipping DHIS2 submission for survey ID $surveyId: No valid DHIS2 configuration found.");
                 }
-            } else {
-                error_log("Skipping DHIS2 submission for survey ID $surveyId: No valid DHIS2 configuration found in the database (dhis2_instance or program_dataset is missing/empty).");
+            } catch (Exception $e) {
+                error_log("DHIS2 handler exception for survey ID $surveyId, submission ID $submissionId: " . $e->getMessage());
+                // Don't let DHIS2 errors break the main submission
             }
-        } catch (Exception $e) {
-            error_log("Caught DHIS2 handler exception for survey ID $surveyId, submission ID $submissionId: " . $e->getMessage());
         }
         // --- End DHIS2 Submission Logic ---
 
-        // Redirect to thank you page
-        header("Location: thank_you.php?uid=$uid");
+        // Redirect to simple thank you page with no connection to survey
+        header("Location: thank_you_simple.php?uid=$uid");
         exit;
     } catch (Exception $e) {
         // Roll back transaction on error using $pdo

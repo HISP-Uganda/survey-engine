@@ -24,6 +24,14 @@ function renderSurveyForm($surveyId, $pdo, $options = []) {
     
     $options = array_merge($defaults, $options);
     
+    // Get survey settings for numbering
+    $settingsStmt = $pdo->prepare("SELECT show_numbering, numbering_style FROM survey_settings WHERE survey_id = ?");
+    $settingsStmt->execute([$surveyId]);
+    $settings = $settingsStmt->fetch(PDO::FETCH_ASSOC);
+    
+    $options['show_numbering'] = $settings['show_numbering'] ?? true;
+    $options['numbering_style'] = $settings['numbering_style'] ?? 'numeric';
+    
     // Get survey questions
     $stmt = $pdo->prepare("
         SELECT 
@@ -52,11 +60,31 @@ function renderSurveyForm($surveyId, $pdo, $options = []) {
     
     $html = '<form id="' . htmlspecialchars($options['form_id']) . '" class="' . htmlspecialchars($options['form_class']) . '">';
     
-    foreach ($questions as $question) {
+    foreach ($questions as $index => $question) {
+        $options['question_number'] = $index + 1;
         $html .= renderQuestion($question, $pdo, $options);
     }
     
     $html .= '</form>';
+    
+    // Add CSS for question numbering
+    if ($options['show_numbering'] && $options['numbering_style'] !== 'none') {
+        $html .= '<style>
+            .question-number {
+                display: inline-block;
+                background: #6c757d;
+                color: white;
+                border-radius: 4px;
+                width: 24px;
+                height: 20px;
+                text-align: center;
+                font-size: 0.75rem;
+                font-weight: 600;
+                line-height: 20px;
+                margin-right: 8px;
+            }
+        </style>';
+    }
     
     // Add skip logic JavaScript if enabled
     if ($options['include_skip_logic']) {
@@ -88,9 +116,16 @@ function renderQuestion($question, $pdo, $options = []) {
     // Question container with data attributes for skip logic
     $html = '<div class="question-container mb-4" data-question-id="' . $questionId . '" data-question-type="' . $questionType . '">';
     
-    // Question label
+    // Question label with optional numbering
     $html .= '<div class="question-label mb-2">';
-    $html .= '<label class="form-label fw-bold">' . $label . $requiredIndicator . '</label>';
+    $questionNumberDisplay = '';
+    
+    if ($options['show_numbering'] && $options['numbering_style'] !== 'none') {
+        $questionNumber = $options['question_number'] ?? 1;
+        $questionNumberDisplay = '<span class="question-number me-2">' . formatQuestionNumber($questionNumber, $options['numbering_style']) . '</span>';
+    }
+    
+    $html .= '<label class="form-label fw-bold">' . $questionNumberDisplay . $label . $requiredIndicator . '</label>';
     $html .= '</div>';
     
     // Question input based on type
@@ -483,5 +518,47 @@ function renderFileInput($questionId, $validationRules, $requiredAttr) {
     }
     
     return $html;
+}
+
+/**
+ * Format question number based on numbering style
+ * @param int $number Question number
+ * @param string $style Numbering style
+ * @return string Formatted number
+ */
+function formatQuestionNumber($number, $style) {
+    switch ($style) {
+        case 'alphabetic_lower':
+            return chr(96 + $number) . '.';
+        case 'alphabetic_upper':
+            return chr(64 + $number) . '.';
+        case 'roman_lower':
+            return strtolower(toRomanNumeral($number)) . '.';
+        case 'roman_upper':
+            return toRomanNumeral($number) . '.';
+        case 'numeric':
+        default:
+            return $number . '.';
+    }
+}
+
+/**
+ * Convert number to Roman numeral
+ * @param int $number Number to convert
+ * @return string Roman numeral
+ */
+function toRomanNumeral($number) {
+    $values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+    $symbols = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
+    $result = '';
+    
+    for ($i = 0; $i < count($values); $i++) {
+        while ($number >= $values[$i]) {
+            $result .= $symbols[$i];
+            $number -= $values[$i];
+        }
+    }
+    
+    return $result;
 }
 ?>

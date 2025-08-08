@@ -232,21 +232,233 @@ if ($question && !empty($question['linked_survey_ids'])) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/argon-dashboard.min.css" rel="stylesheet">
     <style>
+        /* Neutral styling with reduced spacing */
+        body {
+            background-color: #f8f9fa !important;
+        }
+        
+        .card {
+            background-color: #ffffff !important;
+            border-radius: 6px !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #2d3748 !important;
+        }
+        
+        .card-header {
+            background-color: #ffffff !important;
+            padding: 1rem !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        
+        .card-header h4 {
+            color: #2d3748 !important;
+            font-size: 1.1rem !important;
+            margin-bottom: 0;
+        }
+        
+        .card-body {
+            padding: 1rem !important;
+        }
+        
         .skip-logic-rule {
             background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.875rem;
+            margin-bottom: 0.5rem;
         }
+        
         .option-input-group {
-            margin-bottom: 8px;
+            margin-bottom: 0.4rem;
         }
+        
         .validation-section {
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
+            padding: 0.875rem;
+            border-radius: 6px;
+            margin-top: 0.75rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* Button styling */
+        .btn {
+            border-radius: 4px !important;
+            font-weight: 500 !important;
+            font-size: 0.875rem !important;
+            padding: 0.5rem 1rem !important;
+            transition: none !important;
+        }
+        
+        .btn-sm {
+            font-size: 0.8rem !important;
+            padding: 0.375rem 0.75rem !important;
+        }
+        
+        .btn-primary {
+            background-color: #4a5568 !important;
+            border-color: #4a5568 !important;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2d3748 !important;
+            border-color: #2d3748 !important;
+            transform: none !important;
+        }
+        
+        .btn-secondary {
+            background-color: #718096 !important;
+            border-color: #718096 !important;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4a5568 !important;
+            border-color: #4a5568 !important;
+            transform: none !important;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333 !important;
+            border-color: #c82333 !important;
+            transform: none !important;
+        }
+        
+        /* Form controls */
+        .form-control, .form-select {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 4px !important;
+            font-size: 0.875rem !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #4a5568 !important;
+            box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.1) !important;
+        }
+        
+        .form-label {
+            color: #2d3748 !important;
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 0.375rem;
+        }
+        
+        /* Alert styling */
+        .alert {
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .alert-success {
+            background-color: #f0f9ff !important;
+            border-color: #4a5568 !important;
+            color: #2d3748 !important;
+        }
+        
+        .alert-danger {
+            background-color: #fef2f2 !important;
+            border-color: #dc3545 !important;
+            color: #dc3545 !important;
+        }
+        
+        .alert-info {
+            background-color: #f8f9fa !important;
+            border-color: #4a5568 !important;
+            color: #2d3748 !important;
+        }
+        
+        /* Text colors */
+        .text-primary {
+            color: #4a5568 !important;
+        }
+        
+        .text-muted {
+            color: #718096 !important;
+        }
+        
+        /* Preview section */
+        .question-preview {
+            background-color: #f8f9fa;
+            border: 1px solid #e2e8f0 !important;
+        }
+        
+        /* Skip logic specific */
+        .skip-logic-rule .text-primary {
+            color: #4a5568 !important;
+        }
+        
+        .skip-logic-rule h6 {
+            font-size: 0.9rem;
+            margin-bottom: 0.375rem;
+        }
+        
+        /* Input groups */
+        .input-group {
+            margin-bottom: 0.5rem;
+        }
+        
+        .input-group-text {
+            background-color: #f8f9fa;
+            border-color: #e2e8f0;
+            color: #4a5568;
+            font-size: 0.875rem;
+        }
+        
+        /* Checkbox and radio styling */
+        .form-check {
+            margin-bottom: 0.4rem;
+        }
+        
+        .form-check-input:checked {
+            background-color: #4a5568;
+            border-color: #4a5568;
+        }
+        
+        .form-check-input:focus {
+            border-color: #4a5568;
+            box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.1);
+        }
+        
+        /* Reduced spacing overrides */
+        .py-4 {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+        
+        .py-3 {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+        
+        .mb-3 {
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .mb-2 {
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .p-4 {
+            padding: 1rem !important;
+        }
+        
+        .p-3 {
+            padding: 0.75rem !important;
+        }
+        
+        .p-2 {
+            padding: 0.5rem !important;
         }
     </style>
 </head>
@@ -256,7 +468,7 @@ if ($question && !empty($question['linked_survey_ids'])) {
     <main class="main-content position-relative border-radius-lg">
         <?php include 'components/navbar.php'; ?>
         
-        <div class="container-fluid py-4">
+        <div class="container-fluid py-3">
         <?php if ($success_message): ?>
             <div class="alert alert-success alert-dismissible fade show">
                 <?= htmlspecialchars($success_message) ?>
@@ -296,7 +508,7 @@ if ($question && !empty($question['linked_survey_ids'])) {
                         <div class="card-body">
                             <?php if ($question): ?>
                                 <!-- Question Preview -->
-                                <div class="question-preview p-4 border rounded">
+                                <div class="question-preview p-3 border rounded">
                                     <div class="mb-3">
                                         <h5 class="text-primary">Question Details</h5>
                                         <div class="row">

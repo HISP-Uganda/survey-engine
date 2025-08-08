@@ -67,7 +67,8 @@ try {
         ) as response_counts
     ");
     $avgStmt->execute([$surveyId]);
-    $stats['avg_responses'] = round($avgStmt->fetchColumn(), 2);
+    $avgResult = $avgStmt->fetchColumn();
+    $stats['avg_responses'] = round($avgResult ?? 0, 2);
     
 } catch (PDOException $e) {
     error_log("Database error fetching stats: " . $e->getMessage());
@@ -121,54 +122,55 @@ try {
         }
         
         .dashboard-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 15px;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: #ffffff;
+            color: #2d3748;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
         }
         
         .stat-card {
             background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: none;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            transition: none;
         }
         
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            transform: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #2d3748;
         }
         
         .stat-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
+            color: #718096;
+            font-size: 0.875rem;
+            font-weight: 500;
         }
         
         .chart-container {
             background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-bottom: 2rem;
+            border-radius: 8px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 1.5rem;
             overflow: hidden;
         }
         
         .chart-wrapper {
             position: relative;
-            height: 400px;
+            height: 320px;
             width: 100%;
             max-width: 100%;
             overflow: hidden;
@@ -178,13 +180,13 @@ try {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #f8f9fa;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
         }
         
         .chart-title {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: #2d3748;
             margin: 0;
@@ -197,32 +199,34 @@ try {
         }
         
         .chart-type-selector {
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.4rem;
             background: white;
             font-weight: 500;
+            font-size: 0.875rem;
         }
         
         .chart-type-selector:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #4a5568;
+            box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.1);
         }
         
         .filter-section {
             background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-bottom: 2rem;
+            border-radius: 8px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 1.5rem;
         }
         
         .filter-header {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #2d3748;
-            margin-bottom: 1rem;
+            margin-bottom: 0.875rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -243,65 +247,71 @@ try {
         
         .filter-item select,
         .filter-item input {
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.625rem;
             width: 100%;
             font-weight: 500;
+            font-size: 0.875rem;
         }
         
         .filter-item select:focus,
         .filter-item input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #4a5568;
+            box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.1);
         }
         
         .btn-apply-filters {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #4a5568;
             border: none;
             color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
+            padding: 0.625rem 1.5rem;
+            border-radius: 6px;
             font-weight: 600;
-            transition: all 0.3s ease;
+            font-size: 0.875rem;
+            transition: none;
         }
         
         .btn-apply-filters:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            background: #2d3748;
+            transform: none;
+            box-shadow: none;
             color: white;
         }
         
         .question-analysis {
             background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-bottom: 2rem;
+            border-radius: 8px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 1.5rem;
             overflow: hidden;
         }
         
         .question-selector {
-            margin-bottom: 1.5rem;
-            padding: 1rem;
+            margin-bottom: 1.25rem;
+            padding: 0.875rem;
             background: #f8f9fa;
-            border-radius: 10px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
         }
         
         .prediction-section {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: #4a5568;
             color: white;
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-bottom: 2rem;
+            border-radius: 8px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 1.5rem;
         }
         
         .prediction-header {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 0.875rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -309,26 +319,25 @@ try {
         
         .prediction-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
         }
         
         .prediction-card {
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 1.5rem;
-            backdrop-filter: blur(10px);
+            border-radius: 6px;
+            padding: 1rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .prediction-value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
         }
         
         .prediction-label {
-            font-size: 0.9rem;
+            font-size: 0.825rem;
             opacity: 0.9;
         }
         
@@ -376,14 +385,22 @@ try {
             }
             
             .chart-wrapper {
-                height: 300px;
+                height: 260px;
             }
             
             .chart-container {
-                padding: 1rem;
+                padding: 0.875rem;
             }
             
             .question-analysis {
+                padding: 0.875rem;
+            }
+            
+            .filter-section {
+                padding: 1rem;
+            }
+            
+            .prediction-section {
                 padding: 1rem;
             }
         }
@@ -405,7 +422,7 @@ try {
                         <h4 class="mb-0 opacity-8"><?php echo htmlspecialchars($survey['name']); ?></h4>
                     </div>
                     <div>
-                        <a href="records.php?survey_id=<?php echo $surveyId; ?>" class="btn btn-light">
+                        <a href="records.php" class="btn btn-light">
                             <i class="fas fa-arrow-left me-2"></i>Back to Records
                         </a>
                     </div>

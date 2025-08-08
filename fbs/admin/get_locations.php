@@ -10,11 +10,30 @@ if (!isset($pdo)) {
     exit;
 }
 
+// Get parameters - support both direct params and survey_id
+$surveyId = $_GET['survey_id'] ?? '';
 $instanceKey = $_GET['instance_key'] ?? '';
 $hierarchyLevel = $_GET['hierarchylevel'] ?? ''; // This will be an integer or empty
 
+// If survey_id is provided, get the settings from survey_settings table
+if (!empty($surveyId) && empty($instanceKey) && empty($hierarchyLevel)) {
+    try {
+        $settingsStmt = $pdo->prepare("SELECT selected_instance_key, selected_hierarchy_level FROM survey_settings WHERE survey_id = ?");
+        $settingsStmt->execute([$surveyId]);
+        $settings = $settingsStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($settings) {
+            $instanceKey = $settings['selected_instance_key'] ?? '';
+            $hierarchyLevel = $settings['selected_hierarchy_level'] ?? '';
+        }
+    } catch (PDOException $e) {
+        error_log("Error fetching survey settings: " . $e->getMessage());
+        // Continue without settings
+    }
+}
+
 try {
-    $sql = "SELECT id, name, path, hierarchylevel, instance_key FROM location WHERE 1=1";
+    $sql = "SELECT id, name, path, hierarchylevel, instance_key, uid FROM location WHERE 1=1";
     $params = [];
 
     if (!empty($instanceKey)) {

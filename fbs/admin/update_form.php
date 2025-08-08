@@ -274,13 +274,14 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
         .question-label {
             font-weight: 500;
             color: #344767;
-            flex-grow: 1; /* Allow label to expand */
+            flex-grow: 1;
+            font-size: 0.875rem;
         }
         .question-item .text-muted.small {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #6c757d !important;
-            margin-top: 0.25rem; /* Space below main label */
-            display: block; /* Force to new line */
+            margin-top: 0.25rem;
+            display: block;
         }
         .question-number { /* For selected questions */
             font-weight: 700;
@@ -418,82 +419,64 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
             background: #ffffff;
         }
         
-        /* Enhanced Question Number Badges */
+        /* Simplified Question Number */
         .question-number {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #6c757d;
             color: white;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            border-radius: 4px;
+            width: 24px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.85rem;
-            font-weight: 700;
-            margin-right: 12px;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
         }
         
-        /* Improved Drag Handle */
+        /* Simplified Drag Handle */
         .drag-handle {
-            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 6px;
-            padding: 8px;
-            transition: all 0.2s ease;
+            color: #adb5bd;
+            padding: 4px 8px;
+            cursor: grab;
         }
         
         .drag-handle:hover {
-            background: linear-gradient(145deg, #e9ecef 0%, #dee2e6 100%);
             color: #495057;
-            transform: scale(1.1);
         }
         
-        /* Enhanced Card Headers */
-        .card-header {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-            border-bottom: 2px solid #667eea !important;
-        }
-        
+        /* Simplified Card Headers */
         .card-header h3 {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 800;
+            color: #344767;
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 0;
         }
         
-        /* Improved Questions Panel Container */
+        /* Simplified Questions Panel Container */
         .questions-panel-container {
-            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-            border: 2px solid #e9ecef;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+            background: #ffffff;
+            border: 1px solid #e9ecef;
         }
         
-        /* Scrollbar Styling */
+        /* Simplified Scrollbar */
         .questions-panel-container::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         
         .questions-panel-container::-webkit-scrollbar-track {
             background: #f1f1f1;
-            border-radius: 10px;
         }
         
         .questions-panel-container::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
+            background: #6c757d;
+            border-radius: 3px;
         }
         
-        .questions-panel-container::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-        }
-        
-        /* Enhanced Page Title Section */
+        /* Simplified Page Title */
         .page-title-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            background: #ffffff;
+            border-bottom: 1px solid #e9ecef;
         }
         
         .page-title-section .breadcrumb-link,
@@ -517,7 +500,7 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
     <div class="main-content position-relative border-radius-lg">
         <?php include 'components/navbar.php'; ?>
 
-        <div class="d-flex align-items-center flex-grow-1 page-title-section">
+        <!-- <div class="d-flex align-items-center flex-grow-1 page-title-section">
             <nav aria-label="breadcrumb" class="flex-grow-1">
                 <ol class="breadcrumb mb-0 navbar-breadcrumb" style="background: transparent;">
                     <li class="breadcrumb-item">
@@ -533,7 +516,7 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
                     Update Survey Form: <?php echo htmlspecialchars($survey['name']); ?>
                 </h5>
             </nav>
-        </div>
+        </div> -->
         
         <div class="container-fluid py-4">
             <div class="row mb-4">
@@ -624,8 +607,8 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
                                     <div id="selected-questions">
                                         <?php foreach ($linkedQuestions as $index => $question): ?>
                                         <div id="selected-question-<?php echo $question['id']; ?>" 
-                                            class="question-item p-2 mb-2 d-flex justify-content-between align-items-center">
-                                            <div class="drag-handle me-2"><i class="fas fa-grip-lines"></i></div>
+                                            class="question-item">
+                                            <div class="drag-handle"><i class="fas fa-grip-lines"></i></div>
                                             <div class="flex-grow-1">
                                                 <span class="question-number"><?php echo $question['position'] ?? ($index + 1); ?>.</span>
                                                 <span class="question-label"><?php echo htmlspecialchars($question['label']); ?></span>
@@ -643,16 +626,16 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
                                     </div>
                                     
                                     <?php if (empty($linkedQuestions)): ?>
-                                    <div id="no-questions-message" class="text-center text-muted py-4">
-                                        <i class="fas fa-info-circle fa-2x mb-2"></i>
-                                        <p>No questions have been added to this survey yet. Add questions from the available list.</p>
+                                    <div id="no-questions-message" class="text-center text-muted">
+                                        <i class="fas fa-info-circle mb-2" style="font-size: 1.5rem;"></i>
+                                        <p style="margin-bottom: 0; font-size: 0.875rem;">No questions have been added to this survey yet. Add questions from the available list.</p>
                                     </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                             <div class="card-footer">
                                 <button type="submit" name="update_form" class="btn btn-success w-100">
-                                    <i class="fas fa-save me-2"></i> Save Survey Questions
+                                    <i class="fas fa-save me-1"></i> Save Survey Questions
                                 </button>
                             </div>
                         </div>

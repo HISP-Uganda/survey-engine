@@ -327,25 +327,20 @@ $message = [];
 
     <div class="main-content position-relative border-radius-lg">
          <?php include 'components/navbar.php'; ?>
-
-       <div class="d-flex align-items-center flex-grow-1 py-3 px-2 header-container-light">
-    <nav aria-label="breadcrumb" class="flex-grow-1">
-        <ol class="breadcrumb mb-1 navbar-breadcrumb" style="background: transparent;">
-            <li class="breadcrumb-item">
-                <a href="main" class="breadcrumb-link-light">
-                    <i class="fas fa-home me-1" style="color: #475569;"></i>Home
-                </a>
-            </li>
-            <li class="breadcrumb-item active navbar-breadcrumb-active breadcrumb-item-active-light" aria-current="page">
-                <?= htmlspecialchars($pageTitle ?? 'Settings') ?>
-            </li>
-        </ol>
-        <h4 class="navbar-title mb-0 mt-1 navbar-title-light" style="font-weight: 700;">
-                    <?= htmlspecialchars($pageTitle ?? 'Settings') ?>
-        </h4>
-    </nav>
-</div>
+      
         <div class="container-fluid py-4">
+            
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a class="breadcrumb-link-light" href="main.php">Dashboard</a>     
+                        </li>
+                        <li class="breadcrumb-item active breadcrumb-item-active-light" aria-current="page">
+                            Settings Panel
+                        </li>
+                    </ol>
+                </nav>
+
             <div class="row">
                 <div class="col-md-3">
                     <div class="nav-wrapper">

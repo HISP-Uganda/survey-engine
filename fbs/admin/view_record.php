@@ -9,6 +9,19 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 require 'connect.php';
 
+// Helper function to check if current user can delete
+function canUserDelete() {
+    if (!isset($_SESSION['admin_role_name']) && !isset($_SESSION['admin_role_id'])) {
+        return false;
+    }
+    
+    // Super users can delete - check by role name or role ID
+    $roleName = $_SESSION['admin_role_name'] ?? '';
+    $roleId = $_SESSION['admin_role_id'] ?? 0;
+    
+    return ($roleName === 'super_user' || $roleName === 'admin' || $roleId == 1);
+}
+
 $submissionId = $_GET['submission_id'] ?? null;
 
 if (!$submissionId) {
@@ -181,9 +194,11 @@ foreach ($responses as $response) {
                             <button class="btn btn-sm btn-outline-dark mb-0" onclick="goBack()">
                                 <i class="fas fa-arrow-left me-1"></i> Back to List
                             </button>
+                            <?php if (canUserDelete()): ?>
                             <button class="btn btn-sm btn-outline-danger mb-0" onclick="deleteSubmission(<?php echo $submission['id']; ?>)">
                                 <i class="fas fa-trash me-1"></i> Delete
                             </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -293,7 +308,13 @@ foreach ($responses as $response) {
 
     function deleteSubmission(submissionId) {
         if (confirm("Are you sure you want to delete this submission? This action cannot be undone.")) {
-            fetch(`delete_submission.php?id=${submissionId}`, { method: 'DELETE' })
+            fetch(`delete_submission.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `id=${submissionId}`
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

@@ -21,6 +21,25 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit();
 }
 
+// Helper function to check if current user can delete
+function canUserDelete() {
+    if (!isset($_SESSION['admin_role_name']) && !isset($_SESSION['admin_role_id'])) {
+        return false;
+    }
+    
+    // Super users can delete - check by role name or role ID
+    $roleName = $_SESSION['admin_role_name'] ?? '';
+    $roleId = $_SESSION['admin_role_id'] ?? 0;
+    
+    return ($roleName === 'super_user' || $roleName === 'admin' || $roleId == 1);
+}
+
+// Check if user has permission to delete
+if (!canUserDelete()) {
+    echo json_encode(['success' => false, 'message' => 'Access denied. Only super users can delete submissions.']);
+    exit();
+}
+
 // Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Invalid request method.']);

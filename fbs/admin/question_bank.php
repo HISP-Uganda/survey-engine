@@ -9,6 +9,19 @@ if (!isset($_SESSION['admin_logged_in'])) {
 require_once 'connect.php';
 require_once 'includes/question_helper.php';
 
+// Helper function to check if current user can delete
+function canUserDelete() {
+    if (!isset($_SESSION['admin_role_name']) && !isset($_SESSION['admin_role_id'])) {
+        return false;
+    }
+    
+    // Super users can delete - check by role name or role ID
+    $roleName = $_SESSION['admin_role_name'] ?? '';
+    $roleId = $_SESSION['admin_role_id'] ?? 0;
+    
+    return ($roleName === 'super_user' || $roleName === 'admin' || $roleId == 1);
+}
+
 $search = $_GET['search'] ?? '';
 $type_filter = $_GET['type'] ?? '';
 $dhis2_filter = $_GET['dhis2'] ?? '';
@@ -96,19 +109,251 @@ $question_types = $stmt->fetchAll(PDO::FETCH_COLUMN);
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/argon-dashboard.min.css" rel="stylesheet">
     <style>
+        /* Neutral styling with reduced card sizes */
+        body {
+            background-color: #f8f9fa !important;
+        }
+        
+        .card {
+            background-color: #ffffff !important;
+            border-radius: 6px !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #2d3748 !important;
+        }
+        
+        .card-header {
+            background-color: #ffffff !important;
+            padding: 1rem !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        
+        .card-header h4 {
+            color: #2d3748 !important;
+            font-size: 1.1rem !important;
+            margin-bottom: 0;
+        }
+        
         .question-card {
-            transition: all 0.2s;
+            transition: none;
+            min-height: auto;
         }
+        
         .question-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
+        
+        .question-card .card-header {
+            padding: 0.75rem !important;
+        }
+        
+        .question-card .card-body {
+            padding: 0.75rem !important;
+        }
+        
+        .question-card .card-footer {
+            padding: 0.75rem !important;
+            background-color: #f8f9fa !important;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .card-title {
+            color: #2d3748 !important;
+            font-size: 0.95rem !important;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            line-height: 1.3;
+        }
+        
         .dhis2-badge {
-            background: linear-gradient(45deg, #007bff, #0056b3);
+            background: #4a5568 !important;
+            color: white;
         }
+        
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
         .usage-stats {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-bottom: 0;
+        }
+        
+        .usage-stats .mb-2 {
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .usage-stats .mb-1 {
+            margin-bottom: 0.25rem !important;
+        }
+        
+        .usage-stats small {
+            font-size: 0.75rem;
+            color: #718096;
+        }
+        
+        .usage-stats code {
+            background-color: #f8f9fa;
+            color: #2d3748;
+            padding: 0.125rem 0.25rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+        }
+        
+        /* Button styling */
+        .btn {
+            border-radius: 4px !important;
+            font-weight: 500 !important;
+            font-size: 0.875rem !important;
+            padding: 0.5rem 1rem !important;
+            transition: none !important;
+        }
+        
+        .btn-sm {
+            font-size: 0.8rem !important;
+            padding: 0.375rem 0.75rem !important;
+        }
+        
+        .btn-primary {
+            background-color: #4a5568 !important;
+            border-color: #4a5568 !important;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2d3748 !important;
+            border-color: #2d3748 !important;
+            transform: none !important;
+        }
+        
+        .btn-outline-primary {
+            color: #4a5568 !important;
+            border-color: #4a5568 !important;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: #4a5568 !important;
+            border-color: #4a5568 !important;
+            color: white !important;
+            transform: none !important;
+        }
+        
+        .btn-outline-secondary {
+            color: #718096 !important;
+            border-color: #718096 !important;
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: #718096 !important;
+            border-color: #718096 !important;
+            color: white !important;
+            transform: none !important;
+        }
+        
+        /* Form controls */
+        .form-control, .form-select {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 4px !important;
+            font-size: 0.875rem !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #4a5568 !important;
+            box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.1) !important;
+        }
+        
+        /* Dropdown styling */
+        .dropdown-menu {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 6px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            padding: 0.5rem 0;
+        }
+        
+        .dropdown-item {
+            color: #2d3748 !important;
+            font-size: 0.875rem !important;
+            padding: 0.5rem 1rem !important;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f9fa !important;
+            color: #2d3748 !important;
+        }
+        
+        .dropdown-item.text-danger:hover {
+            background-color: #f8f9fa !important;
+            color: #dc3545 !important;
+        }
+        
+        .dropdown-toggle {
+            border: 1px solid #e2e8f0 !important;
+            color: #4a5568 !important;
+        }
+        
+        .dropdown-toggle:hover {
+            background-color: #f8f9fa !important;
+            border-color: #cbd5e0 !important;
+        }
+        
+        /* Pagination */
+        .pagination .page-link {
+            color: #4a5568 !important;
+            border-color: #e2e8f0 !important;
             font-size: 0.875rem;
-            color: #6c757d;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: #4a5568 !important;
+            border-color: #4a5568 !important;
+        }
+        
+        .pagination .page-link:hover {
+            background-color: #f8f9fa !important;
+            border-color: #cbd5e0 !important;
+            color: #2d3748 !important;
+        }
+        
+        /* Text colors */
+        .text-muted {
+            color: #718096 !important;
+        }
+        
+        .text-primary {
+            color: #4a5568 !important;
+        }
+        
+        /* Reduced spacing */
+        .mb-4 {
+            margin-bottom: 1rem !important;
+        }
+        
+        .mb-3 {
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .mb-2 {
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .py-4 {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+        
+        .g-3 {
+            --bs-gutter-x: 0.75rem;
+            --bs-gutter-y: 0.75rem;
+        }
+        
+        /* Footer text size */
+        .card-footer small {
+            font-size: 0.7rem;
+            color: #718096;
         }
     </style>
 </head>
@@ -117,8 +362,18 @@ $question_types = $stmt->fetchAll(PDO::FETCH_COLUMN);
     
     <main class="main-content position-relative border-radius-lg">
         <?php include 'components/navbar.php'; ?>
-        
+      
         <div class="container-fluid py-4">
+             <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a class="breadcrumb-link-light" href="main.php">Dashboard</a>     
+                        </li>
+                        <li class="breadcrumb-item active breadcrumb-item-active-light" aria-current="page">
+                            Question Bank
+                        </li>
+                    </ol>
+                </nav>
             <div class="row">
                 <div class="col-12">
                     <div class="card">
@@ -132,7 +387,7 @@ $question_types = $stmt->fetchAll(PDO::FETCH_COLUMN);
                         </div>
                         
                         <div class="card-body">
-                            <form method="get" class="row g-3 mb-4">
+                            <form method="get" class="row g-3 mb-3">
                                 <div class="col-md-4">
                                     <input type="text" name="search" class="form-control" 
                                            placeholder="Search questions..." value="<?= htmlspecialchars($search) ?>">
@@ -167,7 +422,7 @@ $question_types = $stmt->fetchAll(PDO::FETCH_COLUMN);
                                 </div>
                             </form>
                             
-                            <div class="row mb-3">
+                            <div class="row mb-2">
                                 <div class="col-12">
                                     <small class="text-muted">
                                         Showing <?= number_format(count($questions)) ?> of <?= number_format($total_questions) ?> questions
@@ -178,7 +433,7 @@ $question_types = $stmt->fetchAll(PDO::FETCH_COLUMN);
                             
                             <div class="row">
                                 <?php foreach ($questions as $question): ?>
-                                    <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="col-md-6 col-lg-4 mb-3">
                                         <div class="card question-card h-100">
                                             <div class="card-header d-flex justify-content-between align-items-start">
                                                 <div>
@@ -208,7 +463,7 @@ $question_types = $stmt->fetchAll(PDO::FETCH_COLUMN);
                                                         <li><a class="dropdown-item" href="#" onclick="viewUsage(<?= $question['id'] ?>)">
                                                             <i class="fas fa-chart-bar"></i> View Usage
                                                         </a></li>
-                                                        <?php if ($question['survey_count'] == 0): ?>
+                                                        <?php if ($question['survey_count'] == 0 && canUserDelete()): ?>
                                                             <li><hr class="dropdown-divider"></li>
                                                             <li><a class="dropdown-item text-danger" href="#" 
                                                                    onclick="deleteQuestion(<?= $question['id'] ?>)">
@@ -227,20 +482,17 @@ $question_types = $stmt->fetchAll(PDO::FETCH_COLUMN);
                                                         <i class="fas fa-poll text-primary"></i> 
                                                         Used in <strong><?= $question['survey_count'] ?></strong> survey(s)
                                                     </div>
-                                                    
                                                     <?php if ($question['survey_names']): ?>
                                                         <div class="mb-2">
                                                             <small><strong>Surveys:</strong> <?= htmlspecialchars($question['survey_names']) ?></small>
                                                         </div>
                                                     <?php endif; ?>
-                                                    
                                                     <?php if ($question['dhis2_dataelement_id']): ?>
                                                         <div class="mb-1">
                                                             <small><strong>Data Element:</strong> 
                                                             <code><?= htmlspecialchars($question['dhis2_dataelement_id']) ?></code></small>
                                                         </div>
                                                     <?php endif; ?>
-                                                    
                                                     <?php if ($question['dhis2_attribute_id']): ?>
                                                         <div class="mb-1">
                                                             <small><strong>Attribute:</strong> 

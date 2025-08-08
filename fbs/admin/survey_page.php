@@ -12,6 +12,81 @@ if (!isset($pdo)) {
     die("Database connection failed. Please try again later.");
 }
 
+// Function to show survey status messages with good design
+function showSurveyMessage($title, $message, $type = 'info') {
+    $iconClass = '';
+    $bgClass = '';
+    $textClass = '';
+    
+    switch ($type) {
+        case 'warning':
+            $iconClass = 'fa-exclamation-triangle text-warning';
+            $bgClass = 'bg-warning-subtle';
+            $textClass = 'text-warning-emphasis';
+            break;
+        case 'info':
+            $iconClass = 'fa-info-circle text-info';
+            $bgClass = 'bg-info-subtle';
+            $textClass = 'text-info-emphasis';
+            break;
+        case 'error':
+            $iconClass = 'fa-times-circle text-danger';
+            $bgClass = 'bg-danger-subtle';
+            $textClass = 'text-danger-emphasis';
+            break;
+        default:
+            $iconClass = 'fa-info-circle text-primary';
+            $bgClass = 'bg-primary-subtle';
+            $textClass = 'text-primary-emphasis';
+    }
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title><?= htmlspecialchars($title) ?></title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <style>
+            body {
+                background: white;
+                min-height: 100vh;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+            .message-container {
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+                border-radius: 20px;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+            }
+            .message-icon {
+                font-size: 4rem;
+                opacity: 0.8;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container d-flex align-items-center justify-content-center min-vh-100">
+            <div class="row w-100 justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="card message-container <?= $bgClass ?> border-0">
+                        <div class="card-body text-center p-5">
+                            <div class="message-icon mb-4">
+                                <i class="fas <?= $iconClass ?>"></i>
+                            </div>
+                            <h2 class="card-title mb-3 <?= $textClass ?>"><?= htmlspecialchars($title) ?></h2>
+                            <p class="card-text lead <?= $textClass ?>"><?= htmlspecialchars($message) ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit();
+}
+
 // Get survey_id from the URL
 $surveyId = $_GET['survey_id'] ?? null;
 
@@ -19,10 +94,18 @@ if (!$surveyId) {
     die("Survey ID is missing.");
 }
 
-// Fetch survey details (id, type, name)
+// Check if user has already submitted this survey (prevent reaccess after submission)
+if (isset($_SESSION['submitted_uid']) && isset($_SESSION['submitted_survey_id']) && $_SESSION['submitted_survey_id'] == $surveyId) {
+    // User already submitted this survey, redirect to simple thank you page
+    $uid = $_SESSION['submitted_uid'];
+    header("Location: thank_you_simple.php?uid=$uid");
+    exit();
+}
+
+// Fetch survey details (id, type, name, is_active)
 $survey = null; // Initialize to null
 try {
-    $surveyStmt = $pdo->prepare("SELECT id, type, name FROM survey WHERE id = ?");
+    $surveyStmt = $pdo->prepare("SELECT id, type, name, is_active FROM survey WHERE id = ?");
     $surveyStmt->execute([$surveyId]);
     $survey = $surveyStmt->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -31,7 +114,17 @@ try {
 }
 
 if (!$survey) {
-    die("Survey not found.");
+    // Survey not found - show unavailable message
+    showSurveyMessage("Survey Currently Unavailable", 
+        "This survey is currently unavailable. Please contact the administrator if you believe this is an error.", 
+        "warning");
+}
+
+// Check if survey is inactive
+if ($survey && $survey['is_active'] == 0) {
+    showSurveyMessage("Survey Deadline Reached", 
+        "The deadline for this survey has reached. Thank you for your time.", 
+        "info");
 }
 
 // Determine survey type

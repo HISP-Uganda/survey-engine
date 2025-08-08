@@ -145,21 +145,10 @@ $notificationCount = count($notifications);
                 <div class="brand-icon-container me-2">
                     <i class="fas fa-rocket" style="color: #3b82f6;"></i>
                 </div>
-                <span class="brand-text">FBS Admin</span>
+                <span class="brand-text">Survey Engine</span>
             </a>
             <!-- Breadcrumb Section -->
-            <nav class="navbar-breadcrumb ms-4 d-none d-md-flex" aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="main.php" class="breadcrumb-link">
-                            <i class="fas fa-home"></i> Home
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item navbar-breadcrumb-active" aria-current="page">
-                        <?php echo htmlspecialchars($pageTitle); ?>
-                    </li>
-                </ol>
-            </nav>
+           
         </div>
 
         <!-- Right-aligned navbar items -->
@@ -359,8 +348,8 @@ $notificationCount = count($notifications);
 <style>
     /* Body padding to account for fixed navbar */
     body {
-        padding-top: 85px; /* Adjust based on navbar height */
-        transition: padding-top 0.3s ease;
+        padding-top: 75px;
+        transition: none;
     }
     
     body.sidebar-collapsed {
@@ -759,7 +748,7 @@ $notificationCount = count($notifications);
         }
         
         body {
-            padding-top: 75px;
+            padding-top: 70px;
         }
         
         .navbar-title {
@@ -962,9 +951,9 @@ $notificationCount = count($notifications);
             
             // Add shadow based on scroll position
             if (scrollTop > 0) {
-                navbar.style.boxShadow = '0 4px 25px rgba(30, 60, 114, 0.25)';
+                navbar.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
             } else {
-                navbar.style.boxShadow = '0 4px 20px rgba(30, 60, 114, 0.15)';
+                navbar.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
             }
             
             lastScrollTop = scrollTop;

@@ -95,10 +95,10 @@ try {
     die("Database error fetching submissions: " . $e->getMessage());
 }
 
-// 3. Get questions for this survey (unchanged logic)
+// 3. Get questions for this survey with question type and options
 try {
     $stmt = $pdo->prepare("
-        SELECT q.id, q.label
+        SELECT q.id, q.label, q.question_type, q.option_set_id
         FROM question q
         JOIN survey_question sq ON q.id = sq.question_id
         WHERE sq.survey_id = :survey_id
@@ -110,13 +110,46 @@ try {
     die("Database error fetching questions: " . $e->getMessage());
 }
 
+// 4. Get checkbox options for questions that have option sets
+$checkboxOptions = [];
+foreach ($questions as $question) {
+    if ($question['question_type'] === 'checkbox' && $question['option_set_id']) {
+        try {
+            $stmt = $pdo->prepare("
+                SELECT option_value
+                FROM option_set_values
+                WHERE option_set_id = :option_set_id
+                ORDER BY id ASC
+            ");
+            $stmt->execute(['option_set_id' => $question['option_set_id']]);
+            $options = $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
+            $checkboxOptions[$question['id']] = $options;
+        } catch (PDOException $e) {
+            error_log("Error fetching options for question {$question['id']}: " . $e->getMessage());
+            $checkboxOptions[$question['id']] = [];
+        }
+    }
+}
+
 // Prepare export data (unchanged logic)
 $exportData = [];
 
 $headers = [
     'Submission ID', 'UID', 'Location', 'Date Submitted'
 ];
-foreach ($questions as $question) { $headers[] = $question['label']; }
+
+// Build headers with separate columns for checkbox options
+foreach ($questions as $question) {
+    if ($question['question_type'] === 'checkbox' && !empty($checkboxOptions[$question['id']])) {
+        // Create separate column for each checkbox option
+        foreach ($checkboxOptions[$question['id']] as $option) {
+            $headers[] = $question['label'] . ' - ' . $option;
+        }
+    } else {
+        // Regular single column for other question types
+        $headers[] = $question['label'];
+    }
+}
 $exportData[] = $headers;
 
 foreach ($submissions as $submission) {
@@ -141,9 +174,19 @@ foreach ($submissions as $submission) {
         $submission['location_name'] ?? 'N/A',
         $submission['created']
     ];
+    
     foreach ($questions as $question) {
         $responseValues = $groupedResponses[$question['id']] ?? [];
-        $row[] = !empty($responseValues) ? implode(', ', $responseValues) : 'No response';
+        
+        if ($question['question_type'] === 'checkbox' && !empty($checkboxOptions[$question['id']])) {
+            // For checkbox questions, create separate columns with Yes/No or 1/0 values
+            foreach ($checkboxOptions[$question['id']] as $option) {
+                $row[] = in_array($option, $responseValues) ? 'Yes' : 'No';
+            }
+        } else {
+            // Regular handling for other question types
+            $row[] = !empty($responseValues) ? implode(', ', $responseValues) : 'No response';
+        }
     }
     $exportData[] = $row;
 }

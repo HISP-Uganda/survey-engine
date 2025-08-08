@@ -51,8 +51,8 @@ $menuItems = [
             <img src="argon-dashboard-master/assets/img/istock3.png"
              class="navbar-brand-img"
              alt="logo"
-             style="max-height: 6rem; border-radius: 2rem; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
-            <span class="ms-1 font-weight-bold fs-5 d-block mt-2 text-dark">Survey Engine</span>
+             style="max-height: 4.5rem; border-radius: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <span class="ms-1 font-weight-bold d-block mt-2 text-dark" style="font-size: 1rem;">Survey Engine</span>
         </a>
     </div>
 
@@ -100,112 +100,106 @@ $menuItems = [
 <div class="sidenav-backdrop"></div>
 
 <style>
-    /* Enhanced Custom Sidenav Background - Light Theme */
+    /* Neutral Custom Sidenav Background */
     .custom-sidenav-bg {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%) !important;
-        color: #1e293b;
+        background: #ffffff !important;
+        color: #2d3748;
         position: relative;
         overflow: hidden;
         border-right: 1px solid #e2e8f0;
     }
     
-    /* Add subtle pattern overlay */
+    /* Remove pattern overlay for neutral design */
     .custom-sidenav-bg::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 20%, rgba(0, 0, 0, 0.02) 0%, transparent 50%);
-        pointer-events: none;
+        display: none;
     }
 
     .custom-sidenav-bg .navbar-brand .font-weight-bold,
     .custom-sidenav-bg .nav-link-text {
-        color: #1e293b !important; /* Dark text for light theme */
+        color: #2d3748 !important;
     }
 
     .custom-sidenav-bg .nav-link {
-        color: rgba(30, 41, 59, 0.85) !important; /* Dark color for inactive links */
-        transition: background-color 0.3s ease, color 0.3s ease;
+        color: #4a5568 !important;
+        transition: none;
     }
 
     .custom-sidenav-bg .nav-link:hover {
-        background-color: rgba(59, 130, 246, 0.1) !important; /* Blue hover effect */
-        color: #1e293b !important;
+        background-color: #f8f9fa !important;
+        color: #2d3748 !important;
     }
 
     /* Active Link Styling */
     .custom-sidenav-bg .nav-link.active {
-        background: rgba(59, 130, 246, 0.15) !important; /* Blue active background */
-        color: #1e293b !important;
+        background: #e2e8f0 !important;
+        color: #2d3748 !important;
         font-weight: bold;
-        box-shadow: 0 2px 10px rgba(59, 130, 246, 0.2); /* Blue shadow for active state */
+        box-shadow: none;
     }
 
-    /* Enhanced Icon Styling within Sidenav */
+    /* Neutral Icon Styling within Sidenav */
     .custom-sidenav-bg .icon-shape {
-        background: rgba(59, 130, 246, 0.1) !important;
-        color: #3b82f6 !important;
-        border-radius: 10px !important;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
+        background: #f8f9fa !important;
+        color: #4a5568 !important;
+        border-radius: 8px !important;
+        transition: none;
     }
     
     .custom-sidenav-bg .nav-link:hover .icon-shape {
-        background: rgba(59, 130, 246, 0.2) !important;
-        transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+        background: #e2e8f0 !important;
+        transform: none;
+        box-shadow: none;
     }
 
     /* Specific icon colors for active state */
     .custom-sidenav-bg .nav-link.active .icon-shape i {
-        color: #3b82f6 !important; /* Active icons are blue */
+        color: #2d3748 !important;
     }
 
-    /* Enhanced User Profile Section Styling */
+    /* Neutral User Profile Section Styling */
     .user-profile-section {
-        padding: 1.5rem 1rem;
-        background: rgba(59, 130, 246, 0.05);
+        padding: 1.25rem 1rem;
+        background: #f8f9fa;
         margin: 1rem 0.75rem 0.75rem;
-        border-radius: 16px;
-        border: 1px solid rgba(59, 130, 246, 0.1);
-        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
     }
 
     .user-profile-section .avatar-img {
-        border: 2px solid rgba(59, 130, 246, 0.3); /* Blue border for user avatar */
+        border: 2px solid #e2e8f0;
     }
 
     .user-profile-section .fw-bold {
-        color: #1e293b;
+        color: #2d3748;
+        font-size: 0.875rem;
     }
 
     .user-profile-section .text-muted {
-        color: rgba(30, 41, 59, 0.7) !important; /* Darker grey for sub-text */
+        color: #718096 !important;
+        font-size: 0.75rem;
     }
 
     .user-profile-section .btn-outline-primary {
-        border-color: rgba(59, 130, 246, 0.3) !important;
-        color: #3b82f6 !important;
-        transition: all 0.3s ease;
-        border-radius: 8px;
+        border-color: #e2e8f0 !important;
+        color: #4a5568 !important;
+        transition: none;
+        border-radius: 6px;
         font-weight: 500;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
     }
 
     .user-profile-section .btn-outline-primary:hover {
-        background-color: rgba(59, 130, 246, 0.1) !important;
-        border-color: rgba(59, 130, 246, 0.5) !important;
-        color: #1e40af !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        background-color: #e2e8f0 !important;
+        border-color: #cbd5e0 !important;
+        color: #2d3748 !important;
+        transform: none;
+        box-shadow: none;
     }
 
     /* Horizontal Rule */
     .horizontal.light {
-        background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0));
+        background-color: #e2e8f0;
         height: 1px;
     }
 
@@ -217,26 +211,28 @@ $menuItems = [
         left: 0;
         top: 0;
         z-index: 1030;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        border-right: 1px solid #e2e8f0;
     }
     
     .sidebar-close-btn {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 6px;
-        transition: all 0.2s ease;
-        width: 32px;
-        height: 32px;
+        background: #f8f9fa;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        transition: none;
+        width: 28px;
+        height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
+        color: #4a5568;
     }
     
     .sidebar-close-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: scale(1.05);
+        background: #e2e8f0;
+        transform: none;
+        color: #2d3748;
     }
 
     .main-content {
@@ -304,14 +300,14 @@ $menuItems = [
         }
     }
 
-    /* Enhanced Nav item styling */
+    /* Neutral Nav item styling */
     .nav-item {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.4rem;
     }
 
     .nav-link {
-        border-radius: 12px;
-        padding: 0.875rem 1.25rem;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
         margin: 0 0.75rem;
         display: flex;
         align-items: center;
@@ -319,50 +315,43 @@ $menuItems = [
         overflow: hidden;
     }
     
-    /* Add subtle hover animation */
+    /* Remove hover animation */
     .nav-link::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-        transition: left 0.5s;
+        display: none;
     }
     
     .nav-link:hover::before {
-        left: 100%;
+        left: 0;
     }
 
     .icon-shape {
-        width: 32px;
-        height: 32px;
-        flex-shrink: 0; /* Prevent icon from shrinking */
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
     }
 
     /* Scroller for long menus */
     .nav-scroller {
-        height: calc(100vh - 120px); /* Adjust height based on header/footer */
+        height: calc(100vh - 110px);
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        padding-bottom: 1rem; /* Add some padding at the bottom */
+        padding-bottom: 1rem;
     }
 
     /* Scrollbar styles for better aesthetics */
     .nav-scroller::-webkit-scrollbar {
-        width: 6px;
+        width: 4px;
     }
 
     .nav-scroller::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.05); /* Lighter track */
-        border-radius: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
     }
 
     .nav-scroller::-webkit-scrollbar-thumb {
-        background-color: rgba(255, 255, 255, 0.3); /* Lighter thumb */
-        border-radius: 10px;
+        background-color: #e2e8f0;
+        border-radius: 4px;
     }
 </style>
 
