@@ -487,7 +487,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          <?php include 'components/navbar.php'; ?>
 
         <div class="container-fluid py-3">
-            <!-- Alerts -->
+           
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
@@ -544,21 +544,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <a href="sb.php" class="btn btn-primary">
                             <i class="fas fa-plus me-2"></i> Create New Survey
                         </a>
-                        <button type="button" class="btn btn-outline-secondary ms-2" id="configAccessBtn">
-                            <i class="fas fa-cog me-2"></i> Config
-                        </button>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                document.getElementById('configAccessBtn').addEventListener('click', function() {
-                                    var pwd = prompt('Enter password to access config:');
-                                    if (pwd === 'config') {
-                                        window.location.href = 'settings.php?tab=config';
-                                    } else if (pwd !== null) {
-                                        alert('Incorrect password.');
-                                    }
-                                });
-                            });
-                        </script>
+                      
+                      
                     </div>
                      <div class="d-flex justify-content-between align-items-center mb-3">
                        
@@ -731,8 +718,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </main>
 
-<!--    
-    <?php include 'components/fixednav.php'; ?> -->
+ 
+
     
     <!-- Argon Dashboard JS -->
     <script src="argon-dashboard-master/assets/js/core/popper.min.js"></script>

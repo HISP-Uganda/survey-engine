@@ -1125,39 +1125,26 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
   <main class="main-content position-relative border-radius-lg">
     <?php include 'components/navbar.php'; ?>
 
-      <?php
-      // Set the page title variable for use in breadcrumb and header
-      $pageTitle = "Create New Survey";
-      ?>
-      <div class="d-flex align-items-center flex-grow-1" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);  padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
-        <nav aria-label="breadcrumb" class="flex-grow-1">
-          <ol class="breadcrumb mb-0 navbar-breadcrumb" style="background: transparent;">
-            <li class="breadcrumb-item">
-              <a href="main" class="breadcrumb-link" style="color: #ffd700; font-weight: 600;">
-                <i class="fas fa-home me-1" style="color: #ffd700;"></i>Home
-              </a>
-            </li>
-            <li class="breadcrumb-item active navbar-breadcrumb-active" aria-current="page" style="color: #fff; font-weight: 700;">
-              <?= htmlspecialchars($pageTitle) ?>
-            </li>
-          </ol>
-          <h5 class="navbar-title mb-0" style="color: #fff; text-shadow: 0 1px 8px #1e3c72, 0 0 2px #ffd700;">
-            <?= htmlspecialchars($pageTitle) ?>
-          </h5>
-        </nav>
-      </div>
-
+  
     <div class="container-fluid py-4">
+       <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a class="breadcrumb-link-light" href="main.php">Dashboard</a>     
+                        </li>
+                        <li class="breadcrumb-item active breadcrumb-item-active-light" aria-current="page">
+                            <a class="breadcrumb-link-light" href="survey.php">Surveys</a>  
+
+                        </li>
+                        <li class="breadcrumb-item active breadcrumb-item-active-light" aria-current="page">
+                            Create New Survey
+                        </li>
+                    </ol>
+                </nav>
       <div class="row">
         <div class="col-12">
           <div class="card shadow-lg mb-5 fade-in">
-            <div class="card-header pb-0 text-center">
-              <h1 class="mb-1">
-                <i class="fas fa-poll me-2"></i>
-                Create New Survey
-              </h1>
-              <p class="mb-0">Choose how you want to create your survey and start collecting valuable insights</p>
-            </div>
+            
             <div class="card-body px-4">
 
               <?php if ($success_message): ?>
