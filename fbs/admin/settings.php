@@ -400,22 +400,22 @@ if ($activeTab == 'config' && (!isset($_SESSION['admin_role_id']) || !in_array($
                     <div class="nav-wrapper">
                         <ul class="nav nav-pills flex-column" id="tabs-text" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'view') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=view">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'view') ? 'active' : '' ?>" href="?tab=view">
                             <i class="fas fa-sitemap me-2"></i>Org-Unit Viewer
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'load') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=load">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'load') ? 'active' : '' ?>" href="?tab=load">
                             <i class="fas fa-download me-2"></i>Org-Unit Importer
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'new') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=new">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'new') ? 'active' : '' ?>" href="?tab=new">
                             <i class="fas fa-search me-2"></i>DHIS2-Programs-Fetcher
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'questions') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=questions">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'questions') ? 'active' : '' ?>" href="?tab=questions">
                             <i class="fas fa-link me-2"></i>Mapping-Interface
                         </a>
                     </li>
@@ -425,24 +425,24 @@ if ($activeTab == 'config' && (!isset($_SESSION['admin_role_id']) || !in_array($
                         
                         <ul class="nav nav-pills flex-column" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'profile') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=profile">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'profile') ? 'active' : '' ?>" href="?tab=profile">
                             <i class="fas fa-user-circle me-2"></i>Profile Settings
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'users') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=users">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'users') ? 'active' : '' ?>" href="?tab=users">
                             <i class="fas fa-users-cog me-2"></i>User Management
                         </a>
                     </li>
                     <?php if (isset($_SESSION['admin_role_id']) && in_array($_SESSION['admin_role_id'], [1, 2])): ?>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'config') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=config">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'config') ? 'active' : '' ?>" href="?tab=config">
                             <i class="fas fa-cogs me-2"></i>DHIS2 Configuration
                         </a>
                     </li>
                     <?php endif; ?>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'payload_checker') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=payload_checker">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'payload_checker') ? 'active' : '' ?>" href="?tab=payload_checker">
                             <i class="fas fa-bug me-2"></i>Payload Checker
                         </a>
                     </li>
@@ -450,6 +450,11 @@ if ($activeTab == 'config' && (!isset($_SESSION['admin_role_id']) || !in_array($
                     </div>
                 </div>
                 <div class="col-md-9">
+
+
+
+
+                
 
             <?php if (!empty($message)) : ?>
                 <div class="alert alert-<?= $message['type'] == 'success' ? 'success' : 'danger' ?> mt-4">

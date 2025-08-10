@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Ignore if update fails - not critical for login
                 }
                 
-                header("Location: main"); // Redirect to your admin dashboard/main page
+                header("Location: main.php"); // Redirect to your admin dashboard/main page
                 exit();
             } elseif ($admin && !$admin['status']) {
                 // Account deactivated

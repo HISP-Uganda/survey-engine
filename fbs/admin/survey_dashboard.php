@@ -12,7 +12,7 @@ require 'connect.php';
 
 $surveyId = $_GET['survey_id'] ?? null;
 if (!$surveyId) {
-    header("Location: records");
+    header("Location: records.php");
     exit();
 }
 
@@ -23,12 +23,12 @@ try {
     $survey = $surveyStmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$survey) {
-        header("Location: records");
+        header("Location: records.php");
         exit();
     }
 } catch (PDOException $e) {
     error_log("Database error: " . $e->getMessage());
-    header("Location: records");
+    header("Location: records.php");
     exit();
 }
 
@@ -438,7 +438,7 @@ try {
                         <h4 class="mb-0 opacity-8"><?php echo htmlspecialchars($survey['name']); ?></h4>
                     </div>
                     <div>
-                        <a href="records" class="btn btn-light">
+                        <a href="records.php" class="btn btn-light">
                             <i class="fas fa-arrow-left me-2"></i>Back to Records
                         </a>
                     </div>

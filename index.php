@@ -521,7 +521,7 @@
             <div class="header-content">
                 <div class="logo">FormBase</div>
                 <nav class="nav-buttons">
-                    <a href="fbs/admin/login" class="btn btn-secondary">Sign In</a>
+                    <a href="fbs/admin/login.php" class="btn btn-secondary">Sign In</a>
                     <!-- <a href="fbs/admin/register" class="btn btn-primary">Get Started</a> -->
                 </nav>
             </div>

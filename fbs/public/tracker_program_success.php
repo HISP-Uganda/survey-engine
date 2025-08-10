@@ -312,7 +312,7 @@ $surveySettings = array_merge($defaultSettings, $surveySettings);
                     
                     <?php if ($submission['tracked_entity_instance']): ?>
                         <div class="detail-row">
-                            <span class="detail-label">Participant ID:</span>
+                            <span class="detail-label">TEI ID:</span>
                             <span class="detail-value"><?= htmlspecialchars($submission['tracked_entity_instance']) ?></span>
                         </div>
                     <?php endif; ?>
