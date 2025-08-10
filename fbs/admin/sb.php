@@ -439,17 +439,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // 1. Create survey entry
-            $surveyTypeLabel = '';
-            if ($domain === 'tracker') {
-                if ($programType === 'tracker') {
-                    $surveyTypeLabel = ' (T)';
-                } elseif ($programType === 'event') {
-                    $surveyTypeLabel = ' (E)';
-                }
-            } elseif ($domain === 'aggregate') {
-                $surveyTypeLabel = ' (A)';
-            }
-            $surveyDisplayName = $programName . $surveyTypeLabel;
+            $surveyDisplayName = $programName;
 
             $stmt = $pdo->prepare("INSERT INTO survey (name, type, dhis2_instance, program_dataset, dhis2_tracked_entity_type_uid, dhis2_program_uid, program_type, domain_type) VALUES (?, 'dhis2', ?, ?, ?, ?, ?, ?)");
             $stmt->execute([$surveyDisplayName, $dhis2Instance, $programId, $dhis2TrackedEntityTypeUid, $programId, $programType, $domain]);
