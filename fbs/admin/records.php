@@ -37,12 +37,16 @@ if (!$surveyId) {
         SELECT 
             s.id, 
             s.name, 
-            COUNT(sub.id) AS submission_count,
-            MAX(sub.created) AS last_submission
+            (COALESCE(COUNT(DISTINCT sub.id), 0) + COALESCE(COUNT(DISTINCT ts.id), 0)) AS submission_count,
+            GREATEST(COALESCE(MAX(sub.created), '1970-01-01'), COALESCE(MAX(ts.submitted_at), '1970-01-01')) AS last_submission,
+            COUNT(DISTINCT sub.id) as regular_count,
+            COUNT(DISTINCT ts.id) as tracker_count
         FROM 
             survey s 
         LEFT JOIN 
             submission sub ON s.id = sub.survey_id 
+        LEFT JOIN 
+            tracker_submissions ts ON s.id = ts.survey_id
         GROUP BY 
             s.id, s.name
         ORDER BY 
@@ -63,13 +67,15 @@ if (!$surveyId) {
     $orderBy = $validSortOptions[$sortBy] ?? 's.created DESC';
 
     try {
+        // First get regular submissions
         $sql = "
             SELECT
                 s.id,
                 s.uid,
                 l.name AS location_name,
                 s.created,
-                COUNT(sr.id) AS response_count
+                COUNT(sr.id) AS response_count,
+                'regular' as submission_type
             FROM submission s
             LEFT JOIN submission_response sr ON s.id = sr.submission_id
             LEFT JOIN location l ON s.location_id = l.id
@@ -78,21 +84,58 @@ if (!$surveyId) {
         
         $params = ['survey_id' => $surveyId];
 
-        // Add date filtering to SQL query for displayed submissions
+        // Add date filtering for regular submissions
         if (!empty($startDateParam)) {
             $sql .= " AND s.created >= :start_date";
-            $params['start_date'] = $startDateParam . ' 00:00:00'; // Start of the day
+            $params['start_date'] = $startDateParam . ' 00:00:00';
         }
         if (!empty($endDateParam)) {
             $sql .= " AND s.created <= :end_date";
-            $params['end_date'] = $endDateParam . ' 23:59:59';   // End of the day
+            $params['end_date'] = $endDateParam . ' 23:59:59';
         }
 
-        $sql .= " GROUP BY s.id, l.name ORDER BY $orderBy";
+        $sql .= " GROUP BY s.id, s.uid, l.name, s.created";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $submissions = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        
+        // Now get tracker submissions for the same survey
+        $trackerSql = "
+            SELECT
+                ts.id,
+                ts.uid,
+                ts.selected_facility_name AS location_name,
+                ts.submitted_at as created,
+                1 AS response_count,
+                'tracker' as submission_type
+            FROM tracker_submissions ts
+            WHERE ts.survey_id = :survey_id_tracker
+        ";
+        
+        $trackerParams = ['survey_id_tracker' => $surveyId];
+        
+        // Add date filtering for tracker submissions  
+        if (!empty($startDateParam)) {
+            $trackerSql .= " AND ts.submitted_at >= :start_date_tracker";
+            $trackerParams['start_date_tracker'] = $startDateParam . ' 00:00:00';
+        }
+        if (!empty($endDateParam)) {
+            $trackerSql .= " AND ts.submitted_at <= :end_date_tracker";
+            $trackerParams['end_date_tracker'] = $endDateParam . ' 23:59:59';
+        }
+        
+        $trackerStmt = $pdo->prepare($trackerSql);
+        $trackerStmt->execute($trackerParams);
+        $trackerSubmissions = $trackerStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        
+        // Combine both arrays
+        $submissions = array_merge($submissions, $trackerSubmissions);
+        
+        // Sort by created date (most recent first)
+        usort($submissions, function($a, $b) {
+            return strtotime($b['created']) - strtotime($a['created']);
+        });
 
         // Fetch survey name
         $survey = $pdo->prepare("SELECT name FROM survey WHERE id = :survey_id");
@@ -574,7 +617,7 @@ if (!$surveyId) {
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a class="breadcrumb-link-light" href="main.php">Dashboard</a>     
+                            <a class="breadcrumb-link-light" href="main">Dashboard</a>     
                         </li>
                         <li class="breadcrumb-item active breadcrumb-item-active-light" aria-current="page">
                             Analyze Submissions
@@ -742,6 +785,7 @@ if (!$surveyId) {
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">UID</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Location</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Responses</th>
+                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Created</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
                                                 </tr>
@@ -760,6 +804,11 @@ if (!$surveyId) {
                                                         </td>
                                                         <td>
                                                             <span class="badge badge-sm bg-gradient-success"><?php echo $submission['response_count']; ?></span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge badge-sm <?php echo $submission['submission_type'] === 'tracker' ? 'bg-gradient-info' : 'bg-gradient-primary'; ?> text-white">
+                                                                <?php echo strtoupper($submission['submission_type']); ?>
+                                                            </span>
                                                         </td>
                                                         <td>
                                                             <p class="text-xs font-weight-bold mb-0"><?php echo date('M d, Y', strtotime($submission['created'])); ?></p>

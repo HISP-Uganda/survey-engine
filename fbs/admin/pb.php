@@ -86,7 +86,7 @@ require 'dhis2/dhis2_shared.php';
 
 
 
-    <?php include 'components/fixednav.php'; ?>
+  
   </main>
 
   <!-- Argon Dashboard JS -->

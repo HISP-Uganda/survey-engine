@@ -451,8 +451,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $surveyDisplayName = $programName . $surveyTypeLabel;
 
-            $stmt = $pdo->prepare("INSERT INTO survey (name, type, dhis2_instance, program_dataset, dhis2_tracked_entity_type_uid) VALUES (?, 'dhis2', ?, ?, ?)");
-            $stmt->execute([$surveyDisplayName, $dhis2Instance, $programId, $dhis2TrackedEntityTypeUid]);
+            $stmt = $pdo->prepare("INSERT INTO survey (name, type, dhis2_instance, program_dataset, dhis2_tracked_entity_type_uid, dhis2_program_uid, program_type, domain_type) VALUES (?, 'dhis2', ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$surveyDisplayName, $dhis2Instance, $programId, $dhis2TrackedEntityTypeUid, $programId, $programType, $domain]);
             $surveyId = $pdo->lastInsertId();
             $position = 1; // Initialize position for survey_question order
 
@@ -1665,7 +1665,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1 && $_GET['survey_source'] == 'dhi
       </div>
     </div>
 
-    <?php include 'components/fixednav.php'; ?>
+   
   </main>
 
   <script src="argon-dashboard-master/assets/js/core/popper.min.js"></script>

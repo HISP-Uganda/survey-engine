@@ -181,7 +181,7 @@ class DHIS2SubmissionHandler {
     public function processSubmission(int $submissionId): array {
     if (!$this->isReadyForSubmission()) {
         $message = 'DHIS2 handler not configured for submission (missing instance or program UID).';
-        $this->markAsSubmitted($submissionId, 'SKIPPED', null, null, $message); // Log skipped attempts
+        $this->markAsSubmitted($submissionId, 'FAILED', null, null, $message); // Log skipped attempts as FAILED
         return ['success' => false, 'message' => $message];
     }
 
@@ -239,6 +239,7 @@ class DHIS2SubmissionHandler {
      * @param int $submissionId
      */
      private function markAsSubmitted(int $submissionId, string $status, ?array $payload = null, ?array $dhis2Response = null, ?string $dhis2Message = null): void {
+        try {
             // Prepare JSON data for storage
             $payloadJson = $payload ? json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null;
             $dhis2ResponseJson = $dhis2Response ? json_encode($dhis2Response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null;
@@ -252,7 +253,7 @@ class DHIS2SubmissionHandler {
                     dhis2_response = VALUES(dhis2_response),
                     dhis2_message = VALUES(dhis2_message),
                     submitted_at = NOW(),
-                    retries = retries + 1 -- Increment retries on update
+                    retries = retries + 1
             ");
 
             $stmt->execute([
@@ -263,7 +264,11 @@ class DHIS2SubmissionHandler {
                 $dhis2Message
             ]);
             error_log("Submission ID $submissionId marked as $status in dhis2_submission_log. Message: " . ($dhis2Message ?? 'N/A'));
+        } catch (PDOException $e) {
+            error_log("Failed to log DHIS2 submission for submission ID $submissionId: " . $e->getMessage());
+            error_log("Attempted status: $status, message: " . ($dhis2Message ?? 'N/A'));
         }
+    }
 
     /**
      * Generates a consistent unique UID for tracker entities/events/enrollments

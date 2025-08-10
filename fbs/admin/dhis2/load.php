@@ -15,36 +15,6 @@ $orgUnitsFetched = false; // Always false on initial load, AJAX will handle
 
 ?>
 
-<style>
-    /* Add specific styles for the load.php components here if needed,
-       or rely on the global styles from settings.php which are already futuristic. */
-
-    /* Adjust checkbox background color to be lighter */
-    .form-check-input.bg-light {
-        background-color: #ffffff !important; /* White for checkboxes */
-        border-color: #cbd5e1 !important;
-    }
-    .form-check-input.bg-light:checked {
-        background-color: #3b82f6 !important; /* Blue when checked */
-        border-color: #3b82f6 !important;
-    }
-
-    /* Sticky table header for scrollable area */
-    .table-responsive thead th {
-        position: sticky;
-        top: 0;
-        z-index: 2; /* Ensure it's above other content in the scrollable div */
-        background-color: #f8fafc !important; /* Light background for sticky header */
-        border-bottom: 1px solid #cbd5e1 !important; /* Light border is visible */
-    }
-
-    /* Adjust button size further if "btn-lg" is not enough */
-    .btn.btn-lg {
-        padding: 0.75rem 2rem; /* More generous padding */
-        font-size: 1.15rem; /* Slightly larger text */
-    }
-
-</style>
 
 <div class="container-fluid py-4"> <h4 class="mb-4 text-dark"><i class="fas fa-globe-africa me-2 text-primary"></i> Load Locations from DHIS2</h4>
 

@@ -1334,13 +1334,13 @@ try {
                         </div>
                         <div class="card-body">
                             <div class="d-grid gap-2">
-                                <a href="survey_page.php?survey_id=<?= $surveyId ?>" class="btn btn-primary" target="_blank">
+                                <a href="../../s/<?= $surveyId ?>" class="btn btn-primary" target="_blank">
                                     <i class="fas fa-external-link-alt me-2"></i>Open Form
                                 </a>
                                 <button onclick="copyShareLink()" class="btn btn-info">
                                     <i class="fas fa-link me-2"></i>Copy Share Link
                                 </button>
-                                <a href="share_page.php?survey_id=<?= $surveyId ?>" class="btn btn-success">
+                                <a href="../../share/s/<?= $surveyId ?>" class="btn btn-success">
                                     <i class="fas fa-share me-2"></i>Share Page
                                 </a>
                                 <hr class="my-2">
@@ -1461,8 +1461,7 @@ try {
     function copyShareLink() {
         const scheme = window.location.protocol;
         const host = window.location.host;
-        const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-        const shareUrl = scheme + '//' + host + basePath + 'share_page.php?survey_id=' + surveyId;
+        const shareUrl = `${scheme}//${host}/share/s/${surveyId}`;
         
         console.log('Attempting to copy URL:', shareUrl); // Debug log
         
@@ -2052,9 +2051,8 @@ try {
                 try {
                     console.log('Share button clicked');
                     await window.savePreviewSettings();
-                    const surveyUrl = window.location.origin + '/fbs/admin/survey_page.php?survey_id=' + surveyId;
-                    console.log('Redirecting to share page with URL:', surveyUrl);
-                    window.location.href = `share_page.php?survey_id=${surveyId}&url=${encodeURIComponent(surveyUrl)}`;
+                    console.log('Redirecting to share page');
+                    window.location.href = `/share/s/${surveyId}`;
                 } catch (error) {
                     console.error('Share button error:', error);
                     showToast('Error occurred while sharing: ' + error.message, 'error');

@@ -5,65 +5,7 @@
 if ($activeTab == 'questions') :
 ?>
 
-<style>
-    /* Question mapping specific styles */
-    .mapping-container {
-        background-color: #ffffff;
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        border: 1px solid #e2e8f0;
-        margin-bottom: 1.5rem;
-    }
-    
-    .question-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
-    }
-    
-    .question-card:hover {
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
-    }
-    
-    .mapping-status {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.25rem 0.75rem;
-        border-radius: 1rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-    
-    .mapping-status.mapped {
-        background-color: #dcfce7;
-        color: #166534;
-        border: 1px solid #bbf7d0;
-    }
-    
-    .mapping-status.unmapped {
-        background-color: #fef2f2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-    }
-    
-    .data-element-select {
-        min-width: 250px;
-    }
-    
-    .option-preview {
-        background: #f1f5f9;
-        border: 1px solid #cbd5e1;
-        border-radius: 0.375rem;
-        padding: 0.75rem;
-        margin-top: 0.5rem;
-        max-height: 200px;
-        overflow-y: auto;
-    }
-</style>
+
 
 <div class="tab-header mb-4">
     <h3 class="text-dark"><i class="fas fa-link me-2 text-primary"></i>Question-Element Mapping Interface</h3>

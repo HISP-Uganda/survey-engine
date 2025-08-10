@@ -1,29 +1,52 @@
-# RewriteEngine On
-# RewriteBase /fbs/
-#   # IMPORTANT: This must match your project's subfolder name exactly
-
-# # If the request is for a file that exists, serve it
-# RewriteCond %{REQUEST_FILENAME} -f
-# RewriteRule ^ - [L]
-
-# # If the request is for a directory that exists, serve it
-# RewriteCond %{REQUEST_FILENAME} -d
-# RewriteRule ^ - [L]
-
-# # If the request is for a URL that doesn't map directly to a file or directory,
-# # rewrite it to append .php
-# RewriteRule ^(.*)$ $1.php [L]
-
-
-
-
 RewriteEngine On
-RewriteBase /survey-engine/
+RewriteBase /
 
-# Serve existing files/directories as-is
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
+# Rule for regular surveys
+RewriteRule ^s/([0-9]+)$ fbs/public/survey_page.php?survey_id=$1 [L]
+RewriteRule ^share/s/([0-9]+)$ fbs/public/share_page.php?survey_id=$1 [L]
 
-# Everything else goes to index.php for front controller handling
-RewriteRule ^ index.php [L]
+# Rule for tracker programs
+RewriteRule ^t/([0-9]+)$ fbs/public/tracker_program_form.php?survey_id=$1 [L]
+RewriteRule ^share/t/([0-9]+)$ fbs/public/tracker_share.php?survey_id=$1 [L]
+
+# Rule for tracker submission endpoint
+RewriteRule ^t/tracker_program_submit.php$ fbs/public/tracker_program_submit.php [L]
+
+# Thank you page URLs
+RewriteRule ^thank-you/([a-zA-Z0-9]+)$ fbs/public/thank_you_simple.php?uid=$1 [L]
+RewriteRule ^tracker-success/([0-9]+)$ fbs/public/tracker_program_success.php?survey_id=$1 [L]
+RewriteRule ^tracker-success/([0-9]+)/([0-9]+)$ fbs/public/tracker_program_success.php?survey_id=$1&submission_id=$2 [L]
+
+# Handle /fbs/ directory requests - auto-append .php for admin pages
+RewriteCond %{REQUEST_URI} ^/fbs/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^fbs/(.*)$ fbs/$1.php [L]
+
+
+
+
+# RewriteEngine On
+# RewriteBase /
+
+# # Rule for regular surveys
+# RewriteRule ^s/([0-9]+)$ survey-engine/fbs/public/survey_page.php?survey_id=$1 [L]
+# RewriteRule ^share/s/([0-9]+)$ survey-engine/fbs/public/share_page.php?survey_id=$1 [L]
+
+# # Rule for tracker programs
+# RewriteRule ^t/([0-9]+)$ survey-engine/fbs/public/tracker_program_form.php?survey_id=$1 [L]
+# RewriteRule ^share/t/([0-9]+)$ survey-engine/fbs/public/tracker_share.php?survey_id=$1 [L]
+
+# # Rule for tracker submission endpoint
+# RewriteRule ^t/tracker_program_submit.php$ survey-engine/fbs/public/tracker_program_submit.php [L]
+
+# # Thank you page URLs
+# RewriteRule ^thank-you/([a-zA-Z0-9]+)$ survey-engine/fbs/public/thank_you_simple.php?uid=$1 [L]
+# RewriteRule ^tracker-success/([0-9]+)$ survey-engine/fbs/public/tracker_program_success.php?survey_id=$1 [L]
+# RewriteRule ^tracker-success/([0-9]+)/([0-9]+)$ survey-engine/fbs/public/tracker_program_success.php?survey_id=$1&submission_id=$2 [L]
+
+# # Handle /fbs/ directory requests - auto-append .php for admin pages
+# RewriteCond %{REQUEST_URI} ^/survey-engine/fbs/
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule ^survey-engine/fbs/(.*)$ survey-engine/fbs/$1.php [L]

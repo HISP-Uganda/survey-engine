@@ -2,6 +2,16 @@
 // DHIS2 Configuration tab content for settings page
 // This file is included in settings.php when config tab is active
 
+// Check if user has super admin or admin role (role_id = 1 or 2)
+if (!isset($_SESSION['admin_role_id']) || !in_array($_SESSION['admin_role_id'], [1, 2])) {
+    echo '<div class="alert alert-danger">
+        <i class="fas fa-lock me-2"></i>
+        <strong>Access Denied</strong><br>
+        This configuration section is only accessible to Super Administrators and Administrators.
+    </div>';
+    return;
+}
+
 // Handle Create
 if (isset($_POST['create'])) {
     $url = $_POST['url'];
@@ -303,24 +313,44 @@ document.addEventListener('DOMContentLoaded', function() {
             resultDiv.style.display = 'block';
             resultDiv.innerHTML = '<div class="connection-test test-loading"><i class="fas fa-hourglass-half me-2"></i>Testing connection to DHIS2 server...</div>';
             
-            // Simulate connection test (you would implement actual DHIS2 API call here)
-            setTimeout(() => {
-                const isSuccess = Math.random() > 0.3; // Simulate 70% success rate
-                
-                if (isSuccess) {
-                    resultDiv.innerHTML = '<div class="connection-test test-success"><i class="fas fa-check-circle me-2"></i>Connection successful! DHIS2 server is reachable.</div>';
+            // Actual DHIS2 API connection test
+            fetch('/fbs/admin/dhis2/test_connection.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    url: url,
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    resultDiv.innerHTML = `<div class="connection-test test-success"><i class="fas fa-check-circle me-2"></i>${data.message}</div>`;
                 } else {
-                    resultDiv.innerHTML = '<div class="connection-test test-error"><i class="fas fa-times-circle me-2"></i>Connection failed. Please check your credentials and server URL.</div>';
+                    resultDiv.innerHTML = `<div class="connection-test test-error"><i class="fas fa-times-circle me-2"></i>${data.message}</div>`;
                 }
-                
-                this.disabled = false;
-                this.innerHTML = '<i class="fas fa-plug me-1"></i>Test';
                 
                 // Hide result after 5 seconds
                 setTimeout(() => {
                     resultDiv.style.display = 'none';
                 }, 5000);
-            }, 2000);
+            })
+            .catch(error => {
+                console.error('Test connection error:', error);
+                resultDiv.innerHTML = '<div class="connection-test test-error"><i class="fas fa-times-circle me-2"></i>Network error occurred during connection test.</div>';
+                
+                // Hide result after 5 seconds
+                setTimeout(() => {
+                    resultDiv.style.display = 'none';
+                }, 5000);
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-plug me-1"></i>Test';
+            });
         });
     });
 });

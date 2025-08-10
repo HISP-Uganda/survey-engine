@@ -12,7 +12,7 @@ require 'connect.php';
 
 $surveyId = $_GET['survey_id'] ?? null;
 if (!$surveyId) {
-    header("Location: records.php");
+    header("Location: records");
     exit();
 }
 
@@ -23,36 +23,52 @@ try {
     $survey = $surveyStmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$survey) {
-        header("Location: records.php");
+        header("Location: records");
         exit();
     }
 } catch (PDOException $e) {
     error_log("Database error: " . $e->getMessage());
-    header("Location: records.php");
+    header("Location: records");
     exit();
 }
 
 // Fetch survey statistics
 $stats = [];
 try {
-    // Total submissions
-    $totalStmt = $pdo->prepare("SELECT COUNT(*) as total FROM submission WHERE survey_id = ?");
-    $totalStmt->execute([$surveyId]);
+    // Total submissions (including both regular and tracker)
+    $totalStmt = $pdo->prepare("
+        SELECT 
+            (SELECT COUNT(*) FROM submission WHERE survey_id = ?) + 
+            (SELECT COUNT(*) FROM tracker_submissions WHERE survey_id = ?) as total
+    ");
+    $totalStmt->execute([$surveyId, $surveyId]);
     $stats['total_submissions'] = $totalStmt->fetchColumn();
     
-    // Submissions today
-    $todayStmt = $pdo->prepare("SELECT COUNT(*) as today FROM submission WHERE survey_id = ? AND DATE(created) = CURDATE()");
-    $todayStmt->execute([$surveyId]);
+    // Submissions today (including both types)
+    $todayStmt = $pdo->prepare("
+        SELECT 
+            (SELECT COUNT(*) FROM submission WHERE survey_id = ? AND DATE(created) = CURDATE()) + 
+            (SELECT COUNT(*) FROM tracker_submissions WHERE survey_id = ? AND DATE(submitted_at) = CURDATE()) as today
+    ");
+    $todayStmt->execute([$surveyId, $surveyId]);
     $stats['today_submissions'] = $todayStmt->fetchColumn();
     
-    // Submissions this week
-    $weekStmt = $pdo->prepare("SELECT COUNT(*) as week FROM submission WHERE survey_id = ? AND WEEK(created) = WEEK(NOW())");
-    $weekStmt->execute([$surveyId]);
+    // Submissions this week (including both types)
+    $weekStmt = $pdo->prepare("
+        SELECT 
+            (SELECT COUNT(*) FROM submission WHERE survey_id = ? AND WEEK(created) = WEEK(NOW())) + 
+            (SELECT COUNT(*) FROM tracker_submissions WHERE survey_id = ? AND WEEK(submitted_at) = WEEK(NOW())) as week
+    ");
+    $weekStmt->execute([$surveyId, $surveyId]);
     $stats['week_submissions'] = $weekStmt->fetchColumn();
     
-    // Submissions this month
-    $monthStmt = $pdo->prepare("SELECT COUNT(*) as month FROM submission WHERE survey_id = ? AND MONTH(created) = MONTH(NOW()) AND YEAR(created) = YEAR(NOW())");
-    $monthStmt->execute([$surveyId]);
+    // Submissions this month (including both types)
+    $monthStmt = $pdo->prepare("
+        SELECT 
+            (SELECT COUNT(*) FROM submission WHERE survey_id = ? AND MONTH(created) = MONTH(NOW()) AND YEAR(created) = YEAR(NOW())) + 
+            (SELECT COUNT(*) FROM tracker_submissions WHERE survey_id = ? AND MONTH(submitted_at) = MONTH(NOW()) AND YEAR(submitted_at) = YEAR(NOW())) as month
+    ");
+    $monthStmt->execute([$surveyId, $surveyId]);
     $stats['month_submissions'] = $monthStmt->fetchColumn();
     
     // Average responses per submission
@@ -422,7 +438,7 @@ try {
                         <h4 class="mb-0 opacity-8"><?php echo htmlspecialchars($survey['name']); ?></h4>
                     </div>
                     <div>
-                        <a href="records.php" class="btn btn-light">
+                        <a href="records" class="btn btn-light">
                             <i class="fas fa-arrow-left me-2"></i>Back to Records
                         </a>
                     </div>

@@ -14,14 +14,30 @@ require 'connect.php'; // Database connection
 
 // --- Data Retrieval ---
 
-// Get survey statistics
+// Get survey statistics (including tracker submissions)
 $surveyStats = $pdo->query("
     SELECT
         COUNT(id) as total_surveys,
-        (SELECT COUNT(id) FROM submission) as total_submissions,
-        (SELECT COUNT(DISTINCT survey_id) FROM submission WHERE created >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) as active_surveys_last_month,
-        (SELECT COUNT(id) FROM submission WHERE created >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) as submissions_last_month,
-        (SELECT COUNT(id) FROM submission WHERE created >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH) AND created < DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) as submissions_prev_month
+        (
+            (SELECT COUNT(id) FROM submission) + 
+            (SELECT COUNT(id) FROM tracker_submissions)
+        ) as total_submissions,
+        (
+            SELECT COUNT(DISTINCT survey_id) 
+            FROM (
+                SELECT survey_id FROM submission WHERE created >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+                UNION 
+                SELECT survey_id FROM tracker_submissions WHERE submitted_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+            ) as active_surveys
+        ) as active_surveys_last_month,
+        (
+            (SELECT COUNT(id) FROM submission WHERE created >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) +
+            (SELECT COUNT(id) FROM tracker_submissions WHERE submitted_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+        ) as submissions_last_month,
+        (
+            (SELECT COUNT(id) FROM submission WHERE created >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH) AND created < DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) +
+            (SELECT COUNT(id) FROM tracker_submissions WHERE submitted_at >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH) AND submitted_at < DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+        ) as submissions_prev_month
     FROM survey
 ")->fetch(PDO::FETCH_ASSOC);
 
@@ -35,24 +51,42 @@ if ($submissions_prev_month > 0) {
     $submission_growth_percentage = 100; // If previous month was 0 and current is > 0
 }
 
-// Get recent submissions (MODIFIED TO INCLUDE sub.id)
+// Get recent submissions from both regular and tracker submissions
 $recentSubmissions = $pdo->query("
-    SELECT sub.id, s.name as survey_name, sub.created, sub.uid,
-           COUNT(sr.id) as response_count
-    FROM submission sub
-    JOIN survey s ON sub.survey_id = s.id
-    LEFT JOIN submission_response sr ON sub.id = sr.submission_id
-    GROUP BY sub.id
-    ORDER BY sub.created DESC
+    (
+        SELECT sub.id, CONVERT(s.name USING utf8) as survey_name, sub.created, CONVERT(sub.uid USING utf8) as uid,
+               COUNT(sr.id) as response_count, 'regular' as submission_type
+        FROM submission sub
+        JOIN survey s ON sub.survey_id = s.id
+        LEFT JOIN submission_response sr ON sub.id = sr.submission_id
+        GROUP BY sub.id
+    )
+    UNION ALL
+    (
+        SELECT ts.id, CONVERT(s.name USING utf8) as survey_name, ts.submitted_at as created, CONVERT(ts.uid USING utf8) as uid,
+               1 as response_count, 'tracker' as submission_type
+        FROM tracker_submissions ts
+        JOIN survey s ON ts.survey_id = s.id
+    )
+    ORDER BY created DESC
     LIMIT 5
 ")->fetchAll(PDO::FETCH_ASSOC);
 
-// Get survey participation data for chart (Top 10 most submitted surveys)
+// Get survey participation data for chart (Top 10 most submitted surveys, including tracker)
 $surveyParticipation = $pdo->query("
-    SELECT s.name, COUNT(sub.id) as submissions
+    SELECT s.name, 
+           (COALESCE(reg.regular_count, 0) + COALESCE(tr.tracker_count, 0)) as submissions
     FROM survey s
-    LEFT JOIN submission sub ON s.id = sub.survey_id
-    GROUP BY s.id, s.name
+    LEFT JOIN (
+        SELECT survey_id, COUNT(*) as regular_count 
+        FROM submission 
+        GROUP BY survey_id
+    ) reg ON s.id = reg.survey_id
+    LEFT JOIN (
+        SELECT survey_id, COUNT(*) as tracker_count 
+        FROM tracker_submissions 
+        GROUP BY survey_id
+    ) tr ON s.id = tr.survey_id
     ORDER BY submissions DESC
     LIMIT 10
 ")->fetchAll(PDO::FETCH_ASSOC);
@@ -200,213 +234,161 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            background-color: #f8fafc !important;
+            background-color: #f7f9fc !important;
             font-family: 'Open Sans', sans-serif;
         }
         
-        /* Enhanced Dashboard Header */
+        /* Compact Dashboard Header */
         .dashboard-welcome {
-            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
-            color: black;
-            padding: 2.5rem 2rem;
-            border-radius: 0px;
-            margin-bottom: 2rem;
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.15);
+            background: #ffffff;
+            color: #333;
+            padding: 1.5rem;
+            border-radius: 0;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             position: relative;
-            overflow: hidden;
-        }
-        
-        .dashboard-welcome::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 100%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            transform: rotate(15deg);
         }
         
         .dashboard-welcome h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            position: relative;
-            z-index: 2;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
         }
         
         .dashboard-welcome p {
-            font-size: 1.1rem;
-            opacity: 0.9;
+            font-size: 1rem;
+            color: #666;
             margin-bottom: 0;
-            position: relative;
-            z-index: 2;
         }
         
         .dashboard-welcome .time-info {
             position: absolute;
-            top: 2rem;
-            right: 2rem;
+            top: 1.5rem;
+            right: 1.5rem;
             text-align: right;
-            z-index: 2;
+            font-size: 0.9rem;
+            color: #777;
         }
         
-        /* Enhanced Statistics Cards */
+        /* Compact Statistics Cards */
         .stat-card {
             background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            border: none;
-            position: relative;
-            overflow: hidden;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
             height: 100%;
         }
         
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--card-accent, linear-gradient(90deg, #667eea, #764ba2));
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-        }
-        
         .stat-card .stat-number {
-            font-size: 2.8rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            background: var(--number-gradient, linear-gradient(135deg, #667eea, #764ba2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.1rem;
+            color: #2d3748;
         }
         
         .stat-card .stat-label {
-            color: #64748b;
-            font-size: 0.95rem;
-            font-weight: 600;
+            color: #718096;
+            font-size: 0.8rem;
+            font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 1rem;
-        }
-        
-        .stat-card .stat-change {
-            font-size: 0.9rem;
-            font-weight: 600;
-            padding: 0.4rem 0.8rem;
-            border-radius: 25px;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-        
-        .stat-card .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            background: var(--icon-gradient, linear-gradient(135deg, #667eea, #764ba2));
-            color: white;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-        }
-        
-        /* Card Accent Colors */
-        .stat-card.primary {
-            --card-accent: linear-gradient(90deg, #667eea, #764ba2);
-            --number-gradient: linear-gradient(135deg, #667eea, #764ba2);
-            --icon-gradient: linear-gradient(135deg, #667eea, #764ba2);
-        }
-        
-        .stat-card.success {
-            --card-accent: linear-gradient(90deg, #10b981, #059669);
-            --number-gradient: linear-gradient(135deg, #10b981, #059669);
-            --icon-gradient: linear-gradient(135deg, #10b981, #059669);
-        }
-        
-        .stat-card.danger {
-            --card-accent: linear-gradient(90deg, #ef4444, #dc2626);
-            --number-gradient: linear-gradient(135deg, #ef4444, #dc2626);
-            --icon-gradient: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-        
-        .stat-card.info {
-            --card-accent: linear-gradient(90deg, #3b82f6, #2563eb);
-            --number-gradient: linear-gradient(135deg, #3b82f6, #2563eb);
-            --icon-gradient: linear-gradient(135deg, #3b82f6, #2563eb);
-        }
-        
-        /* Enhanced Chart Cards */
-        .chart-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-        }
-        
-        .chart-card:hover {
-            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
-        }
-        
-        .chart-card .card-header {
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .chart-card h6 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #1e293b;
+            letter-spacing: 0.5px;
             margin-bottom: 0.5rem;
         }
         
+        .stat-card .stat-change {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .stat-card .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            background: #edf2f7;
+            color: #4a5568;
+        }
+        
+        /* Neutral Card Accent Colors */
+        .stat-card.primary {
+            --card-accent: #4a5568;
+        }
+        
+        .stat-card.success {
+            --card-accent: #38a169;
+        }
+        
+        .stat-card.danger {
+            --card-accent: #e53e3e;
+        }
+        
+        .stat-card.info {
+            --card-accent: #3182ce;
+        }
+        
+        /* Compact Chart Cards */
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .chart-card .card-header {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-card h6 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.25rem;
+        }
+        
         .chart-card .chart-description {
-            color: #64748b;
-            font-size: 0.95rem;
+            color: #718096;
+            font-size: 0.9rem;
             margin: 0;
         }
         
-        /* Enhanced Table */
+        /* Compact Table */
         .modern-table {
             background: white;
-            border-radius: 20px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-        }
-        
-        .modern-table .table {
-            margin-bottom: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
         }
         
         .modern-table .table thead th {
-            background: #f8fafc;
+            background: #f7fafc;
             border: none;
-            padding: 1.5rem 1.5rem;
-            font-weight: 700;
-            color: #475569;
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            color: #4a5568;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
         
         .modern-table .table tbody td {
-            padding: 1.5rem;
+            padding: 1rem 1.25rem;
             border: none;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid #edf2f7;
             vertical-align: middle;
         }
         
@@ -415,56 +397,24 @@ try {
         }
         
         .modern-table .table tbody tr:hover {
-            background: #f8fafc;
+            background: #f7fafc;
         }
         
         /* Responsive Design */
         @media (max-width: 768px) {
             .dashboard-welcome {
-                padding: 2rem 1.5rem;
+                padding: 1.5rem;
                 text-align: center;
-            }
-            
-            .dashboard-welcome h1 {
-                font-size: 2rem;
             }
             
             .dashboard-welcome .time-info {
                 position: static;
-                margin-top: 1rem;
-                text-align: center;
-            }
-            
-            .stat-card {
-                padding: 1.5rem;
-                margin-bottom: 1.5rem;
-            }
-            
-            .stat-card .stat-number {
-                font-size: 2.2rem;
-            }
-            
-            .chart-card {
-                padding: 1.5rem;
-            }
-            
-            .modern-table .table thead th,
-            .modern-table .table tbody td {
-                padding: 1rem;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .dashboard-welcome {
-                padding: 1.5rem 1rem;
-            }
-            
-            .dashboard-welcome h1 {
-                font-size: 1.75rem;
+                margin-top: 0.5rem;
             }
             
             .stat-card {
                 padding: 1.25rem;
+                margin-bottom: 1rem;
             }
             
             .chart-card {
@@ -474,39 +424,37 @@ try {
         
         /* Animation for loading */
         .fade-in {
-            animation: fadeIn 0.6s ease-in;
+            animation: fadeIn 0.5s ease-in-out;
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Improved badge styling */
+        /* Neutral badge styling */
         .response-badge {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 0.5rem 0.8rem;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.85rem;
+            background-color: #e2e8f0;
+            color: #4a5568;
+            padding: 0.4rem 0.7rem;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 0.8rem;
         }
         
-        /* View link styling */
+        /* Neutral view link styling */
         .view-link {
-            color: #667eea;
-            font-weight: 600;
+            color: #3182ce;
+            font-weight: 500;
             text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
         }
         
         .view-link:hover {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
+            background: #ebf8ff;
+            color: #2c5282;
         }
     </style>
 </head>
@@ -516,14 +464,14 @@ try {
     <div class="main-content position-relative border-radius-lg">
         <?php include 'components/navbar.php'; ?>
 
-        <!-- Enhanced Dashboard Welcome Header -->
+        <!-- Compact Dashboard Welcome Header -->
         <div class="dashboard-welcome fade-in">
             <div class="time-info">
-                <div style="font-size: 1rem; opacity: 0.8;">
+                <div style="font-size: 0.9rem; opacity: 0.8;">
                     <i class="fas fa-clock me-1"></i>
                     <?php echo date('l, F j, Y'); ?>
                 </div>
-                <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.25rem;">
+                <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 0.25rem;">
                     <?php echo date('g:i A'); ?>
                 </div>
             </div>
@@ -531,38 +479,38 @@ try {
             <p>Here's what's happening with your surveys today</p>
         </div>
 
-        <div class="container-fluid py-4">
-           <!-- Enhanced Statistics Cards -->
-           <div class="row mb-4">
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+        <div class="container-fluid py-3">
+           <!-- Compact Statistics Cards -->
+           <div class="row mb-3">
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
                     <div class="stat-card primary fade-in">
                         <div class="stat-icon">
                             <i class="fas fa-clipboard-list"></i>
                         </div>
                         <div class="stat-label">Total Surveys</div>
                         <div class="stat-number"><?php echo number_format($surveyStats['total_surveys']); ?></div>
-                        <div class="stat-change" style="background: rgba(16, 185, 129, 0.1); color: #059669;">
+                        <div class="stat-change" style="background: rgba(56, 161, 105, 0.1); color: #2f855a;">
                             <i class="fas fa-arrow-up"></i>
                             +<?= $surveyStats['active_surveys_last_month'] ?> active last month
                         </div>
                     </div>
                 </div>
 
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
                     <div class="stat-card danger fade-in" style="animation-delay: 0.1s;">
                         <div class="stat-icon">
                             <i class="fas fa-paper-plane"></i>
                         </div>
                         <div class="stat-label">Total Submissions</div>
                         <div class="stat-number"><?= number_format($surveyStats['total_submissions']) ?></div>
-                        <div class="stat-change" style="background: <?= $submission_growth_percentage >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)' ?>; color: <?= $submission_growth_percentage >= 0 ? '#059669' : '#dc2626' ?>;">
+                        <div class="stat-change" style="background: <?= $submission_growth_percentage >= 0 ? 'rgba(56, 161, 105, 0.1)' : 'rgba(229, 62, 62, 0.1)' ?>; color: <?= $submission_growth_percentage >= 0 ? '#2f855a' : '#c53030' ?>;">
                             <i class="fas fa-arrow-<?= $submission_growth_percentage >= 0 ? 'up' : 'down' ?>"></i>
                             <?= $submission_growth_percentage >= 0 ? '+' : '' ?><?= round($submission_growth_percentage, 1) ?>% from last month
                         </div>
                     </div>
                 </div>
 
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
                     <div class="stat-card success fade-in" style="animation-delay: 0.2s;">
                         <div class="stat-icon">
                             <i class="fas fa-chart-line"></i>
@@ -572,54 +520,54 @@ try {
                             <?= $surveyStats['total_surveys'] > 0 ? 
                                 number_format($surveyStats['total_submissions'] / $surveyStats['total_surveys'], 1) : '0' ?>
                         </div>
-                        <div class="stat-change" style="background: rgba(59, 130, 246, 0.1); color: #2563eb;">
+                        <div class="stat-change" style="background: rgba(49, 130, 206, 0.1); color: #2c5282;">
                             <i class="fas fa-trending-up"></i>
                             Performance Metric
                         </div>
                     </div>
                 </div>
 
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
                     <div class="stat-card info fade-in" style="animation-delay: 0.3s;">
                         <div class="stat-icon">
                             <i class="fas fa-text-width"></i>
                         </div>
                         <div class="stat-label">Avg. Response Length</div>
                         <div class="stat-number"><?= number_format($avgResponseLength) ?></div>
-                        <div class="stat-change" style="background: rgba(168, 85, 247, 0.1); color: #7c3aed;">
+                        <div class="stat-change" style="background: rgba(113, 128, 150, 0.1); color: #4a5568;">
                             <i class="fas fa-chart-bar"></i>
                             characters average
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Enhanced Chart Section -->
-            <div class="row mb-4">
-                <div class="col-lg-8 mb-4">
+            <!-- Compact Chart Section -->
+            <div class="row mb-3">
+                <div class="col-lg-8 mb-3">
                     <div class="chart-card fade-in" style="animation-delay: 0.4s;">
                         <div class="card-header">
-                            <h6><i class="fas fa-chart-bar me-2" style="color: #667eea;"></i>Top 10 Survey Participation</h6>
+                            <h6><i class="fas fa-chart-bar me-2" style="color: #3182ce;"></i>Top 10 Survey Participation</h6>
                             <p class="chart-description">
-                                <span class="fw-semibold">Most popular surveys</span> by total submissions
+                                Most popular surveys by total submissions
                             </p>
                         </div>
                         <div class="card-body">
-                            <div class="chart-wrapper" style="height: 300px;">
+                            <div class="chart-wrapper" style="height: 280px;">
                                 <canvas id="surveyChart" class="chart-canvas"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 mb-4">
+                <div class="col-lg-4 mb-3">
                     <div class="chart-card fade-in" style="animation-delay: 0.5s;">
                         <div class="card-header">
-                            <h6><i class="fas fa-pie-chart me-2" style="color: #667eea;"></i>Survey Status</h6>
+                            <h6><i class="fas fa-pie-chart me-2" style="color: #3182ce;"></i>Survey Status</h6>
                             <p class="chart-description">
                                 Active vs. Inactive survey breakdown
                             </p>
                         </div>
                         <div class="card-body">
-                            <div class="chart-wrapper" style="height: 300px;">
+                            <div class="chart-wrapper" style="height: 280px;">
                                 <canvas id="statusChart" class="chart-canvas"></canvas>
                             </div>
                         </div>
@@ -628,32 +576,32 @@ try {
             </div>
 
             <!-- Additional Analytics Section -->
-            <div class="row mb-4">
-                <div class="col-lg-6 mb-4">
+            <div class="row mb-3">
+                <div class="col-lg-6 mb-3">
                     <div class="chart-card fade-in" style="animation-delay: 0.6s;">
                         <div class="card-header">
-                            <h6><i class="fas fa-chart-column me-2" style="color: #667eea;"></i>Response Rate by Question Type</h6>
+                            <h6><i class="fas fa-chart-column me-2" style="color: #3182ce;"></i>Response Rate by Question Type</h6>
                             <p class="chart-description">
-                                <span class="fw-semibold">Average responses</span> per question type
+                                Average responses per question type
                             </p>
                         </div>
                         <div class="card-body">
-                            <div class="chart-wrapper" style="height: 300px;">
+                            <div class="chart-wrapper" style="height: 280px;">
                                 <canvas id="questionTypeChart" class="chart-canvas"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 mb-4">
+                <div class="col-lg-6 mb-3">
                     <div class="chart-card fade-in" style="animation-delay: 0.7s;">
                         <div class="card-header">
-                            <h6><i class="fas fa-chart-line me-2" style="color: #667eea;"></i>Monthly Submission Trends</h6>
+                            <h6><i class="fas fa-chart-line me-2" style="color: #3182ce;"></i>Monthly Submission Trends</h6>
                             <p class="chart-description">
-                                <span class="fw-semibold">Submission volume</span> over the last 6 months
+                                Submission volume over the last 6 months
                             </p>
                         </div>
                         <div class="card-body">
-                            <div class="chart-wrapper" style="height: 300px;">
+                            <div class="chart-wrapper" style="height: 280px;">
                                 <canvas id="completionRateChart" class="chart-canvas"></canvas>
                             </div>
                         </div>
@@ -661,14 +609,14 @@ try {
                 </div>
             </div>
 
-            <!-- Enhanced Recent Submissions Table -->
+            <!-- Compact Recent Submissions Table -->
             <div class="row">
                 <div class="col-12">
                     <div class="modern-table fade-in" style="animation-delay: 0.7s;">
-                        <div class="card-header" style="background: white; padding: 2rem 2rem 1.5rem; border-bottom: 2px solid #f1f5f9;">
-                            <h6><i class="fas fa-history me-2" style="color: #667eea;"></i>Recent Submissions</h6>
+                        <div class="card-header" style="background: white; padding: 1.5rem; border-bottom: 1px solid #e2e8f0;">
+                            <h6><i class="fas fa-history me-2" style="color: #3182ce;"></i>Recent Submissions</h6>
                             <p class="chart-description">
-                                Latest 5 survey responses with details
+                                Latest 5 survey responses
                             </p>
                         </div>
                         <div class="table-responsive">
@@ -687,18 +635,23 @@ try {
                                         <tr style="animation-delay: <?= 0.8 + ($index * 0.1) ?>s;" class="fade-in">
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <div class="survey-icon me-3" style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                                                        <i class="fas fa-poll text-white"></i>
+                                                    <div class="survey-icon me-3" style="width: 36px; height: 36px; background: #edf2f7; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                                        <i class="fas fa-poll text-muted"></i>
                                                     </div>
                                                     <div>
-                                                        <h6 class="mb-0 fw-semibold" style="color: #1e293b; font-size: 0.95rem;">
-                                                            <?= htmlspecialchars($submission['survey_name']) ?>
-                                                        </h6>
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <h6 class="mb-0" style="color: #2d3748; font-size: 0.9rem;">
+                                                                <?= htmlspecialchars($submission['survey_name']) ?>
+                                                            </h6>
+                                                            <span class="badge <?= $submission['submission_type'] === 'tracker' ? 'bg-info' : 'bg-primary' ?> text-white" style="font-size: 0.65rem; padding: 2px 6px;">
+                                                                <?= strtoupper($submission['submission_type']) ?>
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="fw-medium" style="color: #64748b; font-size: 0.9rem;">
+                                                <span class="fw-medium" style="color: #718096; font-size: 0.85rem;">
                                                     <?= htmlspecialchars($submission['uid']) ?>
                                                 </span>
                                             </td>
@@ -708,9 +661,9 @@ try {
                                                 </span>
                                             </td>
                                             <td class="text-center">
-                                                <div style="color: #64748b; font-size: 0.9rem;">
-                                                    <div class="fw-medium"><?= date('M d, Y', strtotime($submission['created'])) ?></div>
-                                                    <div style="font-size: 0.8rem; opacity: 0.8;"><?= date('H:i', strtotime($submission['created'])) ?></div>
+                                                <div style="color: #718096; font-size: 0.85rem;">
+                                                    <div><?= date('M d, Y', strtotime($submission['created'])) ?></div>
+                                                    <div style="font-size: 0.75rem; opacity: 0.8;"><?= date('H:i', strtotime($submission['created'])) ?></div>
                                                 </div>
                                             </td>
                                             <td class="text-center">
@@ -738,25 +691,25 @@ try {
     <script src="argon-dashboard-master/assets/js/argon-dashboard.js"></script>
 
     <script>
-        // Enhanced Color Palette
+        // Neutral Color Palette
         const colorPalette = {
-            primary: '#667eea',
-            primaryLight: 'rgba(102, 126, 234, 0.1)',
-            primaryMedium: 'rgba(102, 126, 234, 0.6)',
-            secondary: '#764ba2',
-            success: '#10b981',
-            danger: '#ef4444',
-            warning: '#f59e0b',
-            info: '#3b82f6',
-            gradient: ['#667eea', '#764ba2', '#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#06b6d4']
+            primary: '#3182ce',
+            secondary: '#718096',
+            success: '#38a169',
+            danger: '#e53e3e',
+            warning: '#dd6b20',
+            info: '#4a5568',
+            grid: 'rgba(0,0,0,0.05)',
+            text: '#2d3748',
+            textSecondary: '#718096'
         };
 
         // Chart.js Default Configuration
         Chart.defaults.font.family = "'Open Sans', sans-serif";
         Chart.defaults.font.size = 12;
-        Chart.defaults.color = '#64748b';
+        Chart.defaults.color = colorPalette.textSecondary;
 
-        // Survey Participation Chart with enhanced styling
+        // Survey Participation Chart
         const ctx1 = document.getElementById('surveyChart').getContext('2d');
         const surveyChart = new Chart(ctx1, {
             type: 'bar',
@@ -765,68 +718,34 @@ try {
                 datasets: [{
                     label: 'Total Submissions',
                     data: <?= json_encode($chartData) ?>,
-                    backgroundColor: colorPalette.gradient.map(color => color + '40'),
-                    borderColor: colorPalette.gradient,
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    borderSkipped: false,
+                    backgroundColor: 'rgba(49, 130, 206, 0.2)',
+                    borderColor: colorPalette.primary,
+                    borderWidth: 1.5,
+                    borderRadius: 6,
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        cornerRadius: 8,
-                        padding: 12
-                    }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: {
-                            color: 'rgba(148, 163, 184, 0.1)',
-                            drawBorder: false
-                        },
+                        grid: { color: colorPalette.grid, drawBorder: false },
                         ticks: {
-                            callback: function(value) {
-                                return Number.isInteger(value) ? value : '';
-                            },
-                            color: '#64748b',
-                            font: {
-                                weight: '500'
-                            }
+                            callback: function(value) { return Number.isInteger(value) ? value : ''; },
+                            color: colorPalette.textSecondary
                         }
                     },
                     x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 0,
-                            color: '#64748b',
-                            font: {
-                                weight: '500'
-                            }
-                        }
-                    }
-                },
-                elements: {
-                    bar: {
-                        borderRadius: 8
+                        grid: { display: false },
+                        ticks: { color: colorPalette.textSecondary }
                     }
                 }
             }
         });
 
-        // Survey Status Breakdown Chart with modern doughnut design
+        // Survey Status Breakdown Chart
         const ctx2 = document.getElementById('statusChart').getContext('2d');
         const statusChart = new Chart(ctx2, {
             type: 'doughnut',
@@ -834,13 +753,9 @@ try {
                 labels: <?= json_encode($statusLabels) ?>,
                 datasets: [{
                     data: <?= json_encode($statusData) ?>,
-                    backgroundColor: [
-                        colorPalette.primary,
-                        '#cbd5e1'
-                    ],
-                    borderWidth: 4,
+                    backgroundColor: [colorPalette.primary, '#e2e8f0'],
+                    borderWidth: 2,
                     borderColor: '#fff',
-                    hoverBorderWidth: 6
                 }]
             },
             options: {
@@ -848,219 +763,85 @@ try {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: window.innerWidth < 768 ? 'bottom' : 'right',
-                        align: 'center',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: {
-                                size: 14,
-                                weight: '500'
-                            },
-                            color: '#475569'
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        cornerRadius: 8,
-                        padding: 12
+                        position: 'bottom',
+                        labels: { usePointStyle: true, padding: 15, color: colorPalette.text }
                     }
                 },
-                cutout: '65%',
-                layout: {
-                    padding: 10
-                }
+                cutout: '70%'
             }
         });
 
-        // Question Type Response Rate Chart (Horizontal Bar Chart)
+        // Question Type Response Rate Chart
         const ctx3 = document.getElementById('questionTypeChart').getContext('2d');
         const questionTypeChart = new Chart(ctx3, {
             type: 'bar',
             data: {
                 labels: <?= json_encode($questionTypeLabels) ?>,
                 datasets: [{
-                    label: 'Avg Responses per Question',
+                    label: 'Avg Responses',
                     data: <?= json_encode($questionTypeResponseData) ?>,
-                    backgroundColor: colorPalette.gradient.map(color => color + '60'),
-                    borderColor: colorPalette.gradient,
-                    borderWidth: 2,
+                    backgroundColor: 'rgba(113, 128, 150, 0.2)',
+                    borderColor: colorPalette.secondary,
+                    borderWidth: 1.5,
                     borderRadius: 6,
-                    borderSkipped: false,
                 }]
             },
             options: {
+                indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
-                indexAxis: 'y',
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        cornerRadius: 8,
-                        padding: 12,
-                        callbacks: {
-                            label: function(context) {
-                                return context.parsed.x.toFixed(1) + ' responses per question';
-                            }
-                        }
-                    }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
                     x: {
                         beginAtZero: true,
-                        grid: {
-                            color: 'rgba(148, 163, 184, 0.1)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: '#64748b',
-                            font: {
-                                weight: '500'
-                            }
-                        }
+                        grid: { color: colorPalette.grid, drawBorder: false },
+                        ticks: { color: colorPalette.textSecondary }
                     },
                     y: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#64748b',
-                            font: {
-                                weight: '500',
-                                size: window.innerWidth < 768 ? 10 : 12
-                            }
-                        }
+                        grid: { display: false },
+                        ticks: { color: colorPalette.textSecondary }
                     }
                 }
             }
         });
 
-        // Monthly Submissions Chart (Line Chart)
+        // Monthly Submissions Chart
         const ctx4 = document.getElementById('completionRateChart').getContext('2d');
         const completionChart = new Chart(ctx4, {
             type: 'line',
             data: {
                 labels: <?= json_encode($completionLabels) ?>,
                 datasets: [{
-                    label: 'Monthly Submissions',
+                    label: 'Submissions',
                     data: <?= json_encode($completionData) ?>,
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    backgroundColor: 'rgba(56, 161, 105, 0.1)',
                     borderColor: colorPalette.success,
-                    borderWidth: 3,
+                    borderWidth: 2,
                     tension: 0.4,
                     fill: true,
-                    pointRadius: 5,
+                    pointRadius: 4,
                     pointBackgroundColor: colorPalette.success,
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointHoverRadius: 7,
-                    pointHoverBackgroundColor: colorPalette.success,
-                    pointHoverBorderColor: '#fff',
-                    pointHoverBorderWidth: 3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        cornerRadius: 8,
-                        padding: 12,
-                        callbacks: {
-                            label: function(context) {
-                                return context.parsed.y + ' submissions';
-                            }
-                        }
-                    }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: {
-                            color: 'rgba(148, 163, 184, 0.1)',
-                            drawBorder: false
-                        },
+                        grid: { color: colorPalette.grid, drawBorder: false },
                         ticks: {
-                            callback: function(value) {
-                                return Number.isInteger(value) ? value : '';
-                            },
-                            color: '#64748b',
-                            font: {
-                                weight: '500'
-                            }
+                            callback: function(value) { return Number.isInteger(value) ? value : ''; },
+                            color: colorPalette.textSecondary
                         }
                     },
                     x: {
-                        grid: {
-                            color: 'rgba(148, 163, 184, 0.1)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            autoSkip: true,
-                            maxTicksLimit: window.innerWidth < 768 ? 4 : 6,
-                            color: '#64748b',
-                            font: {
-                                weight: '500'
-                            }
-                        }
+                        grid: { display: false },
+                        ticks: { color: colorPalette.textSecondary }
                     }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
                 }
             }
-        });
-
-        // Responsive chart handling
-        function handleResize() {
-            if (statusChart) {
-                statusChart.options.plugins.legend.position = window.innerWidth < 768 ? 'bottom' : 'right';
-                statusChart.update('none');
-            }
-            
-            if (questionTypeChart) {
-                questionTypeChart.options.scales.y.ticks.font.size = window.innerWidth < 768 ? 10 : 12;
-                questionTypeChart.update('none');
-            }
-            
-            if (completionChart) {
-                completionChart.options.scales.x.ticks.maxTicksLimit = window.innerWidth < 768 ? 4 : 6;
-                completionChart.update('none');
-            }
-        }
-
-        // Add resize listener
-        window.addEventListener('resize', handleResize);
-
-        // Initialize tooltips for table actions
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add smooth scrolling for any internal links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                });
-            });
         });
     </script>
     

@@ -12,6 +12,12 @@ require 'dhis2/dhis2_shared.php';
 $activeTab = $_GET['tab'] ?? 'view';
 $message = [];
 
+// Restrict access to config tab for super users and admins only
+if ($activeTab == 'config' && (!isset($_SESSION['admin_role_id']) || !in_array($_SESSION['admin_role_id'], [1, 2]))) {
+    $activeTab = 'view'; // Redirect to default tab
+    $message = ['type' => 'error', 'text' => 'Access denied. DHIS2 Configuration is only accessible to Super Administrators and Administrators.'];
+}
+
 // Optional: Preload any data or messages for all tabs here
 
 ?>
@@ -28,97 +34,117 @@ $message = [];
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/argon-dashboard.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/sweetalert2.min.css" rel="stylesheet">
+    <link href="dhis2/settings.css" rel="stylesheet">
     <style>
-        /* Base styles from sync_monitor.php (optional, include if these are used elsewhere) */
-        
-        .metric-value {
-            font-size: 2.2rem;
-            font-weight: 700;
-            line-height: 1;
-            display: block;
-        }
-        .metric-label {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-        .metric-errors .metric-value {
-            color: #dc3545;
-        }
-        .status-badge {
-            font-size: 1rem;
-            padding: 0.5em 0.8em;
-        }
-        .progress-bar {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        .sync-message {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border-radius: 0.375rem;
-            border: 1px solid #e9ecef;
-        }
-        .card-header .icon-with-text {
-            display: flex;
-            align-items: center;
-        }
-        .card-header .icon-with-text i {
-            margin-right: 0.5rem;
+        #settings-body .brand-img {
+            display: none;
         }
 
-        /* --- FUTURISTIC DESIGN STYLES START HERE --- */
+        /* Base Neutral Color Scheme */
+        :root {
+            --neutral-50: #f9fafb;
+            --neutral-100: #f3f4f6;
+            --neutral-200: #e5e7eb;
+            --neutral-300: #d1d5db;
+            --neutral-400: #9ca3af;
+            --neutral-500: #6b7280;
+            --neutral-600: #4b5563;
+            --neutral-700: #374151;
+            --neutral-800: #1f2937;
+            --neutral-900: #111827;
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --success-600: #16a34a;
+            --danger-600: #dc2626;
+        }
 
-        /* Overall Lighter Background */
+        /* Overall Clean Background */
         body.bg-gray-100 {
-            background-color: #f8fafc !important; /* Light gray/white background */
+            background-color: var(--neutral-50) !important;
         }
 
-        /* Main Content Area */
+        /* Main Content Area - Reduced Padding */
         .main-content {
-            background-color: #f8fafc; /* Light background for content area */
+            background-color: var(--neutral-50);
         }
+        
         .container-fluid.py-4 {
-            background-color: #ffffff; /* White content background */
-            border-radius: 1rem;
-            padding: 2rem !important; /* More padding */
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08); /* Subtle outer shadow */
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            padding: 1.5rem !important;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
         }
 
-        /* Text Colors for Light Background */
-        .container-fluid h4, .container-fluid h5, .container-fluid h6,
-        .container-fluid p, .container-fluid label, .container-fluid strong, .container-fluid small {
-            color: #1e293b; /* Dark text for readability on light background */
+        /* Typography - Consistent with Aside */
+        .container-fluid h1, .container-fluid h2, .container-fluid h3 {
+            font-size: 1.25rem !important;
+            font-weight: 600 !important;
+            color: var(--neutral-800) !important;
+            margin-bottom: 0.75rem !important;
         }
+        
+        .container-fluid h4, .container-fluid h5, .container-fluid h6 {
+            font-size: 1.125rem !important;
+            font-weight: 500 !important;
+            color: var(--neutral-700) !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .container-fluid p, .container-fluid label, .container-fluid span {
+            font-size: 0.875rem !important;
+            color: var(--neutral-600) !important;
+            line-height: 1.4 !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .container-fluid small {
+            font-size: 0.75rem !important;
+            color: var(--neutral-500) !important;
+        }
+        
         .text-muted {
-            color: #64748b !important; /* Muted text for light theme */
-        }
-        .breadcrumb-link, .breadcrumb-item.active {
-            text-shadow: none; /* Remove shadow for light theme */
+            color: var(--neutral-500) !important;
         }
 
-        /* Page Title Section */
-        .navbar-title {
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7), 0 0 5px #ffd700; /* More pronounced glow for title */
+        /* Breadcrumb - Cleaner */
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-link-light {
+            color: var(--neutral-500) !important;
+            font-size: 0.875rem !important;
+            font-weight: 400 !important;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-link-light:hover {
+            color: var(--neutral-700) !important;
+        }
+        
+        .breadcrumb-item-active-light {
+            color: var(--neutral-800) !important;
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
         }
 
-        /* Vertical Tab Navigation Wrapper - Stable Version */
+        /* Vertical Tab Navigation - Compact and Neutral */
         .nav-wrapper {
             background: #ffffff;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin-bottom: 2rem;
-            border: 1px solid #e2e8f0;
-            position: relative;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--neutral-200);
         }
 
         .nav-pills {
             display: flex !important;
             flex-direction: column !important;
-            gap: 0.5rem;
+            gap: 0.25rem;
         }
 
         .nav-pills .nav-item {
@@ -126,15 +152,16 @@ $message = [];
             width: 100%;
         }
 
-        /* Default Tab Link Style - Stable Version */
+        /* Tab Links - Consistent with Aside Styling */
         .nav-pills .nav-link {
-            color: #64748b;
-            font-weight: 500;
-            padding: 1rem 1.5rem;
-            border-radius: 0.75rem;
-            transition: all 0.2s ease-in-out;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            color: var(--neutral-600);
+            font-size: 0.875rem !important;
+            font-weight: 400;
+            padding: 0.625rem 0.875rem !important;
+            border-radius: 0.375rem;
+            transition: all 0.15s ease-in-out;
+            background: transparent;
+            border: none;
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -142,187 +169,214 @@ $message = [];
             margin: 0;
         }
 
-        /* Tab Link Hover State - Stable */
         .nav-pills .nav-link:hover {
-            color: #1e293b;
-            background: #f1f5f9;
-            border-color: #cbd5e1;
+            color: var(--neutral-800);
+            background: var(--neutral-100);
             text-decoration: none;
         }
 
-        /* Active Tab Link Style - Stable */
         .nav-pills .nav-link.active {
             color: #ffffff !important;
-            background: linear-gradient(135deg, #3b82f6, #1e40af) !important;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3) !important;
-            border-color: #3b82f6 !important;
-            font-weight: 700;
+            background: var(--primary-600) !important;
+            font-weight: 500 !important;
             text-decoration: none;
         }
 
-        /* Remove any conflicting pseudo-elements */
-        .nav-pills .nav-link::before,
-        .nav-pills .nav-link::after {
-            display: none;
-        }
-
-        /* Ensure stable positioning and prevent layout shifts */
-        .nav-pills .nav-link {
-            transform: none !important;
-            position: static !important;
-            overflow: visible !important;
-        }
-        
-        .nav-pills .nav-link:hover,
-        .nav-pills .nav-link.active {
-            transform: none !important;
-        }
-        
-        /* Override Bootstrap nav-pills defaults that might cause instability */
-        .nav-pills .nav-link:not(.active) {
-            background-color: #f8fafc !important;
-        }
-        
-        /* Ensure consistent height for all nav items */
-        .nav-pills .nav-item {
-            min-height: auto;
-        }
-        
-        /* Fix flexbox alignment issues */
         .nav-pills .nav-link i {
             margin-right: 0.5rem;
             width: 1rem;
             text-align: center;
             flex-shrink: 0;
+            font-size: 0.875rem;
         }
 
-        /* Ensure HR elements are not clickable and don't inherit nav styling */
+        /* Dividers */
         .nav-wrapper hr {
-            pointer-events: none !important;
-            background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0)) !important;
-            border: none !important;
-            height: 1px !important;
-            margin: 1rem 0 !important;
-            cursor: default !important;
-            position: relative !important;
-            z-index: -1 !important;
+            border: none;
+            height: 1px;
+            background-color: var(--neutral-200);
+            margin: 0.75rem 0;
+        }
+
+        /* Tab Content Area - Reduced Padding */
+        .tab-content {
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            padding: 1.5rem !important;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--neutral-200);
+        }
+
+        /* Tab Headers - Consistent Sizing */
+        .tab-header h3 {
+            font-size: 1.25rem !important;
+            font-weight: 600 !important;
+            color: var(--neutral-800) !important;
+            margin-bottom: 0.5rem !important;
         }
         
-        .nav-wrapper hr:hover {
-            background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0)) !important;
-            border: none !important;
+        .tab-header p {
+            font-size: 0.875rem !important;
+            color: var(--neutral-500) !important;
+            margin-bottom: 1rem !important;
         }
 
-        /* Prevent any pseudo-elements or empty spaces from being clickable */
-        .nav-wrapper *:empty {
-            pointer-events: none !important;
+        /* Form Controls */
+        .form-select, .form-control, .form-control-sm {
+            background-color: #ffffff !important;
+            color: var(--neutral-700) !important;
+            border: 1px solid var(--neutral-300) !important;
+            font-size: 0.875rem !important;
+            padding: 0.5rem 0.75rem !important;
+            border-radius: 0.375rem !important;
+        }
+        
+        .form-select:focus, .form-control:focus, .form-control-sm:focus {
+            border-color: var(--primary-600) !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1) !important;
+            outline: none !important;
         }
 
-
-        /* Tab Content Area */
-        .tab-content {
-            background-color: #ffffff; /* White background for tab content */
-            border-radius: 0.75rem;
-            padding: 2rem;
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08); /* Light shadow for depth */
-            border: 1px solid #e2e8f0; /* Light border */
+        /* Labels */
+        .form-label, label {
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            color: var(--neutral-700) !important;
+            margin-bottom: 0.375rem !important;
         }
 
-        /* Adjustments for elements within tabs (like forms, tables, cards) */
-        .form-select, .form-control {
-            background-color: #ffffff !important; /* White input fields */
-            color: #1e293b !important;
-            border: 1px solid #cbd5e1 !important;
-        }
-        .form-select:focus, .form-control:focus {
-            border-color: #3b82f6 !important; /* Blue focus border */
-            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important; /* Blue glow on focus */
-        }
+        /* Cards - Minimal Style */
         .card {
             background-color: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-            color: #1e293b !important;
+            border: 1px solid var(--neutral-200) !important;
+            border-radius: 0.5rem !important;
+            box-shadow: none !important;
+            margin-bottom: 1rem !important;
         }
-        .card-header, .table-secondary {
-            background-color: #f8fafc !important; /* Light header for cards/tables */
-            color: #1e293b !important;
+        
+        .card-header {
+            background-color: var(--neutral-50) !important;
+            color: var(--neutral-800) !important;
+            border-bottom: 1px solid var(--neutral-200) !important;
+            padding: 1rem !important;
+            font-size: 1rem !important;
+            font-weight: 500 !important;
         }
-        .table-striped > tbody > tr:nth-of-type(odd) > * {
-            background-color: #f8fafc !important; /* Light stripes for tables */
+        
+        .card-body {
+            padding: 1rem !important;
         }
+
+        /* Tables */
         .table {
-            color: #1e293b !important; /* Dark text for table content */
+            color: var(--neutral-700) !important;
+            font-size: 0.875rem !important;
         }
+        
         .table thead th {
-            border-bottom: 1px solid #cbd5e1 !important; /* Light header border */
+            background-color: var(--neutral-50) !important;
+            color: var(--neutral-800) !important;
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--neutral-300) !important;
+            padding: 0.75rem !important;
         }
-        .table tbody tr {
-            border-bottom: 1px solid #e2e8f0 !important; /* Light row separator */
+        
+        .table tbody td {
+            padding: 0.75rem !important;
+            border-bottom: 1px solid var(--neutral-200) !important;
+        }
+        
+        .table-striped > tbody > tr:nth-of-type(odd) > * {
+            background-color: var(--neutral-50) !important;
         }
 
-        /* Button Styling to Fit Theme */
+        /* Buttons - Neutral and Consistent */
+        .btn {
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+            border: none !important;
+            transition: all 0.15s ease-in-out;
+        }
+        
+        .btn-sm {
+            font-size: 0.75rem !important;
+            padding: 0.375rem 0.75rem !important;
+        }
+        
         .btn-primary {
-            background-color: #3b82f6 !important; /* Blue primary button */
-            border-color: #3b82f6 !important;
-            color: #ffffff !important; /* White text on blue */
+            background-color: var(--primary-600) !important;
+            color: #ffffff !important;
         }
+        
         .btn-primary:hover {
-            background-color: #2563eb !important;
-            border-color: #2563eb !important;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            background-color: var(--primary-700) !important;
         }
-        .btn-success { /* Green for success actions like 'Load Location Table' */
-            background-color: #28a745 !important;
-            border-color: #28a745 !important;
-            color: #fff !important;
+        
+        .btn-success {
+            background-color: var(--success-600) !important;
+            color: #ffffff !important;
         }
-        .btn-success:hover {
-            background-color: #218838 !important;
-            border-color: #1e7e34 !important;
+        
+        .btn-danger {
+            background-color: var(--danger-600) !important;
+            color: #ffffff !important;
         }
-        .btn-danger { /* Red for error/delete actions */
-            background-color: #dc3545 !important;
-            border-color: #dc3545 !important;
-            color: #fff !important;
-        }
-        .btn-danger:hover {
-            background-color: #c82333 !important;
-            border-color: #bd2130 !important;
-        }
-        .btn-outline-secondary { /* For disabled/secondary buttons */
-            border-color: #6c757d !important;
-            color: #6c757d !important;
+        
+        .btn-secondary, .btn-outline-secondary {
+            background-color: var(--neutral-500) !important;
+            color: #ffffff !important;
+            border: 1px solid var(--neutral-500) !important;
         }
 
-          /* Reusable CSS classes for the light theme */
-    .header-container-light {
-        background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-    }
-    .breadcrumb-link-light {
-        color: #475569 !important;
-        font-weight: 600;
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-    .breadcrumb-link-light:hover {
-        color: #1e293b !important;
-    }
-    .breadcrumb-item-active-light {
-        color: #1e293b !important;
-        font-weight: 700;
-    }
-    .navbar-title-light {
-        color: #1e293b;
-        text-shadow: none;
-    }
-        /* --- FUTURISTIC DESIGN STYLES END HERE --- */
+        /* Alert Messages */
+        .alert {
+            font-size: 0.875rem !important;
+            padding: 0.75rem 1rem !important;
+            border-radius: 0.375rem !important;
+            border: 1px solid !important;
+            margin-bottom: 1rem !important;
+        }
+
+        /* Status Badges */
+        .status-badge, .badge {
+            font-size: 0.75rem !important;
+            font-weight: 500 !important;
+            padding: 0.25rem 0.5rem !important;
+            border-radius: 0.25rem !important;
+        }
+
+        /* Code Blocks - Payload Checker */
+        .code-block {
+            background-color: var(--neutral-100) !important;
+            border: 1px solid var(--neutral-200) !important;
+            color: var(--neutral-800) !important;
+            font-size: 0.75rem !important;
+            padding: 0.75rem !important;
+            border-radius: 0.375rem !important;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+        }
+
+        /* Remove Excessive Margins */
+        .mb-4, .mb-3 {
+            margin-bottom: 1rem !important;
+        }
+        
+        .mt-4, .mt-3 {
+            margin-top: 1rem !important;
+        }
+        
+        .py-4, .py-3 {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
     </style>
 </head>
-<body class="g-sidenav-show bg-gray-100">
+<body class="g-sidenav-show bg-gray-100" id="settings-body">
     <?php include 'components/aside.php'; ?>
 
     <div class="main-content position-relative border-radius-lg">
@@ -346,22 +400,22 @@ $message = [];
                     <div class="nav-wrapper">
                         <ul class="nav nav-pills flex-column" id="tabs-text" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'view') ? 'active' : '' ?>" href="?tab=view">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'view') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=view">
                             <i class="fas fa-sitemap me-2"></i>Org-Unit Viewer
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'load') ? 'active' : '' ?>" href="?tab=load">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'load') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=load">
                             <i class="fas fa-download me-2"></i>Org-Unit Importer
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'new') ? 'active' : '' ?>" href="?tab=new">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'new') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=new">
                             <i class="fas fa-search me-2"></i>DHIS2-Programs-Fetcher
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'questions') ? 'active' : '' ?>" href="?tab=questions">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'questions') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=questions">
                             <i class="fas fa-link me-2"></i>Mapping-Interface
                         </a>
                     </li>
@@ -371,22 +425,24 @@ $message = [];
                         
                         <ul class="nav nav-pills flex-column" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'profile') ? 'active' : '' ?>" href="?tab=profile">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'profile') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=profile">
                             <i class="fas fa-user-circle me-2"></i>Profile Settings
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'users') ? 'active' : '' ?>" href="?tab=users">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'users') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=users">
                             <i class="fas fa-users-cog me-2"></i>User Management
                         </a>
                     </li>
+                    <?php if (isset($_SESSION['admin_role_id']) && in_array($_SESSION['admin_role_id'], [1, 2])): ?>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'config') ? 'active' : '' ?>" href="?tab=config">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'config') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=config">
                             <i class="fas fa-cogs me-2"></i>DHIS2 Configuration
                         </a>
                     </li>
+                    <?php endif; ?>
                     <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'payload_checker') ? 'active' : '' ?>" href="?tab=payload_checker">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'payload_checker') ? 'active' : '' ?>" href="/fbs/admin/settings?tab=payload_checker">
                             <i class="fas fa-bug me-2"></i>Payload Checker
                         </a>
                     </li>
@@ -449,6 +505,12 @@ $message = [];
     <script src="argon-dashboard-master/assets/js/plugins/smooth-scrollbar.min.js"></script>
     <script src="argon-dashboard-master/assets/js/plugins/sweetalert2.all.min.js"></script>
     <script>
+    window.addEventListener('load', function() {
+        const logo = document.querySelector('.brand-img');
+        if (logo) {
+            logo.style.display = 'block';
+        }
+    });
     // Place any global JS here, or keep per-tab scripts inside their respective PHP includes!
     
     // Ensure clean navigation behavior

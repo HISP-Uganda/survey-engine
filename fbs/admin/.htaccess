@@ -1,0 +1,22 @@
+# Admin directory specific rules
+Options -Indexes
+
+# Admin clean URL redirects
+RewriteEngine On
+RewriteBase /survey-engine/
+
+# Force clean admin URLs to PHP files, even if directories exist
+RewriteRule ^main$ fbs/admin/main.php [L]
+RewriteRule ^question_bank$ fbs/admin/question_bank.php [L]
+RewriteRule ^survey$ fbs/admin/survey.php [L]
+RewriteRule ^records$ fbs/admin/records.php [L]
+RewriteRule ^settings$ fbs/admin/settings.php [L]
+RewriteRule ^logout$ fbs/admin/logout.php [L]
+
+# Prevent direct access to settings directory listing
+RewriteRule ^settings/$ fbs/admin/settings.php [L]
+
+# Auto-append .php for other admin files
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ $1.php [L]

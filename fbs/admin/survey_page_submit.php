@@ -169,7 +169,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // --- End DHIS2 Submission Logic ---
 
         // Redirect to simple thank you page with no connection to survey
-        header("Location: thank_you_simple.php?uid=$uid");
+        header("Location: /thank-you/$uid");
         exit;
     } catch (Exception $e) {
         // Roll back transaction on error using $pdo

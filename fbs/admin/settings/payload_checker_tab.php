@@ -11,29 +11,43 @@ $message_type = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['retry_submission_id'])) {
     $submissionIdToRetry = intval($_POST['retry_submission_id']);
     
-    // Fetch the original survey ID associated with this submission
-    $stmt = $pdo->prepare("SELECT survey_id FROM submission WHERE id = ?");
-    $stmt->execute([$submissionIdToRetry]);
-    $surveyIdForRetry = $stmt->fetchColumn();
+    // Determine if this is a regular or tracker submission and get survey ID
+    $stmt = $pdo->prepare("
+        SELECT survey_id, 'regular' as type FROM submission WHERE id = ?
+        UNION 
+        SELECT survey_id, 'tracker' as type FROM tracker_submissions WHERE id = ?
+    ");
+    $stmt->execute([$submissionIdToRetry, $submissionIdToRetry]);
+    $submissionInfo = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($surveyIdForRetry) {
+    if ($submissionInfo) {
+        $surveyIdForRetry = $submissionInfo['survey_id'];
+        $submissionType = $submissionInfo['type'];
+        
         try {
-            // Instantiate the DHIS2SubmissionHandler with the correct survey ID
-            $dhis2Submitter = new DHIS2SubmissionHandler($pdo, $surveyIdForRetry);
-
-            if ($dhis2Submitter->isReadyForSubmission()) {
-                $retryResult = $dhis2Submitter->processSubmission($submissionIdToRetry);
-
-                if ($retryResult['success']) {
-                    $message = "Retry successful for Submission ID: $submissionIdToRetry. Message: " . $retryResult['message'];
-                    $message_type = 'success';
-                } else {
-                    $message = "Retry failed for Submission ID: $submissionIdToRetry. Error: " . $retryResult['message'];
-                    $message_type = 'danger';
-                }
-            } else {
-                $message = "Cannot retry Submission ID: $submissionIdToRetry. DHIS2 configuration for survey ID $surveyIdForRetry is invalid.";
+            if ($submissionType === 'tracker') {
+                // For tracker submissions, we need to re-process using the tracker system
+                $message = "Tracker submission retry is not yet implemented. Submission ID: $submissionIdToRetry is a tracker submission.";
                 $message_type = 'warning';
+                // TODO: Implement tracker retry functionality
+            } else {
+                // Regular submission retry using DHIS2SubmissionHandler
+                $dhis2Submitter = new DHIS2SubmissionHandler($pdo, $surveyIdForRetry);
+
+                if ($dhis2Submitter->isReadyForSubmission()) {
+                    $retryResult = $dhis2Submitter->processSubmission($submissionIdToRetry);
+
+                    if ($retryResult['success']) {
+                        $message = "Retry successful for Submission ID: $submissionIdToRetry. Message: " . $retryResult['message'];
+                        $message_type = 'success';
+                    } else {
+                        $message = "Retry failed for Submission ID: $submissionIdToRetry. Error: " . $retryResult['message'];
+                        $message_type = 'danger';
+                    }
+                } else {
+                    $message = "Cannot retry Submission ID: $submissionIdToRetry. DHIS2 configuration for survey ID $surveyIdForRetry is invalid.";
+                    $message_type = 'warning';
+                }
             }
         } catch (Exception $e) {
             $message = "An unexpected error occurred during retry for Submission ID $submissionIdToRetry: " . $e->getMessage();
@@ -53,18 +67,25 @@ try {
         SELECT
             dsl.id as log_id,
             dsl.submission_id,
-            s.uid as submission_uid,
-            s.created as submission_date,
+            COALESCE(s.uid, ts.uid) as submission_uid,
+            COALESCE(s.created, ts.submitted_at) as submission_date,
             dsl.status,
             dsl.payload_sent,
             dsl.dhis2_response,
             dsl.dhis2_message,
             dsl.submitted_at,
             dsl.retries,
-            sy.name as survey_name
+            sy.name as survey_name,
+            CASE 
+                WHEN s.id IS NOT NULL THEN 'regular'
+                WHEN ts.id IS NOT NULL THEN 'tracker'
+                ELSE 'unknown'
+            END as submission_type
         FROM dhis2_submission_log dsl
-        JOIN submission s ON dsl.submission_id = s.id
-        JOIN survey sy ON s.survey_id = sy.id
+        LEFT JOIN submission s ON dsl.submission_id = s.id
+        LEFT JOIN tracker_submissions ts ON dsl.submission_id = ts.id
+        LEFT JOIN survey sy ON COALESCE(s.survey_id, ts.survey_id) = sy.id
+        WHERE (s.id IS NOT NULL OR ts.id IS NOT NULL)
         ORDER BY dsl.submitted_at DESC
         LIMIT 100 -- Limit to last 100 logs for performance
     ");
@@ -278,7 +299,14 @@ try {
                                 </div>
                             </td>
                             <td>
-                                <p class="text-sm font-weight-bold mb-0 text-dark"><?= htmlspecialchars($log['survey_name'] ?? 'N/A') ?></p>
+                                <div>
+                                    <p class="text-sm font-weight-bold mb-0 text-dark"><?= htmlspecialchars($log['survey_name'] ?? 'N/A') ?></p>
+                                    <?php if (isset($log['submission_type'])): ?>
+                                        <span class="badge <?= $log['submission_type'] === 'tracker' ? 'bg-info' : 'bg-primary' ?> text-white" style="font-size: 0.7rem;">
+                                            <?= $log['submission_type'] === 'tracker' ? 'TRACKER' : 'REGULAR' ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                             <td>
                                 <span class="status-badge status-<?= htmlspecialchars($log['status']) ?>">

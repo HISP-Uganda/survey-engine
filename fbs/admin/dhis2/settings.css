@@ -1,0 +1,172 @@
+/* Specific styles for the tree view */
+.org-unit-tree-list {
+    padding-left: 1.5rem; /* Indentation for nested lists */
+    margin-bottom: 0;
+}
+.org-unit-tree-list li {
+    margin-bottom: 0.25rem;
+}
+.org-unit-node {
+    padding: 0.5rem 0.25rem;
+    border-radius: 0.375rem;
+    background-color: rgba(255, 255, 255, 0.05); /* Slight background for each node */
+    transition: background-color 0.2s ease;
+}
+.org-unit-node:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.org-unit-node span {
+    color: #1e293b; /* Dark text for OU names */
+    font-weight: 500;
+    flex-grow: 1; /* Allows name to take available space */
+}
+.org-unit-node small {
+    color: #64748b !important; /* Muted text for UID and level */
+    font-size: 0.8em;
+    margin-left: 0.5rem;
+}
+
+/* Tree Toggle Icons */
+.tree-toggle {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    color: #3b82f6; /* Blue color for expand/collapse icon */
+    font-size: 0.8em;
+    width: 1.5rem; /* Fixed width to prevent jumping */
+    text-align: center;
+}
+.tree-toggle[aria-expanded="true"] {
+    transform: rotate(90deg); /* Rotate icon when expanded */
+}
+.fa-circle-dot { /* Style for leaf nodes (no children) */
+    color: #64748b; /* Muted color */
+    font-size: 0.6em;
+    width: 1.5rem; /* Align with toggles */
+    text-align: center;
+}
+
+/* Accordion Customization for Instance Keys */
+.accordion-item {
+    background-color: #ffffff; /* White background for accordion items */
+    border: 1px solid #e2e8f0; /* Light border */
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    overflow: hidden; /* Ensures border-radius applies to children */
+}
+.accordion-header {
+    background-color: #f8fafc; /* Light header for accordion */
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.accordion-button {
+    background-color: transparent !important;
+    color: #1e293b !important;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 0.75rem 1.25rem;
+    transition: all 0.2s ease;
+}
+.accordion-button:not(.collapsed) {
+    color: #3b82f6 !important; /* Blue for expanded header */
+    background-color: #f8fafc !important; /* Keep light background */
+    box-shadow: none;
+    border-bottom: 1px solid #3b82f6; /* Blue line under expanded header */
+}
+.accordion-button::after {
+    filter: none; /* No inversion for light background */
+}
+.accordion-body {
+    padding: 1.25rem;
+    color: #1e293b; /* Dark text color in body */
+}
+
+/* Specific table styles (if you decide to keep the flat table elsewhere) */
+.table-hover tbody tr:hover {
+    background-color: #f1f5f9; /* Light hover for light tables */
+}
+
+ /* Question mapping specific styles */
+    .mapping-container {
+        background-color: #ffffff;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 1.5rem;
+    }
+    
+    .question-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .question-card:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .mapping-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .mapping-status.mapped {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+    
+    .mapping-status.unmapped {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+    
+    .data-element-select {
+        min-width: 250px;
+    }
+    
+    .option-preview {
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+      /* Add specific styles for the load.php components here if needed,
+       or rely on the global styles from settings.php which are already futuristic. */
+
+    /* Adjust checkbox background color to be lighter */
+    .form-check-input.bg-light {
+        background-color: #ffffff !important; /* White for checkboxes */
+        border-color: #cbd5e1 !important;
+    }
+    .form-check-input.bg-light:checked {
+        background-color: #3b82f6 !important; /* Blue when checked */
+        border-color: #3b82f6 !important;
+    }
+
+    /* Sticky table header for scrollable area */
+    .table-responsive thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2; /* Ensure it's above other content in the scrollable div */
+        background-color: #f8fafc !important; /* Light background for sticky header */
+        border-bottom: 1px solid #cbd5e1 !important; /* Light border is visible */
+    }
+
+    /* Adjust button size further if "btn-lg" is not enough */
+    .btn.btn-lg {
+        padding: 0.75rem 2rem; /* More generous padding */
+        font-size: 1.15rem; /* Slightly larger text */
+    }

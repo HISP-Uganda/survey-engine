@@ -57,40 +57,73 @@ try {
     die("Database error: " . $e->getMessage());
 }
 
-// 2. Fetch submissions for the specified survey and date range
+// 2. Fetch both regular and tracker submissions for the specified survey and date range
 try {
+    // First get regular submissions
     $sql = "
         SELECT
             s.id,
             s.uid,
             l.name AS location_name,
-            s.created
+            s.created,
+            'regular' as submission_type
         FROM submission s
         LEFT JOIN location l ON s.location_id = l.id
         WHERE s.survey_id = :survey_id
     ";
 
-    $params = ['survey_id' => $surveyId]; // Initialize parameters array
+    $params = ['survey_id' => $surveyId];
 
-    // Add date filtering condition if dates are provided and valid
+    // Add date filtering for regular submissions
     if (!empty($startDate) && !empty($endDate)) {
-        // Basic date validation (YYYY-MM-DD format is expected from <input type="date">)
         if (strtotime($startDate) !== false && strtotime($endDate) !== false) {
             $sql .= " AND s.created BETWEEN :start_date AND :end_date_inclusive";
-            // Convert to full datetime range for inclusive filtering (from start of day to end of day)
             $params['start_date'] = $startDate . ' 00:00:00';
             $params['end_date_inclusive'] = $endDate . ' 23:59:59';
         } else {
-            // Log if dates are malformed, but don't stop execution. Filter won't be applied.
             error_log("generate_download.php: Invalid date format received. Not applying date filter. Start: {$startDate}, End: {$endDate}");
         }
     }
-    
-    $sql .= " ORDER BY " . $orderBy; // Append ORDER BY clause
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($params); // Execute with the fully prepared parameters
+    $stmt->execute($params);
     $submissions = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+    // Now get tracker submissions for the same survey
+    $trackerSql = "
+        SELECT
+            ts.id,
+            ts.uid,
+            ts.selected_facility_name AS location_name,
+            ts.submitted_at as created,
+            'tracker' as submission_type
+        FROM tracker_submissions ts
+        WHERE ts.survey_id = :survey_id_tracker
+    ";
+    
+    $trackerParams = ['survey_id_tracker' => $surveyId];
+    
+    // Add date filtering for tracker submissions
+    if (!empty($startDate) && !empty($endDate)) {
+        if (strtotime($startDate) !== false && strtotime($endDate) !== false) {
+            $trackerSql .= " AND ts.submitted_at BETWEEN :start_date_tracker AND :end_date_tracker_inclusive";
+            $trackerParams['start_date_tracker'] = $startDate . ' 00:00:00';
+            $trackerParams['end_date_tracker_inclusive'] = $endDate . ' 23:59:59';
+        }
+    }
+    
+    $trackerStmt = $pdo->prepare($trackerSql);
+    $trackerStmt->execute($trackerParams);
+    $trackerSubmissions = $trackerStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    
+    // Combine both arrays
+    $submissions = array_merge($submissions, $trackerSubmissions);
+    
+    // Sort by created date
+    usort($submissions, function($a, $b) {
+        return strtotime($b['created']) - strtotime($a['created']);
+    });
+
 } catch (PDOException $e) {
     die("Database error fetching submissions: " . $e->getMessage());
 }
@@ -135,10 +168,21 @@ foreach ($questions as $question) {
 $exportData = [];
 
 $headers = [
-    'Submission ID', 'UID', 'Location', 'Date Submitted'
+    'UID', 'Location', 'Date Submitted', 'Type'
 ];
 
-// Build headers with separate columns for checkbox options
+// For tracker submissions, we'll use a row-based approach instead of column-based
+$hasTrackerSubmissions = false;
+
+// Check if we have any tracker submissions
+foreach ($submissions as $submission) {
+    if ($submission['submission_type'] === 'tracker') {
+        $hasTrackerSubmissions = true;
+        break;
+    }
+}
+
+// Build headers - simple approach for all questions
 foreach ($questions as $question) {
     if ($question['question_type'] === 'checkbox' && !empty($checkboxOptions[$question['id']])) {
         // Create separate column for each checkbox option
@@ -146,49 +190,185 @@ foreach ($questions as $question) {
             $headers[] = $question['label'] . ' - ' . $option;
         }
     } else {
-        // Regular single column for other question types
+        // Single column per question
         $headers[] = $question['label'];
     }
 }
 $exportData[] = $headers;
 
+// Process each submission - using row-based approach for tracker repetitions
 foreach ($submissions as $submission) {
-    // Get responses for this submission
-    try {
-        $stmt = $pdo->prepare("
-            SELECT sr.question_id, sr.response_value FROM submission_response sr WHERE sr.submission_id = :submission_id
-        ");
-        $stmt->execute(['submission_id' => $submission['id']]);
-        $responses = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    } catch (PDOException $e) {
-        // Log error but continue processing other submissions if possible
-        error_log("Database error fetching responses for submission ID {$submission['id']}: " . $e->getMessage());
-        continue; // Skip this submission if responses can't be fetched
-    }
-
     $groupedResponses = [];
-    foreach ($responses as $response) { $groupedResponses[$response['question_id']][] = $response['response_value']; }
-
-    $row = [
-        $submission['id'], $submission['uid'],
-        $submission['location_name'] ?? 'N/A',
-        $submission['created']
-    ];
     
-    foreach ($questions as $question) {
-        $responseValues = $groupedResponses[$question['id']] ?? [];
+    if ($submission['submission_type'] === 'regular') {
+        // Get responses for regular submission
+        try {
+            $stmt = $pdo->prepare("
+                SELECT sr.question_id, sr.response_value FROM submission_response sr WHERE sr.submission_id = :submission_id
+            ");
+            $stmt->execute(['submission_id' => $submission['id']]);
+            $responses = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (PDOException $e) {
+            error_log("Database error fetching responses for submission ID {$submission['id']}: " . $e->getMessage());
+            continue;
+        }
         
-        if ($question['question_type'] === 'checkbox' && !empty($checkboxOptions[$question['id']])) {
-            // For checkbox questions, create separate columns with Yes/No or 1/0 values
-            foreach ($checkboxOptions[$question['id']] as $option) {
-                $row[] = in_array($option, $responseValues) ? 'Yes' : 'No';
+        foreach ($responses as $response) { 
+            $groupedResponses[$response['question_id']][] = $response['response_value']; 
+        }
+        
+        // Add single row for regular submission
+        $row = [
+            $submission['uid'],
+            $submission['location_name'] ?? 'N/A',
+            $submission['created'],
+            strtoupper($submission['submission_type'])
+        ];
+        
+        foreach ($questions as $question) {
+            $questionId = $question['id'];
+            
+            if ($question['question_type'] === 'checkbox' && !empty($checkboxOptions[$questionId])) {
+                // Regular checkbox handling
+                $responseValues = $groupedResponses[$questionId] ?? [];
+                foreach ($checkboxOptions[$questionId] as $option) {
+                    $row[] = in_array($option, $responseValues) ? 'Yes' : 'No';
+                }
+            } else {
+                // Single response
+                $responseValues = $groupedResponses[$questionId] ?? [];
+                $row[] = !empty($responseValues) ? implode(', ', $responseValues) : '';
             }
-        } else {
-            // Regular handling for other question types
-            $row[] = !empty($responseValues) ? implode(', ', $responseValues) : 'No response';
+        }
+        $exportData[] = $row;
+        
+    } else {
+        // Handle tracker submission - create multiple rows for repetitions
+        try {
+            $stmt = $pdo->prepare("SELECT form_data FROM tracker_submissions WHERE id = ?");
+            $stmt->execute([$submission['id']]);
+            $formDataJson = $stmt->fetchColumn();
+            $formData = json_decode($formDataJson, true);
+            
+            if ($formData) {
+                // Get question mappings for this survey
+                $stmt = $pdo->prepare("
+                    SELECT q.id, qm.dhis2_dataelement_id, qm.dhis2_attribute_id
+                    FROM question q
+                    JOIN survey_question sq ON q.id = sq.question_id
+                    LEFT JOIN question_dhis2_mapping qm ON q.id = qm.question_id
+                    WHERE sq.survey_id = ?
+                ");
+                $stmt->execute([$surveyId]);
+                $questionMappings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                // Create reverse mapping from DHIS2 ID to question ID
+                $dhis2ToQuestionId = [];
+                foreach ($questionMappings as $mapping) {
+                    if ($mapping['dhis2_dataelement_id']) {
+                        $dhis2ToQuestionId[$mapping['dhis2_dataelement_id']] = $mapping['id'];
+                    }
+                    if ($mapping['dhis2_attribute_id']) {
+                        $dhis2ToQuestionId[$mapping['dhis2_attribute_id']] = $mapping['id'];
+                    }
+                }
+                
+                // Collect attributes data (non-repeating)
+                $attributeData = [];
+                if (isset($formData['trackedEntityAttributes'])) {
+                    foreach ($formData['trackedEntityAttributes'] as $attributeId => $value) {
+                        if (isset($dhis2ToQuestionId[$attributeId])) {
+                            $questionId = $dhis2ToQuestionId[$attributeId];
+                            $attributeData[$questionId] = $value;
+                        }
+                    }
+                }
+                
+                // Process events (repeating stages)
+                $eventRows = [];
+                if (isset($formData['events']) && !empty($formData['events'])) {
+                    $entryNumber = 1;
+                    foreach ($formData['events'] as $eventData) {
+                        $eventRow = [];
+                        
+                        if (isset($eventData['dataValues'])) {
+                            foreach ($eventData['dataValues'] as $dataElementId => $value) {
+                                if (isset($dhis2ToQuestionId[$dataElementId])) {
+                                    $questionId = $dhis2ToQuestionId[$dataElementId];
+                                    $eventRow[$questionId] = $value;
+                                }
+                            }
+                        }
+                        
+                        // Create a row for this event/entry
+                        $row = [
+                            $submission['uid'] . " (Entry $entryNumber)",
+                            $submission['location_name'] ?? 'N/A',
+                            $submission['created'],
+                            strtoupper($submission['submission_type'])
+                        ];
+                        
+                        foreach ($questions as $question) {
+                            $questionId = $question['id'];
+                            
+                            if ($question['question_type'] === 'checkbox' && !empty($checkboxOptions[$questionId])) {
+                                // Checkbox handling for tracker
+                                $value = $eventRow[$questionId] ?? $attributeData[$questionId] ?? '';
+                                $responseValues = is_array($value) ? $value : [$value];
+                                
+                                foreach ($checkboxOptions[$questionId] as $option) {
+                                    $row[] = in_array($option, $responseValues) ? 'Yes' : 'No';
+                                }
+                            } else {
+                                // Regular question - use event data first, then attribute data
+                                $value = $eventRow[$questionId] ?? $attributeData[$questionId] ?? '';
+                                $row[] = $value;
+                            }
+                        }
+                        
+                        $eventRows[] = $row;
+                        $entryNumber++;
+                    }
+                }
+                
+                // If no events, create a single row with just attributes
+                if (empty($eventRows)) {
+                    $row = [
+                        $submission['uid'],
+                        $submission['location_name'] ?? 'N/A',
+                        $submission['created'],
+                        strtoupper($submission['submission_type'])
+                    ];
+                    
+                    foreach ($questions as $question) {
+                        $questionId = $question['id'];
+                        
+                        if ($question['question_type'] === 'checkbox' && !empty($checkboxOptions[$questionId])) {
+                            $value = $attributeData[$questionId] ?? '';
+                            $responseValues = is_array($value) ? $value : [$value];
+                            
+                            foreach ($checkboxOptions[$questionId] as $option) {
+                                $row[] = in_array($option, $responseValues) ? 'Yes' : 'No';
+                            }
+                        } else {
+                            $value = $attributeData[$questionId] ?? '';
+                            $row[] = $value;
+                        }
+                    }
+                    
+                    $eventRows[] = $row;
+                }
+                
+                // Add all event rows to export data
+                foreach ($eventRows as $row) {
+                    $exportData[] = $row;
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error processing tracker submission ID {$submission['id']}: " . $e->getMessage());
+            continue;
         }
     }
-    $exportData[] = $row;
 }
 
 // Remove empty columns (unchanged logic)

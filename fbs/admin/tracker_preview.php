@@ -666,14 +666,14 @@ $programStages = $trackerProgram['programStages'] ?? [];
                             <i class="fas fa-wifi-slash me-2"></i>Form Offline
                         </button>
                     <?php else: ?>
-                        <a href="tracker_program_form.php?survey_id=<?= $surveyId ?>" class="btn btn-primary btn-sm" target="_blank">
+                        <a href="../../t/<?= $surveyId ?>" class="btn btn-primary btn-sm" target="_blank">
                             <i class="fas fa-external-link-alt me-2"></i>Open Form
                         </a>
                     <?php endif; ?>
                     <button onclick="copyShareLink()" class="btn btn-info btn-sm">
                         <i class="fas fa-link me-2"></i>Copy Share Link
                     </button>
-                    <a href="tracker_share.php?survey_id=<?= $surveyId ?>" class="btn btn-success btn-sm">
+                    <a href="../../share/t/<?= $surveyId ?>" class="btn btn-success btn-sm">
                         <i class="fas fa-share me-2"></i>Share Page
                     </a>
                 </div>
@@ -957,8 +957,7 @@ $programStages = $trackerProgram['programStages'] ?? [];
             const surveyId = <?= json_encode($surveyId) ?>;
             const scheme = window.location.protocol;
             const host = window.location.host;
-            const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-            const shareUrl = scheme + '//' + host + basePath + 'tracker_share.php?survey_id=' + surveyId;
+            const shareUrl = `${scheme}//${host}/share/t/${surveyId}`;
             
             console.log('Attempting to copy URL:', shareUrl); // Debug log
             

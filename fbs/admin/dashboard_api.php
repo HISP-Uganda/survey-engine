@@ -49,7 +49,7 @@ try {
     }
 } catch (Exception $e) {
     error_log("Dashboard API error: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Internal server error']);
+    echo json_encode(['success' => false, 'message' => 'Internal server error: ' . $e->getMessage()]);
 }
 
 function getTimelineData($pdo, $surveyId) {
@@ -114,41 +114,53 @@ function getQuestionAnalysis($pdo, $surveyId) {
     $startDate = $_GET['start_date'] ?? null;
     $endDate = $_GET['end_date'] ?? null;
     
-    // Build date filter for submissions
+    // Build date filter for regular submissions
     $dateFilter = '';
+    $trackerDateFilter = '';
     $params = ['survey_id' => $surveyId, 'question_id' => $questionId];
     
     switch ($dateRange) {
         case 'today':
             $dateFilter = 'AND DATE(sub.created) = CURDATE()';
+            $trackerDateFilter = 'AND DATE(ts.submitted_at) = CURDATE()';
             break;
         case 'week':
             $dateFilter = 'AND sub.created >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
+            $trackerDateFilter = 'AND ts.submitted_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
             break;
         case 'month':
             $dateFilter = 'AND sub.created >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
+            $trackerDateFilter = 'AND ts.submitted_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
             break;
         case 'quarter':
             $dateFilter = 'AND sub.created >= DATE_SUB(NOW(), INTERVAL 3 MONTH)';
+            $trackerDateFilter = 'AND ts.submitted_at >= DATE_SUB(NOW(), INTERVAL 3 MONTH)';
             break;
         case 'year':
             $dateFilter = 'AND sub.created >= DATE_SUB(NOW(), INTERVAL 1 YEAR)';
+            $trackerDateFilter = 'AND ts.submitted_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)';
             break;
         case 'custom':
             if ($startDate && $endDate) {
                 $dateFilter = 'AND DATE(sub.created) BETWEEN :start_date AND :end_date';
+                $trackerDateFilter = 'AND DATE(ts.submitted_at) BETWEEN :start_date AND :end_date';
                 $params['start_date'] = $startDate;
                 $params['end_date'] = $endDate;
             }
             break;
     }
     
-    // Get question type
-    $questionStmt = $pdo->prepare("SELECT question_type FROM question WHERE id = ?");
+    // Get question type and label
+    $questionStmt = $pdo->prepare("SELECT question_type, label FROM question WHERE id = ?");
     $questionStmt->execute([$questionId]);
-    $questionType = $questionStmt->fetchColumn();
+    $questionInfo = $questionStmt->fetch(PDO::FETCH_ASSOC);
+    $questionType = $questionInfo['question_type'];
+    $questionLabel = $questionInfo['label'];
     
-    // Get response distribution
+    // Initialize response collection
+    $responses = [];
+    
+    // Get regular submission responses
     $sql = "
         SELECT 
             sr.response_value as response,
@@ -164,21 +176,130 @@ function getQuestionAnalysis($pdo, $surveyId) {
     
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
-    $responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $regularResponses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Add regular responses to the collection
+    foreach ($regularResponses as $response) {
+        $responses[$response['response']] = ($responses[$response['response']] ?? 0) + $response['count'];
+    }
+    
+    // Get tracker submission responses
+    $trackerSql = "
+        SELECT ts.form_data
+        FROM tracker_submissions ts
+        WHERE ts.survey_id = :survey_id
+        $trackerDateFilter
+    ";
+    
+    $trackerParams = ['survey_id' => $surveyId];
+    if (isset($params['start_date'])) {
+        $trackerParams['start_date'] = $params['start_date'];
+    }
+    if (isset($params['end_date'])) {
+        $trackerParams['end_date'] = $params['end_date'];
+    }
+    
+    $trackerStmt = $pdo->prepare($trackerSql);
+    $trackerStmt->execute($trackerParams);
+    $trackerSubmissions = $trackerStmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // For tracker submissions, show summary data instead of question-specific analysis
+    // since tracker programs don't map directly to individual questions
+    if (!empty($trackerSubmissions) && empty($responses)) {
+        // If we have tracker submissions but no regular responses,
+        // create a simple summary of tracker data
+        $responses['Tracker Submissions'] = count($trackerSubmissions);
+        
+        // Sample some values from tracker data for demonstration
+        foreach (array_slice($trackerSubmissions, 0, 1) as $submission) {
+            $formData = json_decode($submission['form_data'], true);
+            if (!$formData) continue;
+            
+            // Extract some sample values to show activity
+            if (isset($formData['trackedEntityAttributes'])) {
+                foreach ($formData['trackedEntityAttributes'] as $value) {
+                    if (is_bool($value)) {
+                        $value = $value ? 'Yes' : 'No';
+                        $responses[$value] = ($responses[$value] ?? 0) + 1;
+                    }
+                }
+            }
+            
+            if (isset($formData['events'])) {
+                foreach ($formData['events'] as $event) {
+                    if (isset($event['dataValues'])) {
+                        foreach ($event['dataValues'] as $value) {
+                            if (is_bool($value)) {
+                                $value = $value ? 'Yes' : 'No';
+                                $responses[$value] = ($responses[$value] ?? 0) + 1;
+                            }
+                        }
+                    }
+                }
+            }
+            break; // Just sample one submission for now
+        }
+    }
+    
+    // Convert to format expected by frontend
+    $formattedResponses = [];
+    foreach ($responses as $response => $count) {
+        $formattedResponses[] = [
+            'response' => $response,
+            'count' => $count
+        ];
+    }
+    
+    // Sort by count descending
+    usort($formattedResponses, function($a, $b) {
+        return $b['count'] - $a['count'];
+    });
     
     // Calculate statistics
-    $stats = calculateQuestionStats($pdo, $surveyId, $questionId, $questionType, $dateFilter, $params);
+    $stats = calculateQuestionStats($pdo, $surveyId, $questionId, $questionType, $dateFilter, $trackerDateFilter, $params, $questionLabel);
     
     return [
         'success' => true, 
-        'responses' => $responses,
+        'responses' => $formattedResponses,
         'stats' => $stats
     ];
 }
 
-function calculateQuestionStats($pdo, $surveyId, $questionId, $questionType, $dateFilter, $params) {
-    // Total responses for this question
-    $totalSql = "
+function extractQuestionValues($formData, $questionLabel) {
+    $values = [];
+    
+    // For now, let's extract ALL non-empty values from the tracker data
+    // and let the calling function handle the aggregation
+    // This is a simplified approach until we have proper DHIS2 mapping
+    
+    // Search through tracked entity attributes
+    if (isset($formData['trackedEntityAttributes'])) {
+        foreach ($formData['trackedEntityAttributes'] as $attributeId => $value) {
+            if (!empty($value) && $value !== null && $value !== '') {
+                $values[] = $value;
+            }
+        }
+    }
+    
+    // Search through events data values
+    if (isset($formData['events'])) {
+        foreach ($formData['events'] as $event) {
+            if (isset($event['dataValues'])) {
+                foreach ($event['dataValues'] as $dataElementId => $value) {
+                    if (!empty($value) && $value !== null && $value !== '') {
+                        $values[] = $value;
+                    }
+                }
+            }
+        }
+    }
+    
+    return array_unique($values); // Remove duplicates
+}
+
+function calculateQuestionStats($pdo, $surveyId, $questionId, $questionType, $dateFilter, $trackerDateFilter, $params, $questionLabel) {
+    // Count regular submission responses
+    $totalRegularSql = "
         SELECT COUNT(*) as total
         FROM submission_response sr
         JOIN submission sub ON sr.submission_id = sub.id
@@ -187,28 +308,54 @@ function calculateQuestionStats($pdo, $surveyId, $questionId, $questionType, $da
         $dateFilter
     ";
     
-    $totalStmt = $pdo->prepare($totalSql);
-    $totalStmt->execute($params);
-    $totalResponses = $totalStmt->fetchColumn();
+    $totalRegularStmt = $pdo->prepare($totalRegularSql);
+    $totalRegularStmt->execute($params);
+    $totalRegularResponses = $totalRegularStmt->fetchColumn();
     
-    // Total submissions for survey (for response rate calculation)
+    // Count tracker submissions (simplified approach)
+    $trackerParams = ['survey_id' => $surveyId];
+    if (isset($params['start_date'])) {
+        $trackerParams['start_date'] = $params['start_date'];
+    }
+    if (isset($params['end_date'])) {
+        $trackerParams['end_date'] = $params['end_date'];
+    }
+    
+    $trackerCountSql = "
+        SELECT COUNT(*) as count
+        FROM tracker_submissions ts
+        WHERE ts.survey_id = :survey_id
+        $trackerDateFilter
+    ";
+    
+    $trackerCountStmt = $pdo->prepare($trackerCountSql);
+    $trackerCountStmt->execute($trackerParams);
+    $trackerCount = $trackerCountStmt->fetchColumn();
+    
+    // For tracker programs, use simplified statistics
+    $totalResponses = $totalRegularResponses + $trackerCount;
+    
+    // Total submissions for survey
     $submissionParams = ['survey_id' => $surveyId];
-    $submissionDateFilter = str_replace('sub.created', 's.created', $dateFilter);
-    if (isset($params['start_date'])) $submissionParams['start_date'] = $params['start_date'];
-    if (isset($params['end_date'])) $submissionParams['end_date'] = $params['end_date'];
+    $regularSubmissionDateFilter = str_replace('sub.created', 's.created', $dateFilter);
+    if (isset($params['start_date'])) {
+        $submissionParams['start_date'] = $params['start_date'];
+    }
+    if (isset($params['end_date'])) {
+        $submissionParams['end_date'] = $params['end_date'];
+    }
     
     $totalSubmissionsSql = "
-        SELECT COUNT(*) as total
-        FROM submission s
-        WHERE s.survey_id = :survey_id
-        $submissionDateFilter
+        SELECT 
+            (SELECT COUNT(*) FROM submission s WHERE s.survey_id = :survey_id $regularSubmissionDateFilter) +
+            (SELECT COUNT(*) FROM tracker_submissions ts WHERE ts.survey_id = :survey_id $trackerDateFilter) as total
     ";
     
     $totalSubmissionsStmt = $pdo->prepare($totalSubmissionsSql);
     $totalSubmissionsStmt->execute($submissionParams);
     $totalSubmissions = $totalSubmissionsStmt->fetchColumn();
     
-    // Most common response
+    // Get most common response from regular submissions only for now
     $mostCommonSql = "
         SELECT sr.response_value
         FROM submission_response sr
@@ -223,9 +370,16 @@ function calculateQuestionStats($pdo, $surveyId, $questionId, $questionType, $da
     
     $mostCommonStmt = $pdo->prepare($mostCommonSql);
     $mostCommonStmt->execute($params);
-    $mostCommon = $mostCommonStmt->fetchColumn() ?: 'N/A';
+    $mostCommon = $mostCommonStmt->fetchColumn();
     
-    // Calculate average score for numeric responses
+    // If no regular responses but have tracker submissions
+    if (!$mostCommon && $trackerCount > 0) {
+        $mostCommon = 'Tracker Data Available';
+    } else if (!$mostCommon) {
+        $mostCommon = 'N/A';
+    }
+    
+    // Calculate average score for numeric responses (regular only for now)
     $averageScore = null;
     if (in_array($questionType, ['rating', 'number', 'integer', 'decimal'])) {
         $avgSql = "
