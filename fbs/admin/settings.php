@@ -9,7 +9,7 @@ require_once 'includes/session_timeout.php';
 require 'connect.php';
 require 'dhis2/dhis2_shared.php';
 
-$activeTab = $_GET['tab'] ?? 'view';
+$activeTab = $_GET['tab'] ?? '';
 $message = [];
 
 // Restrict access to config tab for super users and admins only
@@ -27,7 +27,7 @@ if ($activeTab == 'config' && (!isset($_SESSION['admin_role_id']) || !in_array($
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Settings</title>
-    <link rel="icon" type="image/png" href="argon-dashboard-master/assets/img/istock3.png">
+    <link rel="icon" type="image/png" href="argon-dashboard-master/assets/img/webhook-icon.png">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/nucleo-icons.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/nucleo-svg.css" rel="stylesheet">
@@ -38,6 +38,16 @@ if ($activeTab == 'config' && (!isset($_SESSION['admin_role_id']) || !in_array($
     <style>
         #settings-body .brand-img {
             display: none;
+        }
+        
+        /* Profile avatar styling */
+        .profile-avatar {
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        /* Hide tab content initially to prevent flicker */
+        .tab-content {
+            min-height: 200px;
         }
 
         /* Base Neutral Color Scheme */
@@ -491,8 +501,12 @@ if ($activeTab == 'config' && (!isset($_SESSION['admin_role_id']) || !in_array($
                         include 'settings/payload_checker_tab.php';
                         break;
                     default:
-                        // Optional: show a "not found" or default message
-                        echo '<div class="alert alert-warning">Tab not found.</div>';
+                        // Welcome message when no tab is selected
+                        echo '<div class="text-center py-5">';
+                        echo '<i class="fas fa-cog fa-3x text-muted mb-3"></i>';
+                        echo '<h3 class="text-dark mb-2">Admin Settings</h3>';
+                        echo '<p class="text-muted">Select a tab from the sidebar to manage your system settings.</p>';
+                        echo '</div>';
                         break;
                 }
                 ?>

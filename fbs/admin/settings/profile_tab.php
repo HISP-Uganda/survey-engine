@@ -1,6 +1,7 @@
 <?php
 // Profile tab content for settings page
 // This file is included in settings.php when profile tab is active
+require_once __DIR__ . '/../includes/profile_helper.php';
 
 // Handle profile update if this is a POST request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
@@ -9,6 +10,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $current_password = $_POST['current_password'];
     $new_password = $_POST['new_password'];
     $confirm_password = $_POST['confirm_password'];
+    
+    // Handle profile image upload if provided
+    $imageUploadResult = null;
+    if (!empty($_FILES['profile_image']['name'])) {
+        $imageUploadResult = handleProfileImageUpload($_FILES['profile_image'], $_SESSION['admin_id'], $pdo);
+        if (!$imageUploadResult['success']) {
+            $message = ['type' => 'error', 'text' => $imageUploadResult['message']];
+        }
+    }
     
     // Validate inputs
     if (empty($username)) {
@@ -35,7 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 if ($stmt->execute([$username, $email, $new_hash, $_SESSION['admin_id']])) {
                     $_SESSION['admin_username'] = $username;
                     $_SESSION['admin_email'] = $email;
-                    $message = ['type' => 'success', 'text' => 'Profile updated successfully with new password.'];
+                    $successMsg = 'Profile updated successfully with new password.';
+                    if ($imageUploadResult && $imageUploadResult['success']) {
+                        $successMsg .= ' Profile image updated.';
+                    }
+                    $message = ['type' => 'success', 'text' => $successMsg];
                 } else {
                     $message = ['type' => 'error', 'text' => 'Failed to update profile.'];
                 }
@@ -47,7 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         if ($stmt->execute([$username, $email, $_SESSION['admin_id']])) {
             $_SESSION['admin_username'] = $username;
             $_SESSION['admin_email'] = $email;
-            $message = ['type' => 'success', 'text' => 'Profile updated successfully.'];
+            $successMsg = 'Profile updated successfully.';
+            if ($imageUploadResult && $imageUploadResult['success']) {
+                $successMsg .= ' Profile image updated.';
+            }
+            $message = ['type' => 'success', 'text' => $successMsg];
         } else {
             $message = ['type' => 'error', 'text' => 'Failed to update profile.'];
         }
@@ -161,7 +179,16 @@ try {
 <div class="profile-header text-center">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <img src="argon-dashboard-master/assets/img/ship.jpg" alt="Profile" class="profile-avatar mb-4">
+<?php
+            // Check if user has custom profile image
+            $defaultImage = "argon-dashboard-master/assets/img/ship.jpg";
+            $profileImagePath = $defaultImage;
+            
+            if (!empty($user_data['profile_image']) && file_exists("uploads/profile_images/" . $user_data['profile_image'])) {
+                $profileImagePath = "uploads/profile_images/" . $user_data['profile_image'];
+            }
+            ?>
+            <img src="<?php echo htmlspecialchars($profileImagePath); ?>" alt="Profile" class="profile-avatar mb-4" id="profileImage">
             <h2 class="mb-2"><?php echo htmlspecialchars($user_data['username'] ?? 'Unknown User'); ?></h2>
             <p class="mb-0 text-muted">Administrator</p>
             <p class="text-muted small">Member since <?php echo date('F Y', strtotime($user_data['created_at'] ?? 'now')); ?></p>
@@ -208,7 +235,16 @@ try {
         </h5>
     </div>
     <div class="card-body">
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
+            <!-- Profile Image Upload -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label for="profile_image" class="form-label text-dark">Profile Image</label>
+                    <input type="file" class="form-control" id="profile_image" name="profile_image" accept="image/*">
+                    <div class="form-text">Upload a profile picture. Supported formats: JPG, PNG, GIF (Max: 2MB)</div>
+                </div>
+            </div>
+            
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="username" class="form-label text-dark">Username</label>
@@ -250,3 +286,59 @@ try {
         </form>
     </div>
 </div>
+
+<script>
+// Profile image preview functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const profileImageInput = document.getElementById('profile_image');
+    const profileImageElement = document.getElementById('profileImage');
+    
+    profileImageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                alert('Please select a valid image file (JPG, PNG, or GIF).');
+                e.target.value = '';
+                return;
+            }
+            
+            // Validate file size (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size too large. Maximum 2MB allowed.');
+                e.target.value = '';
+                return;
+            }
+            
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                profileImageElement.src = e.target.result;
+                
+                // Add a subtle animation
+                profileImageElement.style.opacity = '0.5';
+                setTimeout(() => {
+                    profileImageElement.style.opacity = '1';
+                }, 100);
+                
+                // Show file name
+                const fileName = file.name;
+                const fileInfo = document.createElement('small');
+                fileInfo.className = 'text-muted d-block mt-2';
+                fileInfo.textContent = 'Selected: ' + fileName;
+                
+                // Remove existing file info
+                const existingInfo = document.querySelector('.profile-image-info');
+                if (existingInfo) {
+                    existingInfo.remove();
+                }
+                
+                fileInfo.className += ' profile-image-info';
+                profileImageInput.parentNode.appendChild(fileInfo);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+</script>

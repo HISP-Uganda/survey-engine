@@ -4,6 +4,7 @@
 
 // Include permission manager
 require_once 'includes/PermissionManager.php';
+require_once 'includes/profile_helper.php';
 
 // Initialize permission manager
 $permissionManager = new PermissionManager($pdo, $_SESSION['admin_id']);
@@ -412,7 +413,8 @@ $stats['active_users'] = count(array_filter($users, function($user) { return ($u
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="user-card">
                             <div class="d-flex align-items-center mb-3">
-                                <img src="argon-dashboard-master/assets/img/ship.jpg" alt="User" class="user-avatar me-3">
+                                <?php $userProfileImage = getUserProfileImage($user['id'], $pdo); ?>
+                                <img src="<?php echo htmlspecialchars($userProfileImage); ?>" alt="User" class="user-avatar me-3">
                                 <div class="flex-grow-1">
                                     <h6 class="text-dark mb-1">
                                         <?php echo htmlspecialchars($user['username']); ?>

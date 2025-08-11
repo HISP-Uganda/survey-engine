@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../includes/profile_helper.php';
 $currentPage = basename($_SERVER['PHP_SELF']);
 $menuItems = [
     [
@@ -48,10 +49,10 @@ $menuItems = [
         </button>
 
         <a class="navbar-brand m-0 text-center w-100" href="#">
-            <img src="argon-dashboard-master/assets/img/istock3.png"
+            <img src="argon-dashboard-master/assets/img/webhook-icon.png"
              class="navbar-brand-img"
-             alt="logo"
-             style="max-height: 4.5rem; border-radius: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+             alt="Survey Engine Logo"
+             style="max-height: 4rem; width: auto;">
             <span class="ms-1 font-weight-bold d-block mt-2 text-dark" style="font-size: 1rem;">Survey Engine</span>
         </a>
     </div>
@@ -78,7 +79,12 @@ $menuItems = [
                 <hr class="horizontal light mb-3">
                 <div class="d-flex align-items-center">
                     <div class="avatar avatar-sm me-2">
-                        <img src="argon-dashboard-master/assets/img/ship.jpg"
+                        <?php 
+                        $profileImagePath = isset($pdo) && isset($_SESSION['admin_id']) ? 
+                            getUserProfileImage($_SESSION['admin_id'], $pdo) : 
+                            "argon-dashboard-master/assets/img/ship.jpg";
+                        ?>
+                        <img src="<?php echo htmlspecialchars($profileImagePath); ?>"
                              alt="User"
                              class="avatar-img rounded-circle border border-2 border-white">
                     </div>

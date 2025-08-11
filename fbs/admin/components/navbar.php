@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../includes/profile_helper.php';
+
 // Define page titles for different sections
 $pages = [
     "main.php" => "Dashboard",
@@ -266,7 +268,12 @@ $notificationCount = count($notifications);
                 <a href="#" class="navbar-user-avatar d-flex align-items-center" 
                    id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <div class="avatar-container me-2">
-                        <img src="argon-dashboard-master/assets/img/ship.jpg" alt="User" class="avatar-img">
+                        <?php 
+                        $profileImagePath = isset($pdo) && isset($_SESSION['admin_id']) ? 
+                            getUserProfileImage($_SESSION['admin_id'], $pdo) : 
+                            "argon-dashboard-master/assets/img/ship.jpg";
+                        ?>
+                        <img src="<?php echo htmlspecialchars($profileImagePath); ?>" alt="User" class="avatar-img">
                         <div class="avatar-status"></div>
                     </div>
                     <div class="d-none d-lg-flex flex-column text-start">
