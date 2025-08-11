@@ -162,6 +162,33 @@ for ($i = 1; $i <= 8; $i++) {
 // Extract program components
 $trackedEntityAttributes = $trackerProgram['programTrackedEntityAttributes'] ?? [];
 $programStages = $trackerProgram['programStages'] ?? [];
+
+// De-duplicate program stages to prevent issues with faulty API responses
+if (!empty($programStages)) {
+    $uniqueStages = [];
+    $seenStageIds = [];
+    foreach ($programStages as $stage) {
+        if (isset($stage['id']) && !in_array($stage['id'], $seenStageIds)) {
+            $uniqueStages[] = $stage;
+            $seenStageIds[] = $stage['id'];
+        }
+    }
+    $programStages = $uniqueStages;
+}
+//     echo "<h1>Debug Info:                  
+//        Stages Before                            
+//          De-duplication</h1>";                    
+//    echo "<pre>";                          
+//   print_r($trackerProgram[               
+//         'programStages'] ?? []);                 
+//  echo "</pre>";                         
+                                       
+//  echo "<h1>Debug Info:                  
+//    Stages After                             
+//       De-duplication</h1>";                    
+//  echo "<pre>";                          
+//  print_r($programStages);               
+// echo "</pre>";                                                                
 ?>
 
 <!DOCTYPE html>

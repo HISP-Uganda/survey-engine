@@ -60,11 +60,11 @@ try {
     // Submit to DHIS2 using instance key
     $dhis2Response = submitToDHIS2Tracker($survey, $formData, $instanceKey, $locationData);
     
-    // Generate UID for this submission
-    $submissionUID = generateUID();
+    // Use the TEI UID from the response as the submission UID
+    $submissionUID = $dhis2Response['tei_id'] ?? generateUID();
     
     // Save to local database for backup/tracking
-    $submissionId = saveLocalSubmission($surveyId, $formData, $dhis2Response, $locationData, $submissionUID);
+    $submissionId = saveTrackerSubmissionLocally($surveyId, $formData, $dhis2Response, $locationData, $submissionUID);
     
     // Log to payload checker for retry capability
     logToPayloadChecker($submissionId, 'SUCCESS', $formData, $dhis2Response, 'Tracker submission successful');
@@ -83,7 +83,7 @@ try {
     // Try to save local submission even on DHIS2 failure
     try {
         $submissionUID = generateUID();
-        $submissionId = saveLocalSubmission($surveyId, $formData, ['error' => $e->getMessage()], $locationData, $submissionUID);
+        $submissionId = saveTrackerSubmissionLocally($surveyId, $formData, ['error' => $e->getMessage()], $locationData, $submissionUID);
         // Log failure to payload checker for retry capability
         logToPayloadChecker($submissionId, 'FAILED', $formData, null, $e->getMessage());
     } catch (Exception $saveError) {
@@ -96,94 +96,340 @@ try {
     ]);
 }
 
-// Function to submit to DHIS2 tracker API using shared functions
+// Function to submit to DHIS2 tracker API using modern tracker API
 function submitToDHIS2Tracker($survey, $formData, $instanceKey, $locationData) {
     // Use selected orgunit from location data
     $selectedOrgUnit = $locationData['orgunit_uid'] ?? ($survey['dhis2_org_unit'] ?? 'DiszpKrYNg8');
     
-    // Step 1: Create/Update Tracked Entity Instance
-    $teiData = [
-        'trackedEntityType' => $survey['dhis2_tracked_entity_type_uid'] ?? 'MCPQUTHX1Ze', // Default person
-        'orgUnit' => $selectedOrgUnit, // Use selected location
-        'attributes' => []
-    ];
+    // Generate unique UIDs for tracker entities
+    $teiUID = generateUID();
+    $enrollmentUID = generateUID();
     
-    // Add TEI attributes
-    foreach ($formData['trackedEntityAttributes'] as $teaId => $value) {
-        $teiData['attributes'][] = [
-            'attribute' => $teaId,
-            'value' => $value
-        ];
+    // Convert form data structure to correct DHIS2 tracker API format
+    $trackerPayload = convertToTrackerAPIFormat($survey, $formData, $selectedOrgUnit, $teiUID, $enrollmentUID);
+    
+    // Submit using modern tracker API endpoint
+    $endpoint = '/api/tracker?async=false&importReportMode=FULL&validationMode=FULL&importStrategy=CREATE_AND_UPDATE';
+    $response = dhis2_post($endpoint, $trackerPayload, $instanceKey);
+    
+    if (!$response) {
+        throw new Exception('Failed to submit to DHIS2 tracker API: No response received');
     }
     
-    // Create TEI using shared function
-    $teiResponse = dhis2_post('trackedEntityInstances', $teiData, $instanceKey);
-    
-    if (!$teiResponse || !isset($teiResponse['response']['importSummaries'][0]['reference'])) {
-        throw new Exception('Failed to create tracked entity instance: ' . json_encode($teiResponse));
-    }
-    
-    $teiId = $teiResponse['response']['importSummaries'][0]['reference'];
-    
-    // Step 2: Enroll in program
-    $enrollmentData = [
-        'trackedEntityInstance' => $teiId,
-        'program' => $survey['dhis2_program_uid'],
-        'orgUnit' => $selectedOrgUnit, // Use selected location
-        'enrollmentDate' => date('Y-m-d'),
-        'incidentDate' => date('Y-m-d'),
-        'status' => 'ACTIVE'
-    ];
-    
-    $enrollmentResponse = dhis2_post('enrollments', $enrollmentData, $instanceKey);
-    
-    if (!$enrollmentResponse) {
-        throw new Exception('Failed to create enrollment: ' . json_encode($enrollmentResponse));
-    }
-    
-    // Step 3: Create events for each stage occurrence
-    $eventResponses = [];
-    foreach ($formData['events'] as $eventKey => $eventData) {
-        $event = [
-            'program' => $survey['dhis2_program_uid'],
-            'programStage' => $eventData['programStage'],
-            'trackedEntityInstance' => $teiId,
-            'orgUnit' => $selectedOrgUnit, // Use selected location
-            'eventDate' => $eventData['eventDate'],
-            'status' => 'COMPLETED',
-            'dataValues' => []
-        ];
-        
-        // Add data values
-        foreach ($eventData['dataValues'] as $deId => $value) {
-            $event['dataValues'][] = [
-                'dataElement' => $deId,
-                'value' => $value
-            ];
-        }
-        
-        $eventResponse = dhis2_post('events', $event, $instanceKey);
-        $eventResponses[$eventKey] = $eventResponse;
+    // Check for success in modern tracker API response
+    if (!isTrackerAPIResponseSuccessful($response)) {
+        $errorMessage = extractTrackerAPIError($response);
+        error_log("DHIS2 Tracker API submission failed with detailed errors");
+        throw new Exception('DHIS2 Tracker API Error: ' . $errorMessage);
     }
     
     return [
-        'tei_response' => $teiResponse,
-        'enrollment_response' => $enrollmentResponse,
-        'event_responses' => $eventResponses,
-        'tei_id' => $teiId
+        'tracker_response' => $response,
+        'tei_id' => $teiUID,
+        'enrollment_id' => $enrollmentUID,
+        'status' => 'SUCCESS'
     ];
 }
 
+// Helper function to detect if a value is a file path instead of a DHIS2 file resource UID
+function isFileResourcePath($value) {
+    return (
+        strpos($value, 'C:\\') !== false ||          // Windows path
+        strpos($value, '/') !== false &&            // Unix path with file extensions
+        (
+            strpos($value, '.xlsx') !== false ||    // Excel file
+            strpos($value, '.csv') !== false ||     // CSV file
+            strpos($value, '.xls') !== false ||     // Old Excel file
+            strpos($value, '.pdf') !== false ||     // PDF file
+            strpos($value, '.doc') !== false        // Word file
+        ) ||
+        strpos($value, 'fakepath') !== false ||     // Browser security path
+        (
+            // More specific file path detection - must contain file extensions AND path separators
+            (strpos($value, '\\') !== false || strpos($value, '/') !== false) &&
+            preg_match('/\.(xlsx|csv|xls|pdf|docx?|txt|zip)$/i', $value)
+        )
+    );
+}
 
-// Function to save submission locally
-function saveLocalSubmission($surveyId, $formData, $dhis2Response, $locationData) {
+// Convert form data to proper DHIS2 tracker API format
+function convertToTrackerAPIFormat($survey, $formData, $selectedOrgUnit, $teiUID, $enrollmentUID) {
+    // Log form data for debugging
+    error_log("Converting form data to tracker format: " . json_encode($formData));
+    
+    // Prepare tracked entity attributes with validation
+    $attributes = [];
+    if (isset($formData['trackedEntityAttributes'])) {
+        foreach ($formData['trackedEntityAttributes'] as $teaId => $value) {
+            // Clean and validate attribute values
+            $cleanValue = trim((string)$value);
+            if ($cleanValue !== '') {
+                $attributes[] = [
+                    'attribute' => $teaId,
+                    'value' => $cleanValue
+                ];
+                error_log("TEA: $teaId = $cleanValue");
+            }
+        }
+    }
+    
+    // Add missing mandatory attribute if detected from error patterns
+    // Based on error: "Attribute: `biIdwUNiNxa`, is mandatory in tracked entity type `y5jPHwWD9ZV`"
+    $tetUID = $survey['dhis2_tracked_entity_type_uid'] ?? 'MCPQUTHX1Ze';
+    if ($tetUID === 'y5jPHwWD9ZV') {
+        // Check if mandatory attribute biIdwUNiNxa is missing
+        $hasMandatoryAttr = false;
+        foreach ($attributes as $attr) {
+            if ($attr['attribute'] === 'biIdwUNiNxa') {
+                $hasMandatoryAttr = true;
+                break;
+            }
+        }
+        
+        if (!$hasMandatoryAttr) {
+            // Add default value for mandatory attribute
+            $attributes[] = [
+                'attribute' => 'biIdwUNiNxa',
+                'value' => 'SurveyEngine_' . date('Y-m-d_H:i:s') // Default identifier
+            ];
+            error_log("Added mandatory TEA: biIdwUNiNxa = SurveyEngine_" . date('Y-m-d_H:i:s'));
+        }
+    }
+    
+    // Prepare events array (convert from object/map to array)
+    $events = [];
+    if (isset($formData['events'])) {
+        foreach ($formData['events'] as $eventKey => $eventData) {
+            $eventUID = generateUID();
+            
+            // Convert dataValues from object/map to array with validation
+            $dataValues = [];
+            if (isset($eventData['dataValues'])) {
+                foreach ($eventData['dataValues'] as $deId => $value) {
+                    // Clean and validate data values
+                    $cleanValue = trim((string)$value);
+                    if ($cleanValue !== '') {
+                        // Skip FILE_RESOURCE fields with file paths (CSV/XLSX uploads)
+                        // These are local file paths that DHIS2 cannot resolve - should be processed separately
+                        if (isFileResourcePath($cleanValue)) {
+                            error_log("Skipping FILE_RESOURCE field with file path: $deId = $cleanValue");
+                            continue;
+                        }
+                        
+                        $dataValues[] = [
+                            'dataElement' => $deId,
+                            'value' => $cleanValue,
+                            'providedElsewhere' => false
+                        ];
+                        error_log("DataElement: $deId = $cleanValue");
+                    }
+                }
+            }
+            
+            $events[] = [
+                'event' => $eventUID,
+                'program' => $survey['dhis2_program_uid'],
+                'programStage' => $eventData['programStage'],
+                'orgUnit' => $selectedOrgUnit,
+                'occurredAt' => $eventData['eventDate'] ?? date('Y-m-d'), // Use occurredAt instead of eventDate
+                'scheduledAt' => $eventData['eventDate'] ?? date('Y-m-d'),
+                'status' => 'COMPLETED',
+                'completedAt' => date('Y-m-d\TH:i:s.000'),
+                'storedBy' => 'SurveyEngine',
+                'dataValues' => $dataValues
+            ];
+        }
+    }
+    
+    // Build modern tracker API payload
+    $payload = [
+        'trackedEntities' => [
+            [
+                'trackedEntity' => $teiUID,
+                'trackedEntityType' => $survey['dhis2_tracked_entity_type_uid'] ?? 'MCPQUTHX1Ze',
+                'orgUnit' => $selectedOrgUnit,
+                'attributes' => $attributes,
+                'enrollments' => [
+                    [
+                        'enrollment' => $enrollmentUID,
+                        'program' => $survey['dhis2_program_uid'],
+                        'orgUnit' => $selectedOrgUnit,
+                        'enrolledAt' => date('Y-m-d'),
+                        'occurredAt' => date('Y-m-d'),
+                        'status' => 'COMPLETED',
+                        'events' => $events
+                    ]
+                ]
+            ]
+        ]
+    ];
+    
+    // Log final payload for debugging
+    error_log("Final tracker payload: " . json_encode($payload, JSON_PRETTY_PRINT));
+    
+    return $payload;
+}
+
+// Check if tracker API response indicates success
+function isTrackerAPIResponseSuccessful($response) {
+    // Log response for debugging
+    error_log("Checking success for response structure: " . json_encode(array_keys($response)));
+    
+    // Check overall status first (most reliable indicator)
+    if (isset($response['status']) && $response['status'] === 'OK') {
+        error_log("Success detected: status = OK");
+        return true;
+    }
+    
+    // Check HTTP status code if available
+    if (isset($response['httpStatusCode']) && ($response['httpStatusCode'] === 200 || $response['httpStatusCode'] === 201)) {
+        error_log("Success detected: HTTP status " . $response['httpStatusCode']);
+        return true;
+    }
+    
+    // Check bundle report for detailed status
+    if (isset($response['bundleReport']) && isset($response['bundleReport']['status']) && $response['bundleReport']['status'] === 'OK') {
+        error_log("Success detected: bundleReport status = OK");
+        return true;
+    }
+    
+    // Check if there are stats indicating successful creation/update
+    if (isset($response['bundleReport']['stats']) && 
+        ($response['bundleReport']['stats']['created'] > 0 || $response['bundleReport']['stats']['updated'] > 0)) {
+        error_log("Success detected: stats show created/updated entities");
+        return true;
+    }
+    
+    error_log("No success indicators found in response");
+    return false;
+}
+
+// Extract error message from tracker API response
+function extractTrackerAPIError($response) {
+    $errors = [];
+    
+    // Log the full response for debugging
+    error_log("DHIS2 Error Response: " . json_encode($response, JSON_PRETTY_PRINT));
+    
+    // Check for bundle report errors
+    if (isset($response['bundleReport']['typeReportMap'])) {
+        foreach ($response['bundleReport']['typeReportMap'] as $entityType => $typeReport) {
+            if (isset($typeReport['objectReports'])) {
+                foreach ($typeReport['objectReports'] as $objectReport) {
+                    // Log each object report
+                    error_log("Object Report for $entityType: " . json_encode($objectReport));
+                    
+                    if (isset($objectReport['errorReports'])) {
+                        foreach ($objectReport['errorReports'] as $errorReport) {
+                            $errorMsg = $errorReport['message'] ?? $errorReport['errorCode'] ?? 'Unknown error';
+                            $errors[] = "[$entityType] $errorMsg";
+                            
+                            // Special handling for option set validation errors
+                            if (strpos($errorMsg, 'not a valid option') !== false) {
+                                error_log("Option set validation error detected: $errorMsg");
+                            }
+                        }
+                    }
+                    
+                    // Check for warning reports too
+                    if (isset($objectReport['warningReports'])) {
+                        foreach ($objectReport['warningReports'] as $warningReport) {
+                            $warningMsg = $warningReport['message'] ?? 'Unknown warning';
+                            error_log("Warning: [$entityType] $warningMsg");
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Check for validation report errors
+    if (isset($response['validationReport']['errorReports'])) {
+        foreach ($response['validationReport']['errorReports'] as $errorReport) {
+            $errorMsg = $errorReport['message'] ?? $errorReport['errorCode'] ?? 'Validation error';
+            $errors[] = "[Validation] $errorMsg";
+            error_log("Validation error: $errorMsg");
+        }
+    }
+    
+    // Check for top-level error message
+    if (isset($response['message'])) {
+        $errors[] = $response['message'];
+    }
+    
+    // Check for HTTP status error
+    if (isset($response['httpStatusCode']) && $response['httpStatusCode'] >= 400) {
+        $errors[] = "HTTP {$response['httpStatusCode']}: " . ($response['httpStatus'] ?? 'Error');
+    }
+    
+    $finalError = empty($errors) ? 'Unknown tracker API error' : implode('; ', $errors);
+    error_log("Final extracted error: $finalError");
+    
+    return $finalError;
+}
+
+
+// Generate DHIS2 compatible UID (11 characters) with enhanced uniqueness and validation
+function generateUID() {
+    // DHIS2 UID requirements:
+    // - Exactly 11 characters
+    // - First character must be letter (a-zA-Z)
+    // - Remaining 10 characters can be alphanumeric (a-zA-Z0-9)
+    $letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    $alphanumeric = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    
+    // Start with a random letter
+    $uid = $letters[mt_rand(0, strlen($letters) - 1)];
+    
+    // Generate remaining 10 characters using multiple entropy sources
+    $timestamp = microtime(true) * 1000000; // microseconds for high precision
+    $processId = getmypid();
+    $randomBytes = random_bytes(10);
+    $entropy = $timestamp . $processId . bin2hex($randomBytes) . uniqid('', true);
+    
+    // Create hash from entropy
+    $hash = hash('sha256', $entropy);
+    
+    // Extract alphanumeric characters from hash
+    $hashChars = array_filter(str_split($hash), function($char) use ($alphanumeric) {
+        return strpos($alphanumeric, $char) !== false;
+    });
+    
+    // Add characters from hash, falling back to random if needed
+    for ($i = 1; $i < 11; $i++) {
+        if (!empty($hashChars)) {
+            $uid .= array_shift($hashChars);
+        } else {
+            $uid .= $alphanumeric[mt_rand(0, strlen($alphanumeric) - 1)];
+        }
+    }
+    
+    // Ensure exact length and valid format
+    $uid = substr($uid, 0, 11);
+    if (strlen($uid) < 11) {
+        while (strlen($uid) < 11) {
+            $uid .= $alphanumeric[mt_rand(0, strlen($alphanumeric) - 1)];
+        }
+    }
+    
+    return $uid;
+}
+
+// Function to save tracker submission locally
+function saveTrackerSubmissionLocally($surveyId, $formData, $dhis2Response, $locationData, $uid = null) {
     global $pdo;
     
     try {
+        // Generate UID if not provided
+        if (!$uid) {
+            $uid = generateUID();
+        }
+        
         // Create submissions table if it doesn't exist with location fields
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS tracker_submissions (
                 id INT AUTO_INCREMENT PRIMARY KEY,
+                uid VARCHAR(25) UNIQUE,
                 survey_id INT NOT NULL,
                 tracked_entity_instance VARCHAR(255),
                 selected_facility_id VARCHAR(255),
@@ -198,27 +444,33 @@ function saveLocalSubmission($surveyId, $formData, $dhis2Response, $locationData
                 INDEX idx_survey_id (survey_id),
                 INDEX idx_tei (tracked_entity_instance),
                 INDEX idx_facility (selected_facility_id),
-                INDEX idx_status (submission_status)
+                INDEX idx_status (submission_status),
+                INDEX idx_uid (uid)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
         
         $stmt = $pdo->prepare("
             INSERT INTO tracker_submissions 
-            (survey_id, tracked_entity_instance, selected_facility_id, selected_facility_name, 
+            (uid, survey_id, tracked_entity_instance, selected_facility_id, selected_facility_name, 
              selected_orgunit_uid, form_data, dhis2_response, ip_address, user_session_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         
+        // Ensure dhis2Response is an array for safe access
+        $dhis2ResponseArray = is_array($dhis2Response) ? $dhis2Response : [];
+        $locationDataArray = is_array($locationData) ? $locationData : [];
+        
         $stmt->execute([
-            $surveyId,
-            $dhis2Response['tei_id'] ?? null,
-            $locationData['facility_id'] ?? null,
-            $locationData['facility_name'] ?? null,
-            $locationData['orgunit_uid'] ?? null,
-            json_encode($formData),
-            json_encode($dhis2Response),
+            $uid ?? generateUID(),
+            $surveyId ?? 0,
+            $dhis2ResponseArray['tei_id'] ?? null,
+            $locationDataArray['facility_id'] ?? null,
+            $locationDataArray['facility_name'] ?? null,
+            $locationDataArray['orgunit_uid'] ?? null,
+            json_encode($formData ?? []),
+            json_encode($dhis2Response ?? []),
             $_SERVER['REMOTE_ADDR'] ?? 'unknown',
-            session_id()
+            session_id() ?? 'no_session'
         ]);
         
         return $pdo->lastInsertId();
@@ -260,44 +512,6 @@ function logToPayloadChecker($submissionId, $status, $formData, $dhis2Response, 
         error_log("Tracker submission ID $submissionId logged to payload checker with status: $status");
     } catch (PDOException $e) {
         error_log("Failed to log tracker submission to payload checker: " . $e->getMessage());
-    }
-}
-
-// Function to generate a unique identifier (UID) for tracker submissions
-function generateUID() {
-    return strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 10));
-}
-
-// Function to save tracker submission locally with UID
-function saveLocalSubmission($surveyId, $formData, $dhis2Response, $locationData, $uid) {
-    global $pdo;
-    
-    try {
-        $stmt = $pdo->prepare("
-            INSERT INTO tracker_submissions 
-            (uid, survey_id, tracked_entity_instance, selected_facility_id, selected_facility_name, 
-             selected_orgunit_uid, form_data, dhis2_response, ip_address, user_session_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        
-        $stmt->execute([
-            $uid,
-            $surveyId,
-            $dhis2Response['tei_id'] ?? null,
-            $locationData['facility_id'] ?? null,
-            $locationData['facility_name'] ?? null,
-            $locationData['orgunit_uid'] ?? null,
-            json_encode($formData),
-            json_encode($dhis2Response),
-            $_SERVER['REMOTE_ADDR'] ?? 'unknown',
-            session_id()
-        ]);
-        
-        return $pdo->lastInsertId();
-        
-    } catch (Exception $e) {
-        error_log("Error saving local tracker submission: " . $e->getMessage());
-        return null;
     }
 }
 ?>

@@ -168,8 +168,137 @@ function fetchFromDHIS2($endpoint, $dhis2Config) {
     return json_decode($response, true);
 }
 
-// Fetch tracker program structure from DHIS2
-$trackerProgram = fetchFromDHIS2("programs/{$survey['dhis2_program_uid']}.json?fields=id,name,description,programType,trackedEntityType,programStages[id,name,description,repeatable,minDaysFromStart,programStageDataElements[dataElement[id,name,displayName,valueType,optionSet[options[code,displayName]]]]],programTrackedEntityAttributes[trackedEntityAttribute[id,name,displayName,valueType,unique,optionSet[options[code,displayName]]],mandatory,displayInList]", $dhis2Config);
+// Fetch tracker program structure from DHIS2 with option set IDs
+$trackerProgram = fetchFromDHIS2("programs/{$survey['dhis2_program_uid']}.json?fields=id,name,description,programType,trackedEntityType,programStages[id,name,description,repeatable,minDaysFromStart,programStageDataElements[dataElement[id,name,displayName,valueType,optionSet[id,options[code,displayName]]]]],programTrackedEntityAttributes[trackedEntityAttribute[id,name,displayName,valueType,unique,optionSet[id,options[code,displayName]]],mandatory,displayInList]", $dhis2Config);
+
+// Function to get option set values from local database
+function getLocalOptionSetValues($optionSetId) {
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("
+            SELECT local_value as displayName, dhis2_option_code as code 
+            FROM dhis2_option_set_mapping 
+            WHERE dhis2_option_set_id = ? 
+            ORDER BY local_value
+        ");
+        $stmt->execute([$optionSetId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log("Error fetching option set values: " . $e->getMessage());
+        return [];
+    }
+}
+
+// Function to get option set values from DHIS2 API as fallback
+function getOptionSetValuesFromAPI($optionSetId, $dhis2Config) {
+    try {
+        $response = fetchFromDHIS2("optionSets/{$optionSetId}.json?fields=options[code,displayName]", $dhis2Config);
+        if ($response && isset($response['options'])) {
+            error_log("Fetched " . count($response['options']) . " options from DHIS2 API for option set: " . $optionSetId);
+            return $response['options'];
+        }
+    } catch (Exception $e) {
+        error_log("Error fetching option set from DHIS2 API: " . $e->getMessage());
+    }
+    return [];
+}
+
+// Function to get schools - now handled dynamically by API endpoint
+// Schools are loaded based on selected location via get_schools_by_location.php
+
+// Enhance tracker program with local option sets
+if ($trackerProgram && is_array($trackerProgram)) {
+    try {
+        // Enhance TEAs
+        if (isset($trackerProgram['programTrackedEntityAttributes'])) {
+            $trackerProgram['programTrackedEntityAttributes'] = array_map(function($attr) use ($dhis2Config) {
+                if (isset($attr['trackedEntityAttribute']['optionSet'])) {
+                    $optionSetId = null;
+                    if (isset($attr['trackedEntityAttribute']['optionSet']['id'])) {
+                        $optionSetId = $attr['trackedEntityAttribute']['optionSet']['id'];
+                    }
+                    
+                    if ($optionSetId) {
+                        // First try local database
+                        $options = getLocalOptionSetValues($optionSetId);
+                        if (!empty($options)) {
+                            $attr['trackedEntityAttribute']['optionSet']['options'] = $options;
+                            error_log("Replaced with " . count($options) . " local options for TEA: " . $attr['trackedEntityAttribute']['id']);
+                        } else {
+                            // Check if we already have options from DHIS2 API
+                            if (isset($attr['trackedEntityAttribute']['optionSet']['options']) && !empty($attr['trackedEntityAttribute']['optionSet']['options'])) {
+                                error_log("Using existing DHIS2 options for TEA: " . $attr['trackedEntityAttribute']['id']);
+                            } else {
+                                // Fallback: fetch from DHIS2 API
+                                $apiOptions = getOptionSetValuesFromAPI($optionSetId, $dhis2Config);
+                                if (!empty($apiOptions)) {
+                                    $attr['trackedEntityAttribute']['optionSet']['options'] = $apiOptions;
+                                    error_log("Fetched " . count($apiOptions) . " options from DHIS2 API for TEA: " . $attr['trackedEntityAttribute']['id']);
+                                }
+                            }
+                        }
+                    }
+                }
+                return $attr;
+            }, $trackerProgram['programTrackedEntityAttributes']);
+        }
+
+        // Enhance Program Stages
+        if (isset($trackerProgram['programStages'])) {
+            $trackerProgram['programStages'] = array_map(function($stage) {
+                if (isset($stage['programStageDataElements'])) {
+                    $stage['programStageDataElements'] = array_map(function($psde) {
+                        if (isset($psde['dataElement']['optionSet'])) {
+                            error_log("Processing DE " . $psde['dataElement']['id'] . " (" . $psde['dataElement']['name'] . ") with option set structure");
+                            
+                            // Try to get option set ID - it might be in different places
+                            $optionSetId = null;
+                            if (isset($psde['dataElement']['optionSet']['id'])) {
+                                $optionSetId = $psde['dataElement']['optionSet']['id'];
+                                error_log("Found option set ID: " . $optionSetId);
+                            } else {
+                                error_log("No option set ID found in optionSet structure for DE: " . $psde['dataElement']['id']);
+                            }
+                            
+                            if ($optionSetId) {
+                                // First try local database
+                                $options = getLocalOptionSetValues($optionSetId);
+                                if (!empty($options)) {
+                                    $psde['dataElement']['optionSet']['options'] = $options;
+                                    error_log("Replaced with " . count($options) . " local options for DE: " . $psde['dataElement']['id']);
+                                } else {
+                                    error_log("No local options found for option set: " . $optionSetId);
+                                    
+                                    // Check if we already have options from DHIS2 API
+                                    if (isset($psde['dataElement']['optionSet']['options']) && !empty($psde['dataElement']['optionSet']['options'])) {
+                                        error_log("Using existing DHIS2 options (" . count($psde['dataElement']['optionSet']['options']) . ") for DE: " . $psde['dataElement']['id']);
+                                    } else {
+                                        // Fallback: fetch from DHIS2 API
+                                        error_log("Attempting to fetch option set from DHIS2 API for: " . $optionSetId);
+                                        $apiOptions = getOptionSetValuesFromAPI($optionSetId, $dhis2Config);
+                                        if (!empty($apiOptions)) {
+                                            $psde['dataElement']['optionSet']['options'] = $apiOptions;
+                                            error_log("Fetched " . count($apiOptions) . " options from DHIS2 API for DE: " . $psde['dataElement']['id']);
+                                        } else {
+                                            error_log("No options found anywhere for option set: " . $optionSetId);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        return $psde;
+                    }, $stage['programStageDataElements']);
+                }
+                return $stage;
+            }, $trackerProgram['programStages']);
+        }
+        error_log("Successfully enhanced tracker program with local option sets");
+    } catch (Exception $e) {
+        error_log("Error enhancing tracker program with option sets: " . $e->getMessage());
+    }
+} else {
+    error_log("Warning: trackerProgram is null or invalid, using fallback structure");
+}
 
 // Check if we failed to fetch DHIS2 data (offline scenario)
 if (!$trackerProgram) {
@@ -238,7 +367,38 @@ $surveySettings = array_merge($defaultSettings, $surveySettings);
 // Extract program components
 $trackedEntityAttributes = $trackerProgram['programTrackedEntityAttributes'] ?? [];
 $programStages = $trackerProgram['programStages'] ?? [];
-?>
+
+// De-duplicate program stages to prevent issues with faulty API responses
+if (!empty($programStages)) {
+    $uniqueStages = [];
+    $seenStageIds = [];
+    foreach ($programStages as $stage) {
+        if (isset($stage['id']) && !in_array($stage['id'], $seenStageIds)) {
+            $uniqueStages[] = $stage;
+            $seenStageIds[] = $stage['id'];
+        }
+    }
+    $programStages = $uniqueStages; // Update the programStages array with deduplicated stages
+    error_log("Deduplicated program stages. Original count: " . count($trackerProgram['programStages'] ?? []) . ", Final count: " . count($programStages));
+}
+
+//     echo "<h1>Debug Info:                  
+//        Stages Before                            
+//          De-duplication</h1>";                    
+//    echo "<pre>";                          
+//   print_r($trackerProgram[               
+//         'programStages'] ?? []);                 
+//  echo "</pre>";                         
+                                       
+//  echo "<h1>Debug Info:                  
+//    Stages After                             
+//       De-duplication</h1>";                    
+//  echo "<pre>";                          
+//  print_r($programStages);               
+// echo "</pre>";   
+
+
+    ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -248,6 +408,171 @@ $programStages = $trackerProgram['programStages'] ?? [];
     <title><?= htmlspecialchars($surveySettings['title_text']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        /* Enhanced Select2 searchable dropdown styles */
+        .select2-container--default .select2-selection--single {
+            background-color: #fff;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            height: 48px;
+            transition: all 0.3s ease;
+        }
+        
+        .select2-container--default .select2-selection--single:focus-within,
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #495057;
+            line-height: 44px;
+            padding-left: 12px;
+            font-size: 16px;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #6c757d;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 44px;
+            top: 2px;
+            right: 8px;
+        }
+        
+        .select2-dropdown {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .select2-results__option {
+            padding: 12px 16px;
+            font-size: 15px;
+            transition: background-color 0.2s;
+        }
+        
+        .select2-results__option--highlighted {
+            background-color: #007bff !important;
+            color: white;
+        }
+        
+        .select2-search__field {
+            padding: 10px 12px;
+            font-size: 16px;
+            border-radius: 6px;
+        }
+        
+        /* Option set field styling */
+        .option-set-field {
+            position: relative;
+        }
+        
+        .option-set-field::before {
+            content: '\f002';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .question-input-container .form-control.select2-hidden-accessible + .select2-container {
+            width: 100% !important;
+        }
+        
+        /* File Upload Styles */
+        .file-upload-field {
+            width: 100%;
+        }
+        
+        .file-upload-container {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload-area {
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+        
+        .file-upload-icon {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        
+        .file-upload-area:hover .file-upload-icon {
+            color: #007bff;
+        }
+        
+        .file-upload-text strong {
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        
+        .file-upload-text small {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .file-upload-info {
+            padding: 15px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .uploaded-file-info {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+        
+        .file-preview {
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        
+        .file-preview table {
+            width: 100%;
+            font-size: 12px;
+        }
+        
+        .file-preview th {
+            background: #f8f9fa;
+            padding: 5px 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .file-preview td {
+            padding: 3px 8px;
+            border-bottom: 1px solid #f1f3f4;
+        }
+    </style>
     
     <style>
         /* Flag Bar Styles */
@@ -564,7 +889,7 @@ $programStages = $trackerProgram['programStages'] ?? [];
         }
 
         .question-input-container input,
-        .question-input-container select,
+        .question-input-container select:not(.searchable-select),
         .question-input-container textarea {
             background: #fafbfc;
             border: 2px solid #e9ecef;
@@ -577,11 +902,17 @@ $programStages = $trackerProgram['programStages'] ?? [];
         }
 
         .question-input-container input:focus,
-        .question-input-container select:focus,
+        .question-input-container select:not(.searchable-select):focus,
         .question-input-container textarea:focus {
             border-color: #007bff;
             box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
             outline: none;
+        }
+        
+        /* Validation styles for Select2 */
+        .select2-container.is-invalid .select2-selection--single {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
         }
 
         .question-input-container .form-placeholder {
@@ -960,7 +1291,7 @@ $programStages = $trackerProgram['programStages'] ?? [];
             <div class="row">
                 <div class="col-md-8">
                     <div class="form-group" style="position: relative;">
-                        <label for="facilitySearch" class="form-label">Search for facility/location <span class="text-danger">*</span></label>
+                        <label for="facilitySearch" class="form-label">Search for location <span class="text-danger">*</span></label>
                         <input type="text" 
                                id="facilitySearch" 
                                name="facility_search" 
@@ -1006,7 +1337,7 @@ $programStages = $trackerProgram['programStages'] ?? [];
             </div>
             
             <?php if (!empty($trackedEntityAttributes)): ?>
-                <div class="stage-nav-item" onclick="navigateToStage('tei-section')" data-stage="tei-section">
+                <div class="stage-nav-item" onclick="navigateToStage('tei-section', this)" data-stage="tei-section">
                     <div class="stage-progress">1</div>
                     <div class="stage-nav-content">
                         <div class="stage-nav-title">Participant Information</div>
@@ -1016,7 +1347,7 @@ $programStages = $trackerProgram['programStages'] ?? [];
             <?php endif; ?>
             
             <?php foreach ($programStages as $index => $stage): ?>
-                <div class="stage-nav-item" onclick="navigateToStage('<?= $stage['id'] ?>')" data-stage="<?= $stage['id'] ?>">
+                <div class="stage-nav-item" onclick="navigateToStage('<?= $stage['id'] ?>', this)" data-stage="<?= $stage['id'] ?>">
                     <div class="stage-progress"><?= $index + (empty($trackedEntityAttributes) ? 1 : 2) ?></div>
                     <div class="stage-nav-content">
                         <div class="stage-nav-title">
@@ -1139,7 +1470,10 @@ $programStages = $trackerProgram['programStages'] ?? [];
     <script type="application/json" id="programData">
         <?= json_encode([
             'program' => $trackerProgram,
-            'surveySettings' => $surveySettings
+            'surveySettings' => array_merge($surveySettings, [
+                'dhis2_program_uid' => $survey['dhis2_program_uid'] ?? null,
+                'id' => $survey['id']
+            ])
         ]) ?>
     </script>
 
@@ -1157,14 +1491,69 @@ $programStages = $trackerProgram['programStages'] ?? [];
         
         // Initialize the form
         document.addEventListener('DOMContentLoaded', function() {
-            programData = JSON.parse(document.getElementById('programData').textContent);
-            console.log('Program data loaded:', programData);
+            try {
+                const programDataElement = document.getElementById('programData');
+                if (!programDataElement) {
+                    console.error('Program data element not found');
+                    return;
+                }
+                
+                programData = JSON.parse(programDataElement.textContent);
+                console.log('Program data loaded:', programData);
+                
+                // Debug survey settings
+                console.log('Survey settings:', programData.surveySettings);
+                if (programData.surveySettings && programData.surveySettings.dhis2_program_uid) {
+                    console.log('DHIS2 program UID found:', programData.surveySettings.dhis2_program_uid);
+                } else {
+                    console.log('No DHIS2 program UID found in survey settings');
+                }
+                
+                // Debug option set data specifically
+                if (programData.program && programData.program.programStages) {
+                    programData.program.programStages.forEach(stage => {
+                        console.log('Stage:', stage.name);
+                        if (stage.programStageDataElements) {
+                            stage.programStageDataElements.forEach(psde => {
+                                if (psde.dataElement.optionSet) {
+                                    console.log('DE with option set:', psde.dataElement.name, 'Options:', psde.dataElement.optionSet.options?.length);
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                if (!programData || !programData.program) {
+                    console.error('Invalid program data structure');
+                    return;
+                }
+            } catch (error) {
+                console.error('Error loading program data:', error);
+                alert('Error loading form data. Please refresh the page and try again.');
+                return;
+            }
             
             // Initialize stage occurrences and data storage
+            console.log('Available program stages:', programData.program.programStages.map(s => ({id: s.id, name: s.name})));
             programData.program.programStages.forEach(stage => {
                 stageOccurrences[stage.id] = 1;
                 stageData[stage.id] = {}; // Initialize empty data for each stage
             });
+            
+            // Debug navigation items
+            const allNavItems = document.querySelectorAll('.stage-nav-item[data-stage]');
+            console.log('Navigation items found:', allNavItems.length);
+            allNavItems.forEach((item, index) => {
+                const stageId = item.getAttribute('data-stage');
+                const stageTitle = item.querySelector('.stage-nav-title')?.textContent?.trim();
+                console.log(`Nav item ${index + 1}: stageId="${stageId}", title="${stageTitle}"`);
+            });
+            
+            // Initialize navigation - set first stage as active only on initial load
+            const firstNavItem = document.querySelector('.stage-nav-item[data-stage]');
+            if (firstNavItem) {
+                firstNavItem.classList.add('active');
+            }
             
             // Initialize location selection
             initializeLocationSelection();
@@ -1591,7 +1980,18 @@ $programStages = $trackerProgram['programStages'] ?? [];
             }
         }
 
-        function navigateToStage(stageId) {
+        function navigateToStage(stageId, navElement) {
+            console.log('navigateToStage called with stageId:', stageId);
+            
+            // Debug: Check what navigation items exist right now
+            const allNavItems = document.querySelectorAll('.stage-nav-item[data-stage]');
+            console.log('Current navigation items:');
+            allNavItems.forEach((item, index) => {
+                const itemStageId = item.getAttribute('data-stage');
+                const stageTitle = item.querySelector('.stage-nav-title')?.textContent?.trim();
+                console.log(`  ${index + 1}: stageId="${itemStageId}", title="${stageTitle}"`);
+            });
+            
             // Open the stage modal instead of navigating directly
             if (stageId === 'tei-section') {
                 openTEIModal();
@@ -1600,13 +2000,22 @@ $programStages = $trackerProgram['programStages'] ?? [];
             }
 
             // Update navigation active state
+            console.log('Setting active stage to:', stageId);
             document.querySelectorAll('.stage-nav-item').forEach(item => {
                 item.classList.remove('active');
             });
 
-            const navItem = document.querySelector(`[data-stage="${stageId}"]`);
-            if (navItem) {
-                navItem.classList.add('active');
+            if (navElement) {
+                navElement.classList.add('active');
+                console.log('Successfully set active stage to:', stageId);
+            } else {
+                const navItem = document.querySelector(`[data-stage="${stageId}"]`);
+                if (navItem) {
+                    navItem.classList.add('active');
+                    console.log('Successfully set active stage to (fallback):', stageId);
+                } else {
+                    console.error('Could not find nav item for stage:', stageId);
+                }
             }
 
             // Auto-collapse navigation on mobile
@@ -1622,9 +2031,18 @@ $programStages = $trackerProgram['programStages'] ?? [];
         let currentModalStage = null;
 
         function openStageModal(stageId) {
+            if (!programData || !programData.program || !programData.program.programStages) {
+                console.error('Program data not available');
+                alert('Form data not loaded properly. Please refresh the page.');
+                return;
+            }
+            
             currentModalStage = stageId;
             const stage = programData.program.programStages.find(s => s.id === stageId);
-            if (!stage) return;
+            if (!stage) {
+                console.error('Stage not found:', stageId);
+                return;
+            }
 
             const modal = document.getElementById('stageQuestionsModal');
             
@@ -1766,6 +2184,9 @@ $programStages = $trackerProgram['programStages'] ?? [];
             
             // Load existing data if available
             loadExistingData(stageId, occurrenceNum);
+
+            // Initialize Select2 for searchable dropdowns
+            initializeSelect2InModal();
         }
 
         async function openTEIModal() {
@@ -1819,6 +2240,9 @@ $programStages = $trackerProgram['programStages'] ?? [];
             
             // Show modal
             modal.style.display = 'flex';
+
+            // Initialize Select2 for searchable dropdowns
+            initializeSelect2InModal();
         }
 
         async function loadTEIAttributes(container) {
@@ -1962,7 +2386,17 @@ $programStages = $trackerProgram['programStages'] ?? [];
             const isRequired = attribute.mandatory || false;
             
             if (attribute.valueType === 'TEXT') {
-                return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
+                // Check if this TEXT attribute has option set - force dropdown if it does
+                if (attribute.optionSet && attribute.optionSet.options) {
+                    console.log('Converting TEI TEXT attribute with options to dropdown:', attribute.name);
+                    let options = '<option value="">Search or select an option...</option>';
+                    attribute.optionSet.options.forEach(option => {
+                        options += `<option value="${option.code}">${option.displayName}</option>`;
+                    });
+                    return `<div class="option-set-field"><select id="${inputId}" name="${inputId}" class="form-control searchable-select" ${isRequired ? 'required' : ''} data-placeholder="Search for ${label}...">${options}</select></div>`;
+                } else {
+                    return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
+                }
             } else if (['NUMBER', 'INTEGER'].includes(attribute.valueType)) {
                 return `<input type="number" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
             } else if (attribute.valueType === 'DATE') {
@@ -1981,12 +2415,18 @@ $programStages = $trackerProgram['programStages'] ?? [];
                 return `<input type="email" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
             } else if (attribute.valueType === 'PHONE_NUMBER') {
                 return `<input type="tel" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
+            } else if (attribute.valueType === 'FILE_RESOURCE') {
+                return `<div class="alert alert-info">
+                    <i class="fas fa-file-upload me-2"></i>
+                    <strong>File Upload:</strong> ${label}<br>
+                    <small class="text-muted">File upload functionality is not available in this form. This field will be skipped.</small>
+                </div>`;
             } else if (attribute.optionSet && attribute.optionSet.options) {
-                let options = '<option value="">Select an option...</option>';
+                let options = '<option value="">Search or select an option...</option>';
                 attribute.optionSet.options.forEach(option => {
                     options += `<option value="${option.code}">${option.displayName}</option>`;
                 });
-                return `<select id="${inputId}" name="${inputId}" class="form-control" ${isRequired ? 'required' : ''}>${options}</select>`;
+                return `<div class="option-set-field"><select id="${inputId}" name="${inputId}" class="form-control searchable-select" ${isRequired ? 'required' : ''} data-placeholder="Search for ${label}...">${options}</select></div>`;
             } else {
                 return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
             }
@@ -2106,26 +2546,9 @@ $programStages = $trackerProgram['programStages'] ?? [];
         }
 
         async function loadGroupingsFromDatabase(stageId) {
-            try {
-                const surveyId = document.getElementById('surveyId').value;
-                const response = await fetch(`api/groupings.php?survey_id=${surveyId}`);
-                
-                if (!response.ok) {
-                    console.error('Failed to load groupings from database');
-                    return null;
-                }
-                
-                const result = await response.json();
-                
-                if (result.success && result.data) {
-                    return result.data[stageId] || null;
-                }
-                
-                return null;
-            } catch (error) {
-                console.error('Error loading groupings from database:', error);
-                return null;
-            }
+            // Disable groupings API calls for now - use default layout
+            console.log('Using default layout for stage:', stageId);
+            return null;
         }
 
         function loadUngroupedQuestions(container, stage) {
@@ -2248,10 +2671,32 @@ $programStages = $trackerProgram['programStages'] ?? [];
         }
 
         function createQuestionInput(dataElement, inputId, label) {
+            console.log('Creating input for:', dataElement.name, 'ID:', dataElement.id, 'optionSet:', dataElement.optionSet);
+            
+            // Special debugging for the problematic field
+            if (dataElement.id === 'ebmdvu4hMqa') {
+                console.log('SPECIAL DEBUG for ebmdvu4hMqa:', {
+                    valueType: dataElement.valueType,
+                    hasOptionSet: !!dataElement.optionSet,
+                    hasOptions: !!(dataElement.optionSet && dataElement.optionSet.options),
+                    optionCount: dataElement.optionSet?.options?.length
+                });
+            }
+            
             const placeholder = getPlaceholderText(dataElement.valueType, label);
             
             if (dataElement.valueType === 'TEXT') {
-                return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
+                // Check if this TEXT field has option set - force dropdown if it does
+                if (dataElement.optionSet && dataElement.optionSet.options) {
+                    console.log('Converting TEXT field with options to dropdown:', dataElement.name);
+                    let options = '<option value="">Search or select an option...</option>';
+                    dataElement.optionSet.options.forEach(option => {
+                        options += `<option value="${option.code}">${option.displayName}</option>`;
+                    });
+                    return `<div class="option-set-field"><select id="${inputId}" name="${inputId}" class="form-control searchable-select" ${dataElement.compulsory ? 'required' : ''} data-placeholder="Search for ${label}...">${options}</select></div>`;
+                } else {
+                    return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
+                }
             } else if (['NUMBER', 'INTEGER'].includes(dataElement.valueType)) {
                 return `<input type="number" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
             } else if (dataElement.valueType === 'DATE') {
@@ -2266,12 +2711,72 @@ $programStages = $trackerProgram['programStages'] ?? [];
                         <option value="false">No</option>
                     </select>
                 `;
+            } else if (dataElement.valueType === 'FILE_RESOURCE') {
+                console.log('FILE_RESOURCE field detected:', {
+                    name: dataElement.name,
+                    id: dataElement.id,
+                    hasSchoolKeyword: dataElement.name ? dataElement.name.toLowerCase().includes('school') : false,
+                    hasInstitutionKeyword: dataElement.name ? dataElement.name.toLowerCase().includes('institution') : false,
+                    isSpecificId: dataElement.id === 'fkipjGtgOHg',
+                    hasSurveySettings: !!programData.surveySettings,
+                    hasDhis2Program: !!(programData.surveySettings && programData.surveySettings.dhis2_program_uid)
+                });
+                
+                // Check if this is a school-related field for this specific survey
+                if (dataElement.name && (
+                    dataElement.name.toLowerCase().includes('school') || 
+                    dataElement.name.toLowerCase().includes('institution') ||
+                    dataElement.id === 'fkipjGtgOHg' // Specific ID for "Names of schools supported by the organization"
+                ) && programData.surveySettings && programData.surveySettings.dhis2_program_uid) {
+                    console.log('Converting FILE_RESOURCE field to CSV/XLSX upload:', dataElement.name);
+                    return `<div class="file-upload-field">
+                        <div class="file-upload-container">
+                            <div class="file-upload-area" onclick="document.getElementById('${inputId}').click()">
+                                <div class="file-upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="file-upload-text">
+                                    <strong>Click to upload schools list</strong>
+                                    <br>
+                                    <small>Supported formats: CSV, XLSX</small>
+                                </div>
+                                <input type="file" 
+                                       id="${inputId}" 
+                                       name="${inputId}" 
+                                       accept=".csv,.xlsx,.xls" 
+                                       style="display: none;"
+                                       ${dataElement.compulsory ? 'required' : ''}
+                                       onchange="handleSchoolFileUpload(this, '${inputId}')">
+                            </div>
+                            <div id="${inputId}_info" class="file-upload-info" style="display: none;">
+                                <div class="uploaded-file-info">
+                                    <i class="fas fa-file-excel text-success me-2"></i>
+                                    <span class="file-name"></span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeSchoolFile('${inputId}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                <div class="file-preview mt-2" id="${inputId}_preview"></div>
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Upload a CSV or Excel file containing the list of schools. The file should have columns: School Name, School Code/UID
+                        </small>
+                    </div>`;
+                } else {
+                    return `<div class="alert alert-info">
+                        <i class="fas fa-file-upload me-2"></i>
+                        <strong>File Upload:</strong> ${label}<br>
+                        <small class="text-muted">File upload functionality is not available in this form. This field will be skipped.</small>
+                    </div>`;
+                }
             } else if (dataElement.optionSet && dataElement.optionSet.options) {
-                let options = '<option value="">Select an option...</option>';
+                let options = '<option value="">Search or select an option...</option>';
                 dataElement.optionSet.options.forEach(option => {
                     options += `<option value="${option.code}">${option.displayName}</option>`;
                 });
-                return `<select id="${inputId}" name="${inputId}" class="form-control" ${dataElement.compulsory ? 'required' : ''}>${options}</select>`;
+                return `<div class="option-set-field"><select id="${inputId}" name="${inputId}" class="form-control searchable-select" ${dataElement.compulsory ? 'required' : ''} data-placeholder="Search for ${label}...">${options}</select></div>`;
             } else {
                 return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
             }
@@ -2301,10 +2806,147 @@ $programStages = $trackerProgram['programStages'] ?? [];
         }
 
 
+        function initializeSelect2InModal() {
+            // Destroy existing Select2 instances to avoid conflicts
+            $('#stageQuestionsModal .searchable-select').each(function() {
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2('destroy');
+                }
+            });
+            
+            // Initialize Select2 with enhanced configuration
+            $('#stageQuestionsModal .searchable-select').select2({
+                dropdownParent: $('#stageQuestionsModal .modal-content'),
+                theme: "default",
+                placeholder: function() {
+                    return $(this).data('placeholder') || 'Search and select an option...';
+                },
+                allowClear: true,
+                width: '100%',
+                minimumResultsForSearch: 5, // Show search when 5+ options
+                language: {
+                    noResults: function () {
+                        return "No options found";
+                    },
+                    searching: function () {
+                        return "Searching...";
+                    }
+                }
+            });
+            
+            // Add change event handler for validation
+            $('#stageQuestionsModal .searchable-select').on('change', function() {
+                const $this = $(this);
+                if ($this.prop('required') && !$this.val()) {
+                    $this.next('.select2-container').addClass('is-invalid');
+                } else {
+                    $this.next('.select2-container').removeClass('is-invalid');
+                }
+            });
+            
+            // File upload initialization is handled inline
+            console.log('Select2 initialization complete');
+        }
+        
+        // File upload handling functions
+        function handleSchoolFileUpload(input, inputId) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            console.log('School file uploaded:', file.name, file.type);
+            
+            // Show file info
+            const infoDiv = document.getElementById(inputId + '_info');
+            const fileNameSpan = infoDiv.querySelector('.file-name');
+            const previewDiv = document.getElementById(inputId + '_preview');
+            
+            fileNameSpan.textContent = file.name;
+            infoDiv.style.display = 'block';
+            
+            // Preview file contents
+            if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                previewCSVFile(file, previewDiv);
+            } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                previewExcelFile(file, previewDiv);
+            } else {
+                previewDiv.innerHTML = '<p class="text-muted">File uploaded successfully. Preview not available for this format.</p>';
+            }
+        }
+        
+        function removeSchoolFile(inputId) {
+            const input = document.getElementById(inputId);
+            const infoDiv = document.getElementById(inputId + '_info');
+            
+            input.value = '';
+            infoDiv.style.display = 'none';
+            
+            console.log('School file removed for:', inputId);
+        }
+        
+        function previewCSVFile(file, previewDiv) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csv = e.target.result;
+                const lines = csv.split('\\n').slice(0, 6); // Show first 5 rows + header
+                
+                let html = '<p class="mb-2"><strong>File Preview (first 5 rows):</strong></p>';
+                html += '<table class="table table-sm">';
+                
+                lines.forEach((line, index) => {
+                    if (line.trim()) {
+                        const cells = line.split(',');
+                        html += '<tr>';
+                        cells.forEach(cell => {
+                            const tag = index === 0 ? 'th' : 'td';
+                            html += `<${tag}>${cell.trim()}</${tag}>`;
+                        });
+                        html += '</tr>';
+                    }
+                });
+                
+                html += '</table>';
+                previewDiv.innerHTML = html;
+            };
+            reader.readAsText(file);
+        }
+        
+        function previewExcelFile(file, previewDiv) {
+            // For Excel files, show basic info since we can't parse without a library
+            previewDiv.innerHTML = `
+                <p class="mb-2"><strong>Excel File Information:</strong></p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-file-excel text-success me-2"></i>File: ${file.name}</li>
+                    <li><i class="fas fa-weight text-info me-2"></i>Size: ${(file.size / 1024).toFixed(1)} KB</li>
+                    <li><i class="fas fa-calendar text-warning me-2"></i>Modified: ${new Date(file.lastModified).toLocaleDateString()}</li>
+                </ul>
+                <p class="text-muted small">Preview not available for Excel files. File will be processed upon submission.</p>
+            `;
+        }
+
+        // End of file upload functions
+
         function closeStageModal() {
+            console.log('Closing modal for stage:', currentModalStage);
+            
+            // Destroy Select2 instances before closing modal
+            $('#stageQuestionsModal .searchable-select').each(function() {
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2('destroy');
+                }
+            });
+            
             const modal = document.getElementById('stageQuestionsModal');
             modal.style.display = 'none';
+            
+            // Check navigation state before clearing currentModalStage
+            const activeNavItem = document.querySelector('.stage-nav-item.active');
+            console.log('Active nav item before modal close:', activeNavItem?.getAttribute('data-stage'));
+            
             currentModalStage = null;
+            
+            // Check navigation state after clearing currentModalStage
+            const activeNavItemAfter = document.querySelector('.stage-nav-item.active');
+            console.log('Active nav item after modal close:', activeNavItemAfter?.getAttribute('data-stage'));
         }
 
         function saveStageData(stageId, occurrenceNum) {
@@ -2587,6 +3229,10 @@ $programStages = $trackerProgram['programStages'] ?? [];
 
         // Load saved groupings and apply them - prioritize database over localStorage
         async function loadSavedGroupings() {
+            console.log('Groupings disabled - using default form layout');
+            // Groupings functionality disabled for now to prevent API errors
+            return;
+            
             const surveyId = document.getElementById('surveyId').value;
             
             try {
@@ -2869,11 +3515,8 @@ $programStages = $trackerProgram['programStages'] ?? [];
             
             await loadSavedGroupings();
             
-            // Set first section as active for navigation
-            const firstSection = document.querySelector('.tei-section') || document.querySelector('.stage-section');
-            if (firstSection) {
-                firstSection.classList.add('active');
-            }
+            // Navigation active state is managed by navigateToStage function
+            // Don't automatically set first section as active here
             
             // Debug: Check if elements exist
             const stageNavigation = document.getElementById('stageNavigation');

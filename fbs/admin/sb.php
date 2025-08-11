@@ -165,7 +165,7 @@ function getProgramDetails($instance, $domain, $programId, $programType = null)
     try {
         if ($domain === 'tracker') {
             if ($programType === 'tracker') { // WITH_REGISTRATION program
-              $programInfo = dhis2_get('programs/' . $programId . '?fields=id,name,programType,categoryCombo[id,name],programTrackedEntityAttributes[trackedEntityAttribute[id,name,formName,optionSet[id,name]]],programStages[id,name,programStageDataElements[dataElement[id,name,formName,optionSet[id,name]]]],trackedEntityType[id]', $instance);
+              $programInfo = dhis2_get('programs/' . $programId . '?fields=id,name,programType,categoryCombo[id,name],programTrackedEntityAttributes[trackedEntityAttribute[id,name,formName,optionSet[id,name,options[id,name,code]]]],programStages[id,name,programStageDataElements[dataElement[id,name,formName,optionSet[id,name,options[id,name,code]]]]],trackedEntityType[id]', $instance);
               
               if ($programInfo === null) {
                   throw new Exception("Failed to fetch program details for program ID '$programId'. DHIS2 server may be unavailable or experiencing timeouts.");

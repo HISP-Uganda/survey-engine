@@ -76,6 +76,8 @@ try {
             dsl.submitted_at,
             dsl.retries,
             sy.name as survey_name,
+            sy.dhis2_program_uid,
+            sy.dhis2_instance,
             CASE 
                 WHEN s.id IS NOT NULL THEN 'regular'
                 WHEN ts.id IS NOT NULL THEN 'tracker'
@@ -86,6 +88,7 @@ try {
         LEFT JOIN tracker_submissions ts ON dsl.submission_id = ts.id
         LEFT JOIN survey sy ON COALESCE(s.survey_id, ts.survey_id) = sy.id
         WHERE (s.id IS NOT NULL OR ts.id IS NOT NULL)
+          AND (sy.dhis2_program_uid IS NOT NULL OR sy.dhis2_instance IS NOT NULL)
         ORDER BY dsl.submitted_at DESC
         LIMIT 100 -- Limit to last 100 logs for performance
     ");
@@ -301,10 +304,20 @@ try {
                             <td>
                                 <div>
                                     <p class="text-sm font-weight-bold mb-0 text-dark"><?= htmlspecialchars($log['survey_name'] ?? 'N/A') ?></p>
-                                    <?php if (isset($log['submission_type'])): ?>
-                                        <span class="badge <?= $log['submission_type'] === 'tracker' ? 'bg-info' : 'bg-primary' ?> text-white" style="font-size: 0.7rem;">
-                                            <?= $log['submission_type'] === 'tracker' ? 'TRACKER' : 'REGULAR' ?>
-                                        </span>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                        <?php if (isset($log['submission_type'])): ?>
+                                            <span class="badge <?= $log['submission_type'] === 'tracker' ? 'bg-info' : 'bg-primary' ?> text-white" style="font-size: 0.7rem;">
+                                                <?= $log['submission_type'] === 'tracker' ? 'TRACKER' : 'REGULAR' ?>
+                                            </span>
+                                        <?php endif; ?>
+                                        <?php if (!empty($log['dhis2_instance'])): ?>
+                                            <span class="badge bg-success text-white" style="font-size: 0.7rem;">
+                                                <?= htmlspecialchars($log['dhis2_instance']) ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if (!empty($log['dhis2_program_uid'])): ?>
+                                        <p class="text-xs text-secondary mb-0">Program: <?= htmlspecialchars(substr($log['dhis2_program_uid'], 0, 15)) ?>...</p>
                                     <?php endif; ?>
                                 </div>
                             </td>
