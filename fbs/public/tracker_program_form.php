@@ -1458,7 +1458,7 @@ if (!empty($programStages)) {
                         <i class="fas fa-times me-1"></i> Cancel
                     </button>
                     <button type="button" class="btn btn-success" onclick="saveStageData()">
-                        <i class="fas fa-save me-1"></i> Save & Continue
+                        <i class="fas fa-save me-1"></i> Save 
                     </button>
                 </div>
             </div>
@@ -2170,7 +2170,7 @@ if (!empty($programStages)) {
                             <i class="fas fa-times me-2"></i> Cancel
                         </button>
                         <button type="button" class="btn btn-success btn-lg px-5" onclick="saveStageData('${stageId}', ${occurrenceNum})">
-                            <i class="fas fa-save me-2"></i> Save & Continue
+                            <i class="fas fa-save me-2"></i> Save 
                         </button>
                     </div>
                 </div>
@@ -2227,7 +2227,7 @@ if (!empty($programStages)) {
                             <i class="fas fa-times me-2"></i> Cancel
                         </button>
                         <button type="button" class="btn btn-success btn-lg px-5" onclick="saveTEIData()">
-                            <i class="fas fa-save me-2"></i> Save & Continue
+                            <i class="fas fa-save me-2"></i> Save 
                         </button>
                     </div>
                 </div>
