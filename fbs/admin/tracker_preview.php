@@ -867,9 +867,14 @@ if (!empty($programStages)) {
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <h6 class="mb-0">
                                                     <i class="fas fa-folder text-warning me-2"></i>
-                                                    <span class="group-title">Ungrouped Questions</span>
+                                                    <span class="group-title" onclick="editGroupName('default_<?= $stage['id'] ?>')" style="cursor: pointer;" title="Click to edit">Ungrouped Questions</span>
                                                     <small class="text-muted ms-2">(Default group)</small>
                                                 </h6>
+                                                <div class="group-controls">
+                                                    <button class="edit-group-btn" onclick="editGroupName('default_<?= $stage['id'] ?>')" title="Edit name">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="group-questions" data-group="default_<?= $stage['id'] ?>">

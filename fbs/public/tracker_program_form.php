@@ -865,6 +865,53 @@ if (!empty($programStages)) {
             transform: translateY(-1px);
         }
 
+        /* Compact styling for TRUE_ONLY checkbox containers */
+        .modal-question-item.checkbox-item {
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            min-height: auto;
+            border-width: 1px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .modal-question-item.checkbox-item .question-header {
+            margin-bottom: 0;
+            flex: 1;
+        }
+
+        .modal-question-item.checkbox-item .question-input-container {
+            margin-top: 0;
+            flex-shrink: 0;
+            width: 60px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal-question-item.checkbox-item .form-check {
+            margin-bottom: 0;
+            padding-left: 0;
+            min-height: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .modal-question-item.checkbox-item .form-check-input {
+            margin: 0 auto 5px auto;
+            position: static;
+            transform: none;
+        }
+
+        .modal-question-item.checkbox-item .form-check-label {
+            color: #6c757d;
+            font-size: 12px;
+            text-align: center;
+            margin: 0;
+        }
+
         .question-header {
             display: flex;
             justify-content: space-between;
@@ -2187,6 +2234,11 @@ if (!empty($programStages)) {
             // Load existing data if available
             loadExistingData(stageId, occurrenceNum);
             
+            // Load existing files for this stage
+            setTimeout(async () => {
+                await loadExistingFiles();
+            }, 200);
+            
             // Initialize Select2 for searchable dropdowns
             initializeSelect2InModal();
         }
@@ -2254,8 +2306,9 @@ if (!empty($programStages)) {
                 return;
             }
 
-            // Load groupings from database for TEI section
-            const groupingData = await loadGroupingsFromDatabase('tei-section');
+            // Load groupings from database for TEI section  
+            // Use a special identifier for TEI attributes
+            const groupingData = await loadGroupingsFromDatabase('tei_attributes');
 
             // If we have groupings for TEI, apply them
             if (groupingData && groupingData.length > 0) {
@@ -2359,6 +2412,11 @@ if (!empty($programStages)) {
             const div = document.createElement('div');
             div.className = 'modal-question-item';
             
+            // Add compact class for TRUE_ONLY checkboxes
+            if (attribute.valueType === 'TRUE_ONLY') {
+                div.className += ' checkbox-item';
+            }
+            
             // Clean the label by removing prefixes
             let cleanLabel = attribute.name;
             cleanLabel = cleanLabel.replace(/^[A-Z]+_/, '');
@@ -2417,6 +2475,21 @@ if (!empty($programStages)) {
                 return `<input type="email" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
             } else if (attribute.valueType === 'PHONE_NUMBER') {
                 return `<input type="tel" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
+            } else if (attribute.valueType === 'TRUE_ONLY') {
+                return `
+                    <div class="form-check">
+                        <input type="checkbox" id="${inputId}" name="${inputId}" class="form-check-input" value="true" ${isRequired ? 'required' : ''}>
+                        <label class="form-check-label" for="${inputId}">Yes</label>
+                    </div>
+                `;
+            } else if (attribute.valueType === 'URL') {
+                return `<input type="url" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
+            } else if (attribute.valueType === 'PERCENTAGE') {
+                return `<input type="number" id="${inputId}" name="${inputId}" class="form-control" min="0" max="100" step="0.01" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
+            } else if (attribute.valueType === 'TIME') {
+                return `<input type="time" id="${inputId}" name="${inputId}" class="form-control" ${isRequired ? 'required' : ''}>`;
+            } else if (attribute.valueType === 'DATETIME') {
+                return `<input type="datetime-local" id="${inputId}" name="${inputId}" class="form-control" ${isRequired ? 'required' : ''}>`;
             } else if (attribute.valueType === 'FILE_RESOURCE') {
                 return `<div class="alert alert-info">
                     <i class="fas fa-file-upload me-2"></i>
@@ -2443,6 +2516,10 @@ if (!empty($programStages)) {
                 case 'DATE': return 'Select date';
                 case 'EMAIL': return 'Enter email address...';
                 case 'PHONE_NUMBER': return 'Enter phone number...';
+                case 'URL': return 'Enter website URL...';
+                case 'PERCENTAGE': return 'Enter percentage (0-100)...';
+                case 'TIME': return 'Select time';
+                case 'DATETIME': return 'Select date and time';
                 default: return `Enter ${label.toLowerCase()}...`;
             }
         }
@@ -2455,8 +2532,13 @@ if (!empty($programStages)) {
                 case 'DATE': return 'Select or enter a valid date';
                 case 'LONG_TEXT': return 'You can enter longer text with multiple lines';
                 case 'BOOLEAN': return 'Choose Yes or No';
+                case 'TRUE_ONLY': return 'Check this box if applicable';
                 case 'EMAIL': return 'Enter a valid email address';
                 case 'PHONE_NUMBER': return 'Enter a valid phone number';
+                case 'URL': return 'Enter a valid website URL';
+                case 'PERCENTAGE': return 'Enter a percentage value between 0 and 100';
+                case 'TIME': return 'Select or enter a time';
+                case 'DATETIME': return 'Select or enter date and time';
                 default: return 'Enter the required information';
             }
         }
@@ -2534,23 +2616,53 @@ if (!empty($programStages)) {
 
         async function loadStageQuestions(stageId, container) {
             const stage = programData.program.programStages.find(s => s.id === stageId);
-            if (!stage) return;
+            if (!stage) {
+                console.log('❌ Stage not found:', stageId);
+                return;
+            }
+
+            console.log('🚀 Loading stage questions for stage:', stageId, stage.name);
 
             // Load groupings from database
             const groupingData = await loadGroupingsFromDatabase(stageId);
 
             // If we have groupings for this stage, apply them
             if (groupingData && groupingData.length > 0) {
+                console.log('📋 Using grouped layout for stage:', stageId);
                 loadGroupedQuestions(container, stage, groupingData);
             } else {
+                console.log('📝 Using ungrouped layout for stage:', stageId);
                 loadUngroupedQuestions(container, stage);
             }
         }
 
         async function loadGroupingsFromDatabase(stageId) {
-            // Disable groupings API calls for now - use default layout
-            console.log('Using default layout for stage:', stageId);
-            return null;
+            try {
+                const surveyId = document.getElementById('surveyId').value;
+                console.log('🔍 Attempting to load groupings for survey:', surveyId, 'stage:', stageId);
+                
+                const response = await fetch(`/fbs/public/api/groupings.php?survey_id=${surveyId}`);
+                console.log('📡 API Response status:', response.status);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('📊 Full groupings data from API:', result);
+                    
+                    if (result.success && result.data && result.data[stageId]) {
+                        console.log('✅ Loading groupings from database for stage:', stageId, result.data[stageId]);
+                        return result.data[stageId];
+                    } else {
+                        console.log('❌ No groupings found for stage:', stageId, 'Available stages:', Object.keys(result.data || {}));
+                    }
+                } else {
+                    console.error('❌ API request failed with status:', response.status);
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('❌ Error loading groupings from database:', error);
+                return null;
+            }
         }
 
         function loadUngroupedQuestions(container, stage) {
@@ -2648,6 +2760,11 @@ if (!empty($programStages)) {
             const div = document.createElement('div');
             div.className = 'modal-question-item';
             
+            // Add compact class for TRUE_ONLY checkboxes
+            if (dataElement.valueType === 'TRUE_ONLY') {
+                div.className += ' checkbox-item';
+            }
+            
             // Clean the label by removing prefixes
             let cleanLabel = dataElement.name;
             cleanLabel = cleanLabel.replace(/^[A-Z]+_/, '');
@@ -2715,6 +2832,25 @@ if (!empty($programStages)) {
                         <option value="false">No</option>
                     </select>
                 `;
+            } else if (dataElement.valueType === 'TRUE_ONLY') {
+                return `
+                    <div class="form-check">
+                        <input type="checkbox" id="${inputId}" name="${inputId}" class="form-check-input" value="true" ${dataElement.compulsory ? 'required' : ''}>
+                        <label class="form-check-label" for="${inputId}">Yes</label>
+                    </div>
+                `;
+            } else if (dataElement.valueType === 'EMAIL') {
+                return `<input type="email" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
+            } else if (dataElement.valueType === 'PHONE_NUMBER') {
+                return `<input type="tel" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
+            } else if (dataElement.valueType === 'URL') {
+                return `<input type="url" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
+            } else if (dataElement.valueType === 'PERCENTAGE') {
+                return `<input type="number" id="${inputId}" name="${inputId}" class="form-control" min="0" max="100" step="0.01" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
+            } else if (dataElement.valueType === 'TIME') {
+                return `<input type="time" id="${inputId}" name="${inputId}" class="form-control" ${dataElement.compulsory ? 'required' : ''}>`;
+            } else if (dataElement.valueType === 'DATETIME') {
+                return `<input type="datetime-local" id="${inputId}" name="${inputId}" class="form-control" ${dataElement.compulsory ? 'required' : ''}>`;
             } else if (dataElement.valueType === 'FILE_RESOURCE') {
                 console.log('FILE_RESOURCE field detected:', {
                     name: dataElement.name,
@@ -2788,6 +2924,12 @@ if (!empty($programStages)) {
                 case 'INTEGER': return `Enter a number for ${label.toLowerCase()}...`;
                 case 'LONG_TEXT': return `Enter detailed information about ${label.toLowerCase()}...`;
                 case 'DATE': return 'Select date';
+                case 'EMAIL': return 'Enter email address...';
+                case 'PHONE_NUMBER': return 'Enter phone number...';
+                case 'URL': return 'Enter website URL...';
+                case 'PERCENTAGE': return 'Enter percentage (0-100)...';
+                case 'TIME': return 'Select time';
+                case 'DATETIME': return 'Select date and time';
                 default: return `Enter ${label.toLowerCase()}...`;
             }
         }
@@ -2800,6 +2942,13 @@ if (!empty($programStages)) {
                 case 'DATE': return 'Select or enter a valid date';
                 case 'LONG_TEXT': return 'You can enter longer text with multiple lines';
                 case 'BOOLEAN': return 'Choose Yes or No';
+                case 'TRUE_ONLY': return 'Check this box if applicable';
+                case 'EMAIL': return 'Enter a valid email address';
+                case 'PHONE_NUMBER': return 'Enter a valid phone number';
+                case 'URL': return 'Enter a valid website URL';
+                case 'PERCENTAGE': return 'Enter a percentage value between 0 and 100';
+                case 'TIME': return 'Select or enter a time';
+                case 'DATETIME': return 'Select or enter date and time';
                 default: return 'Enter the required information';
             }
         }
@@ -2848,38 +2997,195 @@ if (!empty($programStages)) {
         }
         
         // File upload handling functions
-        function handleSchoolFileUpload(input, inputId) {
+        async function handleSchoolFileUpload(input, inputId) {
             const file = input.files[0];
             if (!file) return;
             
             console.log('School file uploaded:', file.name, file.type);
             
-            // Show file info
+            // Show loading state
             const infoDiv = document.getElementById(inputId + '_info');
             const fileNameSpan = infoDiv.querySelector('.file-name');
             const previewDiv = document.getElementById(inputId + '_preview');
             
-            fileNameSpan.textContent = file.name;
+            fileNameSpan.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Uploading...';
             infoDiv.style.display = 'block';
             
-            // Preview file contents
-            if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-                previewCSVFile(file, previewDiv);
-            } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-                previewExcelFile(file, previewDiv);
-            } else {
-                previewDiv.innerHTML = '<p class="text-muted">File uploaded successfully. Preview not available for this format.</p>';
+            try {
+                // Upload file to server
+                const surveyId = document.getElementById('surveyId').value;
+                const questionId = inputId.replace(/^modal_/, '').replace(/_\d+$/, ''); // Extract question ID
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('survey_id', surveyId);
+                formData.append('question_id', questionId);
+                
+                const response = await fetch('/fbs/public/api/file_uploads.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Store upload info for later use
+                    const uploadInfo = {
+                        uploadId: result.upload_id,
+                        filename: result.filename,
+                        storedFilename: result.stored_filename,
+                        size: result.size,
+                        uploaded: true
+                    };
+                    
+                    // Store in a data attribute for persistence
+                    input.setAttribute('data-upload-info', JSON.stringify(uploadInfo));
+                    
+                    // Update UI
+                    fileNameSpan.innerHTML = `<i class="fas fa-file-excel text-success me-2"></i>${result.filename}`;
+                    
+                    // Add file size info
+                    const sizeInfo = document.createElement('small');
+                    sizeInfo.className = 'text-muted d-block';
+                    sizeInfo.textContent = `Size: ${(result.size / 1024).toFixed(1)} KB`;
+                    fileNameSpan.appendChild(sizeInfo);
+                    
+                    // Show preview if available
+                    if (result.preview) {
+                        displayFilePreview(result.preview, previewDiv);
+                    }
+                    
+                    console.log('✅ File uploaded successfully:', uploadInfo);
+                } else {
+                    throw new Error(result.error || 'Upload failed');
+                }
+                
+            } catch (error) {
+                console.error('❌ File upload error:', error);
+                fileNameSpan.innerHTML = `<i class="fas fa-exclamation-triangle text-danger me-2"></i>Upload failed: ${error.message}`;
+                
+                // Reset file input
+                input.value = '';
+                setTimeout(() => {
+                    infoDiv.style.display = 'none';
+                }, 3000);
             }
         }
         
-        function removeSchoolFile(inputId) {
+        function displayFilePreview(preview, previewDiv) {
+            if (!preview || !Array.isArray(preview)) return;
+            
+            let html = '<p class="mb-2"><strong>File Preview (first 5 rows):</strong></p>';
+            html += '<table class="table table-sm table-bordered">';
+            
+            preview.forEach((line, index) => {
+                if (line.trim()) {
+                    const cells = line.split(',');
+                    html += '<tr>';
+                    if (index === 0) {
+                        // Header row
+                        cells.forEach(cell => {
+                            html += `<th class="small">${cell.trim()}</th>`;
+                        });
+                    } else {
+                        // Data rows
+                        cells.forEach(cell => {
+                            html += `<td class="small">${cell.trim()}</td>`;
+                        });
+                    }
+                    html += '</tr>';
+                }
+            });
+            
+            html += '</table>';
+            previewDiv.innerHTML = html;
+        }
+        
+        async function removeSchoolFile(inputId) {
             const input = document.getElementById(inputId);
             const infoDiv = document.getElementById(inputId + '_info');
             
+            // Check if there's an uploaded file to delete from server
+            const uploadInfo = input.getAttribute('data-upload-info');
+            if (uploadInfo) {
+                try {
+                    const uploadData = JSON.parse(uploadInfo);
+                    
+                    // Delete from server
+                    const response = await fetch(`/fbs/public/api/file_uploads.php?upload_id=${uploadData.uploadId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        console.log('✅ File deleted from server:', uploadData.filename);
+                    } else {
+                        console.warn('⚠️ Failed to delete from server:', result.error);
+                    }
+                } catch (error) {
+                    console.error('❌ Error deleting file from server:', error);
+                }
+            }
+            
+            // Clear UI and input
             input.value = '';
+            input.removeAttribute('data-upload-info');
             infoDiv.style.display = 'none';
             
-            console.log('School file removed for:', inputId);
+            console.log('File removed for:', inputId);
+        }
+        
+        // Function to load existing files when form opens
+        async function loadExistingFiles() {
+            const surveyId = document.getElementById('surveyId').value;
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            
+            console.log('🔍 Loading existing files for survey:', surveyId);
+            
+            for (const input of fileInputs) {
+                const inputId = input.id;
+                const questionId = inputId.replace(/^modal_/, '').replace(/_\d+$/, '');
+                
+                try {
+                    const response = await fetch(`/fbs/public/api/file_uploads.php?survey_id=${surveyId}&question_id=${questionId}`);
+                    const result = await response.json();
+                    
+                    if (result.success && result.file) {
+                        const file = result.file;
+                        
+                        // Store upload info
+                        const uploadInfo = {
+                            uploadId: file.id,
+                            filename: file.original_filename,
+                            storedFilename: file.stored_filename,
+                            size: file.file_size,
+                            uploaded: true
+                        };
+                        
+                        input.setAttribute('data-upload-info', JSON.stringify(uploadInfo));
+                        
+                        // Update UI to show existing file
+                        const infoDiv = document.getElementById(inputId + '_info');
+                        const fileNameSpan = infoDiv.querySelector('.file-name');
+                        
+                        if (infoDiv && fileNameSpan) {
+                            fileNameSpan.innerHTML = `<i class="fas fa-file-excel text-success me-2"></i>${file.original_filename}`;
+                            
+                            // Add file size info
+                            const sizeInfo = document.createElement('small');
+                            sizeInfo.className = 'text-muted d-block';
+                            sizeInfo.textContent = `Size: ${(file.file_size / 1024).toFixed(1)} KB • Uploaded: ${new Date(file.created_at).toLocaleDateString()}`;
+                            fileNameSpan.appendChild(sizeInfo);
+                            
+                            infoDiv.style.display = 'block';
+                            
+                            console.log('✅ Loaded existing file:', file.original_filename);
+                        }
+                    }
+                } catch (error) {
+                    console.log('No existing file for question:', questionId);
+                }
+            }
         }
         
         function previewCSVFile(file, previewDiv) {
@@ -3810,7 +4116,7 @@ if (!empty($programStages)) {
             
             try {
                 // First, try to load from database
-                const response = await fetch(`api/groupings.php?survey_id=${surveyId}`);
+                const response = await fetch(`/fbs/public/api/groupings.php?survey_id=${surveyId}`);
                 
                 if (response.ok) {
                     const result = await response.json();
@@ -4087,6 +4393,11 @@ if (!empty($programStages)) {
             console.log('Tracker form JavaScript loaded successfully');
             
             await loadSavedGroupings();
+            
+            // Load existing files after a short delay to ensure DOM is ready
+            setTimeout(async () => {
+                await loadExistingFiles();
+            }, 500);
             
             // Navigation active state is managed by navigateToStage function
             // Don't automatically set first section as active here
