@@ -2154,8 +2154,8 @@ if (!empty($programStages)) {
                 <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
                     <div class="flex-grow-1">
                         <p class="text-muted mb-0">
-                            <i class="fas fa-lightbulb me-2 text-warning"></i>
-                            <strong>Tip:</strong> You can change question types by clicking on the field type selector
+                            <i class="fas fa-info-circle me-2 text-info"></i>
+                            <strong>Note:</strong> Fill in all required fields to proceed with the tracker submission
                         </p>
                     </div>
                     <div class="d-flex gap-3">
@@ -2216,8 +2216,8 @@ if (!empty($programStages)) {
                 <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
                     <div class="flex-grow-1">
                         <p class="text-muted mb-0">
-                            <i class="fas fa-lightbulb me-2 text-warning"></i>
-                            <strong>Tip:</strong> You can change question types by clicking on the field type selector
+                            <i class="fas fa-info-circle me-2 text-info"></i>
+                            <strong>Note:</strong> Fill in all required fields to proceed with the tracker submission
                         </p>
                     </div>
                     <div class="d-flex gap-3">
@@ -2958,13 +2958,76 @@ if (!empty($programStages)) {
                 return;
             }
             
+            // Validate required fields
+            const requiredInputs = container.querySelectorAll('input[required], select[required], textarea[required]');
+            let hasRequiredErrors = false;
+            
+            requiredInputs.forEach(input => {
+                if (!input.value || (input.type === 'checkbox' && !input.checked)) {
+                    hasRequiredErrors = true;
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+            
+            if (hasRequiredErrors) {
+                alert('Please fill in all required fields marked with *');
+                return;
+            }
+            
             // Collect all form data
             const occurrenceData = { eventDate: eventDate, dataElements: {} };
             const inputs = container.querySelectorAll('input, select, textarea');
             
             inputs.forEach(input => {
-                if (input.value) {
-                    occurrenceData.dataElements[input.id] = input.value;
+                // Handle different input types appropriately
+                if (input.type === 'file') {
+                    // Handle file inputs specially
+                    if (input.files && input.files[0]) {
+                        occurrenceData.dataElements[input.id] = {
+                            fileName: input.files[0].name,
+                            fileSize: input.files[0].size,
+                            fileType: input.files[0].type,
+                            fileObject: input.files[0], // Store the actual file
+                            isFile: true
+                        };
+                        console.log('Saved file data for field:', input.id, occurrenceData.dataElements[input.id].fileName);
+                    }
+                } else if (input.type === 'checkbox') {
+                    // Handle checkboxes - store checked state
+                    occurrenceData.dataElements[input.id] = {
+                        value: input.checked ? input.value : '',
+                        checked: input.checked,
+                        isCheckbox: true
+                    };
+                    console.log('Saved checkbox data for field:', input.id, 'checked:', input.checked);
+                } else if (input.type === 'radio') {
+                    // Handle radio buttons - only store if checked
+                    if (input.checked) {
+                        occurrenceData.dataElements[input.name] = {
+                            value: input.value,
+                            isRadio: true
+                        };
+                        console.log('Saved radio data for field:', input.name, 'value:', input.value);
+                    }
+                } else if (input.tagName.toLowerCase() === 'select') {
+                    // Handle select elements (including Select2)
+                    if (input.value) {
+                        occurrenceData.dataElements[input.id] = {
+                            value: input.value,
+                            selectedText: input.options[input.selectedIndex]?.text || input.value,
+                            isSelect: true
+                        };
+                        console.log('Saved select data for field:', input.id, 'value:', input.value);
+                    }
+                } else if (input.value !== undefined && input.value !== '') {
+                    // Handle all other input types (text, number, date, email, etc.)
+                    occurrenceData.dataElements[input.id] = {
+                        value: input.value,
+                        type: input.type
+                    };
+                    console.log('Saved input data for field:', input.id, 'type:', input.type, 'value:', input.value);
                 }
             });
             
@@ -3006,7 +3069,57 @@ if (!empty($programStages)) {
                 Object.keys(existingData.dataElements).forEach(inputId => {
                     const input = document.getElementById(inputId);
                     if (input) {
-                        input.value = existingData.dataElements[inputId];
+                        const savedData = existingData.dataElements[inputId];
+                        
+                        // Handle different field types appropriately
+                        if (savedData && savedData.isFile) {
+                            // Handle file inputs - show indicator of previously selected file
+                            const fileIndicator = document.createElement('div');
+                            fileIndicator.className = 'text-success small mt-1';
+                            fileIndicator.innerHTML = `<i class="fas fa-file-check me-1"></i>Previously selected: ${savedData.fileName} (${(savedData.fileSize / 1024).toFixed(1)} KB)`;
+                            fileIndicator.id = `file-indicator-${inputId}`;
+                            
+                            // Remove existing indicator if any
+                            const existingIndicator = document.getElementById(`file-indicator-${inputId}`);
+                            if (existingIndicator) {
+                                existingIndicator.remove();
+                            }
+                            
+                            // Add the indicator after the file input
+                            input.parentNode.insertBefore(fileIndicator, input.nextSibling);
+                            console.log('Restored file indicator for:', inputId, savedData.fileName);
+                        } else if (savedData && savedData.isCheckbox) {
+                            // Handle checkboxes - restore checked state
+                            input.checked = savedData.checked;
+                            console.log('Restored checkbox for:', inputId, 'checked:', savedData.checked);
+                        } else if (savedData && savedData.isRadio) {
+                            // Handle radio buttons - find by name and value
+                            const radioInputs = document.querySelectorAll(`input[name="${inputId}"]`);
+                            radioInputs.forEach(radio => {
+                                if (radio.value === savedData.value) {
+                                    radio.checked = true;
+                                    console.log('Restored radio for:', inputId, 'value:', savedData.value);
+                                }
+                            });
+                        } else if (savedData && savedData.isSelect) {
+                            // Handle select elements (including Select2)
+                            input.value = savedData.value;
+                            
+                            // Trigger change event for Select2 or other plugins
+                            const changeEvent = new Event('change', { bubbles: true });
+                            input.dispatchEvent(changeEvent);
+                            console.log('Restored select for:', inputId, 'value:', savedData.value);
+                        } else if (savedData && savedData.value !== undefined) {
+                            // Handle regular inputs with stored value
+                            input.value = savedData.value;
+                            console.log('Restored input for:', inputId, 'type:', savedData.type || 'unknown', 'value:', savedData.value);
+                        } else if (typeof savedData === 'string' || typeof savedData === 'number') {
+                            // Handle legacy simple values (backward compatibility)
+                            input.value = savedData;
+                            console.log('Restored legacy value for:', inputId, 'value:', savedData);
+                        }
+                    } else {
+                        console.warn('Input element not found for saved data:', inputId);
                     }
                 });
             }
@@ -3029,6 +3142,79 @@ if (!empty($programStages)) {
                 }
             }
         }
+
+        // Debug function to test data saving and loading
+        function debugStageData() {
+            console.log('=== STAGE DATA DEBUG ===');
+            console.log('Current stageData:', JSON.stringify(stageData, (key, value) => {
+                // Don't stringify file objects
+                if (key === 'fileObject') return '[File Object]';
+                return value;
+            }, 2));
+            
+            // Test data collection from current modal if open
+            const modal = document.getElementById('stageQuestionsModal');
+            if (modal && modal.style.display !== 'none') {
+                const container = document.getElementById('modalQuestionsContainer');
+                const inputs = container.querySelectorAll('input, select, textarea');
+                console.log('=== CURRENT MODAL INPUTS ===');
+                inputs.forEach(input => {
+                    if (input.type === 'file') {
+                        console.log(`${input.id} (file): ${input.files?.[0]?.name || 'No file selected'}`);
+                    } else if (input.type === 'checkbox') {
+                        console.log(`${input.id} (checkbox): checked=${input.checked}, value=${input.value}`);
+                    } else if (input.type === 'radio') {
+                        console.log(`${input.name} (radio): checked=${input.checked}, value=${input.value}`);
+                    } else {
+                        console.log(`${input.id} (${input.type || input.tagName}): ${input.value}`);
+                    }
+                });
+            }
+            console.log('=== END DEBUG ===');
+        }
+
+        // Make debug function available globally for testing
+        window.debugStageData = debugStageData;
+        
+        // Debug function to show complete submission data
+        function debugSubmissionData() {
+            console.log('=== COMPLETE SUBMISSION DEBUG ===');
+            
+            // Show stageData
+            console.log('Current stageData:', JSON.stringify(stageData, (key, value) => {
+                if (key === 'fileObject') return '[File Object]';
+                return value;
+            }, 2));
+            
+            // Show formData
+            console.log('Current formData:', JSON.stringify(formData, null, 2));
+            
+            // Show all stages in DOM
+            const stageCards = document.querySelectorAll('.stage-card, .stage-nav-item');
+            console.log('=== DOM STAGES ===');
+            stageCards.forEach(stage => {
+                const stageId = stage.getAttribute('data-stage-id') || stage.getAttribute('data-stage');
+                const stageName = stage.textContent.trim();
+                console.log(`Stage: ${stageId} - ${stageName}`);
+            });
+            
+            // Show current modal state
+            const modal = document.getElementById('stageQuestionsModal');
+            console.log('Modal open:', modal?.style.display !== 'none');
+            console.log('Current modal stage:', currentModalStage);
+            console.log('Current modal occurrence:', currentModalOccurrence);
+            
+            // Show all file inputs
+            const allFileInputs = document.querySelectorAll('input[type="file"]');
+            console.log('=== ALL FILE INPUTS ===');
+            allFileInputs.forEach(input => {
+                console.log(`${input.id}: ${input.files?.[0]?.name || 'No file'}`);
+            });
+            
+            console.log('=== END SUBMISSION DEBUG ===');
+        }
+        
+        window.debugSubmissionData = debugSubmissionData;
 
         async function submitAllData() {
             // Check if we're in offline mode
@@ -3055,6 +3241,31 @@ if (!empty($programStages)) {
             
             try {
                 // Collect all form data for DHIS2 submission
+                // Ensure TEI data is collected from any open modal
+                const teiModal = document.getElementById('stageQuestionsModal');
+                if (teiModal && teiModal.style.display !== 'none') {
+                    const modalTitle = teiModal.querySelector('h4');
+                    if (modalTitle && modalTitle.textContent.includes('Participant Information')) {
+                        console.log('Collecting TEI data from open modal...');
+                        const container = document.getElementById('modalQuestionsContainer');
+                        const teiInputs = container.querySelectorAll('input, select, textarea');
+                        
+                        teiInputs.forEach(input => {
+                            if (input.value) {
+                                const match = input.id.match(/^tei_([^_]+)_\d+$/);
+                                if (match) {
+                                    const attributeId = match[1];
+                                    if (!formData.trackedEntityAttributes) {
+                                        formData.trackedEntityAttributes = {};
+                                    }
+                                    formData.trackedEntityAttributes[attributeId] = input.value;
+                                    console.log('Added TEI attribute:', attributeId, input.value);
+                                }
+                            }
+                        });
+                    }
+                }
+                
                 const submissionData = {
                     survey_id: document.getElementById('surveyId').value,
                     location_data: {
@@ -3064,10 +3275,109 @@ if (!empty($programStages)) {
                         hierarchy_path: document.getElementById('hierarchyData').value
                     },
                     form_data: {
-                        trackedEntityAttributes: formData.trackedEntityAttributes,
+                        trackedEntityAttributes: formData.trackedEntityAttributes || {},
                         events: {}
                     }
                 };
+                
+                // IMPORTANT: Save current modal data if a stage is currently open
+                const modal = document.getElementById('stageQuestionsModal');
+                if (modal && modal.style.display !== 'none' && currentModalStage) {
+                    console.log('Saving current open modal data before submission...');
+                    const eventDate = document.getElementById('modalEventDate').value;
+                    const container = document.getElementById('modalQuestionsContainer');
+                    
+                    if (eventDate) {
+                        const tempOccurrenceData = { eventDate: eventDate, dataElements: {} };
+                        const inputs = container.querySelectorAll('input, select, textarea');
+                        
+                        inputs.forEach(input => {
+                            // Use the same logic as saveStageData for consistency
+                            if (input.type === 'file') {
+                                if (input.files && input.files[0]) {
+                                    tempOccurrenceData.dataElements[input.id] = {
+                                        fileName: input.files[0].name,
+                                        fileSize: input.files[0].size,
+                                        fileType: input.files[0].type,
+                                        fileObject: input.files[0],
+                                        isFile: true
+                                    };
+                                }
+                            } else if (input.type === 'checkbox') {
+                                tempOccurrenceData.dataElements[input.id] = {
+                                    value: input.checked ? input.value : '',
+                                    checked: input.checked,
+                                    isCheckbox: true
+                                };
+                            } else if (input.type === 'radio') {
+                                if (input.checked) {
+                                    tempOccurrenceData.dataElements[input.name] = {
+                                        value: input.value,
+                                        isRadio: true
+                                    };
+                                }
+                            } else if (input.tagName.toLowerCase() === 'select') {
+                                if (input.value) {
+                                    tempOccurrenceData.dataElements[input.id] = {
+                                        value: input.value,
+                                        selectedText: input.options[input.selectedIndex]?.text || input.value,
+                                        isSelect: true
+                                    };
+                                }
+                            } else if (input.value !== undefined && input.value !== '') {
+                                tempOccurrenceData.dataElements[input.id] = {
+                                    value: input.value,
+                                    type: input.type
+                                };
+                            }
+                        });
+                        
+                        // Add current modal data to stageData temporarily for submission
+                        if (!stageData[currentModalStage]) {
+                            stageData[currentModalStage] = {};
+                        }
+                        const tempOccurrenceKey = `${currentModalStage}_${currentModalOccurrence || 1}`;
+                        stageData[currentModalStage][tempOccurrenceKey] = tempOccurrenceData;
+                        console.log('Added current modal data:', tempOccurrenceKey, tempOccurrenceData);
+                    }
+                }
+                
+                // Also collect any data from visible stage sections (non-modal data)
+                const stageCards = document.querySelectorAll('.stage-card');
+                stageCards.forEach(stageCard => {
+                    const stageId = stageCard.getAttribute('data-stage-id');
+                    if (stageId) {
+                        // Look for any unsaved data in visible stage inputs
+                        const stageInputs = stageCard.querySelectorAll('input, select, textarea');
+                        stageInputs.forEach(input => {
+                            if (input.value && input.getAttribute('data-de-id')) {
+                                const deId = input.getAttribute('data-de-id');
+                                const occurrence = input.getAttribute('data-occurrence') || '1';
+                                const occurrenceKey = `${stageId}_${occurrence}`;
+                                
+                                // Initialize if not exists
+                                if (!stageData[stageId]) {
+                                    stageData[stageId] = {};
+                                }
+                                if (!stageData[stageId][occurrenceKey]) {
+                                    stageData[stageId][occurrenceKey] = {
+                                        eventDate: new Date().toISOString().split('T')[0], // Default to today
+                                        dataElements: {}
+                                    };
+                                }
+                                
+                                // Add data element
+                                stageData[stageId][occurrenceKey].dataElements[input.id] = {
+                                    value: input.value,
+                                    type: input.type
+                                };
+                                console.log('Added visible stage data:', occurrenceKey, deId, input.value);
+                            }
+                        });
+                    }
+                });
+                
+                console.log('Complete stageData before submission:', stageData);
                 
                 // Convert stage data to DHIS2 events format
                 Object.keys(stageData).forEach(stageId => {
@@ -3088,7 +3398,44 @@ if (!empty($programStages)) {
                             const match = inputId.match(/^modal_([^_]+)_\d+$/);
                             if (match) {
                                 const deId = match[1];
-                                submissionData.form_data.events[occurrenceKey].dataValues[deId] = occurrenceData.dataElements[inputId];
+                                const savedData = occurrenceData.dataElements[inputId];
+                                
+                                // Extract the actual value based on data type
+                                let finalValue = '';
+                                if (savedData && savedData.isFile) {
+                                    finalValue = savedData.fileName; // DHIS2 will get the actual UID later
+                                } else if (savedData && savedData.isCheckbox) {
+                                    finalValue = savedData.checked ? savedData.value : '';
+                                } else if (savedData && savedData.isRadio) {
+                                    finalValue = savedData.value;
+                                } else if (savedData && savedData.isSelect) {
+                                    finalValue = savedData.value;
+                                } else if (savedData && savedData.value !== undefined) {
+                                    finalValue = savedData.value;
+                                } else if (typeof savedData === 'string' || typeof savedData === 'number') {
+                                    finalValue = savedData; // Legacy simple value
+                                }
+                                
+                                if (finalValue !== '') {
+                                    submissionData.form_data.events[occurrenceKey].dataValues[deId] = finalValue;
+                                }
+                            } else {
+                                // Handle non-modal data elements (direct mapping)
+                                const deId = inputId.replace(/^(modal_|tei_)/, '').replace(/_\d+$/, '');
+                                if (deId && occurrenceData.dataElements[inputId]) {
+                                    const savedData = occurrenceData.dataElements[inputId];
+                                    let finalValue = '';
+                                    
+                                    if (savedData && savedData.value !== undefined) {
+                                        finalValue = savedData.value;
+                                    } else if (typeof savedData === 'string' || typeof savedData === 'number') {
+                                        finalValue = savedData;
+                                    }
+                                    
+                                    if (finalValue !== '') {
+                                        submissionData.form_data.events[occurrenceKey].dataValues[deId] = finalValue;
+                                    }
+                                }
                             }
                         });
                     });
@@ -3096,13 +3443,67 @@ if (!empty($programStages)) {
                 
                 console.log('Submitting data to DHIS2:', submissionData);
                 
+                // Create FormData to handle both regular data and files
+                const submissionFormData = new FormData();
+                submissionFormData.append('survey_id', submissionData.survey_id);
+                submissionFormData.append('form_data', JSON.stringify(submissionData.form_data));
+                submissionFormData.append('location_data', JSON.stringify(submissionData.location_data));
+                
+                // Collect all file uploads with detailed logging
+                const allFileUploads = new Map(); // Use Map to avoid key conflicts
+                
+                // Add files from currently visible file inputs
+                const fileFields = document.querySelectorAll('input[type="file"]');
+                console.log(`Found ${fileFields.length} visible file inputs`);
+                fileFields.forEach(fileField => {
+                    if (fileField.files && fileField.files[0]) {
+                        const fileKey = fileField.id || fileField.name || `visible_file_${Date.now()}`;
+                        allFileUploads.set(fileKey, {
+                            file: fileField.files[0],
+                            source: 'visible',
+                            fieldName: fileField.name,
+                            fieldId: fileField.id
+                        });
+                        console.log('Added current visible file:', fileKey, fileField.files[0].name);
+                    }
+                });
+                
+                // Add files from saved stage data (files selected in previous stages)
+                Object.keys(stageData).forEach(stageId => {
+                    const stageOccurrences = stageData[stageId];
+                    Object.keys(stageOccurrences).forEach(occurrenceKey => {
+                        const occurrenceData = stageOccurrences[occurrenceKey];
+                        if (occurrenceData.dataElements) {
+                            Object.keys(occurrenceData.dataElements).forEach(inputId => {
+                                const value = occurrenceData.dataElements[inputId];
+                                if (value && value.isFile && value.fileObject) {
+                                    // Ensure unique key for saved files
+                                    const fileKey = inputId + '_saved';
+                                    allFileUploads.set(fileKey, {
+                                        file: value.fileObject,
+                                        source: 'saved_stage',
+                                        fileName: value.fileName,
+                                        inputId: inputId
+                                    });
+                                    console.log('Added saved stage file:', fileKey, value.fileName);
+                                }
+                            });
+                        }
+                    });
+                });
+                
+                // Add all collected files to FormData
+                console.log(`Total files to upload: ${allFileUploads.size}`);
+                allFileUploads.forEach((fileInfo, fileKey) => {
+                    const finalKey = fileInfo.inputId || fileInfo.fieldId || fileKey;
+                    submissionFormData.append('files[' + finalKey + ']', fileInfo.file);
+                    console.log(`Added to FormData: files[${finalKey}] = ${fileInfo.file.name} (${fileInfo.source})`);
+                });
+                
                 // Submit to backend
                 const response = await fetch('tracker_program_submit.php', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(submissionData)
+                    body: submissionFormData // No Content-Type header needed for FormData
                 });
                 
                 const result = await response.json();

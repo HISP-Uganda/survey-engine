@@ -5,6 +5,7 @@ header('Content-Type: application/json');
 
 require_once '../admin/connect.php';
 require_once '../admin/dhis2/dhis2_shared.php';
+require_once '../admin/includes/file_upload_helper.php';
 
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -13,13 +14,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Get JSON input
-$input = file_get_contents('php://input');
-$requestData = json_decode($input, true);
+// Handle both JSON and FormData submissions
+if ($_SERVER['CONTENT_TYPE'] && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+    // JSON submission (legacy)
+    $input = file_get_contents('php://input');
+    $requestData = json_decode($input, true);
+} else {
+    // FormData submission (with file uploads)
+    $requestData = [
+        'survey_id' => $_POST['survey_id'] ?? null,
+        'form_data' => isset($_POST['form_data']) ? json_decode($_POST['form_data'], true) : null,
+        'location_data' => isset($_POST['location_data']) ? json_decode($_POST['location_data'], true) : []
+    ];
+}
 
-if (!$requestData) {
+if (!$requestData || !$requestData['survey_id'] || !$requestData['form_data']) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Invalid JSON data']);
+    echo json_encode(['success' => false, 'message' => 'Invalid request data']);
     exit;
 }
 
@@ -57,6 +68,75 @@ try {
         throw new Exception('DHIS2 instance configuration not found or inactive: ' . $instanceKey);
     }
     
+    // Process file uploads if any
+    $uploadedFiles = [];
+    $dhis2FileResources = [];
+    
+    if (!empty($_FILES['files'])) {
+        error_log("Processing file uploads: " . json_encode(array_keys($_FILES['files']['name'])));
+        error_log("Total file fields received: " . count($_FILES['files']['name']));
+        
+        // Reorganize $_FILES structure for easier processing
+        $files = [];
+        foreach ($_FILES['files']['name'] as $fieldName => $fileName) {
+            error_log("Processing file field: $fieldName -> $fileName (Error: " . $_FILES['files']['error'][$fieldName] . ")");
+            if ($_FILES['files']['error'][$fieldName] === UPLOAD_ERR_OK) {
+                $files[$fieldName] = [
+                    'name' => $_FILES['files']['name'][$fieldName],
+                    'type' => $_FILES['files']['type'][$fieldName],
+                    'tmp_name' => $_FILES['files']['tmp_name'][$fieldName],
+                    'error' => $_FILES['files']['error'][$fieldName],
+                    'size' => $_FILES['files']['size'][$fieldName]
+                ];
+                error_log("Successfully reorganized file: $fieldName");
+            } else {
+                error_log("File upload error for $fieldName: " . $_FILES['files']['error'][$fieldName]);
+            }
+        }
+        
+        if (!empty($files)) {
+            // Generate temporary submission ID for file naming
+            $tempSubmissionId = time() . '_' . mt_rand(1000, 9999);
+            
+            // Handle local file uploads
+            $uploadResult = handleTrackerFileUploads($files, $tempSubmissionId, $formData);
+            
+            if ($uploadResult['success']) {
+                $uploadedFiles = $uploadResult['files'];
+                error_log("Files uploaded locally: " . json_encode(array_keys($uploadedFiles)));
+                error_log("Total files uploaded locally: " . count($uploadedFiles));
+                
+                // Upload files to DHIS2 as FILE_RESOURCE entities
+                $dhis2UploadCount = 0;
+                foreach ($uploadedFiles as $fieldName => $fileInfo) {
+                    error_log("Attempting DHIS2 upload for: $fieldName -> " . $fileInfo['original_name']);
+                    $dhis2FileUID = uploadFileToDHIS2($fileInfo['file_path'], $fileInfo['original_name'], $instanceKey);
+                    if ($dhis2FileUID) {
+                        $dhis2FileResources[$fieldName] = $dhis2FileUID;
+                        $dhis2UploadCount++;
+                        error_log("SUCCESS: File uploaded to DHIS2: $fieldName -> $dhis2FileUID");
+                    } else {
+                        error_log("FAILED: Could not upload file to DHIS2: $fieldName -> " . $fileInfo['original_name']);
+                    }
+                }
+                error_log("DHIS2 upload summary: $dhis2UploadCount out of " . count($uploadedFiles) . " files uploaded successfully");
+            } else {
+                error_log("File upload failed: " . $uploadResult['message']);
+                throw new Exception('File upload failed: ' . $uploadResult['message']);
+            }
+        }
+    }
+    
+    // Update form data with DHIS2 file resource UIDs
+    if (!empty($dhis2FileResources)) {
+        error_log("Updating form data with " . count($dhis2FileResources) . " DHIS2 file resources");
+        error_log("File resources to replace: " . json_encode($dhis2FileResources));
+        $formData = updateFormDataWithFileResources($formData, $dhis2FileResources);
+        error_log("Form data updated with DHIS2 file UIDs");
+    } else {
+        error_log("No DHIS2 file resources to update in form data");
+    }
+    
     // Submit to DHIS2 using instance key
     $dhis2Response = submitToDHIS2Tracker($survey, $formData, $instanceKey, $locationData);
     
@@ -65,6 +145,13 @@ try {
     
     // Save to local database for backup/tracking
     $submissionId = saveTrackerSubmissionLocally($surveyId, $formData, $dhis2Response, $locationData, $submissionUID);
+    
+    // Log uploaded files to database
+    if (!empty($uploadedFiles) && $submissionId) {
+        foreach ($uploadedFiles as $fieldName => $fileInfo) {
+            logTrackerFileUpload($submissionId, $fieldName, $fileInfo, $pdo);
+        }
+    }
     
     // Log to payload checker for retry capability
     logToPayloadChecker($submissionId, 'SUCCESS', $formData, $dhis2Response, 'Tracker submission successful');
@@ -209,12 +296,8 @@ function convertToTrackerAPIFormat($survey, $formData, $selectedOrgUnit, $teiUID
                     // Clean and validate data values
                     $cleanValue = trim((string)$value);
                     if ($cleanValue !== '') {
-                        // Skip FILE_RESOURCE fields with file paths (CSV/XLSX uploads)
-                        // These are local file paths that DHIS2 cannot resolve - should be processed separately
-                        if (isFileResourcePath($cleanValue)) {
-                            error_log("Skipping FILE_RESOURCE field with file path: $deId = $cleanValue");
-                            continue;
-                        }
+                        // Note: FILE_RESOURCE fields now contain DHIS2 file UIDs (processed above)
+                        // No need to filter file paths as they're now proper DHIS2 references
                         
                         $dataValues[] = [
                             'dataElement' => $deId,

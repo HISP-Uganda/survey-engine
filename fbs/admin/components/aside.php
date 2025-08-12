@@ -52,8 +52,8 @@ $menuItems = [
             <img src="argon-dashboard-master/assets/img/webhook-icon.png"
              class="navbar-brand-img"
              alt="Survey Engine Logo"
-             style="max-height: 4rem; width: auto;">
-            <span class="ms-1 font-weight-bold d-block mt-2 text-dark" style="font-size: 1rem;">Survey Engine</span>
+             style="max-height: 4rem; width: auto; height: 90px;">
+            <span class="ms-1 font-weight-bold d-block mt-2 text-dark" style="font-size: 1rem;">Admin Panel</span>
         </a>
     </div>
 
