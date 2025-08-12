@@ -209,24 +209,63 @@ function uploadFileToDHIS2($filePath, $originalName, $instanceKey) {
  * @return array Updated form data
  */
 function updateFormDataWithFileResources($formData, $dhis2FileResources) {
-    // Update events with file resource UIDs
+    error_log("=== FILE RESOURCE REPLACEMENT DEBUG ===");
+    error_log("File resource mapping - received " . count($dhis2FileResources) . " file resources");
+    error_log("Events structure: " . (is_array($formData['events']) ? 'ARRAY with ' . count($formData['events']) . ' events' : 'NOT ARRAY'));
+    
+    // Log all placeholders in the original form data
+    error_log("=== ORIGINAL PLACEHOLDERS IN FORM DATA ===");
+    foreach ($formData['events'] as $eventIndex => $event) {
+        foreach ($event['dataValues'] as $deId => $value) {
+            if (strpos($value, 'FILE_PLACEHOLDER:') === 0) {
+                error_log("Event $eventIndex, DE $deId: $value");
+            }
+        }
+    }
+    
+    // Group file resources by data element ID (handle multiple files per DE)
+    $fileResourcesByDE = [];
+    foreach ($dhis2FileResources as $fieldName => $fileResourceUID) {
+        if (preg_match('/^modal_([^_]+)_\d+$/', $fieldName, $matches)) {
+            $deId = $matches[1];
+            if (!isset($fileResourcesByDE[$deId])) {
+                $fileResourcesByDE[$deId] = [];
+            }
+            $fileResourcesByDE[$deId][$fieldName] = $fileResourceUID;
+        }
+    }
+    
+    // Update events with file resource UIDs - match specific files to specific events
     if (isset($formData['events'])) {
-        foreach ($formData['events'] as $eventKey => &$event) {
-            if (isset($event['dataValues'])) {
-                foreach ($dhis2FileResources as $fieldName => $fileResourceUID) {
-                    // Extract data element ID from field name (format: modal_DEID_index)
-                    if (preg_match('/^modal_([^_]+)_\d+$/', $fieldName, $matches)) {
-                        $deId = $matches[1];
-                        if (isset($event['dataValues'][$deId])) {
-                            error_log("Updating field $fieldName (DE: $deId) with DHIS2 file UID: $fileResourceUID");
+        foreach ($fileResourcesByDE as $deId => $fileResources) {
+            error_log("Processing data element $deId with " . count($fileResources) . " file resources");
+            
+            // For each event, try to find a matching file resource
+            foreach ($formData['events'] as $eventIndex => &$event) {
+                if (isset($event['dataValues'][$deId])) {
+                    $oldValue = $event['dataValues'][$deId];
+                    error_log("Checking event $eventIndex, dataElement $deId: '$oldValue'");
+                    
+                    // Check if this is a file placeholder
+                    if (strpos($oldValue, 'FILE_PLACEHOLDER:') === 0) {
+                        $placeholderInputId = substr($oldValue, 17); // Remove "FILE_PLACEHOLDER:" prefix
+                        
+                        // Look for exact match first (specific file for this event)
+                        error_log("Looking for placeholder '$placeholderInputId' in available files: [" . implode(', ', array_keys($fileResources)) . "]");
+                        if (isset($fileResources[$placeholderInputId])) {
+                            $fileResourceUID = $fileResources[$placeholderInputId];
                             $event['dataValues'][$deId] = $fileResourceUID;
+                            error_log("SUCCESS: Matched specific file for event $eventIndex: $deId '$oldValue' -> $fileResourceUID");
+                        } else {
+                            // Fallback: use the last available file for this data element
+                            $lastFieldName = array_key_last($fileResources);
+                            $fileResourceUID = $fileResources[$lastFieldName];
+                            $event['dataValues'][$deId] = $fileResourceUID;
+                            error_log("FALLBACK: Used fallback file for event $eventIndex: $deId '$oldValue' -> $fileResourceUID (from $lastFieldName)");
+                            error_log("FALLBACK REASON: Could not find exact match for '$placeholderInputId'");
                         }
                     } else {
-                        // Handle direct field name match (backward compatibility)
-                        if (isset($event['dataValues'][$fieldName])) {
-                            error_log("Updating field $fieldName with DHIS2 file UID: $fileResourceUID");
-                            $event['dataValues'][$fieldName] = $fileResourceUID;
-                        }
+                        error_log("Not a file placeholder: '$oldValue'");
                     }
                 }
             }

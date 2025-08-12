@@ -48,7 +48,7 @@ try {
 $defaultSettings = [
     'title_text' => $survey['name'] ?? 'DHIS2 Tracker Program',
     'show_logo' => true,
-    'logo_path' => 'asets/asets/img/loog.jpg',
+    'logo_path' => '../admin/asets/asets/img/loog.jpg',
     'show_flag_bar' => true,
     'flag_black_color' => '#000000',
     'flag_yellow_color' => '#FCD116', 

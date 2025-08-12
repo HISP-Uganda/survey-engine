@@ -72,7 +72,19 @@ try {
     $uploadedFiles = [];
     $dhis2FileResources = [];
     
+    // Debug: Log all $_FILES information
+    error_log("=== FILE UPLOAD DEBUG ===");
+    error_log("_FILES structure: " . json_encode($_FILES, JSON_PRETTY_PRINT));
+    error_log("FILES array has 'files' key: " . (isset($_FILES['files']) ? 'YES' : 'NO'));
+    if (isset($_FILES['files'])) {
+        error_log("FILES files array is empty: " . (empty($_FILES['files']) ? 'YES' : 'NO'));
+        if (isset($_FILES['files']['name'])) {
+            error_log("File names in FILES: " . json_encode($_FILES['files']['name']));
+        }
+    }
+    
     if (!empty($_FILES['files'])) {
+        error_log("SUCCESS: Files detected in upload!");
         error_log("Processing file uploads: " . json_encode(array_keys($_FILES['files']['name'])));
         error_log("Total file fields received: " . count($_FILES['files']['name']));
         
@@ -120,6 +132,7 @@ try {
                     }
                 }
                 error_log("DHIS2 upload summary: $dhis2UploadCount out of " . count($uploadedFiles) . " files uploaded successfully");
+                error_log("All DHIS2 file resources created: " . json_encode($dhis2FileResources));
             } else {
                 error_log("File upload failed: " . $uploadResult['message']);
                 throw new Exception('File upload failed: ' . $uploadResult['message']);
@@ -131,10 +144,13 @@ try {
     if (!empty($dhis2FileResources)) {
         error_log("Updating form data with " . count($dhis2FileResources) . " DHIS2 file resources");
         error_log("File resources to replace: " . json_encode($dhis2FileResources));
+        error_log("Form data BEFORE replacement: " . json_encode($formData, JSON_PRETTY_PRINT));
         $formData = updateFormDataWithFileResources($formData, $dhis2FileResources);
         error_log("Form data updated with DHIS2 file UIDs");
+        error_log("Form data AFTER replacement: " . json_encode($formData, JSON_PRETTY_PRINT));
     } else {
         error_log("No DHIS2 file resources to update in form data");
+        error_log("This means either no files were uploaded OR all file uploads to DHIS2 failed");
     }
     
     // Submit to DHIS2 using instance key
@@ -283,7 +299,7 @@ function convertToTrackerAPIFormat($survey, $formData, $selectedOrgUnit, $teiUID
         }
     }
     
-    // Prepare events array (convert from object/map to array)
+    // Prepare events array (handle both array and object format for backward compatibility)
     $events = [];
     if (isset($formData['events'])) {
         foreach ($formData['events'] as $eventKey => $eventData) {

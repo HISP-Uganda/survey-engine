@@ -355,7 +355,7 @@ try {
 $defaultSettings = [
     'title_text' => $trackerProgram['name'] ?? 'DHIS2 Tracker Program',
     'show_logo' => true,
-    'logo_path' => 'asets/asets/img/loog.jpg',
+    'logo_path' => 'admin/asets/asets/img/loog.jpg',
     'show_flag_bar' => true,
     'flag_black_color' => '#000000',
     'flag_yellow_color' => '#FCD116', 
@@ -499,8 +499,7 @@ if (!empty($programStages)) {
             border-radius: 8px;
             transition: all 0.3s ease;
         }
-        
-        .file-upload-area {
+         .file-upload-area {
             padding: 30px 20px;
             text-align: center;
             cursor: pointer;
@@ -1484,7 +1483,7 @@ if (!empty($programStages)) {
         let formData = {
             trackedEntityInstance: null,
             trackedEntityAttributes: {},
-            events: {}
+            events: []
         };
         let stageOccurrences = {};
         let stageData = {}; // Store independent form data for each stage occurrence
@@ -1910,10 +1909,9 @@ if (!empty($programStages)) {
                     const occurrenceCount = stageOccurrences[stage.id];
                     
                     for (let i = 1; i <= occurrenceCount; i++) {
-                        const eventKey = `${stage.id}_${i}`;
                         const eventDate = document.querySelector(`[data-stage-id="${stage.id}"][data-occurrence="${i}"].event-date`).value;
                         
-                        formData.events[eventKey] = {
+                        const event = {
                             programStage: stage.id,
                             eventDate: eventDate,
                             dataValues: {}
@@ -1924,9 +1922,11 @@ if (!empty($programStages)) {
                         dataElements.forEach(element => {
                             if (element.value) {
                                 const deId = element.getAttribute('data-de-id');
-                                formData.events[eventKey].dataValues[deId] = element.value;
+                                event.dataValues[deId] = element.value;
                             }
                         });
+                        
+                        formData.events.push(event);
                     }
                 });
                 
@@ -2027,8 +2027,9 @@ if (!empty($programStages)) {
             }
         }
 
-        // Global variable to track current modal stage
+        // Global variables to track current modal stage and occurrence
         let currentModalStage = null;
+        let currentModalOccurrence = null;
 
         function openStageModal(stageId) {
             if (!programData || !programData.program || !programData.program.programStages) {
@@ -2111,6 +2112,7 @@ if (!empty($programStages)) {
         }
 
         async function showStageForm(stageId, stage, occurrenceNum) {
+            currentModalOccurrence = occurrenceNum;
             if (!stage) {
                 stage = programData.program.programStages.find(s => s.id === stageId);
             }
@@ -2184,7 +2186,7 @@ if (!empty($programStages)) {
             
             // Load existing data if available
             loadExistingData(stageId, occurrenceNum);
-
+            
             // Initialize Select2 for searchable dropdowns
             initializeSelect2InModal();
         }
@@ -2650,7 +2652,9 @@ if (!empty($programStages)) {
             let cleanLabel = dataElement.name;
             cleanLabel = cleanLabel.replace(/^[A-Z]+_/, '');
 
-            const inputId = `modal_${dataElement.id}_${index}`;
+            // Use occurrence number instead of index to ensure unique IDs across events
+            const occurrenceNum = currentModalOccurrence || 1;
+            const inputId = `modal_${dataElement.id}_${occurrenceNum}`;
             
             div.innerHTML = `
                 <div class="question-header">
@@ -2729,25 +2733,26 @@ if (!empty($programStages)) {
                     dataElement.id === 'fkipjGtgOHg' // Specific ID for "Names of schools supported by the organization"
                 ) && programData.surveySettings && programData.surveySettings.dhis2_program_uid) {
                     console.log('Converting FILE_RESOURCE field to CSV/XLSX upload:', dataElement.name);
-                    return `<div class="file-upload-field">
-                        <div class="file-upload-container">
-                            <div class="file-upload-area" onclick="document.getElementById('${inputId}').click()">
-                                <div class="file-upload-icon">
-                                    <i class="fas fa-cloud-upload-alt"></i>
+                    return `<div class="file-upload-container" onclick="document.getElementById('${inputId}').click();" style="cursor: pointer;">
+                                <div class="file-upload-area">
+                                    <div class="file-upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <div class="file-upload-text">
+                                        <strong>Click to upload a file</strong>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">
+                                        Upload a CSV or Excel file containing the list of schools. The file should have columns: School Name, School Code/UID
+                                    </small>
                                 </div>
-                                <div class="file-upload-text">
-                                    <strong>Click to upload schools list</strong>
-                                    <br>
-                                    <small>Supported formats: CSV, XLSX</small>
-                                </div>
-                                <input type="file" 
-                                       id="${inputId}" 
-                                       name="${inputId}" 
-                                       accept=".csv,.xlsx,.xls" 
-                                       style="display: none;"
-                                       ${dataElement.compulsory ? 'required' : ''}
-                                       onchange="handleSchoolFileUpload(this, '${inputId}')">
                             </div>
+                            <input type="file" 
+                                   id="${inputId}" 
+                                   name="${inputId}" 
+                                   accept=".csv,.xlsx,.xls"
+                                   style="display: none;"
+                                   ${dataElement.compulsory ? 'required' : ''}
+                                   onchange="handleSchoolFileUpload(this, '${inputId}')">
                             <div id="${inputId}_info" class="file-upload-info" style="display: none;">
                                 <div class="uploaded-file-info">
                                     <i class="fas fa-file-excel text-success me-2"></i>
@@ -2757,13 +2762,7 @@ if (!empty($programStages)) {
                                     </button>
                                 </div>
                                 <div class="file-preview mt-2" id="${inputId}_preview"></div>
-                            </div>
-                        </div>
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Upload a CSV or Excel file containing the list of schools. The file should have columns: School Name, School Code/UID
-                        </small>
-                    </div>`;
+                            </div>`;
                 } else {
                     return `<div class="alert alert-info">
                         <i class="fas fa-file-upload me-2"></i>
@@ -2924,6 +2923,8 @@ if (!empty($programStages)) {
         }
 
         // End of file upload functions
+        
+
 
         function closeStageModal() {
             console.log('Closing modal for stage:', currentModalStage);
@@ -3073,10 +3074,32 @@ if (!empty($programStages)) {
                         
                         // Handle different field types appropriately
                         if (savedData && savedData.isFile) {
-                            // Handle file inputs - show indicator of previously selected file
+                            // Handle file inputs - show comprehensive indicator and maintain data
+                            
+                            // Create enhanced file status indicator
                             const fileIndicator = document.createElement('div');
-                            fileIndicator.className = 'text-success small mt-1';
-                            fileIndicator.innerHTML = `<i class="fas fa-file-check me-1"></i>Previously selected: ${savedData.fileName} (${(savedData.fileSize / 1024).toFixed(1)} KB)`;
+                            fileIndicator.className = 'alert alert-warning py-2 px-3 mt-2 mb-0';
+                            fileIndicator.style.fontSize = '0.875rem';
+                            fileIndicator.innerHTML = `
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                                        <strong>File Previously Selected:</strong> ${savedData.fileName}
+                                        <span class="text-muted ms-2">(${(savedData.fileSize / 1024).toFixed(1)} KB)</span>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-warning text-dark">⚠ Needs Re-selection</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="clearSavedFile('${inputId}')">
+                                            <i class="fas fa-times"></i> Clear
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="text-warning d-block mt-1">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Action Required:</strong> Please re-select this file to ensure it's uploaded to DHIS2. 
+                                    File inputs lose their selection when modals are closed.
+                                </small>
+                            `;
                             fileIndicator.id = `file-indicator-${inputId}`;
                             
                             // Remove existing indicator if any
@@ -3087,7 +3110,48 @@ if (!empty($programStages)) {
                             
                             // Add the indicator after the file input
                             input.parentNode.insertBefore(fileIndicator, input.nextSibling);
-                            console.log('Restored file indicator for:', inputId, savedData.fileName);
+                            
+                            // Also add a data attribute to the input to track the saved file
+                            input.setAttribute('data-saved-file', JSON.stringify({
+                                fileName: savedData.fileName,
+                                fileSize: savedData.fileSize,
+                                hasSavedFile: true
+                            }));
+                            
+                            // Make the file input more prominent to encourage re-selection
+                            input.style.border = '2px solid #ffc107';
+                            input.style.backgroundColor = '#fff3cd';
+                            input.setAttribute('title', 'Please re-select this file to ensure it gets uploaded to DHIS2');
+                            
+                            // Add event listener to clear warning styling when file is selected
+                            input.addEventListener('change', function() {
+                                if (this.files && this.files[0]) {
+                                    // User has selected a new file - clear warning styling
+                                    this.style.border = '';
+                                    this.style.backgroundColor = '';
+                                    this.removeAttribute('title');
+                                    
+                                    // Update the indicator to show success
+                                    const indicator = document.getElementById(`file-indicator-${inputId}`);
+                                    if (indicator) {
+                                        indicator.className = 'alert alert-success py-2 px-3 mt-2 mb-0';
+                                        indicator.innerHTML = `
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <i class="fas fa-file-excel me-2 text-success"></i>
+                                                    <strong>File Selected:</strong> ${this.files[0].name}
+                                                    <span class="text-muted ms-2">(${(this.files[0].size / 1024).toFixed(1)} KB)</span>
+                                                </div>
+                                                <div>
+                                                    <span class="badge bg-success">✓ Ready for Upload</span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                }
+                            });
+                            
+                            console.log('Restored enhanced file indicator for:', inputId, savedData.fileName);
                         } else if (savedData && savedData.isCheckbox) {
                             // Handle checkboxes - restore checked state
                             input.checked = savedData.checked;
@@ -3176,6 +3240,29 @@ if (!empty($programStages)) {
         // Make debug function available globally for testing
         window.debugStageData = debugStageData;
         
+        // Function to clear saved file data
+        function clearSavedFile(inputId) {
+            const input = document.getElementById(inputId);
+            if (input) {
+                // Remove data attribute
+                input.removeAttribute('data-saved-file');
+                
+                // Clear the file input
+                input.value = '';
+                
+                // Remove the indicator
+                const indicator = document.getElementById(`file-indicator-${inputId}`);
+                if (indicator) {
+                    indicator.remove();
+                }
+                
+                console.log('Cleared saved file for:', inputId);
+            }
+        }
+        
+        // Make clearSavedFile available globally
+        window.clearSavedFile = clearSavedFile;
+        
         // Debug function to show complete submission data
         function debugSubmissionData() {
             console.log('=== COMPLETE SUBMISSION DEBUG ===');
@@ -3231,7 +3318,7 @@ if (!empty($programStages)) {
             const facilityOrgunitUid = document.getElementById('facilityOrgunitUid').value;
             
             if (!facilityId) {
-                alert('Please select a facility/location before submitting.');
+                alert('Please select a location before submitting.');
                 return;
             }
             
@@ -3276,7 +3363,7 @@ if (!empty($programStages)) {
                     },
                     form_data: {
                         trackedEntityAttributes: formData.trackedEntityAttributes || {},
-                        events: {}
+                        events: []
                     }
                 };
                 
@@ -3379,31 +3466,86 @@ if (!empty($programStages)) {
                 
                 console.log('Complete stageData before submission:', stageData);
                 
-                // Convert stage data to DHIS2 events format
+                // Debug: Check for file field conflicts
+                const fileFieldAnalysis = {};
+                Object.keys(stageData).forEach(stageId => {
+                    Object.keys(stageData[stageId]).forEach(occurrenceKey => {
+                        const elements = stageData[stageId][occurrenceKey].dataElements || {};
+                        Object.keys(elements).forEach(inputId => {
+                            if (elements[inputId].isFile) {
+                                const deId = inputId.match(/^modal_([^_]+)_\d+$/)?.[1];
+                                if (deId) {
+                                    if (!fileFieldAnalysis[deId]) {
+                                        fileFieldAnalysis[deId] = [];
+                                    }
+                                    fileFieldAnalysis[deId].push({
+                                        inputId,
+                                        occurrenceKey,
+                                        fileName: elements[inputId].fileName
+                                    });
+                                }
+                            }
+                        });
+                    });
+                });
+                
+                console.log('=== FILE FIELD ANALYSIS ===');
+                Object.keys(fileFieldAnalysis).forEach(deId => {
+                    const files = fileFieldAnalysis[deId];
+                    console.log(`Data Element ${deId}: ${files.length} files`);
+                    files.forEach((file, index) => {
+                        console.log(`  ${index + 1}. ${file.fileName} (${file.occurrenceKey})`);
+                    });
+                    if (files.length > 1) {
+                        console.warn(`⚠️  Multiple files assigned to same data element: ${deId}`);
+                        
+                        // Check if files are in same occurrence (file splitting needed) or different occurrences (legitimate)
+                        const occurrences = [...new Set(files.map(f => f.occurrenceKey))];
+                        if (occurrences.length === 1) {
+                            console.warn(`   → Files are in SAME occurrence (${occurrences[0]}) - will split into separate events`);
+                        } else {
+                            console.log(`   → Files are in DIFFERENT occurrences - this is normal`);
+                        }
+                    }
+                });
+                console.log('=== END FILE ANALYSIS ===');
+                
+                // Convert stage data to DHIS2 events format (simplified - one file per field)
                 Object.keys(stageData).forEach(stageId => {
                     const stageOccurrences = stageData[stageId];
                     Object.keys(stageOccurrences).forEach(occurrenceKey => {
                         const occurrenceData = stageOccurrences[occurrenceKey];
                         
                         // Create event for DHIS2
-                        submissionData.form_data.events[occurrenceKey] = {
+                        const event = {
                             programStage: stageId,
                             eventDate: occurrenceData.eventDate,
                             dataValues: {}
                         };
                         
-                        // Convert modal input data to DHIS2 data values
+                        // Process all data elements (files and non-files)
                         Object.keys(occurrenceData.dataElements || {}).forEach(inputId => {
-                            // Extract data element ID from input ID (format: modal_DEID_index)
                             const match = inputId.match(/^modal_([^_]+)_\d+$/);
                             if (match) {
                                 const deId = match[1];
                                 const savedData = occurrenceData.dataElements[inputId];
                                 
-                                // Extract the actual value based on data type
                                 let finalValue = '';
                                 if (savedData && savedData.isFile) {
-                                    finalValue = savedData.fileName; // DHIS2 will get the actual UID later
+                                    console.log(`Checking file field ${inputId}:`, {
+                                        fileName: savedData.fileName,
+                                        hasFileObject: !!savedData.fileObject,
+                                        fileObjectType: typeof savedData.fileObject
+                                    });
+                                    
+                                    // Check if this file is actually available for upload
+                                    if (savedData.fileObject && savedData.fileObject instanceof File) {
+                                        finalValue = `FILE_PLACEHOLDER:${inputId}`;
+                                        console.log(`✓ Creating placeholder for ${inputId} - file object available`);
+                                    } else {
+                                        console.warn(`✗ Skipping file field ${inputId} - file object not available (was: ${savedData.fileName})`);
+                                        finalValue = ''; // Skip this field entirely - will not be sent to DHIS2
+                                    }
                                 } else if (savedData && savedData.isCheckbox) {
                                     finalValue = savedData.checked ? savedData.value : '';
                                 } else if (savedData && savedData.isRadio) {
@@ -3413,32 +3555,22 @@ if (!empty($programStages)) {
                                 } else if (savedData && savedData.value !== undefined) {
                                     finalValue = savedData.value;
                                 } else if (typeof savedData === 'string' || typeof savedData === 'number') {
-                                    finalValue = savedData; // Legacy simple value
+                                    finalValue = savedData;
                                 }
                                 
                                 if (finalValue !== '') {
-                                    submissionData.form_data.events[occurrenceKey].dataValues[deId] = finalValue;
-                                }
-                            } else {
-                                // Handle non-modal data elements (direct mapping)
-                                const deId = inputId.replace(/^(modal_|tei_)/, '').replace(/_\d+$/, '');
-                                if (deId && occurrenceData.dataElements[inputId]) {
-                                    const savedData = occurrenceData.dataElements[inputId];
-                                    let finalValue = '';
-                                    
-                                    if (savedData && savedData.value !== undefined) {
-                                        finalValue = savedData.value;
-                                    } else if (typeof savedData === 'string' || typeof savedData === 'number') {
-                                        finalValue = savedData;
-                                    }
-                                    
-                                    if (finalValue !== '') {
-                                        submissionData.form_data.events[occurrenceKey].dataValues[deId] = finalValue;
-                                    }
+                                    event.dataValues[deId] = finalValue;
                                 }
                             }
                         });
+                        
+                        submissionData.form_data.events.push(event);
                     });
+                });
+                
+                console.log(`Final events to submit: ${submissionData.form_data.events.length} events`);
+                submissionData.form_data.events.forEach((event, index) => {
+                    console.log(`  Event ${index + 1} (${event.programStage}): ${Object.keys(event.dataValues).length} data values`);
                 });
                 
                 console.log('Submitting data to DHIS2:', submissionData);
@@ -3449,56 +3581,96 @@ if (!empty($programStages)) {
                 submissionFormData.append('form_data', JSON.stringify(submissionData.form_data));
                 submissionFormData.append('location_data', JSON.stringify(submissionData.location_data));
                 
-                // Collect all file uploads with detailed logging
-                const allFileUploads = new Map(); // Use Map to avoid key conflicts
+                // Collect ALL files from all sources (no overriding - each input field can have its own file)
+                const finalFiles = new Map(); // Map of input field ID to file
+                console.log('=== FILE COLLECTION DEBUG ===');
+                console.log('Stage data keys:', Object.keys(stageData));
                 
-                // Add files from currently visible file inputs
-                const fileFields = document.querySelectorAll('input[type="file"]');
-                console.log(`Found ${fileFields.length} visible file inputs`);
-                fileFields.forEach(fileField => {
-                    if (fileField.files && fileField.files[0]) {
-                        const fileKey = fileField.id || fileField.name || `visible_file_${Date.now()}`;
-                        allFileUploads.set(fileKey, {
-                            file: fileField.files[0],
-                            source: 'visible',
-                            fieldName: fileField.name,
-                            fieldId: fileField.id
-                        });
-                        console.log('Added current visible file:', fileKey, fileField.files[0].name);
-                    }
-                });
-                
-                // Add files from saved stage data (files selected in previous stages)
+                // First, collect files from saved stage data
                 Object.keys(stageData).forEach(stageId => {
+                    console.log(`Processing stage: ${stageId}`);
                     const stageOccurrences = stageData[stageId];
                     Object.keys(stageOccurrences).forEach(occurrenceKey => {
+                        console.log(`  Processing occurrence: ${occurrenceKey}`);
                         const occurrenceData = stageOccurrences[occurrenceKey];
                         if (occurrenceData.dataElements) {
+                            console.log(`    Found ${Object.keys(occurrenceData.dataElements).length} data elements`);
                             Object.keys(occurrenceData.dataElements).forEach(inputId => {
                                 const value = occurrenceData.dataElements[inputId];
+                                console.log(`    Checking element ${inputId}:`, value);
                                 if (value && value.isFile && value.fileObject) {
-                                    // Ensure unique key for saved files
-                                    const fileKey = inputId + '_saved';
-                                    allFileUploads.set(fileKey, {
+                                    finalFiles.set(inputId, {
                                         file: value.fileObject,
-                                        source: 'saved_stage',
                                         fileName: value.fileName,
-                                        inputId: inputId
+                                        inputId: inputId,
+                                        source: 'saved_stage'
                                     });
-                                    console.log('Added saved stage file:', fileKey, value.fileName);
+                                    console.log(`✓ File collected from saved data: ${inputId} -> ${value.fileName}`);
+                                } else if (value && value.isFile) {
+                                    console.log(`✗ File data missing fileObject for ${inputId}:`, {
+                                        isFile: value.isFile,
+                                        fileName: value.fileName,
+                                        hasFileObject: !!value.fileObject
+                                    });
                                 }
                             });
+                        } else {
+                            console.log(`    No data elements found for occurrence ${occurrenceKey}`);
                         }
                     });
                 });
                 
-                // Add all collected files to FormData
-                console.log(`Total files to upload: ${allFileUploads.size}`);
-                allFileUploads.forEach((fileInfo, fileKey) => {
-                    const finalKey = fileInfo.inputId || fileInfo.fieldId || fileKey;
-                    submissionFormData.append('files[' + finalKey + ']', fileInfo.file);
-                    console.log(`Added to FormData: files[${finalKey}] = ${fileInfo.file.name} (${fileInfo.source})`);
+                // Then, add files from ALL file inputs (including saved file states)
+                const fileFields = document.querySelectorAll('input[type="file"]');
+                console.log(`Found ${fileFields.length} visible file inputs`);
+                fileFields.forEach((fileField, index) => {
+                    console.log(`  Visible file input ${index}: ${fileField.id} (has files: ${!!(fileField.files && fileField.files[0])})`);
+                    
+                    // Check if this input has a saved file (from data attribute or saved state indicator)
+                    const savedFileData = fileField.getAttribute('data-saved-file');
+                    let hasSavedFile = false;
+                    if (savedFileData) {
+                        try {
+                            const savedInfo = JSON.parse(savedFileData);
+                            hasSavedFile = savedInfo.hasSavedFile;
+                            console.log(`    Input ${fileField.id} has saved file: ${savedInfo.fileName}`);
+                        } catch (e) {
+                            console.log(`    Could not parse saved file data for ${fileField.id}`);
+                        }
+                    }
+                    
+                    // Collect file if it exists OR if there's a saved file
+                    if (fileField.files && fileField.files[0]) {
+                        console.log(`    Current file: ${fileField.files[0].name}`);
+                        finalFiles.set(fileField.id, {
+                            file: fileField.files[0],
+                            fileName: fileField.files[0].name,
+                            inputId: fileField.id,
+                            source: 'current_visible'
+                        });
+                        console.log(`✓ File collected from visible input: ${fileField.id} -> ${fileField.files[0].name}`);
+                    } else if (hasSavedFile) {
+                        console.log(`✗ File input ${fileField.id} shows saved file but no actual file object available`);
+                        console.log(`    This is expected - file inputs lose their files after modal close/reopen`);
+                        
+                        // For saved files without current file objects, we'll skip sending this to DHIS2
+                        // The placeholder will remain, causing the error we're seeing
+                        // TODO: Need to prompt user to re-select files or implement file persistence
+                        console.warn(`WARNING: File for ${fileField.id} was saved but is no longer available for upload`);
+                    }
                 });
+                
+                // Add ALL files to FormData
+                console.log(`=== FILE COLLECTION SUMMARY ===`);
+                console.log(`Total files to upload: ${finalFiles.size}`);
+                if (finalFiles.size === 0) {
+                    console.warn('WARNING: No files collected! This means no files will be uploaded to DHIS2.');
+                }
+                finalFiles.forEach((fileInfo, inputId) => {
+                    submissionFormData.append('files[' + fileInfo.inputId + ']', fileInfo.file);
+                    console.log(`✓ Added to FormData: files[${fileInfo.inputId}] = ${fileInfo.fileName} (${fileInfo.source})`);
+                });
+                console.log('=== END FILE COLLECTION ===');
                 
                 // Submit to backend
                 const response = await fetch('tracker_program_submit.php', {
