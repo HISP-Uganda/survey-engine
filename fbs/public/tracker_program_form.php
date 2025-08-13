@@ -488,6 +488,19 @@ if (!empty($programStages)) {
         .question-input-container .form-control.select2-hidden-accessible + .select2-container {
             width: 100% !important;
         }
+
+        /* Expandable Location Dropdown */
+        .expandable-dropdown {
+            transition: max-height 0.3s ease;
+        }
+        
+        .expandable-dropdown.expanded {
+            max-height: 300px !important;
+        }
+        
+        .expandable-dropdown.collapsed {
+            max-height: 120px !important;
+        }
         
         /* File Upload Styles */
         .file-upload-field {
@@ -588,17 +601,445 @@ if (!empty($programStages)) {
         
         /* Tracker Form Styles */
         .tracker-container {
-            max-width: 1000px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .tracker-main {
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        /* Compact Table Sections */
+        .location-table-section,
+        .participant-table-section,
+        .stage-table-section,
+        .stages-combined-section,
+        .stage-occurrences-section {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .stage-occurrences-table {
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+        
+        .stage-occurrence-row {
+            transition: background-color 0.2s ease;
+        }
+        
+        .stage-occurrence-row:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .stage-occurrence-row td {
+            vertical-align: middle;
+            padding: 10px 8px;
+        }
+        
+        .stage-name {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 13px;
+        }
+        
+        .occurrence-badge {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .status-indicator {
+            font-size: 12px;
+        }
+        
+        .status-indicator.has-data {
+            color: #28a745;
+        }
+        
+        .status-indicator.no-data {
+            color: #6c757d;
+        }
+        
+        .data-preview {
+            font-size: 12px;
+            line-height: 1.3;
+        }
+        
+        .event-date-text {
+            font-size: 12px;
+        }
+        
+        /* Stage Navigation Sidebar */
+        .stage-table-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .stage-navigation-sidebar {
+            flex-shrink: 0;
+            width: 200px;
+            background: #ffffff;
+            border: 2px solid #e3e6ea;
+            border-radius: 10px;
+            padding: 20px 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 20px;
+        }
+        
+        .nav-header {
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .nav-header small {
+            font-weight: 600;
+            font-size: 12px;
+            color: #495057;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stage-nav-item {
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background-color: #f8f9fa;
+        }
+        
+        .stage-nav-item:hover {
+            background-color: #e9ecef;
+            border-color: #007bff;
+            transform: translateX(2px);
+        }
+        
+        .stage-nav-item.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #0056b3;
+            box-shadow: 0 2px 6px rgba(0,123,255,0.3);
+        }
+        
+        .stage-nav-item.active .occurrence-count {
+            color: #ffffff;
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .stage-nav-name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+            line-height: 1.3;
+            word-wrap: break-word;
+        }
+        
+        .stage-nav-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .occurrence-count {
+            color: #6c757d;
+            font-size: 10px;
+            font-weight: 500;
+            background-color: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        
+        .stage-occurrences-table-wrapper {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .stage-occurrences-table {
+            width: 100%;
+            table-layout: auto;
+        }
+        
+        .stage-occurrences-section {
+            margin-bottom: 20px;
+        }
+        
+        /* Remove any height restrictions that might cause scrolling */
+        .stage-table-container, 
+        .stage-occurrences-table-wrapper,
+        .stage-occurrences-table tbody {
+            overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
+        }
+        
+        .stages-container {
+            display: flex;
+            gap: 15px;
+            min-height: 300px;
+        }
+        
+        .stage-nav-tabs {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            border-right: 1px solid #e9ecef;
+            padding-right: 15px;
+        }
+        
+        .stage-tab {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        
+        .stage-tab:hover {
+            background: #f8f9fa;
+        }
+        
+        .stage-tab.active {
+            background: #e3f2fd;
+            border-color: #007bff;
+        }
+        
+        .stage-tab-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 10px;
+            min-width: 30px;
+        }
+        
+        .stage-number {
+            font-size: 12px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .stage-status {
+            font-size: 16px;
+            line-height: 1;
+            margin-top: 2px;
+        }
+        
+        .stage-status.filled {
+            color: #28a745;
+        }
+        
+        .stage-status.empty {
+            color: #6c757d;
+        }
+        
+        .stage-tab-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .stage-tab-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #2c3e50;
+            line-height: 1.3;
+            margin-bottom: 2px;
+        }
+        
+        .stage-tab-meta {
+            font-size: 11px;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .stage-data-container {
+            flex: 1;
+        }
+        
+        .stage-data-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .stage-data-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .location-table-container,
+        .participant-table-container,
+        .stage-table-container {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .content-header {
+            padding: 15px 20px !important;
+            margin-bottom: 20px !important;
+            border-radius: 6px !important;
+        }
+        
+        .stage-data-table {
+            margin-bottom: 0;
+            font-size: 12px;
+        }
+        
+        .stage-data-table td {
+            padding: 6px 8px;
+            vertical-align: middle;
+        }
+        
+        .stage-actions {
+            white-space: nowrap;
+            width: 100px;
+        }
+        
+        .stage-field-name {
+            font-weight: 500;
+            width: 30%;
+            background-color: #f8f9fa;
+        }
+        
+        .stage-field-value {
+            width: 60%;
+        }
+        
+        .stage-summary-row {
+            background-color: #f1f3f4;
+            font-weight: 500;
+        }
+        
+        .location-table,
+        .participant-table {
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+        
+        .location-table td,
+        .participant-table td {
+            padding: 8px 10px;
+            vertical-align: middle;
+        }
+        
+        .location-table .field-label,
+        .participant-table .field-label {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            width: 25%;
+            color: #495057;
+        }
+        
+        .location-table .field-value,
+        .participant-table .field-value {
+            width: 75%;
+        }
+        
+        .readonly-field {
+            background-color: #f8f9fa !important;
+            cursor: not-allowed;
+        }
+        
+        .readonly-field.editable {
+            background-color: white !important;
+            cursor: text;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .participant-table-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .participant-table {
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+        
+        .participant-table td {
+            padding: 8px 10px;
+            vertical-align: middle;
+        }
+        
+        .participant-table .field-label {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            width: 25%;
+            color: #495057;
+        }
+        
+        .participant-table .field-value {
+            width: 75%;
+        }
+        
+        .participant-table input,
+        .participant-table select,
+        .participant-table textarea {
+            width: 100%;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 5px 8px;
+            font-size: 13px;
+        }
+        
+        .participant-table .readonly-value {
+            color: #6c757d;
+            font-style: italic;
+            padding: 5px 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
         }
         
         .tei-section {
             background: white;
-            border-radius: 15px;
+            border-radius: 8px;
             padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .stage-section {
@@ -619,29 +1060,46 @@ if (!empty($programStages)) {
             padding: 30px;
         }
         
-        /* Centered Stage Navigation */
+        /* Sidebar Stage Navigation */
+        .sidebar-header {
+            padding: 20px;
+            background: #007bff;
+            color: white;
+            text-align: center;
+        }
+        
+        .sidebar-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .sidebar-subtitle {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
         .stage-navigation {
-            position: static;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
+            padding: 0;
+            height: calc(100vh - 100px);
+            overflow-y: auto;
         }
 
         .stage-nav-toggle {
             display: none; /* Hide toggle button since we don't need it anymore */
         }
 
-        /* Remove main content margins */
+        /* Main content area */
         .main-content {
-            margin-right: 0;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 60vh;
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: calc(100vh - 100px);
+        }
+        
+        .content-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .stage-nav-header {
@@ -652,69 +1110,65 @@ if (!empty($programStages)) {
         }
 
         .stage-nav-item {
-            padding: 12px 15px;
-            border-bottom: 1px solid #f1f3f4;
-            cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f3f4;
+            cursor: pointer;
+            transition: all 0.2s ease;
             position: relative;
         }
 
         .stage-nav-item:hover {
             background: #f8f9fa;
-            transform: translateX(-2px);
         }
 
         .stage-nav-item.active {
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(0,123,255,0.3);
-        }
-
-        .stage-nav-item.active:hover {
-            transform: translateX(-2px);
-            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            background: #e3f2fd;
+            border-right: 3px solid #007bff;
+            color: #0d47a1;
         }
 
         .stage-nav-item.completed {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-        }
-
-        .stage-nav-item.completed:hover {
-            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            background: #e8f5e8;
+            border-right: 3px solid #28a745;
         }
 
         .stage-progress {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
-            background: #dee2e6;
+            background: #e9ecef;
+            color: #6c757d;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-right: 12px;
+            font-weight: 600;
             font-size: 11px;
-            font-weight: bold;
-            color: #6c757d;
+            position: relative;
             flex-shrink: 0;
-        }
-
-        .stage-nav-item.active .stage-progress {
-            background: rgba(255,255,255,0.2);
-            color: white;
+            transition: all 0.3s ease;
         }
 
         .stage-nav-item.completed .stage-progress {
-            background: rgba(255,255,255,0.2);
+            background: #28a745;
             color: white;
         }
 
-        .stage-nav-item.completed .stage-progress::before {
+        .stage-nav-item.completed .stage-progress::after {
             content: '✓';
-            font-size: 14px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .stage-nav-item.active .stage-progress {
+            background: #007bff;
+            color: white;
         }
 
         .stage-nav-content {
@@ -722,18 +1176,75 @@ if (!empty($programStages)) {
         }
 
         .stage-nav-title {
-            font-weight: 600;
+            font-weight: 500;
+            font-size: 13px;
+            color: #2c3e50;
             margin-bottom: 2px;
+            line-height: 1.3;
         }
 
         .stage-nav-subtitle {
-            font-size: 12px;
-            opacity: 0.8;
+            font-size: 11px;
+            color: #6c757d;
+            line-height: 1.2;
         }
-
-        .stage-nav-item.active .stage-nav-subtitle,
-        .stage-nav-item.completed .stage-nav-subtitle {
-            opacity: 0.9;
+        
+        .stage-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .occurrence-controls {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .occurrence-count {
+            font-size: 10px;
+            margin-right: 3px;
+        }
+        
+        .btn-micro {
+            width: 16px;
+            height: 16px;
+            padding: 0;
+            border-radius: 50%;
+            border: 1px solid;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            line-height: 1;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-micro.btn-success {
+            border-color: #28a745;
+            color: #28a745;
+        }
+        
+        .btn-micro.btn-success:hover {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-micro.btn-danger {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        
+        .btn-micro.btn-danger:hover {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-micro:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* Updated Occurrence Tabs with repositioned Add Another and Remove */
@@ -1077,6 +1588,77 @@ if (!empty($programStages)) {
         .grouped-questions-container {
             width: 100%;
         }
+        
+        /* Enhanced Grouping Styles for Tabular Interface */
+        .question-group {
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .group-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+        
+        .group-header:hover {
+            background: #e9ecef;
+        }
+        
+        .group-header.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .group-title {
+            font-weight: 500;
+            font-size: 14px;
+            flex-grow: 1;
+            color: #2c3e50;
+        }
+        
+        .group-header.active .group-title {
+            color: white;
+        }
+        
+        .group-toggle {
+            margin-left: 10px;
+            transition: transform 0.2s ease;
+            color: #6c757d;
+        }
+        
+        .group-header.active .group-toggle {
+            color: white;
+        }
+        
+        .group-header.collapsed .group-toggle {
+            transform: rotate(-90deg);
+        }
+        
+        .group-content {
+            padding: 20px;
+            background: white;
+        }
+        
+        .group-content.collapsed {
+            display: none;
+        }
+        
+        .group-questions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
         .group-grid {
             display: grid;
@@ -1120,17 +1702,53 @@ if (!empty($programStages)) {
 
         /* Responsive adjustments */        
         @media (max-width: 768px) {
-            .stage-navigation {
-                max-width: 100%;
-                margin: 0 15px;
-            }
-            
-            .tracker-container {
+            .tracker-main {
                 padding: 10px;
             }
             
+            .content-header {
+                padding: 10px 15px !important;
+            }
+            
+            .location-table-section,
+            .participant-table-section,
+            .stage-table-section,
+            .stages-combined-section {
+                padding: 10px;
+            }
+            
+            .stages-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .stage-nav-tabs {
+                width: 100%;
+                flex-direction: row;
+                overflow-x: auto;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+                padding-right: 0;
+                padding-bottom: 10px;
+            }
+            
+            .stage-tab {
+                min-width: 120px;
+                flex-shrink: 0;
+            }
+            
+            .section-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .stage-actions {
+                width: auto;
+                text-align: center;
+            }
+            
             .modal-content {
-                padding: 25px 20px;
+                padding: 15px;
                 width: 98%;
                 margin: 5px;
                 max-height: 98vh;
@@ -1299,18 +1917,210 @@ if (!empty($programStages)) {
     <?php endif; ?>
 
     <div class="tracker-container">
-        <!-- Header -->
-        <div class="text-center mb-4">
-            <?php if ($surveySettings['show_logo']): ?>
-                <img src="<?= htmlspecialchars($surveySettings['logo_path']) ?>" alt="Logo" class="mb-3" style="max-height: 80px;">
-            <?php endif; ?>
-            <h2 class="mb-2" style="color: #2c3e50; font-weight: 700;">
-                <?= htmlspecialchars($surveySettings['title_text']) ?>
-            </h2>
-            <?php if (!empty($trackerProgram['description'])): ?>
-                <p class="text-muted"><?= htmlspecialchars($trackerProgram['description']) ?></p>
-            <?php endif; ?>
-        </div>
+        <!-- Main Content Area -->
+        <div class="tracker-main">
+            <!-- Header Section -->
+            <div class="content-header" style="padding: 20px 30px; background: white; border-bottom: 1px solid #e9ecef;">
+                <?php if ($surveySettings['show_logo']): ?>
+                    <img src="<?= htmlspecialchars($surveySettings['logo_path']) ?>" alt="Logo" class="mb-3" style="max-height: 60px;">
+                <?php endif; ?>
+                <h4 class="mb-2" style="color: #2c3e50; font-weight: 600;">
+                    <?= htmlspecialchars($surveySettings['title_text']) ?>
+                </h4>
+                <?php if (!empty($trackerProgram['description'])): ?>
+                    <p class="text-muted mb-0"><?= htmlspecialchars($trackerProgram['description']) ?></p>
+                <?php endif; ?>
+            </div>
+            
+            <!-- Location Information Table -->
+            <div class="location-table-section" id="locationTableSection">
+                <div class="section-header">
+                    <h6 class="section-title">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Location Information
+                    </h6>
+                    <div class="section-actions">
+                        <small class="text-muted">Required field</small>
+                    </div>
+                </div>
+                
+                <div class="location-table-container">
+                    <table class="table table-sm table-bordered location-table" id="locationTable">
+                        <tbody>
+                            <tr>
+                                <td class="field-label">Search Location</td>
+                                <td class="field-value">
+                                    <div style="position: relative;">
+                                        <input type="text" 
+                                               id="facilitySearch" 
+                                               name="facility_search" 
+                                               class="form-control" 
+                                               placeholder="Type to search locations..."
+                                               autocomplete="off"
+                                               required>
+                                        <div id="facilityResults" class="facility-results expandable-dropdown" style="display: none; position: absolute; z-index: 1050; background: white; border: 1px solid #ccc; border-radius: 6px; max-height: 120px; overflow-y: auto; width: 100%; margin-top: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: max-height 0.3s ease;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="field-label">Selected Location</td>
+                                <td class="field-value">
+                                    <div class="readonly-value" id="selectedLocationDisplay">No location selected yet</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Hidden inputs for selected facility data -->
+                <input type="hidden" id="facilityId" name="facility_id" required>
+                <input type="hidden" id="facilityName" name="facility_name">
+                <input type="hidden" id="facilityOrgunitUid" name="facility_orgunit_uid">
+                <input type="hidden" id="hierarchyData" name="hierarchy_data">
+            </div>
+            
+            <!-- Static Participant Information Table -->
+            <div class="participant-table-section" id="participantTableSection">
+                <div class="section-header">
+                    <h6 class="section-title">
+                        <i class="fas fa-user me-2"></i>
+                        Participant Information
+                    </h6>
+                    <div class="section-actions">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="openTEIModal()" id="editParticipantBtn">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="participant-table-container">
+                    <table class="table table-sm table-bordered participant-table" id="participantTable">
+                        <tbody>
+                            <!-- Participant attributes will be dynamically populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Stage Occurrences as Rows Table -->
+            <div class="stage-occurrences-section">
+                <div class="section-header">
+                    <h6 class="section-title">
+                        <i class="fas fa-tasks me-2"></i>
+                        Program Stages Data
+                    </h6>
+                    <div class="section-actions">
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="addStageOccurrence()" id="addStageBtn" disabled>
+                            <i class="fas fa-plus me-1"></i>Add Stage
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stage-table-container d-flex">
+                    <!-- Navigation Sidebar -->
+                    <div class="stage-navigation-sidebar">
+                        <div class="nav-header">
+                            <small class="text-muted">Select Stage</small>
+                        </div>
+                        <div class="stage-nav-list">
+                            <?php foreach ($programStages as $index => $stage): ?>
+                            <div class="stage-nav-item <?= $index === 0 ? 'active' : '' ?>" 
+                                 data-stage-id="<?= $stage['id'] ?>" 
+                                 onclick="selectStage('<?= $stage['id'] ?>')">
+                                <div class="stage-nav-name"><?= htmlspecialchars($stage['name']) ?></div>
+                                <div class="stage-nav-info">
+                                    <?php if ($stage['repeatable']): ?>
+                                        <small class="badge bg-success">Repeatable</small>
+                                    <?php endif; ?>
+                                    <span class="occurrence-count" id="navCount_<?= $stage['id'] ?>">1 occurrence</span>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    
+                    <!-- Stage Occurrences Table -->
+                    <div class="stage-occurrences-table-wrapper">
+                        <table class="table table-sm table-bordered stage-occurrences-table" id="stageOccurrencesTable">
+                        <thead>
+                            <tr>
+                                <th width="30%">Stage</th>
+                                <th width="15%">Occurrence</th>
+                                <th width="25%">Status</th>
+                                <th width="30%">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stageOccurrencesBody">
+                            <?php foreach ($programStages as $index => $stage): ?>
+                            <tr class="stage-occurrence-row" data-stage-id="<?= $stage['id'] ?>" data-occurrence="1">
+                                <td class="stage-info">
+                                    <div class="stage-name"><?= htmlspecialchars($stage['name']) ?></div>
+                                    <?php if ($stage['repeatable']): ?>
+                                        <small class="badge bg-success" style="font-size: 9px;">Repeatable</small>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="occurrence-number">
+                                    <span class="occurrence-badge">1</span>
+                                </td>
+                                <td class="stage-status">
+                                    <span class="status-indicator" id="status_<?= $stage['id'] ?>_1">
+                                        <i class="fas fa-circle text-muted"></i> No data
+                                    </span>
+                                </td>
+                                <td class="stage-actions">
+                                    <div class="btn-group btn-group-sm" style="width: 100%;">
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="openStageModal('<?= $stage['id'] ?>', 1)" title="Edit data">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeStageOccurrence('<?= $stage['id'] ?>', 1)" title="Remove occurrence">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        <span class="save-indicator d-none" id="saveIndicator_<?= $stage['id'] ?>_1">
+                                            <i class="fas fa-check-circle text-success" title="Saved"></i>
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Data Entry Area -->
+            <div class="main-content" id="mainContent">
+                <div class="content-wrapper">
+                  
+                    
+                    <!-- Submit Section -->
+                    <div class="submit-section text-center p-4" style="background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 20px;">
+                        <?php if (isset($offlineMode) && $offlineMode): ?>
+                            <button type="button" class="btn btn-secondary btn-lg" disabled title="Submission is disabled in offline mode">
+                                <i class="fas fa-wifi-slash me-2"></i>
+                                Submit Disabled (Offline)
+                            </button>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Please check your internet connection to enable data submission
+                                </small>
+                            </div>
+                        <?php else: ?>
+                            <button type="button" class="btn btn-success btn-lg" onclick="submitAllData()">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Submit All Data
+                            </button>
+                        <?php endif; ?>
+                        <div class="loading-spinner mt-3" id="loadingSpinner" style="display: none;">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Submitting...</span>
+                            </div>
+                            <p class="mt-2">Submitting data to DHIS2...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         <!-- Offline Mode Warning -->
         <?php if (isset($offlineMode) && $offlineMode): ?>
@@ -1328,127 +2138,7 @@ if (!empty($programStages)) {
         </div>
         <?php endif; ?>
         
-        <!-- Location Selection Section - Moved to Top -->
-        <div class="location-section" id="locationSection" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1000px; margin-left: auto; margin-right: auto;">
-            <h5 class="mb-3" style="color: #2c3e50; font-weight: 700;">
-                <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                Select Location
-            </h5>
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="form-group" style="position: relative;">
-                        <label for="facilitySearch" class="form-label">Search for location <span class="text-danger">*</span></label>
-                        <input type="text" 
-                               id="facilitySearch" 
-                               name="facility_search" 
-                               class="form-control" 
-                               placeholder="Type to search locations..."
-                               autocomplete="off"
-                               required>
-                        <div id="facilityResults" class="facility-results" style="display: none; position: absolute; z-index: 1000; background: white; border: 1px solid #ddd; border-radius: 8px; max-height: 250px; overflow-y: auto; width: 100%; margin-top: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-top: 3px solid #007bff;"></div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label class="form-label">Selected Location Path</label>
-                        <div id="selectedLocationPath" class="alert alert-info" style="min-height: 60px; display: flex; align-items: center; font-size: 14px; border-radius: 8px; border-left: 4px solid #0dcaf0;">
-                            <i class="fas fa-info-circle me-2" style="font-size: 16px; color: #0dcaf0;"></i>
-                            <div>
-                                <div style="font-weight: 500; margin-bottom: 2px;">No location selected yet</div>
-                                <div style="font-size: 12px; color: #6c757d;">Please search and select a facility above</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Hidden inputs for selected facility data -->
-            <input type="hidden" id="facilityId" name="facility_id" required>
-            <input type="hidden" id="facilityName" name="facility_name">
-            <input type="hidden" id="facilityOrgunitUid" name="facility_orgunit_uid">
-            <input type="hidden" id="hierarchyData" name="hierarchy_data">
-        </div>
 
-        <!-- Enhanced Stage Navigation - DHIS2 Tracker Style -->
-        <div class="stage-navigation" id="stageNavigation" style="max-width: 1000px; margin-left: auto; margin-right: auto;">
-            <button class="stage-nav-toggle" onclick="toggleStageNavigation()">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <div class="stage-nav-header">
-                <h6 class="mb-1 text-center" style="color: #007bff;">
-                    <i class="fas fa-list me-2"></i>
-                    DHIS2 Tracker Program Stages
-                </h6>
-                <p class="text-center text-muted mb-0" style="font-size: 14px;">Click on any stage to fill the form</p>
-            </div>
-            
-            <?php if (!empty($trackedEntityAttributes)): ?>
-                <div class="stage-nav-item" onclick="navigateToStage('tei-section', this)" data-stage="tei-section">
-                    <div class="stage-progress">1</div>
-                    <div class="stage-nav-content">
-                        <div class="stage-nav-title">Participant Information</div>
-                        <div class="stage-nav-subtitle">Basic registration details</div>
-                    </div>
-                </div>
-            <?php endif; ?>
-            
-            <?php foreach ($programStages as $index => $stage): ?>
-                <div class="stage-nav-item" onclick="navigateToStage('<?= $stage['id'] ?>', this)" data-stage="<?= $stage['id'] ?>">
-                    <div class="stage-progress"><?= $index + (empty($trackedEntityAttributes) ? 1 : 2) ?></div>
-                    <div class="stage-nav-content">
-                        <div class="stage-nav-title">
-                            <?= htmlspecialchars($stage['name']) ?>
-                            <?php if ($stage['repeatable']): ?>
-                                <span class="badge bg-success ms-2" style="font-size: 10px;">
-                                    <i class="fas fa-repeat me-1"></i>Repeatable
-                                </span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="stage-nav-subtitle">
-                            <?= count($stage['programStageDataElements']) ?> fields
-                            <?php if ($stage['repeatable']): ?>
-                                • <span id="occurrenceCount_<?= $stage['id'] ?>">1</span> occurrence(s)
-                                <button type="button" class="btn btn-sm btn-outline-success ms-2" onclick="event.stopPropagation(); addStageOccurrence('<?= $stage['id'] ?>')" style="font-size: 10px; padding: 2px 6px;">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger ms-1" onclick="event.stopPropagation(); removeStageOccurrence('<?= $stage['id'] ?>')" id="removeBtn_<?= $stage['id'] ?>" disabled style="font-size: 10px; padding: 2px 6px;">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-
-        <div class="main-content" id="mainContent">
-            <!-- Submit Section -->
-            <div class="text-center p-4" style="background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1000px; margin: 30px auto;">
-                <?php if (isset($offlineMode) && $offlineMode): ?>
-                    <button type="button" class="btn btn-secondary btn-lg" disabled title="Submission is disabled in offline mode">
-                        <i class="fas fa-wifi-slash me-2"></i>
-                        Submit Disabled (Offline)
-                    </button>
-                    <div class="mt-2">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Please check your internet connection to enable data submission
-                        </small>
-                    </div>
-                <?php else: ?>
-                    <button type="button" class="btn btn-success btn-lg" onclick="submitAllData()">
-                        <i class="fas fa-paper-plane me-2"></i>
-                        Submit
-                    </button>
-                <?php endif; ?>
-                <div class="loading-spinner mt-3" id="loadingSpinner" style="display: none;">
-                    <div class="spinner-border text-success" role="status">
-                        <span class="visually-hidden">Submitting...</span>
-                    </div>
-                    <p class="mt-2">Submitting data to DHIS2...</p>
-                </div>
-            </div>
-            
             <!-- Hidden form for data collection -->
             <form id="trackerForm" style="display: none;">
                 <input type="hidden" id="surveyId" value="<?= $surveyId ?>">
@@ -1504,7 +2194,7 @@ if (!empty($programStages)) {
                     <button type="button" class="btn btn-outline-secondary me-2" onclick="closeStageModal()">
                         <i class="fas fa-times me-1"></i> Cancel
                     </button>
-                    <button type="button" class="btn btn-success" onclick="saveStageData()">
+                    <button type="button" class="btn btn-success" onclick="saveStageData(currentModalStage, currentModalOccurrence)">
                         <i class="fas fa-save me-1"></i> Save 
                     </button>
                 </div>
@@ -1603,6 +2293,12 @@ if (!empty($programStages)) {
             
             // Initialize location selection
             initializeLocationSelection();
+            
+            // Initialize tables
+            updateLocationDisplay();
+            updateParticipantTable();
+            initializeStageTables();
+            initializeCombinedStageTable();
         });
 
         // Location selection functionality
@@ -1624,10 +2320,20 @@ if (!empty($programStages)) {
                 searchAndDisplayFacilities(searchTerm);
             });
             
+            // Expand when focused and has content
+            facilitySearchInput.addEventListener('focus', function() {
+                const searchTerm = this.value.trim();
+                if (searchTerm.length >= 2) {
+                    searchAndDisplayFacilities(searchTerm);
+                }
+            });
+            
             // Hide results when clicking outside
             document.addEventListener('click', function(event) {
                 if (!facilitySearchInput.contains(event.target) && !facilityResultsDiv.contains(event.target)) {
                     facilityResultsDiv.style.display = 'none';
+                    facilityResultsDiv.classList.remove('expanded');
+                    facilityResultsDiv.classList.add('collapsed');
                 }
             });
         }
@@ -1687,6 +2393,8 @@ if (!empty($programStages)) {
             
             if (!searchTerm || searchTerm.length < 2) {
                 facilityResultsDiv.style.display = 'none';
+                facilityResultsDiv.classList.remove('expanded');
+                facilityResultsDiv.classList.add('collapsed');
                 return;
             }
 
@@ -1699,12 +2407,12 @@ if (!empty($programStages)) {
                 matchingFacilities.forEach(facility => {
                     resultsHtml += `
                         <div class="facility-item" 
-                             style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #eee; transition: background-color 0.2s; word-wrap: break-word; overflow-wrap: break-word;"
-                             onmouseover="this.style.backgroundColor='#f8f9fa'"
-                             onmouseout="this.style.backgroundColor='transparent'"
+                             style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; transition: background-color 0.2s ease; word-wrap: break-word; font-size: 14px;"
+                             onmouseover="this.style.backgroundColor='#f0f0f0';"
+                             onmouseout="this.style.backgroundColor='transparent';"
                              onclick="selectFacility('${facility.id}', '${facility.name.replace(/'/g, "\\'")}', '${facility.uid || ''}', '${facility.path || ''}')">
-                            <div style="font-weight: 600; color: #2c3e50; margin-bottom: 4px; word-wrap: break-word;">${facility.name}</div>
-                            <div id="facility-path-${facility.id}" style="font-size: 12px; color: #666; line-height: 1.3; word-wrap: break-word;">Loading path...</div>
+                            <div style="font-weight: 500; color: #333; margin-bottom: 3px; font-size: 14px;">${facility.name}</div>
+                            <div id="facility-path-${facility.id}" style="font-size: 12px; color: #666; line-height: 1.2;">Loading path...</div>
                         </div>
                     `;
                 });
@@ -1736,6 +2444,9 @@ if (!empty($programStages)) {
                 });
                 
                 facilityResultsDiv.style.display = 'block';
+                // Expand dropdown when showing results
+                facilityResultsDiv.classList.remove('collapsed');
+                facilityResultsDiv.classList.add('expanded');
             } else {
                 if (searchTerm.length > 0) {
                     facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No matching locations found for your search.</div>';
@@ -1743,17 +2454,43 @@ if (!empty($programStages)) {
                     facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No locations available for selected filters.</div>';
                 }
                 facilityResultsDiv.style.display = 'block';
+                // Keep collapsed for "no results" message
+                facilityResultsDiv.classList.remove('expanded');
+                facilityResultsDiv.classList.add('collapsed');
             }
         }
 
         async function selectFacility(facilityId, facilityName, orgunitUid, facilityPath) {
+            console.log('Selecting facility:', { facilityId, facilityName, orgunitUid, facilityPath });
+            
             document.getElementById('facilitySearch').value = facilityName;
             document.getElementById('facilityId').value = facilityId;
             document.getElementById('facilityName').value = facilityName;
             document.getElementById('facilityOrgunitUid').value = orgunitUid;
-            document.getElementById('hierarchyData').value = facilityPath;
             
-            // Update selected location path display with loading state
+            // Hide results dropdown first and collapse it
+            const facilityResultsDiv = document.getElementById('facilityResults');
+            facilityResultsDiv.style.display = 'none';
+            facilityResultsDiv.classList.remove('expanded');
+            facilityResultsDiv.classList.add('collapsed');
+            
+            // If no path provided or path is empty, try to get it from the displayed path
+            if (!facilityPath || facilityPath.trim() === '') {
+                const pathElement = document.getElementById(`facility-path-${facilityId}`);
+                if (pathElement && pathElement.textContent !== 'Loading path...' && pathElement.textContent !== 'Path unavailable') {
+                    facilityPath = pathElement.textContent;
+                }
+            }
+            
+            document.getElementById('hierarchyData').value = facilityPath || '';
+            
+            // Update location display in table immediately
+            updateLocationDisplay();
+            
+            // Update participant summary panel
+            updateParticipantSummary();
+            
+            // Update selected location path display with loading state (if element exists)
             const pathDisplay = document.getElementById('selectedLocationPath');
             pathDisplay.innerHTML = `
                 <i class="fas fa-check-circle text-success me-2"></i>
@@ -1799,62 +2536,461 @@ if (!empty($programStages)) {
             document.getElementById('facilityResults').style.display = 'none';
             
             console.log('Selected facility:', { facilityId, facilityName, orgunitUid, facilityPath });
+            
+            // Update location display in table
+            updateLocationDisplay();
         }
 
-        // Add new stage occurrence
-        function addStageOccurrence(stageId) {
-            const currentCount = stageOccurrences[stageId];
-            const newCount = currentCount + 1;
-            stageOccurrences[stageId] = newCount;
+        // Location table functions
+        function toggleLocationEdit() {
+            const searchField = document.getElementById('facilitySearch');
+            const editBtn = document.getElementById('editLocationBtn');
+            const saveBtn = document.getElementById('saveLocationBtn');
+            const cancelBtn = document.getElementById('cancelLocationBtn');
             
-            // Update occurrence count display
-            const countElement = document.getElementById(`occurrenceCount_${stageId}`);
-            if (countElement) {
-                countElement.textContent = newCount;
+            if (searchField.readOnly) {
+                // Enable editing
+                searchField.readOnly = false;
+                searchField.classList.add('editable');
+                editBtn.style.display = 'none';
+                saveBtn.style.display = 'inline-block';
+                cancelBtn.style.display = 'inline-block';
             }
+        }
+        
+        function saveLocationData() {
+            const searchField = document.getElementById('facilitySearch');
+            const editBtn = document.getElementById('editLocationBtn');
+            const saveBtn = document.getElementById('saveLocationBtn');
+            const cancelBtn = document.getElementById('cancelLocationBtn');
             
-            // Enable remove button
-            const removeBtn = document.getElementById(`removeBtn_${stageId}`);
-            if (removeBtn) {
-                removeBtn.disabled = false;
+            // Make readonly
+            searchField.readOnly = true;
+            searchField.classList.remove('editable');
+            editBtn.style.display = 'inline-block';
+            saveBtn.style.display = 'none';
+            cancelBtn.style.display = 'none';
+            
+            updateLocationDisplay();
+        }
+        
+        function cancelLocationEdit() {
+            const searchField = document.getElementById('facilitySearch');
+            const editBtn = document.getElementById('editLocationBtn');
+            const saveBtn = document.getElementById('saveLocationBtn');
+            const cancelBtn = document.getElementById('cancelLocationBtn');
+            
+            // Restore original value
+            searchField.value = document.getElementById('facilityName').value || '';
+            searchField.readOnly = true;
+            searchField.classList.remove('editable');
+            editBtn.style.display = 'inline-block';
+            saveBtn.style.display = 'none';
+            cancelBtn.style.display = 'none';
+        }
+        
+        async function updateLocationDisplay() {
+            const facilityName = document.getElementById('facilityName').value;
+            const facilityId = document.getElementById('facilityId').value;
+            let hierarchyData = document.getElementById('hierarchyData').value;
+            const locationDisplay = document.getElementById('selectedLocationDisplay');
+            
+            console.log('Updating location display:', { facilityName, facilityId, hierarchyData });
+            
+            if (facilityName && facilityId) {
+                let displayText = facilityName;
+                
+                // If we don't have hierarchy data or it's incomplete, or if it contains UIDs, fetch it from the API
+                if (!hierarchyData || hierarchyData.trim() === '' || hierarchyData === 'undefined' || hierarchyData.includes('/')) {
+                    try {
+                        locationDisplay.innerHTML = '<div style="color: #6c757d;"><i class="fas fa-spinner fa-spin"></i> Loading location path...</div>';
+                        
+                        const response = await fetch(`/fbs/admin/get_location_path.php?id=${facilityId}`);
+                        const data = await response.json();
+                        
+                        console.log('API response for location path:', data);
+                        
+                        if (data.path && data.path.trim() && !data.path.includes('/')) {
+                            // Good! We got a clean human-readable path
+                            hierarchyData = data.path;
+                            document.getElementById('hierarchyData').value = hierarchyData;
+                        } else if (data.error) {
+                            console.error('API error fetching location path:', data.error);
+                            hierarchyData = '';
+                        }
+                    } catch (error) {
+                        console.error('Error fetching location path:', error);
+                        hierarchyData = '';
+                    }
+                }
+                
+                if (hierarchyData && hierarchyData.trim() !== '' && hierarchyData !== 'undefined') {
+                    try {
+                        // Try to parse as JSON first
+                        const pathData = JSON.parse(hierarchyData);
+                        if (pathData && Array.isArray(pathData) && pathData.length > 0) {
+                            // Build full path from root to selected facility
+                            const pathNames = pathData.map(item => item.name || item);
+                            if (!pathNames.includes(facilityName)) {
+                                pathNames.push(facilityName);
+                            }
+                            displayText = pathNames.join(' → ');
+                        }
+                    } catch (e) {
+                        // If JSON parsing fails, treat as plain text path
+                        if (hierarchyData.includes('→') && !hierarchyData.includes('/')) {
+                            // Already formatted with arrows and no UIDs, just use it
+                            displayText = hierarchyData;
+                        } else if (hierarchyData.includes('/')) {
+                            // This means we still have UIDs in the path, which shouldn't happen after API call
+                            console.warn('Location path still contains UIDs after API call:', hierarchyData);
+                            displayText = facilityName; // Fallback to just facility name
+                        } else {
+                            // If it's clean text without arrows, show both hierarchy and facility
+                            displayText = hierarchyData !== facilityName ? `${hierarchyData} → ${facilityName}` : facilityName;
+                        }
+                    }
+                } else {
+                    // No hierarchy data available
+                    displayText = facilityName;
+                }
+                
+                locationDisplay.innerHTML = `<div style="color: #2c3e50; font-weight: 500; line-height: 1.4;">${displayText}</div>`;
+            } else {
+                locationDisplay.innerHTML = '<div style="color: #6c757d; font-style: italic;">No location selected yet</div>';
             }
-            
-            console.log(`Added occurrence for stage ${stageId}. New count: ${newCount}`);
         }
 
-        // Remove stage occurrence
-        function removeStageOccurrence(stageId) {
-            const currentCount = stageOccurrences[stageId];
+        // Participant table functions - simplified since edit now directly opens modal
+        
+        function updateParticipantTable() {
+            const tableBody = document.querySelector('#participantTable tbody');
+            tableBody.innerHTML = '';
             
-            if (currentCount <= 1) {
-                console.log('Cannot remove the last occurrence');
+            // Add status row
+            const statusRow = document.createElement('tr');
+            const hasData = formData.trackedEntityAttributes && Object.keys(formData.trackedEntityAttributes).length > 0;
+            statusRow.innerHTML = `
+                <td class="field-label">Registration Status</td>
+                <td class="field-value">
+                    <div class="readonly-value" style="color: ${hasData ? '#28a745' : '#6c757d'};">
+                        ${hasData ? 'Registered' : 'Not registered'}
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(statusRow);
+            
+            // Add participant attributes if available
+            if (formData.trackedEntityAttributes && programData?.program?.programTrackedEntityAttributes) {
+                Object.keys(formData.trackedEntityAttributes).forEach(attributeId => {
+                    const value = formData.trackedEntityAttributes[attributeId];
+                    if (value) {
+                        const attribute = programData.program.programTrackedEntityAttributes
+                            .find(attr => attr.trackedEntityAttribute.id === attributeId);
+                        
+                        if (attribute) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td class="field-label">${attribute.trackedEntityAttribute.displayName}</td>
+                                <td class="field-value">
+                                    <div class="readonly-value">${value}</div>
+                                </td>
+                            `;
+                            tableBody.appendChild(row);
+                        }
+                    }
+                });
+            }
+        }
+
+        // Stage table management functions
+        function initializeStageTables() {
+            if (programData?.program?.programStages) {
+                programData.program.programStages.forEach(stage => {
+                    updateStageTable(stage.id);
+                });
+            }
+        }
+        
+        // Combined Stage Table Management
+        let currentActiveStage = null;
+        
+        function initializeCombinedStageTable() {
+            // Initialize with first stage if available
+            if (programData?.program?.programStages && programData.program.programStages.length > 0) {
+                const firstStage = programData.program.programStages[0];
+                switchToStage(firstStage.id);
+            }
+            
+            // Update all stage status indicators
+            updateAllStageStatuses();
+        }
+        
+        function switchToStage(stageId) {
+            // Update active tab
+            document.querySelectorAll('.stage-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-stage-id="${stageId}"]`)?.classList.add('active');
+            
+            currentActiveStage = stageId;
+            updateCombinedStageTable(stageId);
+        }
+        
+        function updateCombinedStageTable(stageId) {
+            console.log('updateCombinedStageTable called with stageId:', stageId);
+            
+            const stage = programData?.program?.programStages?.find(s => s.id === stageId);
+            if (!stage) {
+                console.warn('Stage not found for ID:', stageId);
                 return;
             }
             
-            const newCount = currentCount - 1;
-            stageOccurrences[stageId] = newCount;
-            
-            // Remove data for the last occurrence
-            const lastOccurrenceKey = `${stageId}_${currentCount}`;
-            if (stageData[stageId] && stageData[stageId][lastOccurrenceKey]) {
-                delete stageData[stageId][lastOccurrenceKey];
+            // Update header only if element exists
+            const stageTitle = document.getElementById('currentStageTitle');
+            if (stageTitle) {
+                stageTitle.textContent = stage.name;
+                console.log('Stage title updated to:', stage.name);
+            } else {
+                console.warn('currentStageTitle element not found, skipping title update');
             }
             
-            // Update occurrence count display
-            const countElement = document.getElementById(`occurrenceCount_${stageId}`);
-            if (countElement) {
-                countElement.textContent = newCount;
+            // Update actions only if container exists
+            const actionsContainer = document.getElementById('currentStageActions');
+            if (!actionsContainer) {
+                console.warn('currentStageActions element not found, skipping actions update');
+                return;
+            }
+            let actionsHtml = '';
+            
+            if (stage.repeatable) {
+                actionsHtml += `
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="addStageOccurrence('${stageId}')" title="Add occurrence">
+                        <i class="fas fa-plus me-1"></i>Add
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeStageOccurrence('${stageId}')" id="removeBtn_${stageId}" title="Remove occurrence">
+                        <i class="fas fa-minus me-1"></i>Remove
+                    </button>
+                `;
             }
             
-            // Disable remove button if only one occurrence left
-            if (newCount <= 1) {
-                const removeBtn = document.getElementById(`removeBtn_${stageId}`);
-                if (removeBtn) {
-                    removeBtn.disabled = true;
+            actionsHtml += `
+                <button type="button" class="btn btn-sm btn-primary" onclick="openStageModal('${stageId}')">
+                    <i class="fas fa-edit me-1"></i>Edit Data
+                </button>
+            `;
+            
+            actionsContainer.innerHTML = actionsHtml;
+            console.log('Actions container updated');
+            
+            // Update table body only if it exists
+            const tableBody = document.getElementById('stageTableBody');
+            if (!tableBody) {
+                console.warn('stageTableBody element not found, skipping table update');
+                return;
+            }
+            tableBody.innerHTML = '';
+            console.log('Table body cleared');
+            
+            // Check if we have data for this stage
+            const stageData = formData.stages?.[stageId];
+            const hasData = stageData && Object.keys(stageData).length > 0;
+            
+            // Add event date row
+            const eventDateRow = document.createElement('tr');
+            const eventDate = hasData && stageData.eventDate ? stageData.eventDate : 'Not set';
+            eventDateRow.innerHTML = `
+                <td class="stage-field-name"><strong>Event Date</strong></td>
+                <td class="stage-field-value">
+                    <div class="readonly-value" style="color: ${eventDate !== 'Not set' ? '#2c3e50' : '#6c757d'};">${eventDate}</div>
+                </td>
+                <td class="stage-actions">
+                    <small class="text-muted">Required</small>
+                </td>
+            `;
+            tableBody.appendChild(eventDateRow);
+            
+            // Add data element rows
+            stage.programStageDataElements.forEach(element => {
+                const dataElement = element.dataElement;
+                const value = hasData && stageData[dataElement.id] ? stageData[dataElement.id] : 'No data';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="stage-field-name">${dataElement.displayName}</td>
+                    <td class="stage-field-value">
+                        <div class="readonly-value" style="color: ${value !== 'No data' ? '#2c3e50' : '#6c757d'};">${value}</div>
+                    </td>
+                    <td class="stage-actions">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="editSingleField('${stageId}', '${dataElement.id}')" title="Edit this field">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${value !== 'No data' ? `
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSingleField('${stageId}', '${dataElement.id}')" title="Clear this field">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        ` : ''}
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Update stage status in tab
+            updateStageTabStatus(stageId);
+            
+            console.log('updateCombinedStageTable completed successfully for stage:', stageId);
+        }
+        
+        function updateAllStageStatuses() {
+            if (programData?.program?.programStages) {
+                programData.program.programStages.forEach(stage => {
+                    updateStageTabStatus(stage.id);
+                });
+            }
+        }
+        
+        function updateStageTabStatus(stageId) {
+            const statusElement = document.getElementById(`tabStatus_${stageId}`);
+            if (!statusElement) return;
+            
+            const stageData = formData.stages?.[stageId];
+            const hasData = stageData && Object.keys(stageData).length > 0;
+            
+            statusElement.textContent = hasData ? '●' : '○';
+            statusElement.className = hasData ? 'stage-status filled' : 'stage-status empty';
+        }
+        
+        function editSingleField(stageId, fieldId) {
+            // This will open the full stage modal for now
+            // In future, could implement inline editing
+            openStageModal(stageId);
+        }
+        
+        function clearSingleField(stageId, fieldId) {
+            if (confirm('Are you sure you want to clear this field?')) {
+                // Clear the field from formData
+                if (formData.stages && formData.stages[stageId]) {
+                    delete formData.stages[stageId][fieldId];
                 }
+                
+                // Update the display
+                updateCombinedStageTable(stageId);
+                updateAllStageStatuses();
+            }
+        }
+        
+        function updateStageTable(stageId) {
+            // Update both old and new systems for compatibility
+            updateCombinedStageTable(stageId);
+            updateAllStageStatuses();
+        }
+
+        // Add new stage occurrence - creates a new table row
+        function addStageOccurrence(stageId = null) {
+            // Use selected stage if no stage ID provided
+            const targetStageId = stageId || selectedStageId;
+            
+            if (!targetStageId) {
+                alert('Please select a stage first');
+                return;
             }
             
-            console.log(`Removed occurrence for stage ${stageId}. New count: ${newCount}`);
+            const currentCount = stageOccurrences[targetStageId];
+            const newOccurrence = currentCount + 1;
+            stageOccurrences[targetStageId] = newOccurrence;
+            
+            // Find the stage data
+            const stage = programData.program.programStages.find(s => s.id === targetStageId);
+            if (!stage || !stage.repeatable) {
+                alert('This stage is not repeatable');
+                return;
+            }
+            
+            // Create new table row
+            const tbody = document.getElementById('stageOccurrencesBody');
+            const newRow = document.createElement('tr');
+            newRow.className = 'stage-occurrence-row';
+            newRow.setAttribute('data-stage-id', targetStageId);
+            newRow.setAttribute('data-occurrence', newOccurrence);
+            
+            newRow.innerHTML = `
+                <td class="stage-info">
+                    <div class="stage-name">${stage.name}</div>
+                    <small class="badge bg-success" style="font-size: 9px;">Repeatable</small>
+                </td>
+                <td class="occurrence-number">
+                    <span class="occurrence-badge">${newOccurrence}</span>
+                </td>
+                <td class="stage-status">
+                    <span class="status-indicator" id="status_${targetStageId}_${newOccurrence}">
+                        <i class="fas fa-circle text-muted"></i> No data
+                    </span>
+                </td>
+                <td class="stage-actions">
+                    <div class="btn-group btn-group-sm" style="width: 100%;">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openStageModal('${targetStageId}', ${newOccurrence})" title="Edit data">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeStageOccurrence('${targetStageId}', ${newOccurrence})" title="Remove occurrence">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <span class="save-indicator d-none" id="saveIndicator_${targetStageId}_${newOccurrence}">
+                            <i class="fas fa-check-circle text-success" title="Saved"></i>
+                        </span>
+                    </div>
+                </td>
+            `;
+            
+            // Insert the new row after the last occurrence of this stage
+            const existingRows = tbody.querySelectorAll(`tr[data-stage-id="${targetStageId}"]`);
+            const lastRow = existingRows[existingRows.length - 1];
+            lastRow.insertAdjacentElement('afterend', newRow);
+            
+            // Update occurrence count in navigation
+            const navCountElement = document.getElementById(`navCount_${targetStageId}`);
+            if (navCountElement) {
+                const visibleRows = tbody.querySelectorAll(`tr[data-stage-id="${targetStageId}"]`);
+                navCountElement.textContent = `${visibleRows.length} occurrence${visibleRows.length > 1 ? 's' : ''}`;
+            }
+            
+            console.log(`Added occurrence ${newOccurrence} for stage ${targetStageId}`);
+        }
+
+        // Remove stage occurrence - deletes specific table row
+        function removeStageOccurrence(stageId, occurrence) {
+            // Find all rows for this stage
+            const stageRows = document.querySelectorAll(`tr[data-stage-id="${stageId}"]`);
+            
+            if (stageRows.length <= 1) {
+                alert('Cannot remove the last occurrence of a stage');
+                return;
+            }
+            
+            // Find and remove the specific row
+            const targetRow = document.querySelector(`tr[data-stage-id="${stageId}"][data-occurrence="${occurrence}"]`);
+            if (targetRow) {
+                targetRow.remove();
+                
+                // Remove data for this occurrence
+                const occurrenceKey = `${stageId}_${occurrence}`;
+                if (stageData[stageId] && stageData[stageId][occurrenceKey]) {
+                    delete stageData[stageId][occurrenceKey];
+                }
+                
+                // Update occurrence count in memory
+                const remainingRows = document.querySelectorAll(`tr[data-stage-id="${stageId}"]`);
+                stageOccurrences[stageId] = remainingRows.length;
+                
+                // Update occurrence count in navigation
+                const navCountElement = document.getElementById(`navCount_${stageId}`);
+                if (navCountElement) {
+                    navCountElement.textContent = `${remainingRows.length} occurrence${remainingRows.length > 1 ? 's' : ''}`;
+                }
+                
+                console.log(`Removed occurrence ${occurrence} for stage ${stageId}. Remaining: ${remainingRows.length}`);
+            } else {
+                console.log('Target row not found');
+            }
         }
         
         function addOccurrence(stageId) {
@@ -2077,8 +3213,56 @@ if (!empty($programStages)) {
         // Global variables to track current modal stage and occurrence
         let currentModalStage = null;
         let currentModalOccurrence = null;
+        let selectedStageId = null;
+        
+        // Initialize with first stage selected
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstStage = document.querySelector('.stage-nav-item');
+            if (firstStage) {
+                const firstStageId = firstStage.getAttribute('data-stage-id');
+                selectStage(firstStageId);
+            }
+        });
+        
+        // Stage navigation function
+        function selectStage(stageId) {
+            selectedStageId = stageId;
+            
+            // Update navigation active state
+            document.querySelectorAll('.stage-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const activeNavItem = document.querySelector(`[data-stage-id="${stageId}"]`);
+            if (activeNavItem) {
+                activeNavItem.classList.add('active');
+            }
+            
+            // Filter table rows to show only selected stage
+            const allRows = document.querySelectorAll('.stage-occurrence-row');
+            allRows.forEach(row => {
+                if (row.getAttribute('data-stage-id') === stageId) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Enable/disable Add Stage button
+            const addBtn = document.getElementById('addStageBtn');
+            const stage = programData.program.programStages.find(s => s.id === stageId);
+            if (stage && stage.repeatable) {
+                addBtn.disabled = false;
+                addBtn.textContent = `Add ${stage.name}`;
+            } else {
+                addBtn.disabled = true;
+                addBtn.textContent = 'Add Stage (Not Repeatable)';
+            }
+            
+            console.log(`Selected stage: ${stageId}`);
+        }
 
-        function openStageModal(stageId) {
+        function openStageModal(stageId, occurrence = 1) {
             if (!programData || !programData.program || !programData.program.programStages) {
                 console.error('Program data not available');
                 alert('Form data not loaded properly. Please refresh the page.');
@@ -2086,6 +3270,7 @@ if (!empty($programStages)) {
             }
             
             currentModalStage = stageId;
+            currentModalOccurrence = occurrence;
             const stage = programData.program.programStages.find(s => s.id === stageId);
             if (!stage) {
                 console.error('Stage not found:', stageId);
@@ -2094,12 +3279,8 @@ if (!empty($programStages)) {
 
             const modal = document.getElementById('stageQuestionsModal');
             
-            // For repeatable stages, let user choose which occurrence to fill
-            if (stage.repeatable && stageOccurrences[stageId] > 1) {
-                showOccurrenceSelector(stageId, stage);
-            } else {
-                showStageForm(stageId, stage, 1);
-            }
+            // Directly show the stage form for the specific occurrence
+            showStageForm(stageId, stage, occurrence);
 
             // Show modal
             modal.style.display = 'flex';
@@ -2207,18 +3388,8 @@ if (!empty($programStages)) {
                             <strong>Note:</strong> Fill in all required fields to proceed with the tracker submission
                         </p>
                     </div>
-                    <div class="d-flex gap-3">
-                        ${stage.repeatable && stageOccurrences[stageId] > 1 ? `
-                            <button type="button" class="btn btn-outline-info btn-lg px-4" onclick="openStageModal('${stageId}')">
-                                <i class="fas fa-arrow-left me-2"></i> Back to List
-                            </button>
-                        ` : ''}
-                        <button type="button" class="btn btn-outline-secondary btn-lg px-4" onclick="closeStageModal()">
-                            <i class="fas fa-times me-2"></i> Cancel
-                        </button>
-                        <button type="button" class="btn btn-success btn-lg px-5" onclick="saveStageData('${stageId}', ${occurrenceNum})">
-                            <i class="fas fa-save me-2"></i> Save 
-                        </button>
+                    <div class="d-flex gap-3" id="modalButtonsContainer">
+                        <!-- Buttons will be added dynamically -->
                     </div>
                 </div>
             `;
@@ -2227,6 +3398,24 @@ if (!empty($programStages)) {
             const eventDateInput = modal.querySelector('#modalEventDate');
             eventDateInput.value = new Date().toISOString().split('T')[0];
 
+            // Add buttons dynamically to avoid template literal issues
+            const buttonsContainer = modal.querySelector('#modalButtonsContainer');
+            let buttonsHTML = '';
+            
+            // Back to list button removed as requested
+            
+            // Add cancel and save buttons
+            buttonsHTML += `
+                <button type="button" class="btn btn-outline-secondary btn-lg px-4" onclick="closeStageModal()">
+                    <i class="fas fa-times me-2"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-success btn-lg px-5" onclick="saveStageData('${stageId}', ${occurrenceNum})">
+                    <i class="fas fa-save me-2"></i> Save 
+                </button>
+            `;
+            
+            buttonsContainer.innerHTML = buttonsHTML;
+
             // Load stage questions
             const container = modal.querySelector('#modalQuestionsContainer');
             await loadStageQuestions(stageId, container);
@@ -2234,10 +3423,10 @@ if (!empty($programStages)) {
             // Load existing data if available
             loadExistingData(stageId, occurrenceNum);
             
-            // Load existing files for this stage
-            setTimeout(async () => {
-                await loadExistingFiles();
-            }, 200);
+            // Load existing files for this stage - disabled to keep files empty initially
+            // setTimeout(async () => {
+            //     await loadExistingFiles();
+            // }, 200);
             
             // Initialize Select2 for searchable dropdowns
             initializeSelect2InModal();
@@ -2558,17 +3747,30 @@ if (!empty($programStages)) {
         }
 
         function saveTEIData() {
+            console.log('saveTEIData function called');
             const container = document.getElementById('modalQuestionsContainer');
+            
+            if (!container) {
+                console.error('Modal questions container not found');
+                alert('Error: Form container not found. Please try again.');
+                return;
+            }
+            
+            console.log('Container found:', container);
             
             // Collect all TEI attribute data
             const teiData = {};
             const inputs = container.querySelectorAll('input, select, textarea');
+            console.log('Found inputs:', inputs.length);
             let hasRequiredErrors = false;
             
             inputs.forEach(input => {
+                console.log('Processing input:', input.id, 'value:', input.value, 'required:', input.hasAttribute('required'));
+                
                 if (input.hasAttribute('required') && !input.value.trim()) {
                     hasRequiredErrors = true;
                     input.classList.add('is-invalid');
+                    console.log('Required field empty:', input.id);
                 } else {
                     input.classList.remove('is-invalid');
                     if (input.value) {
@@ -2577,29 +3779,45 @@ if (!empty($programStages)) {
                         if (match) {
                             const attributeId = match[1];
                             teiData[attributeId] = input.value;
+                            console.log('Added to teiData:', attributeId, '=', input.value);
                         }
                     }
                 }
             });
             
             if (hasRequiredErrors) {
+                console.log('Validation failed - required fields empty');
                 alert('Please fill in all required fields marked with *');
                 return;
             }
             
+            console.log('Validation passed, proceeding to save');
+            console.log('TEI data to save:', teiData);
+            
             // Store TEI data
             formData.trackedEntityAttributes = teiData;
             
-            console.log('Saving TEI data:', teiData);
+            console.log('TEI data stored in formData:', formData.trackedEntityAttributes);
             
             // Update UI to show TEI data has been saved
             updateTEIProgress();
+            updateParticipantSummary();
+            updateParticipantTable();
             
             // Close modal
             closeStageModal();
             
+            console.log('About to show success message');
+            
             // Show success message
-            showSuccessMessage('Participant information saved successfully!');
+            try {
+                showSuccessMessage('Participant information saved successfully!');
+                console.log('Success message shown successfully');
+            } catch (error) {
+                console.error('Error showing success message:', error);
+            }
+            
+            console.log('=== SAVE TEI DATA COMPLETED ===');
         }
 
         function updateTEIProgress() {
@@ -2612,6 +3830,83 @@ if (!empty($programStages)) {
                     navItem.classList.remove('completed');
                 }
             }
+        }
+        
+        function updateParticipantSummary() {
+            console.log('updateParticipantSummary called');
+            
+            // Check if elements exist before trying to update them
+            const statusElement = document.getElementById('participantStatus');
+            const locationElement = document.getElementById('participantLocation');
+            const summaryContainer = document.getElementById('participantSummary');
+            
+            console.log('Participant summary elements found:', {
+                statusElement: !!statusElement,
+                locationElement: !!locationElement,
+                summaryContainer: !!summaryContainer
+            });
+            
+            // Update status only if element exists
+            if (statusElement) {
+                if (formData.trackedEntityAttributes && Object.keys(formData.trackedEntityAttributes).length > 0) {
+                    statusElement.textContent = 'Registered';
+                    statusElement.style.color = '#28a745';
+                } else {
+                    statusElement.textContent = 'Not registered';
+                    statusElement.style.color = '#6c757d';
+                }
+                console.log('Status updated successfully');
+            } else {
+                console.warn('participantStatus element not found, skipping status update');
+            }
+            
+            // Update location only if element exists
+            if (locationElement) {
+                const facilityNameInput = document.getElementById('facilityName');
+                const facilityName = facilityNameInput ? facilityNameInput.value : null;
+                if (facilityName) {
+                    locationElement.textContent = facilityName;
+                    locationElement.style.color = '#2c3e50';
+                } else {
+                    locationElement.textContent = 'No location selected';
+                    locationElement.style.color = '#6c757d';
+                }
+                console.log('Location updated successfully');
+            } else {
+                console.warn('participantLocation element not found, skipping location update');
+            }
+            
+            // Add participant attributes to summary only if container exists
+            if (formData.trackedEntityAttributes && summaryContainer) {
+                // Remove existing dynamic attributes
+                const existingDynamic = summaryContainer.querySelectorAll('.dynamic-attribute');
+                existingDynamic.forEach(el => el.remove());
+                
+                // Add new attributes
+                Object.keys(formData.trackedEntityAttributes).forEach(attributeId => {
+                    const value = formData.trackedEntityAttributes[attributeId];
+                    if (value) {
+                        // Find attribute definition to get display name
+                        const attribute = programData.program.programTrackedEntityAttributes
+                            ?.find(attr => attr.trackedEntityAttribute.id === attributeId);
+                        
+                        if (attribute) {
+                            const summaryItem = document.createElement('div');
+                            summaryItem.className = 'summary-item dynamic-attribute';
+                            summaryItem.innerHTML = `
+                                <div class="summary-label">${attribute.trackedEntityAttribute.displayName}</div>
+                                <div class="summary-value">${value}</div>
+                            `;
+                            summaryContainer.appendChild(summaryItem);
+                        }
+                    }
+                });
+                console.log('Participant summary attributes updated successfully');
+            } else if (!summaryContainer) {
+                console.warn('participantSummary container not found, skipping attributes update');
+            }
+            
+            console.log('updateParticipantSummary completed');
         }
 
         async function loadStageQuestions(stageId, container) {
@@ -3033,7 +4328,7 @@ if (!empty($programStages)) {
                     const uploadInfo = {
                         uploadId: result.upload_id,
                         filename: result.filename,
-                        storedFilename: result.stored_filename,
+                        savedFilename: result.saved_filename,
                         size: result.size,
                         uploaded: true
                     };
@@ -3157,7 +4452,7 @@ if (!empty($programStages)) {
                         const uploadInfo = {
                             uploadId: file.id,
                             filename: file.original_filename,
-                            storedFilename: file.stored_filename,
+                            savedFilename: file.saved_filename,
                             size: file.file_size,
                             uploaded: true
                         };
@@ -3174,7 +4469,7 @@ if (!empty($programStages)) {
                             // Add file size info
                             const sizeInfo = document.createElement('small');
                             sizeInfo.className = 'text-muted d-block';
-                            sizeInfo.textContent = `Size: ${(file.file_size / 1024).toFixed(1)} KB • Uploaded: ${new Date(file.created_at).toLocaleDateString()}`;
+                            sizeInfo.textContent = `Size: ${(file.file_size / 1024).toFixed(1)} KB • Uploaded: ${new Date(file.uploaded_at).toLocaleDateString()}`;
                             fileNameSpan.appendChild(sizeInfo);
                             
                             infoDiv.style.display = 'block';
@@ -3257,11 +4552,55 @@ if (!empty($programStages)) {
         }
 
         function saveStageData(stageId, occurrenceNum) {
-            const eventDate = document.getElementById('modalEventDate').value;
+            console.log('=== SAVE STAGE DATA START ===');
+            console.log('Parameters received:', { stageId, occurrenceNum });
+            console.log('Global variables:', { currentModalStage, currentModalOccurrence });
+            
+            // Use current modal values if parameters not provided
+            if (!stageId || stageId === 'undefined') {
+                stageId = currentModalStage;
+                console.log('Using currentModalStage:', stageId);
+            }
+            if (!occurrenceNum || occurrenceNum === 'undefined') {
+                occurrenceNum = currentModalOccurrence;
+                console.log('Using currentModalOccurrence:', occurrenceNum);
+            }
+            
+            if (!stageId || !occurrenceNum) {
+                console.error('Missing stage or occurrence data:', { stageId, occurrenceNum });
+                alert('Error: Stage or occurrence information missing. Please try closing and reopening the form.');
+                return;
+            }
+            
+            console.log('Final values to use:', { stageId, occurrenceNum });
+            
+            const eventDate = document.getElementById('modalEventDate');
             const container = document.getElementById('modalQuestionsContainer');
             
+            console.log('Save stage data - DOM elements found:', { 
+                eventDate: !!eventDate, 
+                eventDateValue: eventDate?.value,
+                container: !!container,
+                modalVisible: document.getElementById('stageQuestionsModal')?.style.display !== 'none'
+            });
+            
             if (!eventDate) {
+                console.error('Event date element not found in DOM');
+                alert('Error: Event date field not found. Please try closing and reopening the form.');
+                return;
+            }
+            
+            if (!eventDate.value || eventDate.value.trim() === '') {
+                console.error('Event date value is empty:', eventDate.value);
                 alert('Please select an event date');
+                // Focus on the event date field
+                eventDate.focus();
+                return;
+            }
+            
+            if (!container) {
+                console.error('Questions container not found in DOM');
+                alert('Error: Questions container not found. Please try closing and reopening the form.');
                 return;
             }
             
@@ -3283,11 +4622,21 @@ if (!empty($programStages)) {
                 return;
             }
             
+            console.log('Starting data collection...');
+            
             // Collect all form data
-            const occurrenceData = { eventDate: eventDate, dataElements: {} };
+            const occurrenceData = { eventDate: eventDate.value, dataElements: {} };
             const inputs = container.querySelectorAll('input, select, textarea');
             
-            inputs.forEach(input => {
+            console.log('Found form inputs:', inputs.length);
+            
+            inputs.forEach((input, index) => {
+                console.log(`Processing input ${index + 1}/${inputs.length}:`, {
+                    id: input.id,
+                    type: input.type,
+                    value: input.value,
+                    tagName: input.tagName
+                });
                 // Handle different input types appropriately
                 if (input.type === 'file') {
                     // Handle file inputs specially
@@ -3350,13 +4699,41 @@ if (!empty($programStages)) {
             
             // Update UI to show data has been saved
             updateStageProgress(stageId);
+            updateStageTable(stageId);
+            
+            // Show save indicator with green tick
+            const saveIndicator = document.getElementById(`saveIndicator_${stageId}_${occurrenceNum}`);
+            if (saveIndicator) {
+                saveIndicator.classList.remove('d-none');
+                
+                // Hide it after 3 seconds
+                setTimeout(() => {
+                    saveIndicator.classList.add('d-none');
+                }, 3000);
+            }
+            
+            // Update status to show data has been saved
+            const statusIndicator = document.getElementById(`status_${stageId}_${occurrenceNum}`);
+            if (statusIndicator) {
+                statusIndicator.innerHTML = '<i class="fas fa-check-circle text-success"></i> Data saved';
+                console.log(`Status updated for stage ${stageId} occurrence ${occurrenceNum}`);
+            }
             
             // Close modal
             closeStageModal();
             
             // Show success message
             const stageName = programData.program.programStages.find(s => s.id === stageId)?.name || 'Stage';
-            showSuccessMessage(`${stageName} ${occurrenceNum > 1 ? `occurrence ${occurrenceNum}` : ''} saved successfully!`);
+            console.log('About to show success message for stage:', stageName);
+            
+            try {
+                showSuccessMessage(`${stageName} ${occurrenceNum > 1 ? `occurrence ${occurrenceNum}` : ''} saved successfully!`);
+                console.log('Success message shown for stage save');
+            } catch (error) {
+                console.error('Error showing stage save success message:', error);
+            }
+            
+            console.log('=== SAVE STAGE DATA FUNCTION COMPLETED ===');
         }
 
         function loadExistingData(stageId, occurrenceNum) {
@@ -4001,7 +5378,7 @@ if (!empty($programStages)) {
                 console.error('Submission error:', error);
                 loadingSpinner.style.display = 'none';
                 submitBtn.style.display = 'inline-block';
-                alert('Error submitting data: ' + error.message);
+                showErrorMessage(error.message);
             }
         }
 
@@ -4020,6 +5397,54 @@ if (!empty($programStages)) {
             setTimeout(() => {
                 alert.remove();
             }, 3000);
+        }
+
+        function showErrorMessage(message) {
+            // Enhanced error notification with better formatting
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-danger position-fixed';
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 3000; max-width: 500px; max-height: 400px; overflow-y: auto;';
+            
+            // Check if the message contains multiple error types and format accordingly
+            let formattedMessage = message;
+            if (message.includes('[Configuration]') || message.includes('[Duplicate]') || message.includes('[Validation]')) {
+                // Split by error type markers and format nicely
+                const errors = message.split(/(?=\[(?:Configuration|Duplicate|Validation)\])/);
+                formattedMessage = errors.map(error => {
+                    if (error.trim()) {
+                        if (error.includes('[Configuration]')) {
+                            return `<div class="mb-2"><strong><i class="fas fa-cog text-warning me-2"></i>Configuration Issue:</strong><br/>${error.replace('[Configuration]', '').trim()}</div>`;
+                        } else if (error.includes('[Duplicate]')) {
+                            return `<div class="mb-2"><strong><i class="fas fa-copy text-info me-2"></i>Duplicate Entry:</strong><br/>${error.replace('[Duplicate]', '').trim()}</div>`;
+                        } else if (error.includes('[Validation]')) {
+                            return `<div class="mb-2"><strong><i class="fas fa-exclamation-triangle text-danger me-2"></i>Validation Error:</strong><br/>${error.replace('[Validation]', '').trim()}</div>`;
+                        }
+                    }
+                    return '';
+                }).filter(e => e).join('');
+            } else {
+                formattedMessage = `<i class="fas fa-exclamation-circle me-2"></i>${message}`;
+            }
+            
+            alert.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div style="flex: 1;">
+                        <h6 class="alert-heading mb-2">Submission Error</h6>
+                        ${formattedMessage}
+                    </div>
+                    <button type="button" class="btn-close ms-3" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // Auto-dismiss after 15 seconds for long messages, 8 seconds for short ones
+            const dismissTime = formattedMessage.length > 300 ? 15000 : 8000;
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, dismissTime);
         }
 
         // Function to clear all forms in a stage when navigating to it
@@ -4394,10 +5819,10 @@ if (!empty($programStages)) {
             
             await loadSavedGroupings();
             
-            // Load existing files after a short delay to ensure DOM is ready
-            setTimeout(async () => {
-                await loadExistingFiles();
-            }, 500);
+            // Load existing files after a short delay to ensure DOM is ready - disabled to keep files empty initially
+            // setTimeout(async () => {
+            //     await loadExistingFiles();
+            // }, 500);
             
             // Navigation active state is managed by navigateToStage function
             // Don't automatically set first section as active here

@@ -446,7 +446,30 @@ function extractTrackerAPIError($response) {
     if (isset($response['validationReport']['errorReports'])) {
         foreach ($response['validationReport']['errorReports'] as $errorReport) {
             $errorMsg = $errorReport['message'] ?? $errorReport['errorCode'] ?? 'Validation error';
-            $errors[] = "[Validation] $errorMsg";
+            
+            // Enhance common error messages for better user understanding
+            if (strpos($errorMsg, 'OrganisationUnit') !== false && strpos($errorMsg, 'Program') !== false && strpos($errorMsg, 'dont match') !== false) {
+                // Extract orgunit and program UIDs from the error message
+                preg_match('/OrganisationUnit: `([^`]+)`/', $errorMsg, $orgunitMatches);
+                preg_match('/Program: `([^`]+)`/', $errorMsg, $programMatches);
+                
+                $orgunitUid = $orgunitMatches[1] ?? 'unknown';
+                $programUid = $programMatches[1] ?? 'unknown';
+                
+                $enhancedMsg = "Configuration Error: The selected location (Organization Unit: $orgunitUid) is not authorized for this program (Program: $programUid). Please contact your administrator to check the program's organization unit assignment in DHIS2, or select a different location that belongs to this program.";
+                $errors[] = "[Configuration] $enhancedMsg";
+            } elseif (strpos($errorMsg, 'Non-unique attribute value') !== false) {
+                // Handle duplicate attribute errors
+                preg_match('/Non-unique attribute value `([^`]+)` for attribute `([^`]+)`/', $errorMsg, $matches);
+                $value = $matches[1] ?? 'unknown';
+                $attribute = $matches[2] ?? 'unknown';
+                
+                $enhancedMsg = "Duplicate Entry: A participant with this information already exists (Attribute: $attribute, Value: $value). This might be a phone number, ID, or other unique identifier that's already registered in the system. Please check if this participant is already enrolled or use different contact information.";
+                $errors[] = "[Duplicate] $enhancedMsg";
+            } else {
+                $errors[] = "[Validation] $errorMsg";
+            }
+            
             error_log("Validation error: $errorMsg");
         }
     }

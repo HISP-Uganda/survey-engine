@@ -18,7 +18,7 @@ try {
         // Handle file upload
         $surveyId = $_POST['survey_id'] ?? null;
         $questionId = $_POST['question_id'] ?? null;
-        $submissionId = $_POST['submission_id'] ?? null; // For existing submissions
+        $submissionId = $_POST['submission_id'] ?? 0; // Default to 0 for new uploads
         
         if (!$surveyId || !$questionId) {
             throw new Exception('Survey ID and Question ID are required');
@@ -53,23 +53,22 @@ try {
             throw new Exception('Failed to save file');
         }
         
-        // Save file info to database
+        // Save file info to database (using existing table structure)
         $stmt = $pdo->prepare("
-            INSERT INTO tracker_file_uploads (survey_id, question_id, submission_id, original_filename, stored_filename, file_path, file_size, mime_type, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            INSERT INTO tracker_file_uploads (submission_id, field_name, original_filename, saved_filename, file_path, file_size, mime_type, uploaded_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
             ON DUPLICATE KEY UPDATE
             original_filename = VALUES(original_filename),
-            stored_filename = VALUES(stored_filename),
+            saved_filename = VALUES(saved_filename),
             file_path = VALUES(file_path),
             file_size = VALUES(file_size),
             mime_type = VALUES(mime_type),
-            updated_at = NOW()
+            uploaded_at = NOW()
         ");
         
         $stmt->execute([
-            $surveyId,
-            $questionId,
             $submissionId,
+            $questionId,
             $file['name'],
             $fileName,
             $filePath,
@@ -91,7 +90,7 @@ try {
             'success' => true,
             'upload_id' => $uploadId,
             'filename' => $file['name'],
-            'stored_filename' => $fileName,
+            'saved_filename' => $fileName,
             'size' => $file['size'],
             'preview' => $preview
         ]);
@@ -100,7 +99,7 @@ try {
         // Retrieve file info
         $surveyId = $_GET['survey_id'] ?? null;
         $questionId = $_GET['question_id'] ?? null;
-        $submissionId = $_GET['submission_id'] ?? null;
+        $submissionId = $_GET['submission_id'] ?? 0;
         
         if (!$surveyId || !$questionId) {
             throw new Exception('Survey ID and Question ID are required');
@@ -108,11 +107,11 @@ try {
         
         $stmt = $pdo->prepare("
             SELECT * FROM tracker_file_uploads 
-            WHERE survey_id = ? AND question_id = ? AND (submission_id = ? OR submission_id IS NULL)
-            ORDER BY created_at DESC 
+            WHERE field_name = ? AND (submission_id = ? OR submission_id = 0)
+            ORDER BY uploaded_at DESC 
             LIMIT 1
         ");
-        $stmt->execute([$surveyId, $questionId, $submissionId]);
+        $stmt->execute([$questionId, $submissionId]);
         $fileInfo = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($fileInfo) {
