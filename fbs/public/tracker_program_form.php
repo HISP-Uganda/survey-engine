@@ -602,15 +602,15 @@ if (!empty($programStages)) {
         /* Tracker Form Styles */
         .tracker-container {
             background: #f8f9fa;
-            min-height: 100vh;
+            min-height: auto;
         }
         
         .tracker-main {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 20px 0;
             background: #f8f9fa;
-            min-height: 100vh;
+            min-height: auto;
         }
         
         /* Compact Table Sections */
@@ -620,45 +620,67 @@ if (!empty($programStages)) {
         .stages-combined-section,
         .stage-occurrences-section {
             background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e3e6ea;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
         
         .stage-occurrences-table {
             margin-bottom: 0;
             font-size: 13px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+        }
+        
+        .stage-occurrences-table thead th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #e3e6ea;
+            color: #374151;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 16px;
         }
         
         .stage-occurrence-row {
             transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f1f3f4;
         }
         
         .stage-occurrence-row:hover {
             background-color: #f8f9fa;
         }
         
+        .stage-occurrence-row:last-child {
+            border-bottom: none;
+        }
+        
         .stage-occurrence-row td {
             vertical-align: middle;
-            padding: 10px 8px;
+            padding: 12px 16px;
+            border: none;
         }
         
         .stage-name {
-            font-weight: 500;
-            color: #2c3e50;
-            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
         }
         
         .occurrence-badge {
             display: inline-block;
-            background: #007bff;
+            background: #6b7280;
             color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 26px;
+            text-align: center;
         }
         
         .status-indicator {
@@ -692,56 +714,58 @@ if (!empty($programStages)) {
         .stage-navigation-sidebar {
             flex-shrink: 0;
             width: 200px;
-            background: #ffffff;
-            border: 2px solid #e3e6ea;
-            border-radius: 10px;
-            padding: 20px 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background: #f8f9fa;
+            border: 1px solid #e3e6ea;
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
             position: sticky;
             top: 20px;
         }
         
         .nav-header {
-            margin-bottom: 16px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e9ecef;
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid #e3e6ea;
+            border-radius: 12px 12px 0 0;
+            background: #ffffff;
             text-align: center;
         }
         
         .nav-header small {
             font-weight: 600;
-            font-size: 12px;
-            color: #495057;
+            font-size: 11px;
+            color: #6c757d;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
         }
         
         .stage-nav-item {
-            padding: 12px 14px;
-            margin-bottom: 8px;
-            border-radius: 8px;
+            padding: 14px 20px;
+            margin: 4px 12px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            background-color: #f8f9fa;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+            background-color: transparent;
         }
         
         .stage-nav-item:hover {
-            background-color: #e9ecef;
-            border-color: #007bff;
+            background-color: #ffffff;
+            border-color: #d1d5db;
             transform: translateX(2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
         .stage-nav-item.active {
-            background-color: #007bff;
+            background-color: #374151;
             color: white;
-            border-color: #0056b3;
-            box-shadow: 0 2px 6px rgba(0,123,255,0.3);
+            border-color: #374151;
+            box-shadow: 0 3px 12px rgba(55,65,81,0.2);
         }
         
         .stage-nav-item.active .occurrence-count {
             color: #ffffff;
-            background-color: rgba(255,255,255,0.2);
+            background-color: rgba(255,255,255,0.15);
         }
         
         .stage-nav-name {
@@ -893,7 +917,17 @@ if (!empty($programStages)) {
             gap: 8px;
         }
         
-        .location-table-container,
+        .location-table-container {
+            max-height: 200px;
+            overflow-y: auto;
+            overflow: visible; /* Allow dropdown to extend outside */
+        }
+        
+        .location-table-container.dropdown-active {
+            overflow: visible;
+            max-height: none;
+        }
+        
         .participant-table-container,
         .stage-table-container {
             max-height: 200px;
@@ -1906,7 +1940,7 @@ if (!empty($programStages)) {
     </style>
 </head>
 
-<body style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh;">
+<body style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
     <!-- Flag Bar -->
     <?php if ($surveySettings['show_flag_bar']): ?>
         <div class="flag-bar">
@@ -2030,7 +2064,7 @@ if (!empty($programStages)) {
                                 <div class="stage-nav-name"><?= htmlspecialchars($stage['name']) ?></div>
                                 <div class="stage-nav-info">
                                     <?php if ($stage['repeatable']): ?>
-                                        <small class="badge bg-success">Repeatable</small>
+                                        <small class="badge bg-secondary">Repeatable</small>
                                     <?php endif; ?>
                                     <span class="occurrence-count" id="navCount_<?= $stage['id'] ?>">1 occurrence</span>
                                 </div>
@@ -2056,7 +2090,7 @@ if (!empty($programStages)) {
                                 <td class="stage-info">
                                     <div class="stage-name"><?= htmlspecialchars($stage['name']) ?></div>
                                     <?php if ($stage['repeatable']): ?>
-                                        <small class="badge bg-success" style="font-size: 9px;">Repeatable</small>
+                                        <small class="badge bg-secondary" style="font-size: 9px;">Repeatable</small>
                                     <?php endif; ?>
                                 </td>
                                 <td class="occurrence-number">
@@ -2094,7 +2128,7 @@ if (!empty($programStages)) {
                   
                     
                     <!-- Submit Section -->
-                    <div class="submit-section text-center p-4" style="background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 20px;">
+                    <div class="submit-section text-center p-3" style="background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 20px 20px 5px;">
                         <?php if (isset($offlineMode) && $offlineMode): ?>
                             <button type="button" class="btn btn-secondary btn-lg" disabled title="Submission is disabled in offline mode">
                                 <i class="fas fa-wifi-slash me-2"></i>
@@ -2334,6 +2368,8 @@ if (!empty($programStages)) {
                     facilityResultsDiv.style.display = 'none';
                     facilityResultsDiv.classList.remove('expanded');
                     facilityResultsDiv.classList.add('collapsed');
+                    // Remove dropdown-active class from container
+                    document.querySelector('.location-table-container').classList.remove('dropdown-active');
                 }
             });
         }
@@ -2447,6 +2483,8 @@ if (!empty($programStages)) {
                 // Expand dropdown when showing results
                 facilityResultsDiv.classList.remove('collapsed');
                 facilityResultsDiv.classList.add('expanded');
+                // Add dropdown-active class to container
+                document.querySelector('.location-table-container').classList.add('dropdown-active');
             } else {
                 if (searchTerm.length > 0) {
                     facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No matching locations found for your search.</div>';
@@ -2473,6 +2511,8 @@ if (!empty($programStages)) {
             facilityResultsDiv.style.display = 'none';
             facilityResultsDiv.classList.remove('expanded');
             facilityResultsDiv.classList.add('collapsed');
+            // Remove dropdown-active class from container
+            document.querySelector('.location-table-container').classList.remove('dropdown-active');
             
             // If no path provided or path is empty, try to get it from the displayed path
             if (!facilityPath || facilityPath.trim() === '') {
@@ -2661,6 +2701,22 @@ if (!empty($programStages)) {
             }
         }
 
+        // Utility function to clean display names by removing prefixes
+        function cleanDisplayName(displayName) {
+            if (!displayName) return '';
+            
+            // Remove common prefixes like "PM_", "TE_", etc. and any leading underscores
+            let cleaned = displayName.replace(/^[A-Z]{1,3}_+/g, '');
+            
+            // If no prefix was removed, return original
+            if (cleaned === displayName) {
+                return displayName;
+            }
+            
+            // Capitalize first letter of cleaned name
+            return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+        }
+
         // Participant table functions - simplified since edit now directly opens modal
         
         function updateParticipantTable() {
@@ -2689,9 +2745,10 @@ if (!empty($programStages)) {
                             .find(attr => attr.trackedEntityAttribute.id === attributeId);
                         
                         if (attribute) {
+                            const cleanName = cleanDisplayName(attribute.trackedEntityAttribute.displayName);
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                                <td class="field-label">${attribute.trackedEntityAttribute.displayName}</td>
+                                <td class="field-label">${cleanName}</td>
                                 <td class="field-value">
                                     <div class="readonly-value">${value}</div>
                                 </td>
@@ -2916,7 +2973,7 @@ if (!empty($programStages)) {
             newRow.innerHTML = `
                 <td class="stage-info">
                     <div class="stage-name">${stage.name}</div>
-                    <small class="badge bg-success" style="font-size: 9px;">Repeatable</small>
+                    <small class="badge bg-secondary" style="font-size: 9px;">Repeatable</small>
                 </td>
                 <td class="occurrence-number">
                     <span class="occurrence-badge">${newOccurrence}</span>
@@ -3353,7 +3410,7 @@ if (!empty($programStages)) {
                     <h4 class="mb-0" id="modalStageTitle" style="color: #2c3e50; font-weight: 700;">
                         <i class="fas fa-clipboard-list text-primary me-3"></i>
                         ${stage.name} ${stage.repeatable ? `- Occurrence ${occurrenceNum}` : ''}
-                        ${stage.repeatable ? '<span class="badge bg-success ms-3"><i class="fas fa-repeat me-1"></i>Repeatable</span>' : ''}
+                        ${stage.repeatable ? '<span class="badge bg-secondary ms-3"><i class="fas fa-repeat me-1"></i>Repeatable</span>' : ''}
                     </h4>
                     <button type="button" class="btn-close btn-lg" onclick="closeStageModal()" style="font-size: 1.5rem; padding: 10px;">
                         <i class="fas fa-times"></i>
@@ -3891,10 +3948,11 @@ if (!empty($programStages)) {
                             ?.find(attr => attr.trackedEntityAttribute.id === attributeId);
                         
                         if (attribute) {
+                            const cleanName = cleanDisplayName(attribute.trackedEntityAttribute.displayName);
                             const summaryItem = document.createElement('div');
                             summaryItem.className = 'summary-item dynamic-attribute';
                             summaryItem.innerHTML = `
-                                <div class="summary-label">${attribute.trackedEntityAttribute.displayName}</div>
+                                <div class="summary-label">${cleanName}</div>
                                 <div class="summary-value">${value}</div>
                             `;
                             summaryContainer.appendChild(summaryItem);
@@ -4771,7 +4829,7 @@ if (!empty($programStages)) {
                                         <span class="text-muted ms-2">(${(savedData.fileSize / 1024).toFixed(1)} KB)</span>
                                     </div>
                                     <div>
-                                        <span class="badge bg-warning text-dark">⚠ Needs Re-selection</span>
+                                        <span class="badge bg-warning-subtle text-warning-emphasis">⚠ Needs Re-selection</span>
                                         <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="clearSavedFile('${inputId}')">
                                             <i class="fas fa-times"></i> Clear
                                         </button>
@@ -4826,7 +4884,7 @@ if (!empty($programStages)) {
                                                     <span class="text-muted ms-2">(${(this.files[0].size / 1024).toFixed(1)} KB)</span>
                                                 </div>
                                                 <div>
-                                                    <span class="badge bg-success">✓ Ready for Upload</span>
+                                                    <span class="badge bg-success-subtle text-success-emphasis">✓ Ready for Upload</span>
                                                 </div>
                                             </div>
                                         `;
