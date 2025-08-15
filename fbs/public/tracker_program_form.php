@@ -38,8 +38,6 @@ function showSurveyMessage($title, $message, $type = 'info') {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?= htmlspecialchars($title) ?></title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <style>
             body {
                 background: white;
@@ -355,7 +353,7 @@ try {
 $defaultSettings = [
     'title_text' => $trackerProgram['name'] ?? 'DHIS2 Tracker Program',
     'show_logo' => true,
-    'logo_path' => 'admin/asets/asets/img/loog.jpg',
+    'logo_path' => 'admin/argon-dashboard-master/assets/img/loog.jpg',
     'show_flag_bar' => true,
     'flag_black_color' => '#000000',
     'flag_yellow_color' => '#FCD116', 
@@ -406,521 +404,541 @@ if (!empty($programStages)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($surveySettings['title_text']) ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
     <style>
-        /* Enhanced Select2 searchable dropdown styles */
-        .select2-container--default .select2-selection--single {
-            background-color: #fff;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            height: 48px;
-            transition: all 0.3s ease;
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #10b981;
+            --secondary-color: #6b7280;
+            --border-radius: 12px;
         }
         
-        .select2-container--default .select2-selection--single:focus-within,
-        .select2-container--default.select2-container--open .select2-selection--single {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        body {
+            background: #f8fafc;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            font-size: 14px;
         }
         
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: #495057;
-            line-height: 44px;
-            padding-left: 12px;
-            font-size: 16px;
+        /* Header Styles */
+        .tracker-header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
-        .select2-container--default .select2-selection--single .select2-selection__placeholder {
-            color: #6c757d;
+        .tracker-header .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
         
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 44px;
-            top: 2px;
-            right: 8px;
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
         
-        .select2-dropdown {
-            border: 2px solid #007bff;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        .flag-bar {
+            display: flex;
+            height: 4px;
+            margin-top: 0.5rem;
         }
         
-        .select2-results__option {
-            padding: 12px 16px;
-            font-size: 15px;
-            transition: background-color 0.2s;
+        .flag-segment {
+            flex: 1;
         }
         
-        .select2-results__option--highlighted {
-            background-color: #007bff !important;
-            color: white;
+        /* Step Navigation */
+        .step-navigation {
+            background: white;
+            padding: 1.5rem 0;
+            margin-bottom: 1.5rem;
         }
         
-        .select2-search__field {
-            padding: 10px 12px;
-            font-size: 16px;
-            border-radius: 6px;
+        .step-navigation .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
         
-        /* Option set field styling */
-        .option-set-field {
+        .steps-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
             position: relative;
         }
         
-        .option-set-field::before {
-            content: '\f002';
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            position: absolute;
-            right: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-            pointer-events: none;
-            z-index: 1;
-        }
-        
-        .question-input-container .form-control.select2-hidden-accessible + .select2-container {
-            width: 100% !important;
-        }
-
-        /* Expandable Location Dropdown */
-        .expandable-dropdown {
-            transition: max-height 0.3s ease;
-        }
-        
-        .expandable-dropdown.expanded {
-            max-height: 300px !important;
-        }
-        
-        .expandable-dropdown.collapsed {
-            max-height: 120px !important;
-        }
-        
-        /* File Upload Styles */
-        .file-upload-field {
-            width: 100%;
-        }
-        
-        .file-upload-container {
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-         .file-upload-area {
-            padding: 30px 20px;
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 1;
             text-align: center;
-            cursor: pointer;
+        }
+        
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
             transition: all 0.3s ease;
-            background: #fafbfc;
+            cursor: pointer;
         }
         
-        .file-upload-area:hover {
-            border-color: #007bff;
-            background: #f8f9ff;
+        .step.completed .step-number {
+            background: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
         }
         
-        .file-upload-icon {
-            font-size: 3rem;
-            color: #6c757d;
-            margin-bottom: 15px;
+        .step.active .step-number {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
         
-        .file-upload-area:hover .file-upload-icon {
-            color: #007bff;
+        .step-label {
+            font-weight: 500;
+            color: #6b7280;
+            font-size: 0.8rem;
         }
         
-        .file-upload-text strong {
-            font-size: 18px;
-            color: #2c3e50;
+        .step.completed .step-label,
+        .step.active .step-label {
+            color: #374151;
         }
         
-        .file-upload-text small {
-            color: #6c757d;
+        .step-connector {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            width: calc(100% - 48px);
+            height: 2px;
+            background: #e5e7eb;
+            z-index: -1;
+        }
+        
+        .step.completed .step-connector {
+            background: var(--success-color);
+        }
+        
+        .step:last-child .step-connector {
+            display: none;
+        }
+        
+        /* Main Content */
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-active {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-pending {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        
+        .section-content {
+            padding: 1.5rem;
+        }
+        
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+            max-width: 500px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px 32px;
+            margin-bottom: 18px;
+            gap: 80px;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .form-group:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Question label area */
+        .form-group .form-label {
+            width: 35%;
+            max-width: 320px;
+            min-width: 280px;
+            flex-shrink: 0;
+            margin-bottom: 0;
+            padding-top: 8px;
+            word-wrap: break-word;
+            font-size: 15px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+        
+        /* Answer area */
+        .form-group .answer-area {
+            flex: 1;
+            width: 65%;
+            min-width: 400px;
+            max-width: 100%;
+        }
+        
+        .form-group .answer-area .form-control,
+        .form-group .answer-area .form-check,
+        .form-group .answer-area select {
+            width: 100%;
+            min-height: 42px;
             font-size: 14px;
         }
         
-        .file-upload-info {
-            padding: 15px;
-            background: #f8f9fa;
-            border-top: 1px solid #dee2e6;
+        /* Special styling for dropdowns to ensure they're large enough */
+        .form-group .answer-area select.form-control {
+            min-height: 48px;
+            padding: 12px 16px;
+            background-color: #ffffff;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 400;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 48px;
         }
         
-        .uploaded-file-info {
+        .form-group .answer-area select.form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+        
+        .form-group .answer-area select.form-control:hover {
+            border-color: #9ca3af;
+        }
+        
+        .form-group .input-hint {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.4rem;
             display: flex;
             align-items: center;
-            padding: 10px;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-        }
-        
-        .file-preview {
-            max-height: 200px;
-            overflow-y: auto;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 10px;
-        }
-        
-        .file-preview table {
-            width: 100%;
-            font-size: 12px;
-        }
-        
-        .file-preview th {
-            background: #f8f9fa;
-            padding: 5px 8px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .file-preview td {
-            padding: 3px 8px;
-            border-bottom: 1px solid #f1f3f4;
-        }
-    </style>
-    
-    <style>
-        /* Flag Bar Styles */
-        .flag-bar {
-            height: 8px;
-            display: flex;
-            width: 100%;
-        }
-        
-        .flag-section {
-            flex: 1;
-            height: 100%;
-        }
-        
-        /* Tracker Form Styles */
-        .tracker-container {
-            background: #f8f9fa;
-            min-height: auto;
-        }
-        
-        .tracker-main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px 20px 0;
-            background: #f8f9fa;
-            min-height: auto;
-        }
-        
-        /* Compact Table Sections */
-        .location-table-section,
-        .participant-table-section,
-        .stage-table-section,
-        .stages-combined-section,
-        .stage-occurrences-section {
-            background: white;
-            border: 1px solid #e3e6ea;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        
-        .stage-occurrences-table {
-            margin-bottom: 0;
+            gap: 0.25rem;
             font-size: 13px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
         }
         
-        .stage-occurrences-table thead th {
-            background-color: #f8f9fa;
-            border-bottom: 2px solid #e3e6ea;
+        .required-indicator {
+            color: #dc2626;
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-help {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        
+        /* Sub-tabs for Data Entry */
+        .sub-tabs {
+            background: #f8fafc;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .sub-tabs-nav {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .sub-tab {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: fit-content;
+        }
+        
+        .sub-tab:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        
+        .sub-tab.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .sub-tab-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e5e7eb;
+        }
+        
+        .sub-tab.completed .sub-tab-status {
+            background: var(--success-color);
+        }
+        
+        .sub-tab.active .sub-tab-status {
+            background: white;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background: white;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background: #f3f4f6;
             color: #374151;
+        }
+        
+        /* Modal Improvements */
+        .modal-content {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        
+        /* Summary Report Styles */
+        .summary-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .summary-header {
+            padding: 1rem 1.5rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
             font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 12px 16px;
+            color: #374151;
         }
         
-        .stage-occurrence-row {
-            transition: background-color 0.2s ease;
-            border-bottom: 1px solid #f1f3f4;
+        .summary-content {
+            padding: 1.5rem;
         }
         
-        .stage-occurrence-row:hover {
-            background-color: #f8f9fa;
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f3f4f6;
         }
         
-        .stage-occurrence-row:last-child {
+        .summary-item:last-child {
             border-bottom: none;
         }
         
-        .stage-occurrence-row td {
-            vertical-align: middle;
-            padding: 12px 16px;
-            border: none;
-        }
-        
-        .stage-name {
-            font-weight: 600;
-            color: #374151;
-            font-size: 14px;
-        }
-        
-        .occurrence-badge {
-            display: inline-block;
-            background: #6b7280;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 14px;
-            font-size: 12px;
-            font-weight: 600;
-            min-width: 26px;
-            text-align: center;
-        }
-        
-        .status-indicator {
-            font-size: 12px;
-        }
-        
-        .status-indicator.has-data {
-            color: #28a745;
-        }
-        
-        .status-indicator.no-data {
-            color: #6c757d;
-        }
-        
-        .data-preview {
-            font-size: 12px;
-            line-height: 1.3;
-        }
-        
-        .event-date-text {
-            font-size: 12px;
-        }
-        
-        /* Stage Navigation Sidebar */
-        .stage-table-container {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-        }
-        
-        .stage-navigation-sidebar {
-            flex-shrink: 0;
-            width: 200px;
-            background: #f8f9fa;
-            border: 1px solid #e3e6ea;
-            border-radius: 12px;
-            padding: 0;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            position: sticky;
-            top: 20px;
-        }
-        
-        .nav-header {
-            padding: 16px 20px 12px;
-            border-bottom: 1px solid #e3e6ea;
-            border-radius: 12px 12px 0 0;
-            background: #ffffff;
-            text-align: center;
-        }
-        
-        .nav-header small {
-            font-weight: 600;
-            font-size: 11px;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-        }
-        
-        .stage-nav-item {
-            padding: 14px 20px;
-            margin: 4px 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            border: 1px solid transparent;
-            background-color: transparent;
-        }
-        
-        .stage-nav-item:hover {
-            background-color: #ffffff;
-            border-color: #d1d5db;
-            transform: translateX(2px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .stage-nav-item.active {
-            background-color: #374151;
-            color: white;
-            border-color: #374151;
-            box-shadow: 0 3px 12px rgba(55,65,81,0.2);
-        }
-        
-        .stage-nav-item.active .occurrence-count {
-            color: #ffffff;
-            background-color: rgba(255,255,255,0.15);
-        }
-        
-        .stage-nav-name {
-            font-weight: 600;
-            font-size: 13px;
-            margin-bottom: 6px;
-            line-height: 1.3;
-            word-wrap: break-word;
-        }
-        
-        .stage-nav-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .occurrence-count {
-            color: #6c757d;
-            font-size: 10px;
+        .summary-label {
             font-weight: 500;
-            background-color: #e9ecef;
-            padding: 2px 6px;
-            border-radius: 4px;
-            white-space: nowrap;
+            color: #6b7280;
         }
         
-        .stage-occurrences-table-wrapper {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .stage-occurrences-table {
-            width: 100%;
-            table-layout: auto;
-        }
-        
-        .stage-occurrences-section {
-            margin-bottom: 20px;
-        }
-        
-        /* Remove any height restrictions that might cause scrolling */
-        .stage-table-container, 
-        .stage-occurrences-table-wrapper,
-        .stage-occurrences-table tbody {
-            overflow: visible !important;
-            max-height: none !important;
-            height: auto !important;
-        }
-        
-        .stages-container {
-            display: flex;
-            gap: 15px;
-            min-height: 300px;
-        }
-        
-        .stage-nav-tabs {
-            width: 200px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            border-right: 1px solid #e9ecef;
-            padding-right: 15px;
-        }
-        
-        .stage-tab {
-            display: flex;
-            align-items: center;
-            padding: 10px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-        }
-        
-        .stage-tab:hover {
-            background: #f8f9fa;
-        }
-        
-        .stage-tab.active {
-            background: #e3f2fd;
-            border-color: #007bff;
-        }
-        
-        .stage-tab-indicator {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-right: 10px;
-            min-width: 30px;
-        }
-        
-        .stage-number {
-            font-size: 12px;
-            font-weight: 600;
-            color: #495057;
-        }
-        
-        .stage-status {
-            font-size: 16px;
-            line-height: 1;
-            margin-top: 2px;
-        }
-        
-        .stage-status.filled {
-            color: #28a745;
-        }
-        
-        .stage-status.empty {
-            color: #6c757d;
-        }
-        
-        .stage-tab-content {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .stage-tab-name {
-            font-size: 13px;
+        .summary-value {
+            color: #111827;
             font-weight: 500;
-            color: #2c3e50;
-            line-height: 1.3;
-            margin-bottom: 2px;
         }
         
-        .stage-tab-meta {
-            font-size: 11px;
-            color: #6c757d;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .form-grid {
+                max-width: 100%;
+            }
+            
+            .steps-container {
+                padding: 0 1rem;
+            }
+            
+            .step-label {
+                font-size: 0.8rem;
+            }
+            
+            .sub-tabs-nav {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
         }
         
-        .stage-data-container {
-            flex: 1;
-        }
-        
-        .stage-data-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .stage-data-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
+        /* Location Table Styles */
         .location-table-container {
             max-height: 200px;
             overflow-y: auto;
-            overflow: visible; /* Allow dropdown to extend outside */
+            overflow: visible;
         }
         
         .location-table-container.dropdown-active {
@@ -928,772 +946,785 @@ if (!empty($programStages)) {
             max-height: none;
         }
         
-        .participant-table-container,
-        .stage-table-container {
+        .location-table {
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+        
+        .location-table td {
+            padding: 8px 10px;
+            vertical-align: middle;
+        }
+        
+        .location-table .field-label {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            width: 25%;
+            color: #495057;
+        }
+        
+        .location-table .field-value {
+            width: 75%;
+        }
+        
+        .facility-results {
             max-height: 200px;
             overflow-y: auto;
         }
         
-        .content-header {
-            padding: 15px 20px !important;
-            margin-bottom: 20px !important;
-            border-radius: 6px !important;
-        }
-        
-        .stage-data-table {
-            margin-bottom: 0;
-            font-size: 12px;
-        }
-        
-        .stage-data-table td {
-            padding: 6px 8px;
-            vertical-align: middle;
-        }
-        
-        .stage-actions {
-            white-space: nowrap;
-            width: 100px;
-        }
-        
-        .stage-field-name {
-            font-weight: 500;
-            width: 30%;
-            background-color: #f8f9fa;
-        }
-        
-        .stage-field-value {
-            width: 60%;
-        }
-        
-        .stage-summary-row {
-            background-color: #f1f3f4;
-            font-weight: 500;
-        }
-        
-        .location-table,
-        .participant-table {
-            margin-bottom: 0;
+        .facility-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
             font-size: 13px;
         }
         
-        .location-table td,
-        .participant-table td {
-            padding: 8px 10px;
-            vertical-align: middle;
+        .facility-item:hover {
+            background-color: #f8f9fa;
         }
         
-        .location-table .field-label,
-        .participant-table .field-label {
-            background-color: #f8f9fa;
+        .facility-item:last-child {
+            border-bottom: none;
+        }
+        
+        .facility-name {
             font-weight: 500;
-            width: 25%;
-            color: #495057;
+            color: #333;
         }
         
-        .location-table .field-value,
-        .participant-table .field-value {
-            width: 75%;
+        .facility-path {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
         }
         
-        .readonly-field {
-            background-color: #f8f9fa !important;
-            cursor: not-allowed;
-        }
-        
-        .readonly-field.editable {
-            background-color: white !important;
-            cursor: text;
-        }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .section-title {
-            color: #2c3e50;
-            font-weight: 600;
-            font-size: 16px;
-            margin: 0;
-        }
-        
-        .section-actions {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .participant-table-container {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .participant-table {
-            margin-bottom: 0;
-            font-size: 13px;
-        }
-        
-        .participant-table td {
-            padding: 8px 10px;
-            vertical-align: middle;
-        }
-        
-        .participant-table .field-label {
-            background-color: #f8f9fa;
-            font-weight: 500;
-            width: 25%;
-            color: #495057;
-        }
-        
-        .participant-table .field-value {
-            width: 75%;
-        }
-        
-        .participant-table input,
-        .participant-table select,
-        .participant-table textarea {
-            width: 100%;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            padding: 5px 8px;
-            font-size: 13px;
-        }
-        
-        .participant-table .readonly-value {
-            color: #6c757d;
-            font-style: italic;
-            padding: 5px 8px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }
-        
-        .tei-section {
-            background: white;
+        /* Stage Cards */
+        .stage-card {
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .stage-section {
-            background: white;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
             overflow: hidden;
-        }
-        
-        .stage-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 30px;
-        }
-        
-        .stage-body {
-            padding: 30px;
-        }
-        
-        /* Sidebar Stage Navigation */
-        .sidebar-header {
-            padding: 20px;
-            background: #007bff;
-            color: white;
-            text-align: center;
-        }
-        
-        .sidebar-title {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
-        }
-        
-        .sidebar-subtitle {
-            margin: 5px 0 0 0;
-            font-size: 12px;
-            opacity: 0.9;
-        }
-        
-        .stage-navigation {
-            padding: 0;
-            height: calc(100vh - 100px);
-            overflow-y: auto;
-        }
-
-        .stage-nav-toggle {
-            display: none; /* Hide toggle button since we don't need it anymore */
-        }
-
-        /* Main content area */
-        .main-content {
-            padding: 20px;
-            background: #f8f9fa;
-            min-height: calc(100vh - 100px);
-        }
-        
-        .content-wrapper {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .stage-nav-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #dee2e6;
-            background: #f8f9fa;
-            border-radius: 15px 0 0 0;
-        }
-
-        .stage-nav-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid #f1f3f4;
-            cursor: pointer;
             transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .stage-nav-item:hover {
-            background: #f8f9fa;
-        }
-
-        .stage-nav-item.active {
-            background: #e3f2fd;
-            border-right: 3px solid #007bff;
-            color: #0d47a1;
-        }
-
-        .stage-nav-item.completed {
-            background: #e8f5e8;
-            border-right: 3px solid #28a745;
-        }
-
-        .stage-progress {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            background: #e9ecef;
-            color: #6c757d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            font-weight: 600;
-            font-size: 11px;
-            position: relative;
-            flex-shrink: 0;
-            transition: all 0.3s ease;
-        }
-
-        .stage-nav-item.completed .stage-progress {
-            background: #28a745;
-            color: white;
-        }
-
-        .stage-nav-item.completed .stage-progress::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .stage-nav-item.active .stage-progress {
-            background: #007bff;
-            color: white;
-        }
-
-        .stage-nav-content {
-            flex: 1;
-        }
-
-        .stage-nav-title {
-            font-weight: 500;
-            font-size: 13px;
-            color: #2c3e50;
-            margin-bottom: 2px;
-            line-height: 1.3;
-        }
-
-        .stage-nav-subtitle {
-            font-size: 11px;
-            color: #6c757d;
-            line-height: 1.2;
         }
         
-        .stage-info-row {
+        .stage-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stage-card-header {
+            background: #f9fafb;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
         }
         
-        .occurrence-controls {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-        
-        .occurrence-count {
-            font-size: 10px;
-            margin-right: 3px;
-        }
-        
-        .btn-micro {
-            width: 16px;
-            height: 16px;
-            padding: 0;
-            border-radius: 50%;
-            border: 1px solid;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 8px;
-            line-height: 1;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-micro.btn-success {
-            border-color: #28a745;
-            color: #28a745;
-        }
-        
-        .btn-micro.btn-success:hover {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-micro.btn-danger {
-            border-color: #dc3545;
-            color: #dc3545;
-        }
-        
-        .btn-micro.btn-danger:hover {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn-micro:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Updated Occurrence Tabs with repositioned Add Another and Remove */
-        .stage-header {
-            position: relative;
-        }
-
-        .occurrence-controls {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .add-occurrence-btn-fixed, .remove-occurrence-btn-fixed {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .stage-card-title {
+            font-weight: 600;
+            color: #374151;
+            margin: 0;
             font-size: 14px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .remove-occurrence-btn-fixed {
-            background: #dc3545;
-        }
-
-        .add-occurrence-btn-fixed:hover {
-            background: #20c997;
-            transform: translateY(-1px);
-            box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-        }
-
-        .remove-occurrence-btn-fixed:hover {
-            background: #c82333;
-            transform: translateY(-1px);
-            box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-        }
-
-        .remove-occurrence-btn-fixed:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .occurrence-tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .occurrence-tab {
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #e9ecef;
-            background: #f8f9fa;
-        }
-        
-        .occurrence-tab.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        /* Hide all form sections since we're using modals only */
-        .stage-section, .tei-section {
-            display: none;
-        }
-        
-        /* Modal Picker Styles */
-        .modal-picker {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 2000;
-            display: none;
             align-items: center;
-            justify-content: center;
+            gap: 0.5rem;
         }
-
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            max-width: 1200px;
-            width: 98%;
-            max-height: 95vh;
-            overflow-y: auto;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            margin: 10px;
+        
+        .stage-card-status {
+            font-size: 11px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            text-transform: uppercase;
         }
-
-        .btn-close {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            color: #6c757d;
-            cursor: pointer;
+        
+        .stage-card-body {
+            padding: 1rem;
         }
-
-        .btn-close:hover {
-            color: #dc3545;
-        }
-
-        .modal-question-item {
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .modal-question-item:hover {
-            box-shadow: 0 4px 15px rgba(0,123,255,0.15);
-            border-color: #007bff;
-            transform: translateY(-1px);
-        }
-
-        /* Compact styling for TRUE_ONLY checkbox containers */
-        .modal-question-item.checkbox-item {
-            padding: 15px 20px;
-            margin-bottom: 15px;
-            min-height: auto;
-            border-width: 1px;
+        
+        .stage-card-actions {
+            padding: 0.75rem 1rem;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
             display: flex;
-            align-items: flex-start;
-            gap: 15px;
+            gap: 0.5rem;
+            justify-content: flex-end;
         }
-
-        .modal-question-item.checkbox-item .question-header {
-            margin-bottom: 0;
-            flex: 1;
+        
+        .occurrence-badge {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
         }
-
-        .modal-question-item.checkbox-item .question-input-container {
-            margin-top: 0;
-            flex-shrink: 0;
-            width: 60px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .modal-question-item.checkbox-item .form-check {
-            margin-bottom: 0;
-            padding-left: 0;
-            min-height: auto;
+        
+        .occurrence-list {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .modal-question-item.checkbox-item .form-check-input {
-            margin: 0 auto 5px auto;
-            position: static;
-            transform: none;
-        }
-
-        .modal-question-item.checkbox-item .form-check-label {
-            color: #6c757d;
-            font-size: 12px;
-            text-align: center;
-            margin: 0;
-        }
-
-        .question-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 18px;
-            gap: 15px;
-        }
-
-        .question-label {
-            font-weight: 600;
-            color: #2c3e50;
-            margin: 0;
-            flex: 1;
-            font-size: 18px;
-            line-height: 1.4;
-        }
-
-
-        .question-input-container {
-            position: relative;
-        }
-
-        .question-input-container input,
-        .question-input-container select:not(.searchable-select),
-        .question-input-container textarea {
-            background: #fafbfc;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 15px 18px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            width: 100%;
-            min-height: 50px;
-        }
-
-        .question-input-container input:focus,
-        .question-input-container select:not(.searchable-select):focus,
-        .question-input-container textarea:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
-            outline: none;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
         }
         
-        /* Validation styles for Select2 */
-        .select2-container.is-invalid .select2-selection--single {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        .occurrence-item {
+            padding: 0.5rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 0.5rem;
         }
-
-        .question-input-container .form-placeholder {
-            position: absolute;
-            top: 12px;
-            left: 15px;
-            color: #6c757d;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            pointer-events: none;
-            background: white;
-            padding: 0 5px;
+        
+        .occurrence-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-
-        .question-input-container input:focus + .form-placeholder,
-        .question-input-container input:not(:placeholder-shown) + .form-placeholder,
-        .question-input-container select:focus + .form-placeholder,
-        .question-input-container textarea:focus + .form-placeholder {
-            top: -8px;
-            font-size: 12px;
-            color: #007bff;
-            font-weight: 600;
-        }
-
-        .question-required {
-            color: #dc3545;
-            font-weight: bold;
-            margin-left: 3px;
-        }
-
-        .question-help {
-            font-size: 12px;
-            color: #6c757d;
-            margin-top: 5px;
-            font-style: italic;
-        }
-
-        .modal-questions-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-        }
-
-        @media (min-width: 992px) {
-            .modal-questions-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 30px;
-            }
-        }
-
-        @media (min-width: 1200px) {
-            .modal-questions-grid.single-column {
-                grid-template-columns: 1fr;
-                max-width: 800px;
-                margin: 0 auto;
-            }
-        }
-
-        .question-options-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .question-option {
+        
+        .occurrence-info {
             display: flex;
             align-items: center;
-            padding: 8px 12px;
-            background: white;
+            gap: 0.5rem;
+        }
+        
+        .occurrence-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        /* Occurrence summary styling */
+        .occurrence-summary {
+            margin-top: 8px;
+            padding: 8px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            border-left: 3px solid #3b82f6;
+        }
+        
+        .summary-table {
+            width: 100%;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+        
+        .summary-table td {
+            padding: 2px 4px;
+            vertical-align: top;
+        }
+        
+        .summary-table .field-name {
+            font-weight: 500;
+            color: #374151;
+            width: 40%;
+        }
+        
+        .summary-table .field-value {
+            color: #6b7280;
+            width: 60%;
+            word-break: break-word;
+        }
+        
+        .summary-table .more-fields {
+            text-align: center;
+            font-style: italic;
+            padding-top: 4px;
+        }
+        
+        
+        .occurrence-item.has-data {
+            border-left: 4px solid #10b981;
+            background: #f0fdf4;
+        }
+        
+        .occurrence-item.empty {
+            border-left: 4px solid #e5e7eb;
+        }
+        
+        /* Review section occurrence styling */
+        .occurrence-review-item {
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .occurrence-review-item.has-data {
+            border-left: 4px solid #10b981;
+            background: #f0fdf4;
+        }
+        
+        .occurrence-review-item.empty {
+            border-left: 4px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        
+        .occurrence-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .occurrence-title {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .occurrence-status {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        /* Adjust summary styling for review section */
+        .occurrence-review-item .occurrence-summary {
+            margin-top: 0;
+            background: rgba(248, 250, 252, 0.8);
+            border-left: 3px solid #60a5fa;
+        }
+        
+        /* Question Type Specific Styles */
+        .coordinate-input {
+            margin-bottom: 0;
+        }
+        
+        .coordinate-input .row {
+            margin: 0;
+        }
+        
+        .file-preview {
+            padding: 0.5rem;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .form-check {
+            padding-left: 1.5rem;
+        }
+        
+        .form-check-input {
+            margin-left: -1.5rem;
+            margin-top: 0.25rem;
+        }
+        
+        .form-check-label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+        
+        /* Uniform checkbox styling with other questions */
+        .form-group .form-check {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .form-group .form-check-input {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .form-group .form-check-input:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        
+        .form-group .form-check-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-group .form-check-label {
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            flex-grow: 1;
+            margin: 0;
+        }
+        
+        
+        /* Horizontal checkbox layout for multiple options */
+        .checkbox-options-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+        }
+        
+        .checkbox-options-container .form-check {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            min-width: auto;
+        }
+        
+        /* Ensure checkbox groups flow horizontally when they have multiple items */
+        .form-group:has(.form-check + .form-check) {
+            display: block;
+        }
+        
+        .form-group:has(.form-check + .form-check) .form-check {
+            display: inline-flex;
+            margin-right: 20px;
+            margin-bottom: 8px;
+        }
+        
+        /* Text area specific styling */
+        .form-group textarea.form-control {
+            width: 100%;
+            max-width: 100%;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        /* Better width utilization for all form controls */
+        .form-group .form-control {
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        /* Responsive adjustments for side-by-side layout */
+        @media (max-width: 768px) {
+            .form-group {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px;
+            }
+            
+            .form-group .form-label {
+                width: 100%;
+                min-width: auto;
+                max-width: none;
+                padding-top: 0;
+            }
+            
+            .form-group .answer-area {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            /* Mobile responsive for modal */
+            .modal-group-content .form-group {
+                flex-direction: column;
+                gap: 12px;
+                padding: 16px 8px;
+            }
+            
+            .modal-group-content .form-group .form-label {
+                width: 100%;
+                min-width: auto;
+                max-width: none;
+            }
+            
+            .modal-group-content .form-group .answer-area {
+                width: 100%;
+                min-width: auto;
+                max-width: none;
+            }
+            
+            .modal-body {
+                padding: 16px 8px;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .modal-group-content .form-group .form-label {
+                width: 40%;
+                min-width: 150px;
+                max-width: 250px;
+            }
+            
+            .modal-group-content .form-group .answer-area {
+                width: 55%;
+                min-width: 200px;
+                max-width: 300px;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .modal-group-content .form-group .form-label {
+                width: 40%;
+                min-width: 200px;
+                max-width: 320px;
+            }
+            
+            .modal-group-content .form-group.input-type-dropdown .answer-area {
+                width: 55%;
+                min-width: 300px;
+                max-width: 450px;
+            }
+        }
+        
+        /* Input validation styles */
+        .form-control:invalid {
+            border-color: #dc3545;
+        }
+        
+        .form-control:valid {
+            border-color: #198754;
+        }
+        
+        /* Textarea resize */
+        textarea.form-control {
+            resize: vertical;
+            min-height: calc(1.5em + 0.75rem + 2px);
+        }
+        
+        /* Number input styling */
+        input[type="number"].form-control {
+            text-align: right;
+        }
+        
+        /* Select styling */
+        select.form-control {
+            cursor: pointer;
+        }
+        
+        /* Date/time input styling */
+        input[type="date"].form-control,
+        input[type="datetime-local"].form-control,
+        input[type="time"].form-control {
+            cursor: pointer;
+        }
+        
+        /* File input styling */
+        input[type="file"].form-control {
+            padding: 0.375rem 0.75rem;
+        }
+        
+        input[type="file"].form-control::-webkit-file-upload-button {
+            padding: 0.25rem 0.75rem;
+            margin: -0.375rem -0.75rem;
+            margin-right: 0.75rem;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem 0 0 0.25rem;
+            cursor: pointer;
+        }
+        
+        /* Hidden by default */
+        .form-section {
+            display: none;
+        }
+        
+        .form-section.active {
+            display: block;
+        }
+        
+        /* Checkbox styling for modal questions - positioned to the right */
+        .modal-question-item .form-check {
+            margin-bottom: 0;
+            padding: 12px 16px;
+            background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 6px;
+            min-height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .modal-question-item .form-check-input {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            position: static;
+            transform: none;
+            flex-shrink: 0;
+            border: 2px solid #6c757d;
+            background-color: #fff;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        .question-option:hover {
-            border-color: #007bff;
-            background: #f8f9fa;
+        .modal-question-item .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
         }
 
-        .question-option input[type="radio"],
-        .question-option input[type="checkbox"] {
-            margin-right: 8px;
+        .modal-question-item .form-check-label {
+            color: #495057;
+            font-size: 14px;
+            margin: 0;
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
         }
-
-        /* Modal Grouped Questions Styles */
+        
+        /* Number input styling */
+        .number-input-container {
+            max-width: 200px;
+        }
+        
+        .number-input-container input[type="number"] {
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        /* Input hint styling */
+        .input-hint {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        
+        .input-hint.error {
+            color: #dc3545;
+        }
+        
+        /* Different input container sizes */
+        .input-container-small {
+            max-width: 150px;
+        }
+        
+        .input-container-medium {
+            max-width: 400px;
+        }
+        
+        .input-container-large {
+            max-width: 100%;
+        }
+        
+        /* Grouping Styles */
         .modal-group-section {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .modal-group-header {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-            color: white;
-            padding: 20px 25px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
         }
 
         .modal-group-title {
             margin: 0;
-            font-weight: 700;
-            font-size: 20px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
         }
 
         .modal-group-content {
-            padding: 25px;
+            padding: 16px 8px;
             background: white;
+        }
+        
+        /* Better spacing for form grid within modal groups */
+        .modal-group-content .form-grid {
+            gap: 0;
+            width: 100%;
+        }
+        
+        /* Adjust modal form groups for modal-lg with proper left-right layout */
+        .modal-group-content .form-group {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 18px 150px 18px 16px;
+            margin-bottom: 14px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            justify-content: space-between;
+            margin-left: 0px;
+            margin-right: 0px;
+        }
+        
+        /* Remove gaps - using space-between layout now */
+        
+        .modal-group-content .form-group:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+        
+        .modal-group-content .form-group .form-label {
+            width: 40%;
+            min-width: 200px;
+            max-width: 300px;
+            font-size: 14px;
+            line-height: 1.4;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0;
+            padding-top: 8px;
+            padding-right: 20px;
+            word-wrap: break-word;
+            hyphens: auto;
+            flex-shrink: 0;
+        }
+        
+        .modal-group-content .form-group .answer-area {
+            width: 55%;
+            min-width: 250px;
+            max-width: 400px;
+            flex-shrink: 0;
+        }
+        
+        /* Dynamic answer area sizing based on input type */
+        .modal-group-content .form-group.input-type-number .answer-area {
+            min-width: 150px;
+            max-width: 200px;
+        }
+        
+        .modal-group-content .form-group.input-type-date .answer-area {
+            min-width: 180px;
+            max-width: 220px;
+        }
+        
+        .modal-group-content .form-group.input-type-dropdown .answer-area {
+            width: 60%;
+            min-width: 320px;
+            max-width: 480px;
+        }
+        
+        .modal-group-content .form-group.input-type-textarea .answer-area {
+            min-width: 300px;
+            max-width: 420px;
+        }
+        
+        .modal-group-content .form-group.input-type-checkbox .answer-area {
+            min-width: 100px;
+            max-width: 150px;
+        }
+        
+        /* Enhanced dropdown styling for larger answer area */
+        .modal-group-content .form-group .answer-area select.form-control {
+            min-height: 46px;
+            padding: 12px 16px;
+            font-size: 15px;
+            width: 100%;
+        }
+        
+        /* Add Bootstrap mb-3 equivalent for form groups */
+        .modal-group-content .form-group.mb-3 {
+            margin-bottom: 1rem;
+        }
+        
+        /* Ensure modal body uses full width and reaches edges */
+        .modal-body {
+            padding: 12px 0px;
+        }
+        
+        #modalQuestionsContainer {
+            width: 100%;
+            max-width: 100%;
+            padding: 0 8px;
+        }
+        
+        /* TEI Attributes Container styling - separate from modal styling */
+        #teiAttributesContainer {
+            width: 100%;
+            max-width: 100%;
+            padding: 20px;
+        }
+        
+        #teiAttributesContainer .form-group {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            gap: 50px;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        #teiAttributesContainer .form-group:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+        
+        #teiAttributesContainer .form-group .form-label {
+            width: 30%;
+            max-width: 250px;
+            min-width: 200px;
+            flex-shrink: 0;
+            margin-bottom: 0;
+            padding-top: 8px;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.4;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        #teiAttributesContainer .form-group .answer-area {
+            flex: 1;
+            width: 70%;
+            min-width: 300px;
+            max-width: 100%;
+        }
+        
+        #teiAttributesContainer .form-group .answer-area .form-control,
+        #teiAttributesContainer .form-group .answer-area .form-check,
+        #teiAttributesContainer .form-group .answer-area select {
+            width: 100%;
+            min-height: 40px;
+            font-size: 14px;
+        }
+        
+        #teiAttributesContainer .form-group .answer-area select.form-control {
+            min-height: 42px;
+            padding: 10px 12px;
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        #teiAttributesContainer .form-group .input-hint {
+            margin-top: 6px;
+            font-size: 11px;
+            color: #6b7280;
+        }
+        
+        /* Responsive adjustments for TEI section */
+        @media (max-width: 768px) {
+            #teiAttributesContainer .form-group {
+                flex-direction: column;
+                gap: 12px;
+                padding: 16px;
+            }
+            
+            #teiAttributesContainer .form-group .form-label {
+                width: 100%;
+                min-width: auto;
+                max-width: none;
+                padding-top: 0;
+            }
+            
+            #teiAttributesContainer .form-group .answer-area {
+                width: 100%;
+                min-width: auto;
+            }
         }
 
         .grouped-questions-container {
             width: 100%;
         }
         
-        /* Enhanced Grouping Styles for Tabular Interface */
-        .question-group {
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            overflow: hidden;
-            background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .group-header {
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-bottom: 1px solid #e9ecef;
-            cursor: pointer;
-            user-select: none;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.2s ease;
-        }
-        
-        .group-header:hover {
-            background: #e9ecef;
-        }
-        
-        .group-header.active {
-            background: #007bff;
-            color: white;
-        }
-        
-        .group-title {
-            font-weight: 500;
-            font-size: 14px;
-            flex-grow: 1;
-            color: #2c3e50;
-        }
-        
-        .group-header.active .group-title {
-            color: white;
-        }
-        
-        .group-toggle {
-            margin-left: 10px;
-            transition: transform 0.2s ease;
-            color: #6c757d;
-        }
-        
-        .group-header.active .group-toggle {
-            color: white;
-        }
-        
-        .group-header.collapsed .group-toggle {
-            transform: rotate(-90deg);
-        }
-        
-        .group-content {
-            padding: 20px;
-            background: white;
-        }
-        
-        .group-content.collapsed {
-            display: none;
-        }
-        
-        .group-questions {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
         .group-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -1706,535 +1737,7 @@ if (!empty($programStages)) {
                 gap: 25px;
             }
         }
-
-        @media (min-width: 1400px) {
-            .group-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 30px;
-            }
-        }
-
-        /* Legacy grouped questions styles for backward compatibility */
-        .form-group-section {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 25px;
-            border-left: 4px solid #17a2b8;
-        }
-
-        .form-group-section .group-title {
-            color: #17a2b8;
-            font-weight: 600;
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 10px;
-        }
-
-        .group-fields {
-            margin-top: 15px;
-        }
-
-        /* Responsive adjustments */        
-        @media (max-width: 768px) {
-            .tracker-main {
-                padding: 10px;
-            }
-            
-            .content-header {
-                padding: 10px 15px !important;
-            }
-            
-            .location-table-section,
-            .participant-table-section,
-            .stage-table-section,
-            .stages-combined-section {
-                padding: 10px;
-            }
-            
-            .stages-container {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .stage-nav-tabs {
-                width: 100%;
-                flex-direction: row;
-                overflow-x: auto;
-                border-right: none;
-                border-bottom: 1px solid #e9ecef;
-                padding-right: 0;
-                padding-bottom: 10px;
-            }
-            
-            .stage-tab {
-                min-width: 120px;
-                flex-shrink: 0;
-            }
-            
-            .section-actions {
-                flex-direction: column;
-                gap: 5px;
-            }
-            
-            .stage-actions {
-                width: auto;
-                text-align: center;
-            }
-            
-            .modal-content {
-                padding: 15px;
-                width: 98%;
-                margin: 5px;
-                max-height: 98vh;
-            }
-            
-            .modal-question-item {
-                padding: 20px 15px;
-            }
-            
-            .question-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            
-            .question-label {
-                font-size: 16px;
-            }
-            
-            .modal-group-header {
-                padding: 15px 20px;
-            }
-            
-            .modal-group-title {
-                font-size: 18px;
-            }
-            
-            .modal-group-content {
-                padding: 20px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .modal-content {
-                padding: 20px 15px;
-                border-radius: 10px;
-            }
-            
-            .modal-question-item {
-                padding: 15px;
-                margin-bottom: 20px;
-            }
-            
-            .question-input-container input,
-            .question-input-container select,
-            .question-input-container textarea {
-                font-size: 16px;
-                padding: 12px 15px;
-            }
-            
-            .modal-group-header {
-                padding: 12px 15px;
-            }
-            
-            .modal-group-title {
-                font-size: 16px;
-            }
-            
-            .modal-group-content {
-                padding: 15px;
-            }
-        }
-
-        /* Large screen optimizations */
-        @media (min-width: 1400px) {
-            .modal-content {
-                max-width: 1400px;
-            }
-            
-            .modal-questions-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 35px;
-            }
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-label {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 8px;
-            display: block;
-        }
-        
-        .required-asterisk {
-            color: #dc3545;
-            margin-left: 3px;
-        }
-        
-        .form-control {
-            border-radius: 8px;
-            border: 2px solid #e9ecef;
-            padding: 12px 15px;
-            transition: all 0.3s ease;
-        }
-        
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-        
-        .submit-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        .btn-submit {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            border: none;
-            color: white;
-            padding: 15px 40px;
-            border-radius: 25px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
-            color: white;
-        }
-        
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .spinner-border {
-            color: #667eea;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .tracker-container {
-                padding: 10px;
-            }
-            
-            .tei-section, .stage-body, .submit-section {
-                padding: 20px;
-            }
-            
-            .stage-header {
-                padding: 15px 20px;
-            }
-        }
     </style>
-</head>
-
-<body style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
-    <!-- Flag Bar -->
-    <?php if ($surveySettings['show_flag_bar']): ?>
-        <div class="flag-bar">
-            <div class="flag-section" style="background-color: <?= $surveySettings['flag_black_color'] ?>;"></div>
-            <div class="flag-section" style="background-color: <?= $surveySettings['flag_yellow_color'] ?>;"></div>
-            <div class="flag-section" style="background-color: <?= $surveySettings['flag_red_color'] ?>;"></div>
-        </div>
-    <?php endif; ?>
-
-    <div class="tracker-container">
-        <!-- Main Content Area -->
-        <div class="tracker-main">
-            <!-- Header Section -->
-            <div class="content-header" style="padding: 20px 30px; background: white; border-bottom: 1px solid #e9ecef;">
-                <?php if ($surveySettings['show_logo']): ?>
-                    <img src="<?= htmlspecialchars($surveySettings['logo_path']) ?>" alt="Logo" class="mb-3" style="max-height: 60px;">
-                <?php endif; ?>
-                <h4 class="mb-2" style="color: #2c3e50; font-weight: 600;">
-                    <?= htmlspecialchars($surveySettings['title_text']) ?>
-                </h4>
-                <?php if (!empty($trackerProgram['description'])): ?>
-                    <p class="text-muted mb-0"><?= htmlspecialchars($trackerProgram['description']) ?></p>
-                <?php endif; ?>
-            </div>
-            
-            <!-- Location Information Table -->
-            <div class="location-table-section" id="locationTableSection">
-                <div class="section-header">
-                    <h6 class="section-title">
-                        <i class="fas fa-map-marker-alt me-2"></i>
-                        Location Information
-                    </h6>
-                    <div class="section-actions">
-                        <small class="text-muted">Required field</small>
-                    </div>
-                </div>
-                
-                <div class="location-table-container">
-                    <table class="table table-sm table-bordered location-table" id="locationTable">
-                        <tbody>
-                            <tr>
-                                <td class="field-label">Search Location</td>
-                                <td class="field-value">
-                                    <div style="position: relative;">
-                                        <input type="text" 
-                                               id="facilitySearch" 
-                                               name="facility_search" 
-                                               class="form-control" 
-                                               placeholder="Type to search locations..."
-                                               autocomplete="off"
-                                               required>
-                                        <div id="facilityResults" class="facility-results expandable-dropdown" style="display: none; position: absolute; z-index: 1050; background: white; border: 1px solid #ccc; border-radius: 6px; max-height: 120px; overflow-y: auto; width: 100%; margin-top: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: max-height 0.3s ease;"></div>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="field-label">Selected Location</td>
-                                <td class="field-value">
-                                    <div class="readonly-value" id="selectedLocationDisplay">No location selected yet</div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Hidden inputs for selected facility data -->
-                <input type="hidden" id="facilityId" name="facility_id" required>
-                <input type="hidden" id="facilityName" name="facility_name">
-                <input type="hidden" id="facilityOrgunitUid" name="facility_orgunit_uid">
-                <input type="hidden" id="hierarchyData" name="hierarchy_data">
-            </div>
-            
-            <!-- Static Participant Information Table -->
-            <div class="participant-table-section" id="participantTableSection">
-                <div class="section-header">
-                    <h6 class="section-title">
-                        <i class="fas fa-user me-2"></i>
-                        Participant Information
-                    </h6>
-                    <div class="section-actions">
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="openTEIModal()" id="editParticipantBtn">
-                            <i class="fas fa-edit me-1"></i>Edit
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="participant-table-container">
-                    <table class="table table-sm table-bordered participant-table" id="participantTable">
-                        <tbody>
-                            <!-- Participant attributes will be dynamically populated here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Stage Occurrences as Rows Table -->
-            <div class="stage-occurrences-section">
-                <div class="section-header">
-                    <h6 class="section-title">
-                        <i class="fas fa-tasks me-2"></i>
-                        Program Stages Data
-                    </h6>
-                    <div class="section-actions">
-                        <button type="button" class="btn btn-sm btn-outline-success" onclick="addStageOccurrence()" id="addStageBtn" disabled>
-                            <i class="fas fa-plus me-1"></i>Add Stage
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="stage-table-container d-flex">
-                    <!-- Navigation Sidebar -->
-                    <div class="stage-navigation-sidebar">
-                        <div class="nav-header">
-                            <small class="text-muted">Select Stage</small>
-                        </div>
-                        <div class="stage-nav-list">
-                            <?php foreach ($programStages as $index => $stage): ?>
-                            <div class="stage-nav-item <?= $index === 0 ? 'active' : '' ?>" 
-                                 data-stage-id="<?= $stage['id'] ?>" 
-                                 onclick="selectStage('<?= $stage['id'] ?>')">
-                                <div class="stage-nav-name"><?= htmlspecialchars($stage['name']) ?></div>
-                                <div class="stage-nav-info">
-                                    <?php if ($stage['repeatable']): ?>
-                                        <small class="badge bg-secondary">Repeatable</small>
-                                    <?php endif; ?>
-                                    <span class="occurrence-count" id="navCount_<?= $stage['id'] ?>">1 occurrence</span>
-                                </div>
-                            </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    
-                    <!-- Stage Occurrences Table -->
-                    <div class="stage-occurrences-table-wrapper">
-                        <table class="table table-sm table-bordered stage-occurrences-table" id="stageOccurrencesTable">
-                        <thead>
-                            <tr>
-                                <th width="30%">Stage</th>
-                                <th width="15%">Occurrence</th>
-                                <th width="25%">Status</th>
-                                <th width="30%">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stageOccurrencesBody">
-                            <?php foreach ($programStages as $index => $stage): ?>
-                            <tr class="stage-occurrence-row" data-stage-id="<?= $stage['id'] ?>" data-occurrence="1">
-                                <td class="stage-info">
-                                    <div class="stage-name"><?= htmlspecialchars($stage['name']) ?></div>
-                                    <?php if ($stage['repeatable']): ?>
-                                        <small class="badge bg-secondary" style="font-size: 9px;">Repeatable</small>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="occurrence-number">
-                                    <span class="occurrence-badge">1</span>
-                                </td>
-                                <td class="stage-status">
-                                    <span class="status-indicator" id="status_<?= $stage['id'] ?>_1">
-                                        <i class="fas fa-circle text-muted"></i> No data
-                                    </span>
-                                </td>
-                                <td class="stage-actions">
-                                    <div class="btn-group btn-group-sm" style="width: 100%;">
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="openStageModal('<?= $stage['id'] ?>', 1)" title="Edit data">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeStageOccurrence('<?= $stage['id'] ?>', 1)" title="Remove occurrence">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                        <span class="save-indicator d-none" id="saveIndicator_<?= $stage['id'] ?>_1">
-                                            <i class="fas fa-check-circle text-success" title="Saved"></i>
-                                        </span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Main Data Entry Area -->
-            <div class="main-content" id="mainContent">
-                <div class="content-wrapper">
-                  
-                    
-                    <!-- Submit Section -->
-                    <div class="submit-section text-center p-3" style="background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 20px 20px 5px;">
-                        <?php if (isset($offlineMode) && $offlineMode): ?>
-                            <button type="button" class="btn btn-secondary btn-lg" disabled title="Submission is disabled in offline mode">
-                                <i class="fas fa-wifi-slash me-2"></i>
-                                Submit Disabled (Offline)
-                            </button>
-                            <div class="mt-2">
-                                <small class="text-muted">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Please check your internet connection to enable data submission
-                                </small>
-                            </div>
-                        <?php else: ?>
-                            <button type="button" class="btn btn-success btn-lg" onclick="submitAllData()">
-                                <i class="fas fa-paper-plane me-2"></i>
-                                Submit All Data
-                            </button>
-                        <?php endif; ?>
-                        <div class="loading-spinner mt-3" id="loadingSpinner" style="display: none;">
-                            <div class="spinner-border text-success" role="status">
-                                <span class="visually-hidden">Submitting...</span>
-                            </div>
-                            <p class="mt-2">Submitting data to DHIS2...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        <!-- Offline Mode Warning -->
-        <?php if (isset($offlineMode) && $offlineMode): ?>
-        <div class="alert alert-warning" style="max-width: 1000px; margin-left: auto; margin-right: auto; margin-bottom: 20px; border-radius: 15px; border-left: 5px solid #ffc107;">
-            <div class="d-flex align-items-center">
-                <i class="fas fa-wifi-slash fa-2x me-3" style="color: #856404;"></i>
-                <div>
-                    <h6 class="alert-heading mb-2">Offline Mode - Limited Functionality</h6>
-                    <p class="mb-1">This form is running in offline mode because the DHIS2 server is not accessible.</p>
-                    <small class="text-muted">
-                        • Data submission is disabled • Location loading may be limited • Please check your internet connection
-                    </small>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
-        
-
-            <!-- Hidden form for data collection -->
-            <form id="trackerForm" style="display: none;">
-                <input type="hidden" id="surveyId" value="<?= $surveyId ?>">
-                <input type="hidden" id="programId" value="<?= htmlspecialchars($trackerProgram['id']) ?>">
-            </form>
-        </div>
-    </div>
-
-    <!-- Stage Questions Modal -->
-    <div class="modal-picker" id="stageQuestionsModal">
-        <div class="modal-content">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="mb-0" id="modalStageTitle">
-                    <i class="fas fa-clipboard-list text-primary me-2"></i>
-                    Stage Questions
-                </h5>
-                <button type="button" class="btn-close" onclick="closeStageModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <!-- Stage Description -->
-            <div class="alert alert-info" id="modalStageDescription" style="display: none;">
-                <i class="fas fa-info-circle me-2"></i>
-                <span id="stageDescriptionText"></span>
-            </div>
-
-            <!-- Event Date -->
-            <div class="mb-4">
-                <label class="form-label">
-                    <i class="fas fa-calendar-alt text-primary me-2"></i>
-                    Visit/Event Date
-                    <span class="text-danger">*</span>
-                </label>
-                <input type="date" id="modalEventDate" class="form-control" required 
-                       placeholder="Select the date for this visit/event">
-            </div>
-
-            <!-- Questions Form -->
-            <div id="modalQuestionsContainer" style="max-height: 500px; overflow-y: auto;">
-                <div class="text-center py-4" id="modalQuestionsLoading">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <div class="mt-2">Loading questions...</div>
-                </div>
-            </div>
-
-            <!-- Modal Actions -->
-            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-               
-                <div>
-                    <button type="button" class="btn btn-outline-secondary me-2" onclick="closeStageModal()">
-                        <i class="fas fa-times me-1"></i> Cancel
-                    </button>
-                    <button type="button" class="btn btn-success" onclick="saveStageData(currentModalStage, currentModalOccurrence)">
-                        <i class="fas fa-save me-1"></i> Save 
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Hidden data for JavaScript -->
     <script type="application/json" id="programData">
@@ -2246,21 +1749,2384 @@ if (!empty($programStages)) {
             ])
         ]) ?>
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Core JavaScript Functions - Must be defined before HTML onclick handlers -->
     <script>
         // Global variables
         let programData;
         let formData = {
             trackedEntityInstance: null,
             trackedEntityAttributes: {},
-            events: []
+            events: [],
+            stages: {}
         };
         let stageOccurrences = {};
-        let stageData = {}; // Store independent form data for each stage occurrence
+        let stageData = {};
+        let currentStep = 'location';
+        let currentStageId = null;
+        let currentStageOccurrence = 1;
+        let currentFilteredLocations = [];
+        let selectedLocation = null;
+
+        // Navigation Functions - declared at window level for onclick access
+        window.navigateToStep = function(stepName) {
+            console.log('Navigating to step:', stepName);
+            
+            // Update step navigation
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+                if (step.getAttribute('data-step') === stepName) {
+                    step.classList.add('active');
+                }
+            });
+            
+            // Update all step completion statuses when navigating
+            updateAllStepStatuses();
+            
+            // Update form sections
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+                if (section.getAttribute('data-step') === stepName) {
+                    section.classList.add('active');
+                }
+            });
+            
+            currentStep = stepName;
+            
+            // Special handling for different steps - handle async calls properly
+            switch(stepName) {
+                case 'location':
+                    if (typeof initializeLocationSelection === 'function') {
+                        initializeLocationSelection().catch(e => console.error('Location init error:', e));
+                    }
+                    break;
+                case 'participant':
+                    if (typeof populateTEIAttributes === 'function') {
+                        populateTEIAttributes().catch(e => console.error('TEI attributes error:', e));
+                    }
+                    break;
+                case 'data-entry':
+                    if (typeof populateStagesCards === 'function') {
+                        populateStagesCards();
+                    }
+                    break;
+                case 'review':
+                    if (typeof generateSummaryReport === 'function') {
+                        generateSummaryReport();
+                    }
+                    break;
+            }
+        };
+
+        // openStageModal will be defined later with full implementation
+
+        window.saveStageData = function() {
+            console.log('Saving stage data...');
+            // Simple implementation for now - will be enhanced after DOM ready
+            const modalElement = document.getElementById('stageModal');
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) modal.hide();
+            }
+        };
+        
+        window.selectFacility = function(facilityId, facilityName, facilityPath) {
+            console.log('Selecting facility:', facilityId, facilityName);
+            selectedLocation = { id: facilityId, name: facilityName, path: facilityPath };
+            
+            const facilitySearch = document.getElementById('facilitySearch');
+            const facilityResults = document.getElementById('facilityResults');
+            const locationNextBtn = document.getElementById('locationNextBtn');
+            
+            if (facilitySearch) facilitySearch.value = facilityName;
+            if (facilityResults) facilityResults.style.display = 'none';
+            if (locationNextBtn) locationNextBtn.disabled = false;
+            
+            // Update location status
+            const locationStatus = document.getElementById('locationStatus');
+            if (locationStatus) {
+                locationStatus.textContent = 'COMPLETED';
+                locationStatus.className = 'section-status status-completed';
+            }
+            
+            // Update the selected location display with readable path
+            const selectedLocationDisplay = document.getElementById('selectedLocationDisplay');
+            if (selectedLocationDisplay) {
+                selectedLocationDisplay.innerHTML = `
+                    <div><strong>${facilityName}</strong></div>
+                    <div class="text-muted" style="font-size: 0.9em;" id="locationPathDisplay">Loading path...</div>
+                `;
+                
+                // Load the actual path
+                loadLocationPath(facilityId, document.getElementById('locationPathDisplay'));
+            }
+        };
+        
+        // Stage management functions
+        window.addStageOccurrence = function(stageId) {
+            // This will be implemented after DOM ready
+            console.log('Adding stage occurrence for:', stageId);
+        };
+        
+        window.removeStageOccurrence = function(stageId, occurrence) {
+            console.log('Removing stage occurrence:', stageId, occurrence);
+        };
+        
+        // Utility functions
+        window.showSuccessMessage = function(message) {
+            // Create or update success toast
+            let toast = document.getElementById('successToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'successToast';
+                toast.className = 'toast-message toast-success';
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #10b981;
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    z-index: 9999;
+                    font-size: 14px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    transform: translateX(100%);
+                    transition: transform 0.3s ease;
+                `;
+                document.body.appendChild(toast);
+            }
+            
+            toast.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fas fa-check-circle me-2"></i>${message}</span>
+                    <button onclick="this.parentElement.parentElement.style.transform='translateX(100%)'" 
+                            style="background: none; border: none; color: white; font-size: 16px; cursor: pointer; padding: 0; margin-left: 12px;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            toast.style.transform = 'translateX(0)';
+            
+            // Clear any existing timeout
+            if (toast.hideTimeout) {
+                clearTimeout(toast.hideTimeout);
+            }
+            
+            // Auto-hide after 4 seconds
+            toast.hideTimeout = setTimeout(() => {
+                toast.style.transform = 'translateX(100%)';
+                // Completely remove after animation completes
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 4000);
+        };
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="tracker-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="logo-section">
+                        <?php if ($surveySettings['show_logo'] && !empty($surveySettings['logo_path'])): ?>
+                            <img src="/fbs/admin/<?= htmlspecialchars($surveySettings['logo_path']) ?>" alt="Logo" style="height: 40px;" onerror="this.style.display='none'">
+                        <?php endif; ?>
+                        <h1 class="h5 mb-0"><?= htmlspecialchars($trackerProgram['name'] ?? $surveySettings['title_text']) ?></h1>
+                    </div>
+                </div>
+                <!-- <div class="col-md-6 text-end">
+                    <span class="text-muted">Tracker Program</span>
+                </div> -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Step Navigation -->
+    <div class="step-navigation">
+        <div class="container">
+            <div class="steps-container">
+                <div class="step active" data-step="location" onclick="navigateToStep('location')">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Location</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step" data-step="participant" onclick="navigateToStep('participant')">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Participant</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step" data-step="data-entry" onclick="navigateToStep('data-entry')">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Data Entry</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step" data-step="review" onclick="navigateToStep('review')">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Review</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Location Section -->
+        <div class="form-section active" id="locationSection" data-step="location">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Select Location
+                </h2>
+                <span class="section-status status-pending" id="locationStatus">REQUIRED</span>
+            </div>
+            <div class="section-content">
+                <!-- Location Information Table -->
+                <div class="location-table-section" id="locationTableSection">
+                    <div class="location-table-container">
+                        <table class="table table-sm table-bordered location-table" id="locationTable">
+                            <tbody>
+                                <tr>
+                                    <td class="field-label">Search Location</td>
+                                    <td class="field-value">
+                                        <div style="position: relative;">
+                                            <input type="text" 
+                                                   id="facilitySearch" 
+                                                   name="facility_search" 
+                                                   class="form-control" 
+                                                   placeholder="Type to search locations..."
+                                                   autocomplete="off"
+                                                   required>
+                                            <div id="facilityResults" 
+                                                 class="facility-results expandable-dropdown" 
+                                                 style="display: none; position: absolute; z-index: 1050; 
+                                                        background: white; border: 1px solid #ccc; 
+                                                        border-radius: 6px; max-height: 120px; 
+                                                        overflow-y: auto; width: 100%; margin-top: 2px; 
+                                                        box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
+                                                        transition: max-height 0.3s ease;"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="field-label">Selected Location</td>
+                                    <td class="field-value">
+                                        <div class="readonly-value" id="selectedLocationDisplay">No location selected yet</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Hidden inputs for selected facility data -->
+                    <input type="hidden" id="facilityId" name="facility_id" required>
+                    <input type="hidden" id="facilityName" name="facility_name">
+                    <input type="hidden" id="facilityOrgunitUid" name="facility_orgunit_uid">
+                    <input type="hidden" id="hierarchyData" name="hierarchy_data">
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <div>
+                    <!-- No back button for first step -->
+                </div>
+                <button type="button" class="btn btn-success" id="locationNextBtn" onclick="navigateToStep('participant')" disabled>
+                    Continue to Participant
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Participant Information Section -->
+        <div class="form-section" id="participantSection" data-step="participant">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-user text-primary"></i>
+                    Participant Information
+                </h2>
+                <span class="section-status status-active">ACTIVE</span>
+            </div>
+            <div class="section-content">
+                <form id="participantForm">
+                    <!-- TEI Attributes Container -->
+                    <div id="teiAttributesContainer" class="form-grid">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </form>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-outline" onclick="navigateToStep('location')">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </button>
+                <button type="button" class="btn btn-success" onclick="navigateToStep('data-entry')">
+                    Continue to Data Entry
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Entry Section -->
+        <div class="form-section" id="dataEntrySection" data-step="data-entry">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-edit"></i>
+                    Data Entry
+                </h2>
+                <span class="section-status status-pending">REQUIRED</span>
+            </div>
+            
+            <div class="section-content">
+                <div id="stagesContainer">
+                    <!-- Stage cards will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button type="button" class="btn btn-outline" onclick="navigateToStep('participant')">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </button>
+                <button type="button" class="btn btn-success" onclick="navigateToStep('review')">
+                    Continue to Review
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Review & Submit Section -->
+        <div class="form-section" id="reviewSection" data-step="review">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-clipboard-check text-warning"></i>
+                    Review & Submit
+                </h2>
+                <span class="section-status status-pending">FINAL STEP</span>
+            </div>
+            <div class="section-content">
+                <div id="summaryReport">
+                    <!-- Summary will be populated by JavaScript -->
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-outline" onclick="navigateToStep('data-entry')">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Data Entry
+                </button>
+                <button type="button" class="btn btn-primary" onclick="submitAllData()" id="finalSubmitBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stage Modal -->
+    <div class="modal fade" id="stageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Stage Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalQuestionsContainer">
+                        <!-- Stage questions will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveStageData()">
+                        <i class="fas fa-save"></i>
+                        Save & Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Implementation functions - the stubs above will be replaced with these on DOM ready
+
+        // Location Functions
+        async function initializeLocationSelection() {
+            console.log('Initializing location selection...');
+            console.log('Program data available:', !!programData);
+            console.log('Survey settings:', programData?.surveySettings);
+            
+            const facilitySearch = document.getElementById('facilitySearch');
+            const facilityResults = document.getElementById('facilityResults');
+            
+            console.log('facilitySearch element:', facilitySearch);
+            console.log('facilityResults element:', facilityResults);
+            
+            if (!facilitySearch || !facilityResults) {
+                console.error('Required DOM elements not found for location selection');
+                return;
+            }
+            
+            // Fetch locations for this survey
+            console.log('About to fetch locations...');
+            await fetchLocationsForSurveyPage();
+            
+            // Set up search functionality
+            facilitySearch.addEventListener('input', function() {
+                const searchTerm = this.value.trim();
+                if (searchTerm.length >= 2) {
+                    searchAndDisplayFacilities(searchTerm);
+                } else {
+                    facilityResults.style.display = 'none';
+                }
+            });
+            
+            facilitySearch.addEventListener('focus', function() {
+                const searchTerm = this.value.trim();
+                if (searchTerm.length >= 2) {
+                    searchAndDisplayFacilities(searchTerm);
+                }
+            });
+            
+            // Hide results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!facilitySearch.contains(e.target) && !facilityResults.contains(e.target)) {
+                    facilityResults.style.display = 'none';
+                }
+            });
+        }
+        
+        async function fetchLocationsForSurveyPage() {
+            try {
+                console.log('Fetching locations for survey ID:', programData.surveySettings.id);
+                const url = `/fbs/admin/get_locations.php?survey_id=${programData.surveySettings.id}`;
+                console.log('Location API URL:', url);
+                
+                const response = await fetch(url);
+                console.log('Location response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const locations = await response.json();
+                console.log('Raw location response:', locations);
+                
+                currentFilteredLocations = Array.isArray(locations) ? locations : [];
+                console.log(`Loaded ${currentFilteredLocations.length} locations for survey`);
+                
+                if (currentFilteredLocations.length === 0) {
+                    console.warn('No locations found for this survey');
+                }
+            } catch (error) {
+                console.error('Error fetching locations:', error);
+                currentFilteredLocations = [];
+                
+                // Show user-friendly message
+                const facilityResults = document.getElementById('facilityResults');
+                if (facilityResults) {
+                    facilityResults.innerHTML = '<div class="facility-item" style="color: red;">Error loading locations. Please refresh the page.</div>';
+                    facilityResults.style.display = 'block';
+                    setTimeout(() => {
+                        facilityResults.style.display = 'none';
+                    }, 3000);
+                }
+            }
+        }
+        
+        function searchAndDisplayFacilities(searchTerm) {
+            const facilityResults = document.getElementById('facilityResults');
+            if (!facilityResults) return;
+            
+            const filteredLocations = currentFilteredLocations.filter(location => 
+                location.name.toLowerCase().includes(searchTerm.toLowerCase())
+            ).slice(0, 10); // Limit to 10 results
+            
+            facilityResults.innerHTML = '';
+            
+            if (filteredLocations.length === 0) {
+                facilityResults.innerHTML = '<div class="facility-item">No locations found</div>';
+            } else {
+                filteredLocations.forEach(location => {
+                    const facilityItem = document.createElement('div');
+                    facilityItem.className = 'facility-item';
+                    facilityItem.innerHTML = `
+                        <div class="facility-name">${location.name}</div>
+                        <div class="facility-path">Loading path...</div>
+                    `;
+                    
+                    // Store location data for later use
+                    facilityItem.dataset.locationId = location.id;
+                    facilityItem.dataset.locationName = location.name;
+                    facilityItem.dataset.orgunitUid = location.uid || '';
+                    
+                    facilityItem.onclick = () => {
+                        const path = facilityItem.dataset.locationPath || '';
+                        selectFacility(
+                            location.id, 
+                            location.name, 
+                            location.uid || '',
+                            path
+                        );
+                    };
+                    
+                    facilityResults.appendChild(facilityItem);
+                    
+                    // Load path asynchronously
+                    loadLocationPath(location.id, facilityItem.querySelector('.facility-path'), facilityItem);
+                });
+            }
+            
+            facilityResults.style.display = 'block';
+        }
+        
+        async function loadLocationPath(locationId, pathElement, facilityItem) {
+            try {
+                const response = await fetch(`/fbs/admin/get_location_path.php?id=${locationId}`);
+                const data = await response.json();
+                if (data.success && data.path) {
+                    pathElement.textContent = data.path;
+                    facilityItem.dataset.locationPath = data.path;
+                } else {
+                    pathElement.textContent = 'Path unavailable';
+                    facilityItem.dataset.locationPath = '';
+                }
+            } catch (error) {
+                pathElement.textContent = 'Path unavailable';
+                facilityItem.dataset.locationPath = '';
+            }
+        }
+        
+        function selectFacility(facilityId, facilityName, orgunitUid, facilityPath) {
+            // Update hidden inputs
+            document.getElementById('facilityId').value = facilityId;
+            document.getElementById('facilityName').value = facilityName;
+            document.getElementById('facilityOrgunitUid').value = orgunitUid;
+            document.getElementById('hierarchyData').value = facilityPath;
+            
+            // Update search input
+            document.getElementById('facilitySearch').value = facilityName;
+            
+            // Hide dropdown
+            document.getElementById('facilityResults').style.display = 'none';
+            
+            // Update location display
+            updateLocationDisplay(facilityId, facilityName);
+            
+            selectedLocation = { id: facilityId, name: facilityName, orgunitUid, path: facilityPath };
+            
+            // Update step status
+            updateStepStatus('location', 'completed');
+            
+            // Enable next button
+            const nextBtn = document.getElementById('locationNextBtn');
+            if (nextBtn) {
+                nextBtn.disabled = false;
+            }
+        }
+        
+        async function updateLocationDisplay(facilityId, facilityName) {
+            const display = document.getElementById('selectedLocationDisplay');
+            if (!display) return;
+            
+            display.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Loading location details...`;
+            
+            try {
+                const response = await fetch(`/fbs/admin/get_location_path.php?id=${facilityId}`);
+                const data = await response.json();
+                
+                if (data.success && data.path) {
+                    display.innerHTML = `
+                        <div class="facility-name">${facilityName}</div>
+                        <div class="facility-path">${data.path}</div>
+                    `;
+                } else {
+                    display.innerHTML = facilityName;
+                }
+            } catch (error) {
+                display.innerHTML = facilityName;
+            }
+        }
+        
+        function updateStepStatus(stepName, status) {
+            const step = document.querySelector(`[data-step="${stepName}"]`);
+            if (step) {
+                step.classList.remove('completed', 'active');
+                if (status === 'completed') {
+                    step.classList.add('completed');
+                    const stepNumber = step.querySelector('.step-number');
+                    if (stepNumber) {
+                        stepNumber.innerHTML = '<i class="fas fa-check"></i>';
+                    }
+                }
+                
+                // Update status in section header
+                const statusElement = step.querySelector('.section-status');
+                if (statusElement) {
+                    if (status === 'completed') {
+                        statusElement.innerHTML = '<i class="fas fa-check-circle me-1"></i>COMPLETED';
+                        statusElement.className = 'section-status status-completed';
+                    } else {
+                        statusElement.textContent = 'REQUIRED';
+                        statusElement.className = 'section-status status-pending';
+                    }
+                }
+            }
+        }
+        
+        // Function to check if a step is completed
+        function isStepCompleted(stepName) {
+            switch (stepName) {
+                case 'location':
+                    return !!selectedLocation;
+                case 'participant':
+                    // Check if we have any TEI attributes defined
+                    if (!programData.program?.programTrackedEntityAttributes) {
+                        console.log('❌ No TEI attributes defined');
+                        return false;
+                    }
+                    
+                    const requiredAttrs = programData.program.programTrackedEntityAttributes.filter(attr => attr.mandatory) || [];
+                    console.log(`📋 Participant step check: ${requiredAttrs.length} mandatory attributes`);
+                    console.log('Current formData.trackedEntityAttributes:', formData.trackedEntityAttributes);
+                    
+                    // If there are no mandatory attributes, check if ANY attribute has been filled
+                    if (requiredAttrs.length === 0) {
+                        const allAttrs = programData.program.programTrackedEntityAttributes;
+                        const hasAnyData = allAttrs.some(attr => {
+                            const value = formData.trackedEntityAttributes[attr.trackedEntityAttribute.id];
+                            return value && value.trim() !== '';
+                        });
+                        console.log(`✓ No mandatory attrs, checking if any filled: ${hasAnyData}`);
+                        return hasAnyData;
+                    }
+                    
+                    // Check that all mandatory attributes are filled
+                    const allFilled = requiredAttrs.every(attr => {
+                        const value = formData.trackedEntityAttributes[attr.trackedEntityAttribute.id];
+                        const isFilled = value && value.trim() !== '';
+                        console.log(`  - ${attr.trackedEntityAttribute.name}: ${isFilled ? '✓' : '✗'} (value: "${value}")`);
+                        return isFilled;
+                    });
+                    console.log(`✓ All mandatory attrs filled: ${allFilled}`);
+                    return allFilled;
+                case 'data-entry':
+                    // Check if at least one stage has meaningful data
+                    if (!formData.stages) return false;
+                    
+                    // Use the same logic as stage completion checking
+                    return Object.keys(formData.stages).some(stageId => hasStageRealData(stageId));
+                case 'review':
+                    return false; // Review step is never "completed" until submission
+                default:
+                    return false;
+            }
+        }
+        
+        // Function to update all step statuses
+        function updateAllStepStatuses() {
+            const steps = ['location', 'participant', 'data-entry'];
+            steps.forEach(step => {
+                if (isStepCompleted(step)) {
+                    updateStepStatus(step, 'completed');
+                }
+            });
+        }
+
+        // Function to generate input hints based on question type
+        function getInputHint(valueType, attribute) {
+            const hints = {
+                'TEXT': 'Enter text',
+                'LONG_TEXT': 'Enter detailed text or description',
+                'NUMBER': 'Enter a number (can include decimals)',
+                'INTEGER': 'Enter a whole number',
+                'INTEGER_POSITIVE': 'Enter a positive whole number (1, 2, 3...)',
+                'INTEGER_NEGATIVE': 'Enter a negative whole number (...-3, -2, -1)',
+                'INTEGER_ZERO_OR_POSITIVE': 'Enter zero or a positive whole number (0, 1, 2...)',
+                'DATE': 'Select a date from the calendar',
+                'DATETIME': 'Select date and time',
+                'TIME': 'Select a time',
+                'EMAIL': 'Enter a valid email address (example@domain.com)',
+                'PHONE_NUMBER': 'Enter a phone number',
+                'URL': 'Enter a web address (https://example.com)',
+                'BOOLEAN': 'Select Yes or No',
+                'TRUE_ONLY': 'Check if applicable',
+                'PERCENTAGE': 'Enter a percentage value (0-100)',
+                'UNIT_INTERVAL': 'Enter a value between 0 and 1',
+                'AGE': 'Enter age in years',
+                'FILE_RESOURCE': 'Upload a file',
+                'IMAGE': 'Upload an image file',
+                'COORDINATE': 'Enter coordinates or use map'
+            };
+            
+            let hint = hints[valueType] || 'Enter value';
+            
+            // Add specific constraints if available
+            if (attribute) {
+                if (valueType === 'INTEGER_POSITIVE' && attribute.min) {
+                    hint += ` (minimum: ${attribute.min})`;
+                } else if (valueType === 'INTEGER_ZERO_OR_POSITIVE' && attribute.min) {
+                    hint += ` (minimum: ${attribute.min})`;
+                } else if (attribute.min && attribute.max) {
+                    hint += ` (${attribute.min} - ${attribute.max})`;
+                } else if (attribute.min) {
+                    hint += ` (minimum: ${attribute.min})`;
+                } else if (attribute.max) {
+                    hint += ` (maximum: ${attribute.max})`;
+                }
+            }
+            
+            return hint;
+        }
+        
+        
+        // Option Set Loading Function
+        async function loadOptionSetOptions(selectElement, optionSet) {
+            try {
+                console.log('=== Loading option set options ===');
+                console.log('Option set structure:', optionSet);
+                console.log('Option set ID:', optionSet.id);
+                console.log('Has options:', !!optionSet.options);
+                console.log('Options array length:', optionSet.options?.length);
+                console.log('First option sample:', optionSet.options?.[0]);
+                
+                // First try to use options from the optionSet if they exist
+                if (optionSet.options && optionSet.options.length > 0) {
+                    console.log(`✓ Using ${optionSet.options.length} options from optionSet.options`);
+                    optionSet.options.forEach((option, index) => {
+                        console.log(`Adding option ${index}:`, option);
+                        const optionElement = document.createElement('option');
+                        optionElement.value = option.code || option.value || option.option_value;
+                        optionElement.textContent = option.displayName || option.name || option.label || option.option_value;
+                        selectElement.appendChild(optionElement);
+                    });
+                    console.log('✓ Successfully loaded options from optionSet.options');
+                    return;
+                }
+                
+                // Fallback to local database
+                console.log('Loading option set from local database:', optionSet.id);
+                const response = await fetch(`/fbs/admin/get_option_set_values.php?option_set_id=${optionSet.id}`);
+                
+                if (response.ok) {
+                    const options = await response.json();
+                    console.log('Local database response:', options);
+                    if (Array.isArray(options) && options.length > 0) {
+                        console.log(`Loaded ${options.length} options from local database`);
+                        options.forEach(option => {
+                            const optionElement = document.createElement('option');
+                            optionElement.value = option.code || option.value || option.option_value;
+                            optionElement.textContent = option.displayName || option.label || option.option_value;
+                            selectElement.appendChild(optionElement);
+                        });
+                        console.log('Successfully loaded options from local database');
+                        return;
+                    } else {
+                        console.log('No valid options found in local database response');
+                    }
+                } else {
+                    console.log('Local database request failed:', response.status, response.statusText);
+                }
+                
+                // Fallback to DHIS2 API
+                console.log('Loading option set from DHIS2 API:', optionSet.id);
+                const dhis2Response = await fetch(`/fbs/admin/dhis2/dhis2_fetch.php?endpoint=optionSets/${optionSet.id}.json?fields=options[code,displayName]`);
+                
+                if (dhis2Response.ok) {
+                    const dhis2Data = await dhis2Response.json();
+                    if (dhis2Data.options && dhis2Data.options.length > 0) {
+                        console.log(`Loaded ${dhis2Data.options.length} options from DHIS2 API`);
+                        dhis2Data.options.forEach(option => {
+                            const optionElement = document.createElement('option');
+                            optionElement.value = option.code;
+                            optionElement.textContent = option.displayName;
+                            selectElement.appendChild(optionElement);
+                        });
+                        return;
+                    }
+                }
+                
+                // If all fails, add a placeholder
+                console.warn('Could not load options for option set:', optionSet.id);
+                const errorOption = document.createElement('option');
+                errorOption.value = '';
+                errorOption.textContent = 'Options could not be loaded';
+                errorOption.disabled = true;
+                selectElement.appendChild(errorOption);
+                
+            } catch (error) {
+                console.error('Error loading option set options:', error);
+                const errorOption = document.createElement('option');
+                errorOption.value = '';
+                errorOption.textContent = 'Error loading options';
+                errorOption.disabled = true;
+                selectElement.appendChild(errorOption);
+            }
+        }
+
+        // TEI Attributes Population
+        async function populateTEIAttributes() {
+            console.log('Populating TEI attributes...');
+            const container = document.getElementById('teiAttributesContainer');
+            console.log('TEI container found:', !!container);
+            console.log('Program data available:', !!programData);
+            if (!container || !programData) return;
+            
+            container.innerHTML = '';
+            
+            const attributes = programData.program?.programTrackedEntityAttributes || [];
+            
+            for (const attrConfig of attributes) {
+                const attribute = attrConfig.trackedEntityAttribute;
+                if (!attribute) return;
+                
+                const formGroup = document.createElement('div');
+                formGroup.className = 'form-group';
+                
+                // Apply uniform styling - no special container classes needed
+                
+                const label = document.createElement('label');
+                label.className = 'form-label';
+                label.setAttribute('for', `tei_${attribute.id}`);
+                
+                // Clean the display name by removing prefixes like PM_, TP_, etc.
+                let cleanName = attribute.displayName || attribute.name;
+                cleanName = cleanName.replace(/^[A-Z]{2,3}_/i, '');
+                
+                label.innerHTML = `
+                    ${cleanName}
+                    ${attrConfig.mandatory ? '<span class="required-indicator">*</span>' : ''}
+                `;
+                
+                let inputElement;
+                
+                // Create appropriate input based on attribute value type
+                switch (attribute.valueType) {
+                    case 'TEXT':
+                        inputElement = document.createElement('input');
+                        inputElement.type = 'text';
+                        inputElement.className = 'form-control';
+                        inputElement.placeholder = 'Enter text...';
+                        break;
+                        
+                    case 'LONG_TEXT':
+                        inputElement = document.createElement('textarea');
+                        inputElement.className = 'form-control';
+                        inputElement.rows = 3;
+                        inputElement.placeholder = 'Enter detailed text...';
+                        break;
+                        
+                    case 'NUMBER':
+                    case 'INTEGER':
+                    case 'INTEGER_POSITIVE':
+                    case 'INTEGER_ZERO_OR_POSITIVE':
+                        inputElement = document.createElement('input');
+                        inputElement.type = 'number';
+                        inputElement.className = 'form-control';
+                        if (attribute.valueType === 'INTEGER_POSITIVE') {
+                            inputElement.min = '1';
+                        } else if (attribute.valueType === 'INTEGER_ZERO_OR_POSITIVE') {
+                            inputElement.min = '0';
+                        }
+                        break;
+                        
+                    case 'DATE':
+                        inputElement = document.createElement('input');
+                        inputElement.type = 'date';
+                        inputElement.className = 'form-control';
+                        break;
+                        
+                    case 'DATETIME':
+                        inputElement = document.createElement('input');
+                        inputElement.type = 'datetime-local';
+                        inputElement.className = 'form-control';
+                        break;
+                        
+                    case 'EMAIL':
+                        inputElement = document.createElement('input');
+                        inputElement.type = 'email';
+                        inputElement.className = 'form-control';
+                        inputElement.placeholder = 'example@domain.com';
+                        break;
+                        
+                    case 'PHONE_NUMBER':
+                        inputElement = document.createElement('input');
+                        inputElement.type = 'tel';
+                        inputElement.className = 'form-control';
+                        inputElement.placeholder = '+256 xxx xxx xxx';
+                        break;
+                        
+                    case 'BOOLEAN':
+                        inputElement = document.createElement('input');
+                        inputElement.type = 'checkbox';
+                        inputElement.className = 'form-check-input';
+                        formGroup.className = 'form-group form-check';
+                        label.className = 'form-check-label';
+                        break;
+                        
+                    default:
+                        // Handle option sets or default to text
+                        if (attribute.optionSet) {
+                            console.log('TEI Attribute with option set:', attribute.name, 'Options count:', attribute.optionSet.options?.length);
+                            console.log('Full TEI optionSet:', attribute.optionSet);
+                            
+                            inputElement = document.createElement('select');
+                            inputElement.className = 'form-control';
+                            
+                            const defaultOption = document.createElement('option');
+                            defaultOption.value = '';
+                            defaultOption.textContent = 'Select an option...';
+                            defaultOption.disabled = true;
+                            defaultOption.selected = true;
+                            inputElement.appendChild(defaultOption);
+                            
+                            // First check if options are already in the optionSet (from PHP processing)
+                            if (attribute.optionSet.options && attribute.optionSet.options.length > 0) {
+                                console.log(`✓ Using pre-loaded TEI options (${attribute.optionSet.options.length}) for:`, attribute.name);
+                                attribute.optionSet.options.forEach((option, index) => {
+                                    console.log(`Adding pre-loaded TEI option ${index}:`, option);
+                                    const optionElement = document.createElement('option');
+                                    optionElement.value = option.code || option.value || option.option_value;
+                                    optionElement.textContent = option.displayName || option.name || option.label || option.option_value;
+                                    inputElement.appendChild(optionElement);
+                                });
+                            } else {
+                                // Fallback to API loading
+                                console.log('No pre-loaded TEI options, trying API for:', attribute.name);
+                                await loadOptionSetOptions(inputElement, attribute.optionSet);
+                            }
+                            
+                            console.log(`✓ TEI attribute ${attribute.name} has ${inputElement.options.length} options`);
+                            if (inputElement.options.length <= 1) {
+                                console.warn(`⚠️ TEI SELECT element for ${attribute.name} only has ${inputElement.options.length} options!`);
+                            }
+                        } else {
+                            // Default to text input
+                            inputElement = document.createElement('input');
+                            inputElement.type = 'text';
+                            inputElement.className = 'form-control';
+                        }
+                        break;
+                }
+                
+                inputElement.id = `tei_${attribute.id}`;
+                inputElement.name = attribute.id;
+                inputElement.setAttribute('data-attribute-id', attribute.id);
+                
+                if (attrConfig.mandatory) {
+                    inputElement.required = true;
+                }
+                
+                // Load saved value if exists
+                if (formData.trackedEntityAttributes[attribute.id]) {
+                    if (inputElement.type === 'file') {
+                        // File inputs cannot have their value set programmatically
+                        console.log('Skipping value setting for TEI file input:', inputElement.id);
+                    } else {
+                        inputElement.value = formData.trackedEntityAttributes[attribute.id];
+                    }
+                }
+                
+                // Add change listener
+                inputElement.addEventListener('change', function() {
+                    formData.trackedEntityAttributes[attribute.id] = this.value;
+                    console.log('TEI attribute saved:', attribute.id, this.value);
+                    
+                    // Update step status when TEI attributes change
+                    updateAllStepStatuses();
+                });
+                
+                // Create input hint
+                const inputHint = document.createElement('div');
+                inputHint.className = 'input-hint';
+                inputHint.textContent = getInputHint(attribute.valueType, attribute);
+                
+                // Create answer area wrapper for consistent side-by-side layout
+                const answerArea = document.createElement('div');
+                answerArea.className = 'answer-area';
+                
+                // Special handling for checkboxes
+                if (inputElement.type === 'checkbox') {
+                    const checkDiv = document.createElement('div');
+                    checkDiv.className = 'form-check';
+                    checkDiv.appendChild(inputElement);
+                    
+                    const checkLabel = document.createElement('label');
+                    checkLabel.className = 'form-check-label';
+                    checkLabel.setAttribute('for', inputElement.id);
+                    checkLabel.textContent = 'Yes';
+                    checkDiv.appendChild(checkLabel);
+                    
+                    answerArea.appendChild(checkDiv);
+                    answerArea.appendChild(inputHint);
+                    formGroup.appendChild(label);
+                    formGroup.appendChild(answerArea);
+                } else {
+                    // Standard side-by-side structure
+                    answerArea.appendChild(inputElement);
+                    answerArea.appendChild(inputHint);
+                    formGroup.appendChild(label);
+                    formGroup.appendChild(answerArea);
+                }
+                container.appendChild(formGroup);
+            }
+        }
+
+        // Stage Cards Population for Data Entry
+        function populateStagesCards() {
+            console.log('=== Populating stages cards ===');
+            const container = document.getElementById('stagesContainer');
+            console.log('Stages container found:', !!container);
+            console.log('Program data available:', !!programData);
+            
+            if (!container) {
+                console.error('stagesContainer element not found!');
+                return;
+            }
+            
+            if (!programData) {
+                console.error('Program data not available!');
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            const stages = programData.program?.programStages || [];
+            console.log('Number of stages:', stages.length);
+            console.log('Stages data:', stages);
+            
+            if (stages.length === 0) {
+                console.log('No stages found, showing empty state');
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No stages configured</h5>
+                        <p class="text-muted">This program has no stages configured yet.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            stages.forEach((stage, index) => {
+                console.log(`Creating stage card ${index}:`, stage.name);
+                const stageCard = document.createElement('div');
+                stageCard.className = 'stage-card';
+                
+                // Check if stage has meaningful data
+                const stageDataExists = hasStageRealData(stage.id);
+                const occurrences = getStageOccurrences(stage.id);
+                
+                stageCard.innerHTML = `
+                    <div class="stage-card-header">
+                        <div class="stage-card-title">
+                            <i class="fas fa-clipboard-list"></i>
+                            ${stage.name}
+                            ${stage.repeatable ? '<span class="occurrence-badge">Repeatable</span>' : ''}
+                        </div>
+                        <span class="stage-card-status status-${stageDataExists ? 'completed' : 'pending'}">
+                            ${stageDataExists ? 'COMPLETED' : 'PENDING'}
+                        </span>
+                    </div>
+                    <div class="stage-card-body">
+                        <div class="stage-description">
+                            ${stage.description || 'No description available'}
+                        </div>
+                        ${stage.repeatable ? `
+                            <div class="occurrence-instructions mb-3">
+                                <div class="alert alert-info py-2">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Instructions:</strong> This stage can have multiple occurrences. 
+                                    Click <i class="fas fa-edit"></i> to enter data, then <i class="fas fa-plus"></i> to add more occurrences.
+                                </div>
+                            </div>
+                            <div class="occurrence-list" id="occurrences_${stage.id}">
+                                <!-- Occurrences will be populated -->
+                            </div>
+                        ` : `
+                            <div class="single-stage-instructions mb-3">
+                                <div class="alert alert-light py-2">
+                                    <i class="fas fa-clipboard-list me-2"></i>
+                                    <strong>Single Entry Stage:</strong> Click "Enter Data" below to fill in the required information.
+                                </div>
+                            </div>
+                        `}
+                    </div>
+                    <div class="stage-card-actions">
+                        ${!stage.repeatable ? `
+                            <button type="button" class="btn btn-primary btn-sm" 
+                                    onclick="openStageModal('${stage.id}', 1)"
+                                    title="${stageDataExists ? 'Edit the data for this stage' : 'Enter data for this stage'}"
+                                    data-bs-toggle="tooltip">
+                                <i class="fas fa-edit"></i> ${stageDataExists ? 'Edit' : 'Enter'} Data
+                            </button>
+                        ` : ''}
+                        ${stage.repeatable ? `
+                            <button type="button" class="btn btn-success btn-sm" 
+                                    onclick="addStageOccurrence('${stage.id}')"
+                                    title="Add a new occurrence of this stage"
+                                    data-bs-toggle="tooltip">
+                                <i class="fas fa-plus"></i> Add New ${stage.name}
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                
+                container.appendChild(stageCard);
+                console.log(`✓ Added stage card for: ${stage.name}`);
+                
+                // Populate occurrences for repeatable stages
+                if (stage.repeatable) {
+                    // Ensure at least one occurrence exists
+                    if (!stageOccurrences[stage.id]) {
+                        stageOccurrences[stage.id] = 1;
+                    }
+                    populateStageOccurrences(stage.id, stageOccurrences[stage.id]);
+                }
+            });
+        }
+        
+        // Helper function to generate occurrence data summary
+        function generateOccurrenceSummary(stageId, occurrenceData) {
+            if (!occurrenceData || Object.keys(occurrenceData).length === 0) {
+                return '<div class="text-muted small">No data entered</div>';
+            }
+            
+            // Get the stage definition to understand field names
+            const stage = programData.program?.programStages?.find(s => s.id === stageId);
+            if (!stage) return '<div class="text-muted small">No data entered</div>';
+            
+            const dataElements = stage.programStageDataElements || [];
+            const filledData = [];
+            
+            // Get the first 3 filled fields
+            let count = 0;
+            for (const dataElementWrapper of dataElements) {
+                if (count >= 3) break;
+                
+                const dataElement = dataElementWrapper.dataElement;
+                const value = occurrenceData[dataElement.id];
+                
+                if (value !== undefined && value !== '' && value !== null) {
+                    // Clean the field name
+                    let fieldName = (dataElement.displayName || dataElement.name || '').replace(/^[A-Z]{2,3}_/i, '');
+                    if (fieldName.length > 25) {
+                        fieldName = fieldName.substring(0, 25) + '...';
+                    }
+                    
+                    // Format the value
+                    let displayValue = value;
+                    if (typeof value === 'object') {
+                        if (value.fileName) {
+                            displayValue = `📎 ${value.fileName}`;
+                        } else if (value.latitude && value.longitude) {
+                            displayValue = `📍 ${value.latitude}, ${value.longitude}`;
+                        } else {
+                            displayValue = JSON.stringify(value);
+                        }
+                    } else if (typeof value === 'boolean') {
+                        displayValue = value ? '✓ Yes' : '✗ No';
+                    } else if (String(displayValue).length > 30) {
+                        displayValue = String(displayValue).substring(0, 30) + '...';
+                    }
+                    
+                    filledData.push({ field: fieldName, value: displayValue });
+                    count++;
+                }
+            }
+            
+            if (filledData.length === 0) {
+                return '<div class="text-muted small">No data entered</div>';
+            }
+            
+            // Calculate how many more fields are filled beyond the first 3
+            const totalFilled = Object.keys(occurrenceData).filter(key => {
+                const val = occurrenceData[key];
+                return val !== undefined && val !== '' && val !== null;
+            }).length;
+            
+            let summaryHTML = '<div class="occurrence-summary">';
+            summaryHTML += '<table class="summary-table">';
+            
+            filledData.forEach(item => {
+                summaryHTML += `
+                    <tr>
+                        <td class="field-name">${item.field}:</td>
+                        <td class="field-value">${item.value}</td>
+                    </tr>
+                `;
+            });
+            
+            if (totalFilled > 3) {
+                summaryHTML += `
+                    <tr>
+                        <td colspan="2" class="more-fields">
+                            <small class="text-muted">+ ${totalFilled - 3} more fields</small>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            summaryHTML += '</table>';
+            summaryHTML += '</div>';
+            
+            return summaryHTML;
+        }
+
+        // Helper function to check if a stage has real data (not just empty placeholders)
+        function hasStageRealData(stageId) {
+            if (!formData.stages || !formData.stages[stageId]) {
+                return false;
+            }
+            
+            const stageData = formData.stages[stageId];
+            
+            // Check direct stage data (non-repeatable stages)
+            const directDataKeys = Object.keys(stageData).filter(key => !key.startsWith('occurrence_'));
+            if (directDataKeys.some(key => {
+                const value = stageData[key];
+                return value !== undefined && value !== '' && value !== null;
+            })) {
+                return true;
+            }
+            
+            // Check occurrence data (repeatable stages)
+            const occurrenceKeys = Object.keys(stageData).filter(key => key.startsWith('occurrence_'));
+            return occurrenceKeys.some(occKey => {
+                const occData = stageData[occKey];
+                if (!occData || typeof occData !== 'object') return false;
+                
+                return Object.keys(occData).some(dataKey => {
+                    const value = occData[dataKey];
+                    return value !== undefined && value !== '' && value !== null;
+                });
+            });
+        }
+
+        function getStageOccurrences(stageId) {
+            // Return existing occurrences or default to 1
+            console.log(`getStageOccurrences called for stageId: ${stageId}`);
+            if (formData.stages && formData.stages[stageId]) {
+                const occurrenceKeys = Object.keys(formData.stages[stageId]).filter(key => key.startsWith('occurrence_'));
+                console.log(`Found occurrence keys: ${occurrenceKeys}`);
+                
+                // Always ensure at least occurrence_1 exists for repeatable stages
+                if (occurrenceKeys.length === 0) {
+                    console.log('No occurrence keys found, creating occurrence_1');
+                    formData.stages[stageId][`occurrence_1`] = {};
+                    return 1;
+                }
+                
+                const count = occurrenceKeys.length;
+                console.log(`Returning count: ${count}`);
+                return count;
+            }
+            console.log('No stage data found, returning 1');
+            return 1;
+        }
+        
+        function populateStageOccurrences(stageId, count) {
+            console.log(`populateStageOccurrences called with stageId: ${stageId}, count: ${count}`);
+            const container = document.getElementById(`occurrences_${stageId}`);
+            if (!container) {
+                console.error(`Container occurrences_${stageId} not found!`);
+                return;
+            }
+            
+            container.innerHTML = '';
+            console.log('Container found and cleared');
+            
+            // Get actual occurrence keys instead of assuming sequential numbering
+            if (formData.stages && formData.stages[stageId]) {
+                const occurrenceKeys = Object.keys(formData.stages[stageId])
+                    .filter(key => key.startsWith('occurrence_'))
+                    .sort((a, b) => {
+                        const numA = parseInt(a.split('_')[1]);
+                        const numB = parseInt(b.split('_')[1]);
+                        return numA - numB;
+                    });
+                
+                console.log('Found occurrence keys:', occurrenceKeys);
+                
+                // If no occurrences exist but count > 0, create occurrence_1
+                if (occurrenceKeys.length === 0 && count > 0) {
+                    console.log('No occurrences found, creating occurrence_1');
+                    formData.stages[stageId][`occurrence_1`] = {};
+                    occurrenceKeys.push('occurrence_1');
+                }
+                
+                // Display each actual occurrence
+                occurrenceKeys.forEach((key, index) => {
+                    const occurrenceNum = parseInt(key.split('_')[1]);
+                    const displayNum = index + 1; // Display as 1, 2, 3... regardless of actual key numbers
+                    const occurrenceData = formData.stages[stageId][key];
+                    const hasData = occurrenceData && Object.keys(occurrenceData).some(dataKey => {
+                        const value = occurrenceData[dataKey];
+                        return value !== undefined && value !== '' && value !== null;
+                    });
+                    console.log(`Occurrence ${key} (display as ${displayNum}) hasData:`, hasData, formData.stages[stageId][key]);
+                
+                    const occurrenceItem = document.createElement('div');
+                    occurrenceItem.className = `occurrence-item ${hasData ? 'has-data' : 'empty'}`;
+                    
+                    // Generate the summary for this occurrence
+                    const summaryHTML = hasData ? generateOccurrenceSummary(stageId, formData.stages[stageId][key]) : '';
+                    
+                    occurrenceItem.innerHTML = `
+                        <div class="occurrence-main">
+                            <div class="occurrence-info">
+                                <span class="occurrence-number">Occurrence ${displayNum}</span>
+                                <span class="occurrence-status ${hasData ? 'text-success' : 'text-muted'}">
+                                    <i class="fas fa-${hasData ? 'check-circle' : 'circle'}"></i>
+                                    ${hasData ? 'Completed' : 'Empty'}
+                                </span>
+                            </div>
+                            <div class="occurrence-actions">
+                                <button type="button" class="btn btn-sm btn-outline-primary" 
+                                        onclick="openStageModal('${stageId}', ${occurrenceNum})"
+                                        title="${hasData ? 'Edit this occurrence' : 'Enter data for this occurrence'}"
+                                        data-bs-toggle="tooltip">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                ${occurrenceKeys.length > 1 ? `
+                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                            onclick="removeStageOccurrence('${stageId}', ${occurrenceNum})"
+                                            title="Delete this occurrence"
+                                            data-bs-toggle="tooltip">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ${summaryHTML}
+                    `;
+                    
+                    container.appendChild(occurrenceItem);
+                });
+            } else {
+                // No stage data, create empty occurrence_1
+                console.log('No stage data found, creating default occurrence_1');
+                if (!formData.stages) formData.stages = {};
+                if (!formData.stages[stageId]) formData.stages[stageId] = {};
+                formData.stages[stageId][`occurrence_1`] = {};
+                
+                const occurrenceItem = document.createElement('div');
+                occurrenceItem.className = 'occurrence-item empty';
+                occurrenceItem.innerHTML = `
+                    <div class="occurrence-main">
+                        <div class="occurrence-info">
+                            <span class="occurrence-number">Occurrence 1</span>
+                            <span class="occurrence-status text-muted">
+                                <i class="fas fa-circle"></i>
+                                Empty
+                            </span>
+                        </div>
+                        <div class="occurrence-actions">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openStageModal('${stageId}', 1)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(occurrenceItem);
+            }
+        }
+        
+        // addStageOccurrence function is now implemented in enhanceWindowFunctions()
+        
+        function getStageNameById(stageId) {
+            const stage = programData.program?.programStages?.find(s => s.id === stageId);
+            return stage ? stage.name : 'Stage';
+        }
+        
+        function removeStageOccurrence(stageId, occurrence) {
+            if (confirm('Are you sure you want to remove this occurrence?')) {
+                // Remove from formData
+                if (formData.stages && formData.stages[stageId]) {
+                    delete formData.stages[stageId][`occurrence_${occurrence}`];
+                }
+                
+                // Refresh the display
+                const newCount = getStageOccurrences(stageId);
+                populateStageOccurrences(stageId, newCount);
+                
+                console.log(`Removed occurrence ${occurrence} for stage ${stageId}`);
+            }
+        }
+
+        // Stage Sub-tabs Population (keeping for compatibility)
+        function populateStageSubTabs() {
+            const tabsContainer = document.getElementById('stageSubTabs');
+            const contentContainer = document.getElementById('stageContentContainer');
+            
+            if (!tabsContainer || !contentContainer || !programData) return;
+            
+            tabsContainer.innerHTML = '';
+            contentContainer.innerHTML = '';
+            
+            const stages = programData.program?.programStages || [];
+            
+            stages.forEach((stage, index) => {
+                // Create sub-tab
+                const subTab = document.createElement('div');
+                subTab.className = `sub-tab ${index === 0 ? 'active' : ''}`;
+                subTab.setAttribute('data-stage-id', stage.id);
+                subTab.onclick = () => switchToStage(stage.id);
+                
+                const statusDot = document.createElement('div');
+                statusDot.className = 'sub-tab-status';
+                
+                const tabText = document.createElement('span');
+                tabText.textContent = stage.name;
+                
+                subTab.appendChild(statusDot);
+                subTab.appendChild(tabText);
+                tabsContainer.appendChild(subTab);
+                
+                // Create content area for this stage
+                const stageContent = document.createElement('div');
+                stageContent.id = `stageContent_${stage.id}`;
+                stageContent.className = `stage-content ${index === 0 ? 'active' : ''}`;
+                stageContent.style.display = index === 0 ? 'block' : 'none';
+                
+                // Check if stage has data
+                const hasData = formData.stages && formData.stages[stage.id] && Object.keys(formData.stages[stage.id]).length > 0;
+                
+                if (hasData) {
+                    // Show summary of saved data
+                    const summaryDiv = document.createElement('div');
+                    summaryDiv.className = 'alert alert-info';
+                    summaryDiv.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-info-circle me-2"></i>
+                                This stage has saved data
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="openStageModal('${stage.id}')">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </button>
+                        </div>
+                    `;
+                    stageContent.appendChild(summaryDiv);
+                    
+                    // Update tab status
+                    subTab.classList.add('completed');
+                } else {
+                    // Show empty state
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'text-center py-5';
+                    emptyDiv.innerHTML = `
+                        <div class="text-muted mb-3">
+                            <i class="fas fa-clipboard-list fa-3x"></i>
+                        </div>
+                        <h5 class="text-muted">No data entered for this stage</h5>
+                        <p class="text-muted">Click the button below to start entering data</p>
+                        <button class="btn btn-primary" onclick="openStageModal('${stage.id}')">
+                            <i class="fas fa-plus me-1"></i>Add Data
+                        </button>
+                    `;
+                    stageContent.appendChild(emptyDiv);
+                }
+                
+                contentContainer.appendChild(stageContent);
+            });
+            
+            // Set the first stage as current if none is set
+            if (!currentStageId && stages.length > 0) {
+                currentStageId = stages[0].id;
+            }
+        }
+
+        function switchToStage(stageId) {
+            console.log('Switching to stage:', stageId);
+            currentStageId = stageId;
+            
+            // Update tab appearance
+            document.querySelectorAll('.sub-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-stage-id') === stageId) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Update content visibility
+            document.querySelectorAll('.stage-content').forEach(content => {
+                content.style.display = 'none';
+                if (content.id === `stageContent_${stageId}`) {
+                    content.style.display = 'block';
+                }
+            });
+        }
+
+        // Summary Report Generation
+        function generateSummaryReport() {
+            console.log('Generating summary report...');
+            const container = document.getElementById('summaryReport');
+            console.log('Summary container found:', !!container);
+            console.log('Program data available:', !!programData);
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            // Location Information Summary (at the top)
+            const locationCard = document.createElement('div');
+            locationCard.className = 'summary-card';
+            locationCard.innerHTML = `
+                <div class="summary-header">
+                    <i class="fas fa-map-marker-alt me-2"></i>Location Information
+                </div>
+                <div class="summary-content" id="locationSummary">
+                    <!-- Will be populated -->
+                </div>
+            `;
+            container.appendChild(locationCard);
+            
+            // Populate location summary
+            const locationSummary = document.getElementById('locationSummary');
+            if (selectedLocation) {
+                locationSummary.innerHTML = `
+                    <div class="summary-item">
+                        <span class="summary-label">Selected Location</span>
+                        <span class="summary-value">
+                            <strong>${selectedLocation.name}</strong><br>
+                            <small class="text-muted">${selectedLocation.path || 'Path not available'}</small>
+                        </span>
+                    </div>
+                `;
+            } else {
+                locationSummary.innerHTML = `
+                    <div class="summary-item">
+                        <span class="summary-label">Selected Location</span>
+                        <span class="summary-value text-warning">No location selected yet</span>
+                    </div>
+                `;
+            }
+            
+            // Participant Information Summary
+            const participantCard = document.createElement('div');
+            participantCard.className = 'summary-card';
+            participantCard.innerHTML = `
+                <div class="summary-header">
+                    <i class="fas fa-user me-2"></i>Participant Information
+                </div>
+                <div class="summary-content" id="participantSummary">
+                    <!-- Will be populated -->
+                </div>
+            `;
+            container.appendChild(participantCard);
+            
+            // Populate participant summary
+            const participantSummary = document.getElementById('participantSummary');
+            const attributes = programData.program?.programTrackedEntityAttributes || [];
+            
+            attributes.forEach(attrConfig => {
+                const attribute = attrConfig.trackedEntityAttribute;
+                const value = formData.trackedEntityAttributes[attribute.id] || 'Not provided';
+                
+                // Clean the display name by removing prefixes like PM_, TP_, etc.
+                let cleanName = attribute.displayName || attribute.name;
+                cleanName = cleanName.replace(/^[A-Z]{2,3}_/i, '');
+                
+                const summaryItem = document.createElement('div');
+                summaryItem.className = 'summary-item';
+                summaryItem.innerHTML = `
+                    <span class="summary-label">${cleanName}</span>
+                    <span class="summary-value">${value}</span>
+                `;
+                participantSummary.appendChild(summaryItem);
+            });
+            
+            // Stage Data Summary with Repeatable Support
+            const stages = programData.program?.programStages || [];
+            stages.forEach(stage => {
+                const stageData = formData.stages && formData.stages[stage.id] ? formData.stages[stage.id] : null;
+                const hasData = stageData && Object.keys(stageData).length > 0;
+                
+                const stageCard = document.createElement('div');
+                stageCard.className = 'summary-card';
+                
+                let stageContent = '';
+                
+                if (stage.repeatable && hasData) {
+                    // Show occurrences for repeatable stages
+                    const occurrenceKeys = Object.keys(stageData).filter(key => key.startsWith('occurrence_'));
+                    const occurrenceCount = Math.max(occurrenceKeys.length, Object.keys(stageData).length > 0 ? 1 : 0);
+                    
+                    stageContent = `
+                        <div class="summary-content">
+                            <div class="text-success mb-2">
+                                <i class="fas fa-check me-2"></i>
+                                ${occurrenceCount} occurrence${occurrenceCount !== 1 ? 's' : ''} completed
+                            </div>
+                    `;
+                    
+                    // Show details for each occurrence with summary tables
+                    for (let i = 1; i <= occurrenceCount; i++) {
+                        const occurrenceData = stageData[`occurrence_${i}`] || stageData;
+                        const hasOccurrenceData = occurrenceData && Object.keys(occurrenceData).length > 0;
+                        
+                        stageContent += `
+                            <div class="occurrence-review-item ${hasOccurrenceData ? 'has-data' : 'empty'}">
+                                <div class="occurrence-header">
+                                    <span class="occurrence-title">Occurrence ${i}</span>
+                                    <span class="occurrence-status ${hasOccurrenceData ? 'text-success' : 'text-muted'}">
+                                        <i class="fas fa-${hasOccurrenceData ? 'check-circle' : 'circle'} me-1"></i>
+                                        ${hasOccurrenceData ? 'Completed' : 'Empty'}
+                                    </span>
+                                </div>
+                                ${hasOccurrenceData ? generateOccurrenceSummary(stage.id, occurrenceData) : '<div class="text-muted small">No data entered</div>'}
+                            </div>
+                        `;
+                    }
+                    
+                    stageContent += '</div>';
+                } else if (hasData) {
+                    // Regular stage with data
+                    stageContent = `
+                        <div class="summary-content">
+                            <div class="text-success">
+                                <i class="fas fa-check me-2"></i>Data has been entered
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // No data
+                    stageContent = `
+                        <div class="summary-content">
+                            <div class="text-muted">No data entered</div>
+                        </div>
+                    `;
+                }
+                
+                stageCard.innerHTML = `
+                    <div class="summary-header">
+                        <div>
+                            <i class="fas fa-clipboard-list me-2"></i>${stage.name}
+                            ${stage.repeatable ? '<span class="occurrence-badge ms-2">Repeatable</span>' : ''}
+                        </div>
+                        <span>
+                            ${hasData ? '<i class="fas fa-check-circle text-success"></i>' : '<i class="fas fa-times-circle text-muted"></i>'}
+                        </span>
+                    </div>
+                    ${stageContent}
+                `;
+                
+                container.appendChild(stageCard);
+            });
+        }
+        
+        // Function to load saved groupings from the database/API
+        async function loadSavedGroupings(stageId, dataElements) {
+            try {
+                console.log('Loading saved groupings for stage:', stageId);
+                const surveyId = programData.surveySettings?.id;
+                
+                if (!surveyId) {
+                    console.log('No survey ID available, using default grouping');
+                    return groupQuestionsByCategory(dataElements);
+                }
+                
+                // Use the working API path
+                const apiPath = `/fbs/admin/api/groupings.php?survey_id=${surveyId}`;
+                console.log('Loading groupings from:', apiPath);
+                
+                const response = await fetch(apiPath);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success && result.data && result.data[stageId]) {
+                        console.log('Found saved groupings for stage:', stageId, result.data[stageId]);
+                        
+                        // Convert saved groupings to the format expected by the form
+                        const savedGroups = result.data[stageId];
+                        const questionGroups = {};
+                        
+                        // Create a lookup map of data elements by ID
+                        const elementMap = {};
+                        dataElements.forEach(elementConfig => {
+                            elementMap[elementConfig.dataElement.id] = elementConfig;
+                        });
+                        
+                        // Process saved groups
+                        savedGroups.forEach(group => {
+                            const groupTitle = group.groupTitle || 'Unnamed Group';
+                            questionGroups[groupTitle] = [];
+                            
+                            if (group.questions && Array.isArray(group.questions)) {
+                                group.questions.forEach(questionRef => {
+                                    const elementConfig = elementMap[questionRef.questionId];
+                                    if (elementConfig) {
+                                        questionGroups[groupTitle].push(elementConfig);
+                                    }
+                                });
+                            }
+                        });
+                        
+                        // Add any ungrouped questions to a default group
+                        const groupedQuestionIds = new Set();
+                        Object.values(questionGroups).flat().forEach(element => {
+                            groupedQuestionIds.add(element.dataElement.id);
+                        });
+                        
+                        const ungroupedElements = dataElements.filter(elementConfig => 
+                            !groupedQuestionIds.has(elementConfig.dataElement.id)
+                        );
+                        
+                        if (ungroupedElements.length > 0) {
+                            questionGroups['General Information'] = ungroupedElements;
+                        }
+                        
+                        console.log('✓ Successfully loaded custom groupings:', questionGroups);
+                        return questionGroups;
+                    } else {
+                        console.log(`No custom groupings found for stage ${stageId}`);
+                    }
+                } else {
+                    console.log(`Groupings API returned ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                console.error('Error loading saved groupings:', error);
+            }
+            
+            // Fallback to automatic grouping
+            console.log('Using automatic grouping as fallback');
+            return groupQuestionsByCategory(dataElements);
+        }
+        
+        // Function to group questions by category based on naming patterns
+        function groupQuestionsByCategory(dataElements) {
+            const groups = {};
+            
+            dataElements.forEach(elementConfig => {
+                const dataElement = elementConfig.dataElement;
+                if (!dataElement) return;
+                
+                // Extract group name from data element name
+                let groupName = 'General Information';
+                const elementName = dataElement.displayName || dataElement.name || '';
+                
+                // Common grouping patterns for DHIS2 data elements
+                if (elementName.match(/^(TP_|PM_|TR_)/i)) {
+                    // Remove prefix and extract group from next part
+                    const withoutPrefix = elementName.replace(/^[A-Z]{2,3}_/i, '');
+                    const words = withoutPrefix.split(/[_\s]+/);
+                    
+                    if (words.length > 1) {
+                        // Use first word or two words as group name
+                        groupName = words.slice(0, 2).join(' ');
+                        groupName = groupName.charAt(0).toUpperCase() + groupName.slice(1).toLowerCase();
+                    }
+                } else {
+                    // Try to extract group from element name patterns
+                    const words = elementName.split(/[_\s]+/);
+                    if (words.length > 1) {
+                        // Use first word as group, or look for common patterns
+                        if (elementName.toLowerCase().includes('contact')) {
+                            groupName = 'Contact Information';
+                        } else if (elementName.toLowerCase().includes('address') || elementName.toLowerCase().includes('location')) {
+                            groupName = 'Address & Location';
+                        } else if (elementName.toLowerCase().includes('date') || elementName.toLowerCase().includes('time')) {
+                            groupName = 'Date & Time Information';
+                        } else if (elementName.toLowerCase().includes('health') || elementName.toLowerCase().includes('medical')) {
+                            groupName = 'Health Information';
+                        } else if (elementName.toLowerCase().includes('school') || elementName.toLowerCase().includes('education')) {
+                            groupName = 'Education Information';
+                        } else {
+                            groupName = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase() + ' Information';
+                        }
+                    }
+                }
+                
+                // Initialize group if it doesn't exist
+                if (!groups[groupName]) {
+                    groups[groupName] = [];
+                }
+                
+                groups[groupName].push(elementConfig);
+            });
+            
+            return groups;
+        }
+        
+        // Helper function to create question input HTML (like committed version)
+        function createQuestionInput(dataElement, inputId, label) {
+            console.log('Creating input for:', dataElement.name, 'Type:', dataElement.valueType, 'Option Set:', !!dataElement.optionSet);
+            
+            if (dataElement.optionSet && dataElement.optionSet.options) {
+                console.log('✓ Creating SELECT for:', dataElement.name, 'with', dataElement.optionSet.options.length, 'options');
+                let options = '<option value="">Search or select an option...</option>';
+                dataElement.optionSet.options.forEach(option => {
+                    options += `<option value="${option.code}">${option.displayName}</option>`;
+                });
+                return `<select id="${inputId}" name="${inputId}" class="form-control searchable-select" 
+                        data-de-id="${dataElement.id}">
+                    ${options}
+                </select>`;
+            }
+
+            switch (dataElement.valueType) {
+                case 'TEXT':
+                    return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" 
+                            placeholder="Enter text..." data-de-id="${dataElement.id}">`;
+                
+                case 'LONG_TEXT':
+                    return `<textarea id="${inputId}" name="${inputId}" class="form-control" rows="3" 
+                            placeholder="Enter detailed text..." data-de-id="${dataElement.id}"></textarea>`;
+                
+                case 'NUMBER':
+                case 'INTEGER':
+                case 'INTEGER_POSITIVE':
+                case 'INTEGER_NEGATIVE':
+                case 'INTEGER_ZERO_OR_POSITIVE':
+                    let numberAttrs = 'type="number" class="form-control"';
+                    if (dataElement.valueType === 'INTEGER_POSITIVE') numberAttrs += ' min="1"';
+                    else if (dataElement.valueType === 'INTEGER_ZERO_OR_POSITIVE') numberAttrs += ' min="0"';
+                    else if (dataElement.valueType === 'INTEGER_NEGATIVE') numberAttrs += ' max="-1"';
+                    return `<input ${numberAttrs} id="${inputId}" name="${inputId}" 
+                            placeholder="Enter number..." data-de-id="${dataElement.id}">`;
+                
+                case 'PERCENTAGE':
+                    return `<input type="number" id="${inputId}" name="${inputId}" class="form-control" 
+                            min="0" max="100" step="0.01" placeholder="0-100%" data-de-id="${dataElement.id}">`;
+                
+                case 'DATE':
+                    return `<input type="date" id="${inputId}" name="${inputId}" class="form-control" 
+                            data-de-id="${dataElement.id}">`;
+                
+                case 'DATETIME':
+                    return `<input type="datetime-local" id="${inputId}" name="${inputId}" class="form-control" 
+                            data-de-id="${dataElement.id}">`;
+                
+                case 'TIME':
+                    return `<input type="time" id="${inputId}" name="${inputId}" class="form-control" 
+                            data-de-id="${dataElement.id}">`;
+                
+                case 'EMAIL':
+                    return `<input type="email" id="${inputId}" name="${inputId}" class="form-control" 
+                            placeholder="example@domain.com" data-de-id="${dataElement.id}">`;
+                
+                case 'PHONE_NUMBER':
+                    return `<input type="tel" id="${inputId}" name="${inputId}" class="form-control" 
+                            placeholder="+256 xxx xxx xxx" data-de-id="${dataElement.id}">`;
+                
+                case 'URL':
+                    return `<input type="url" id="${inputId}" name="${inputId}" class="form-control" 
+                            placeholder="https://example.com" data-de-id="${dataElement.id}">`;
+                
+                case 'BOOLEAN':
+                case 'TRUE_ONLY':
+                    return `<div class="form-check">
+                        <input type="checkbox" id="${inputId}" name="${inputId}" class="form-check-input" 
+                               data-de-id="${dataElement.id}">
+                        <label class="form-check-label" for="${inputId}">Yes</label>
+                    </div>`;
+                
+                case 'FILE_RESOURCE':
+                    return `<input type="file" id="${inputId}" name="${inputId}" class="form-control" 
+                            accept="*/*" data-de-id="${dataElement.id}">`;
+                
+                case 'COORDINATE':
+                    return `<div class="coordinate-input">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="number" step="any" class="form-control" 
+                                       placeholder="Latitude" name="${inputId}_lat" 
+                                       data-de-id="${dataElement.id}">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" step="any" class="form-control" 
+                                       placeholder="Longitude" name="${inputId}_lng" 
+                                       data-de-id="${dataElement.id}">
+                            </div>
+                        </div>
+                    </div>`;
+                
+                default:
+                    console.log('✗ Defaulting to TEXT input for:', dataElement.name);
+                    return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" 
+                            placeholder="Enter text..." data-de-id="${dataElement.id}">`;
+            }
+        }
+
+        // Helper function to get question help text (contextual and specific)
+        function getQuestionHelp(dataElement) {
+            // First check if it has an option set (dropdown) - this takes priority
+            if (dataElement.optionSet && dataElement.optionSet.options && dataElement.optionSet.options.length > 0) {
+                return 'Select from the available options';
+            }
+            
+            // Get the question text for contextual help
+            const questionText = (dataElement.displayName || dataElement.name || '').toLowerCase();
+            
+            // Provide contextual help based on question content and value type
+            switch (dataElement.valueType) {
+                case 'TEXT':
+                    // Analyze question text to provide better context
+                    if (questionText.includes('year') || questionText.includes('age')) {
+                        return 'Enter the number of years (e.g., 5, 10, 15)';
+                    } else if (questionText.includes('name')) {
+                        return 'Enter the full name';
+                    } else if (questionText.includes('code') || questionText.includes('id')) {
+                        return 'Enter the code or identifier';
+                    } else if (questionText.includes('address')) {
+                        return 'Enter the address details';
+                    } else if (questionText.includes('description') || questionText.includes('comment')) {
+                        return 'Enter a brief description';
+                    } else {
+                        return 'Enter text information';
+                    }
+                case 'LONG_TEXT':
+                    return 'You can enter longer text with multiple lines';
+                case 'NUMBER':
+                case 'INTEGER':
+                    if (questionText.includes('year') || questionText.includes('age')) {
+                        return 'Enter the number of years';
+                    } else if (questionText.includes('count') || questionText.includes('number')) {
+                        return 'Enter a count or quantity';
+                    } else if (questionText.includes('amount') || questionText.includes('cost') || questionText.includes('price')) {
+                        return 'Enter the amount (numbers only)';
+                    } else {
+                        return 'Enter numeric values only';
+                    }
+                case 'INTEGER_POSITIVE':
+                    if (questionText.includes('year') || questionText.includes('age')) {
+                        return 'Enter number of years (must be greater than 0)';
+                    } else {
+                        return 'Enter a positive number (greater than 0)';
+                    }
+                case 'INTEGER_NEGATIVE':
+                    return 'Enter a negative number (less than 0)';
+                case 'INTEGER_ZERO_OR_POSITIVE':
+                    if (questionText.includes('year') || questionText.includes('age')) {
+                        return 'Enter number of years (0 or more)';
+                    } else {
+                        return 'Enter zero or a positive number';
+                    }
+                case 'PERCENTAGE':
+                    return 'Enter a percentage value between 0 and 100';
+                case 'DATE':
+                    if (questionText.includes('birth')) {
+                        return 'Select your date of birth';
+                    } else if (questionText.includes('start')) {
+                        return 'Select the start date';
+                    } else if (questionText.includes('end')) {
+                        return 'Select the end date';
+                    } else {
+                        return 'Select or enter a valid date';
+                    }
+                case 'DATETIME':
+                    return 'Select or enter date and time';
+                case 'TIME':
+                    return 'Select or enter a time';
+                case 'EMAIL':
+                    return 'Enter a valid email address (e.g., user@example.com)';
+                case 'PHONE_NUMBER':
+                    return 'Enter a valid phone number (e.g., +256 xxx xxx xxx)';
+                case 'URL':
+                    return 'Enter a valid website URL (e.g., https://example.com)';
+                case 'BOOLEAN':
+                    return 'Choose Yes or No';
+                case 'TRUE_ONLY':
+                    return 'Check this box if applicable';
+                case 'FILE_RESOURCE':
+                    if (questionText.includes('photo') || questionText.includes('image')) {
+                        return 'Select an image file to upload';
+                    } else if (questionText.includes('document')) {
+                        return 'Select a document file to upload';
+                    } else {
+                        return 'Select a file to upload';
+                    }
+                case 'COORDINATE':
+                    return 'Enter latitude and longitude coordinates';
+                default:
+                    return 'Enter the required information';
+            }
+        }
+
+        // Updated openStageModal function for new UI
+        window.openStageModal = async function(stageId, occurrence = 1) {
+            console.log('Opening stage modal for:', stageId, 'occurrence:', occurrence);
+            
+            if (!stageId) {
+                // If no stage ID provided, use the current stage or first available
+                stageId = currentStageId || (programData.program?.programStages?.[0]?.id);
+            }
+            
+            if (!stageId) {
+                alert('No stage available to edit');
+                return;
+            }
+            
+            const stage = programData.program.programStages.find(s => s.id === stageId);
+            if (!stage) {
+                console.error('Stage not found:', stageId);
+                return;
+            }
+            
+            // Set current stage and occurrence for saving
+            currentStageId = stageId;
+            currentStageOccurrence = occurrence;
+            
+            // Update modal title
+            const modalTitle = document.getElementById('modalTitle');
+            if (modalTitle) {
+                modalTitle.textContent = stage.repeatable ? `${stage.name} - Occurrence ${occurrence}` : stage.name;
+            }
+            
+            // Clear and populate modal content
+            const modalContainer = document.getElementById('modalQuestionsContainer');
+            if (!modalContainer) return;
+            
+            modalContainer.innerHTML = '';
+            
+            // Add event date field first
+            const eventDateGroup = document.createElement('div');
+            eventDateGroup.className = 'form-group mb-3';
+            
+            // Get saved event date for this occurrence
+            const savedStageData = formData.stages?.[stageId];
+            let savedEventDate = new Date().toISOString().split('T')[0];
+            
+            if (savedStageData) {
+                if (stage.repeatable && occurrence > 1) {
+                    // For repeatable stages, look in occurrence-specific data
+                    const occurrenceData = savedStageData[`occurrence_${occurrence}`];
+                    if (occurrenceData && occurrenceData['eventDate']) {
+                        savedEventDate = occurrenceData['eventDate'];
+                    }
+                } else {
+                    // For non-repeatable stages or first occurrence
+                    if (savedStageData['eventDate']) {
+                        savedEventDate = savedStageData['eventDate'];
+                    } else if (savedStageData[`occurrence_${occurrence}`] && savedStageData[`occurrence_${occurrence}`]['eventDate']) {
+                        savedEventDate = savedStageData[`occurrence_${occurrence}`]['eventDate'];
+                    }
+                }
+            }
+            
+            eventDateGroup.innerHTML = `
+                <label class="form-label" for="eventDate_${stageId}">
+                    Event Date <span class="required-indicator">*</span>
+                </label>
+                <input type="date" class="form-control event-date" id="eventDate_${stageId}" 
+                       value="${savedEventDate}" required>
+                <div class="form-help">The date when this event occurred</div>
+            `;
+            modalContainer.appendChild(eventDateGroup);
+            
+            // Add separator
+            const separator = document.createElement('hr');
+            separator.className = 'my-4';
+            modalContainer.appendChild(separator);
+            
+            // Load saved groupings or fall back to default grouping
+            let questionGroups;
+            try {
+                questionGroups = await loadSavedGroupings(stage.id, stage.programStageDataElements || []);
+            } catch (error) {
+                console.error('Failed to load groupings, using default:', error);
+                questionGroups = groupQuestionsByCategory(stage.programStageDataElements || []);
+            }
+            
+            // Create questions with grouping
+            for (const [groupName, elements] of Object.entries(questionGroups)) {
+                if (elements.length === 0) continue;
+                
+                // Create group section
+                const groupSection = document.createElement('div');
+                groupSection.className = 'modal-group-section';
+                
+                // Group header
+                const groupHeader = document.createElement('div');
+                groupHeader.className = 'modal-group-header';
+                groupHeader.innerHTML = `<h6 class="modal-group-title">${groupName}</h6>`;
+                
+                // Group content container
+                const groupContent = document.createElement('div');
+                groupContent.className = 'modal-group-content';
+                
+                // Questions grid for this group
+                const questionsGrid = document.createElement('div');
+                questionsGrid.className = 'form-grid';
+                
+                for (const elementConfig of elements) {
+                const dataElement = elementConfig.dataElement;
+                if (!dataElement) return;
+                
+                const formGroup = document.createElement('div');
+                formGroup.className = 'form-group';
+                
+                // Clean the display name by removing prefixes like PM_, TP_, etc.
+                let cleanName = dataElement.displayName || dataElement.name;
+                cleanName = cleanName.replace(/^[A-Z]{2,3}_/i, '');
+                
+                // Create input using HTML string generation
+                const inputId = `stage_${stageId}_${dataElement.id}`;
+                const inputHTML = createQuestionInput(dataElement, inputId, cleanName);
+                const helpText = getQuestionHelp(dataElement);
+                
+                // Add input type class for dynamic styling
+                let inputTypeClass = '';
+                if (dataElement.optionSet) {
+                    inputTypeClass = 'input-type-dropdown';
+                } else {
+                    switch (dataElement.valueType) {
+                        case 'NUMBER':
+                        case 'INTEGER':
+                        case 'INTEGER_POSITIVE':
+                        case 'INTEGER_NEGATIVE':
+                        case 'INTEGER_ZERO_OR_POSITIVE':
+                        case 'PERCENTAGE':
+                            inputTypeClass = 'input-type-number';
+                            break;
+                        case 'DATE':
+                        case 'DATETIME':
+                        case 'TIME':
+                            inputTypeClass = 'input-type-date';
+                            break;
+                        case 'LONG_TEXT':
+                            inputTypeClass = 'input-type-textarea';
+                            break;
+                        case 'BOOLEAN':
+                        case 'TRUE_ONLY':
+                            inputTypeClass = 'input-type-checkbox';
+                            break;
+                        default:
+                            inputTypeClass = 'input-type-text';
+                    }
+                }
+                
+                // Add the input type class to form group
+                formGroup.classList.add(inputTypeClass);
+                
+                // Universal side-by-side layout for all question types
+                formGroup.innerHTML = `
+                    <label class="form-label" for="${inputId}">${cleanName}</label>
+                    <div class="answer-area">
+                        ${inputHTML}
+                        <div class="input-hint">${helpText}</div>
+                    </div>
+                `;
+                
+                // After creating the form group with innerHTML, get references to the actual input elements for value setting
+                const actualInputElement = formGroup.querySelector('input, select, textarea');
+                
+                // Load saved value if exists
+                const savedStageData = formData.stages?.[stageId];
+                let savedValue = undefined;
+                
+                if (savedStageData) {
+                    if (stage.repeatable && occurrence > 1) {
+                        // For repeatable stages, look in occurrence-specific data
+                        const occurrenceData = savedStageData[`occurrence_${occurrence}`];
+                        if (occurrenceData && occurrenceData[dataElement.id] !== undefined) {
+                            savedValue = occurrenceData[dataElement.id];
+                        }
+                    } else {
+                        // For non-repeatable stages or first occurrence, look in stage data directly
+                        if (savedStageData[dataElement.id] !== undefined) {
+                            savedValue = savedStageData[dataElement.id];
+                        } else if (savedStageData[`occurrence_${occurrence}`] && savedStageData[`occurrence_${occurrence}`][dataElement.id] !== undefined) {
+                            savedValue = savedStageData[`occurrence_${occurrence}`][dataElement.id];
+                        }
+                    }
+                }
+                
+                // Set saved values on the actual elements
+                if (savedValue !== undefined && actualInputElement) {
+                    if (actualInputElement.type === 'checkbox') {
+                        actualInputElement.checked = savedValue === 'true' || savedValue === true;
+                    } else if (actualInputElement.type === 'file') {
+                        // File inputs cannot have their value set programmatically for security reasons
+                        // But we can show what file was previously selected
+                        console.log('File input with saved value:', savedValue);
+                        if (savedValue && typeof savedValue === 'object' && savedValue.fileName) {
+                            const existingFileInfo = document.createElement('div');
+                            existingFileInfo.className = 'file-preview mt-2 existing-file';
+                            existingFileInfo.innerHTML = `
+                                <div class="alert alert-info d-flex align-items-center py-2">
+                                    <i class="fas fa-file me-2"></i>
+                                    <div>
+                                        <strong>Previously selected:</strong> ${savedValue.fileName}<br>
+                                        <small class="text-muted">Select a new file to replace this, or leave empty to keep the current file</small>
+                                    </div>
+                                </div>
+                            `;
+                            formGroup.appendChild(existingFileInfo);
+                        }
+                    } else {
+                        actualInputElement.value = savedValue;
+                    }
+                }
+                
+                // For coordinate inputs, handle lat/lng separately
+                if (dataElement.valueType === 'COORDINATE' && savedValue) {
+                    const latInput = formGroup.querySelector('[name$="_lat"]');
+                    const lngInput = formGroup.querySelector('[name$="_lng"]');
+                    if (typeof savedValue === 'object' && savedValue.latitude !== undefined && savedValue.longitude !== undefined) {
+                        if (latInput) latInput.value = savedValue.latitude;
+                        if (lngInput) lngInput.value = savedValue.longitude;
+                    }
+                }
+                
+                // Add file input preview functionality if it's a file input
+                if (dataElement.valueType === 'FILE_RESOURCE' && actualInputElement) {
+                    actualInputElement.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const preview = document.createElement('div');
+                            preview.className = 'file-preview mt-2 new-file';
+                            preview.innerHTML = `
+                                <div class="alert alert-success d-flex align-items-center py-2">
+                                    <i class="fas fa-file me-2"></i>
+                                    <div>
+                                        <strong>New file selected:</strong> ${file.name}<br>
+                                        <small class="text-muted">Size: ${(file.size / 1024).toFixed(1)} KB</small>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Remove any existing previews (both old file info and previous new file previews)
+                            const existingPreviews = formGroup.querySelectorAll('.file-preview');
+                            existingPreviews.forEach(preview => preview.remove());
+                            
+                            formGroup.appendChild(preview);
+                        } else {
+                            // If no file selected, remove new file preview but keep existing file info
+                            const newFilePreviews = formGroup.querySelectorAll('.file-preview.new-file');
+                            newFilePreviews.forEach(preview => preview.remove());
+                        }
+                    });
+                }
+                
+                questionsGrid.appendChild(formGroup);
+                }
+                
+                // Append questionsGrid to groupContent
+                groupContent.appendChild(questionsGrid);
+                
+                // Assemble group section
+                groupSection.appendChild(groupHeader);
+                groupSection.appendChild(groupContent);
+                
+                // Append group section to modal
+                modalContainer.appendChild(groupSection);
+            }
+            
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('stageModal'));
+            modal.show();
+        }
+        
+        // Updated saveStageData function
+        window.saveStageData = function() {
+            console.log('Saving stage data...');
+            
+            const modalContainer = document.getElementById('modalQuestionsContainer');
+            if (!modalContainer) return;
+            
+            const formElements = modalContainer.querySelectorAll('input, select, textarea');
+            const currentStage = currentStageId || (programData.program?.programStages?.[0]?.id);
+            const currentOccurrence = currentStageOccurrence || 1;
+            
+            if (!currentStage) return;
+            
+            // Initialize stage data if not exists
+            if (!formData.stages) {
+                formData.stages = {};
+            }
+            if (!formData.stages[currentStage]) {
+                formData.stages[currentStage] = {};
+            }
+            
+            // For repeatable stages, store data in occurrence-specific object
+            const stage = programData.program?.programStages?.find(s => s.id === currentStage);
+            const isRepeatable = stage?.repeatable;
+            
+            let stageDataTarget;
+            if (isRepeatable) {
+                if (!formData.stages[currentStage][`occurrence_${currentOccurrence}`]) {
+                    formData.stages[currentStage][`occurrence_${currentOccurrence}`] = {};
+                }
+                stageDataTarget = formData.stages[currentStage][`occurrence_${currentOccurrence}`];
+            } else {
+                stageDataTarget = formData.stages[currentStage];
+            }
+            
+            // Collect form data
+            formElements.forEach(element => {
+                const stageId = element.getAttribute('data-stage-id');
+                const elementId = element.getAttribute('data-de-id');
+                
+                if (elementId) {
+                    if (element.type === 'checkbox') {
+                        stageDataTarget[elementId] = element.checked;
+                    } else if (element.type === 'file') {
+                        if (element.files[0]) {
+                            // New file selected
+                            stageDataTarget[elementId] = {
+                                isFile: true,
+                                fileName: element.files[0].name,
+                                fileObject: element.files[0]
+                            };
+                        } else {
+                            // No new file selected - preserve existing file data if any
+                            const existingValue = stageDataTarget[elementId];
+                            if (existingValue && typeof existingValue === 'object' && existingValue.fileName) {
+                                // Keep the existing file data
+                                console.log('Preserving existing file:', existingValue.fileName);
+                            }
+                            // If no existing file data, elementId gets no value (undefined)
+                        }
+                    } else {
+                        stageDataTarget[elementId] = element.value;
+                    }
+                } else if (element.classList.contains('event-date')) {
+                    stageDataTarget['eventDate'] = element.value;
+                }
+            });
+            
+            console.log('Stage data saved:', formData.stages[currentStage]);
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('stageModal'));
+            if (modal) {
+                modal.hide();
+            }
+            
+            // Refresh the data entry view and stage cards if currently active
+            if (currentStep === 'data-entry') {
+                populateStageSubTabs();
+                populateStagesCards(); // Refresh stage cards to show updated status
+                
+                // Also refresh the specific stage's occurrence list to ensure proper status updates
+                if (isRepeatable) {
+                    const occurrenceCount = getStageOccurrences(currentStage);
+                    populateStageOccurrences(currentStage, occurrenceCount);
+                }
+            }
+            
+            // Update step status indicators
+            updateAllStepStatuses();
+            
+            // Show success message
+            showSuccessMessage(`Stage data saved successfully for ${isRepeatable ? `occurrence ${currentOccurrence}` : 'stage'}`);
+        }
         
         // Initialize the form
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             try {
                 const programDataElement = document.getElementById('programData');
                 if (!programDataElement) {
@@ -2271,2779 +4137,148 @@ if (!empty($programStages)) {
                 programData = JSON.parse(programDataElement.textContent);
                 console.log('Program data loaded:', programData);
                 
-                // Debug survey settings
-                console.log('Survey settings:', programData.surveySettings);
-                if (programData.surveySettings && programData.surveySettings.dhis2_program_uid) {
-                    console.log('DHIS2 program UID found:', programData.surveySettings.dhis2_program_uid);
-                } else {
-                    console.log('No DHIS2 program UID found in survey settings');
-                }
-                
-                // Debug option set data specifically
-                if (programData.program && programData.program.programStages) {
-                    programData.program.programStages.forEach(stage => {
-                        console.log('Stage:', stage.name);
-                        if (stage.programStageDataElements) {
-                            stage.programStageDataElements.forEach(psde => {
-                                if (psde.dataElement.optionSet) {
-                                    console.log('DE with option set:', psde.dataElement.name, 'Options:', psde.dataElement.optionSet.options?.length);
-                                }
-                            });
-                        }
-                    });
-                }
-                
-                if (!programData || !programData.program) {
-                    console.error('Invalid program data structure');
-                    return;
-                }
-            } catch (error) {
-                console.error('Error loading program data:', error);
-                alert('Error loading form data. Please refresh the page and try again.');
-                return;
-            }
-            
-            // Initialize stage occurrences and data storage
-            console.log('Available program stages:', programData.program.programStages.map(s => ({id: s.id, name: s.name})));
-            programData.program.programStages.forEach(stage => {
-                stageOccurrences[stage.id] = 1;
-                stageData[stage.id] = {}; // Initialize empty data for each stage
-            });
-            
-            // Debug navigation items
-            const allNavItems = document.querySelectorAll('.stage-nav-item[data-stage]');
-            console.log('Navigation items found:', allNavItems.length);
-            allNavItems.forEach((item, index) => {
-                const stageId = item.getAttribute('data-stage');
-                const stageTitle = item.querySelector('.stage-nav-title')?.textContent?.trim();
-                console.log(`Nav item ${index + 1}: stageId="${stageId}", title="${stageTitle}"`);
-            });
-            
-            // Initialize navigation - set first stage as active only on initial load
-            const firstNavItem = document.querySelector('.stage-nav-item[data-stage]');
-            if (firstNavItem) {
-                firstNavItem.classList.add('active');
-            }
-            
-            // Initialize location selection
-            initializeLocationSelection();
-            
-            // Initialize tables
-            updateLocationDisplay();
-            updateParticipantTable();
-            initializeStageTables();
-            initializeCombinedStageTable();
-        });
-
-        // Location selection functionality
-        let currentFilteredLocations = [];
-
-        async function initializeLocationSelection() {
-            const facilitySearchInput = document.getElementById('facilitySearch');
-            const facilityResultsDiv = document.getElementById('facilityResults');
-            const facilityIdInput = document.getElementById('facilityId');
-            
-            if (!facilitySearchInput) return;
-            
-            // Load locations for this survey
-            await fetchLocationsForSurveyPage();
-            
-            // Add search functionality
-            facilitySearchInput.addEventListener('input', function() {
-                const searchTerm = this.value.trim();
-                searchAndDisplayFacilities(searchTerm);
-            });
-            
-            // Expand when focused and has content
-            facilitySearchInput.addEventListener('focus', function() {
-                const searchTerm = this.value.trim();
-                if (searchTerm.length >= 2) {
-                    searchAndDisplayFacilities(searchTerm);
-                }
-            });
-            
-            // Hide results when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!facilitySearchInput.contains(event.target) && !facilityResultsDiv.contains(event.target)) {
-                    facilityResultsDiv.style.display = 'none';
-                    facilityResultsDiv.classList.remove('expanded');
-                    facilityResultsDiv.classList.add('collapsed');
-                    // Remove dropdown-active class from container
-                    document.querySelector('.location-table-container').classList.remove('dropdown-active');
-                }
-            });
-        }
-
-        async function fetchLocationsForSurveyPage() {
-            const surveyId = document.getElementById('surveyId').value;
-            const facilitySearchInput = document.getElementById('facilitySearch');
-            const facilityResultsDiv = document.getElementById('facilityResults');
-            const facilityIdInput = document.getElementById('facilityId');
-
-            try {
-                const response = await fetch(`/fbs/admin/get_locations.php?survey_id=${surveyId}`);
-                const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(`Server Error: ${data.error}`);
-                }
-                if (Array.isArray(data) && data.length > 0) {
-                    currentFilteredLocations = data;
-                    
-                    if (facilitySearchInput) {
-                        facilitySearchInput.disabled = false;
-                        facilitySearchInput.placeholder = "Type to search locations...";
-                        facilitySearchInput.setAttribute('required', 'required');
-                        facilityIdInput.setAttribute('required', 'required');
-                    }
-                } else {
-                    currentFilteredLocations = [];
-                    if (facilityResultsDiv) {
-                        facilityResultsDiv.innerHTML = '<div style="padding: 15px; color: #666; text-align: center; background: #f8f9fa; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ffc107;"><i class="fas fa-info-circle me-2"></i>No locations available. Please configure location filters in the admin panel.</div>';
-                        facilityResultsDiv.style.display = 'block';
-                    }
-                    if (facilitySearchInput) facilitySearchInput.removeAttribute('required');
-                    if (facilityIdInput) facilityIdInput.removeAttribute('required');
-                    return;
-                }
-            } catch (error) {
-                console.error('Error loading locations:', error);
-                currentFilteredLocations = [];
-                
-                if (facilityResultsDiv) {
-                    facilityResultsDiv.innerHTML = '<div style="padding: 15px; color: #d63384; text-align: center; background: #f8d7da; border-radius: 8px; margin: 10px 0; border-left: 4px solid #dc3545;"><i class="fas fa-exclamation-triangle me-2"></i>Error loading locations. Please try refreshing the page.</div>';
-                    facilityResultsDiv.style.display = 'block';
-                }
-                
-                if (facilitySearchInput) {
-                    facilitySearchInput.disabled = true;
-                    facilitySearchInput.placeholder = "Error loading locations.";
-                    facilitySearchInput.removeAttribute('required');
-                    facilityIdInput.removeAttribute('required');
-                }
-            }
-        }
-
-        function searchAndDisplayFacilities(searchTerm) {
-            const facilityResultsDiv = document.getElementById('facilityResults');
-            
-            if (!searchTerm || searchTerm.length < 2) {
-                facilityResultsDiv.style.display = 'none';
-                facilityResultsDiv.classList.remove('expanded');
-                facilityResultsDiv.classList.add('collapsed');
-                return;
-            }
-
-            const matchingFacilities = currentFilteredLocations.filter(facility => 
-                facility.name.toLowerCase().includes(searchTerm.toLowerCase())
-            ).slice(0, 10); // Limit to 10 results
-
-            if (matchingFacilities.length > 0) {
-                let resultsHtml = '';
-                matchingFacilities.forEach(facility => {
-                    resultsHtml += `
-                        <div class="facility-item" 
-                             style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; transition: background-color 0.2s ease; word-wrap: break-word; font-size: 14px;"
-                             onmouseover="this.style.backgroundColor='#f0f0f0';"
-                             onmouseout="this.style.backgroundColor='transparent';"
-                             onclick="selectFacility('${facility.id}', '${facility.name.replace(/'/g, "\\'")}', '${facility.uid || ''}', '${facility.path || ''}')">
-                            <div style="font-weight: 500; color: #333; margin-bottom: 3px; font-size: 14px;">${facility.name}</div>
-                            <div id="facility-path-${facility.id}" style="font-size: 12px; color: #666; line-height: 1.2;">Loading path...</div>
-                        </div>
-                    `;
-                });
-                
-                facilityResultsDiv.innerHTML = resultsHtml;
-                
-                // Load human-readable paths for each facility
-                matchingFacilities.forEach(async (facility) => {
-                    try {
-                        const response = await fetch(`/fbs/admin/get_location_path.php?id=${facility.id}`);
-                        const data = await response.json();
-                        const pathElement = document.getElementById(`facility-path-${facility.id}`);
-                        if (pathElement) {
-                            if (data.path && data.path.trim()) {
-                                pathElement.textContent = data.path;
-                            } else {
-                                pathElement.textContent = 'No path available';
-                                pathElement.style.fontStyle = 'italic';
-                            }
-                        }
-                    } catch (error) {
-                        console.error(`Error loading path for facility ${facility.id}:`, error);
-                        const pathElement = document.getElementById(`facility-path-${facility.id}`);
-                        if (pathElement) {
-                            pathElement.textContent = 'Path unavailable';
-                            pathElement.style.fontStyle = 'italic';
-                        }
-                    }
-                });
-                
-                facilityResultsDiv.style.display = 'block';
-                // Expand dropdown when showing results
-                facilityResultsDiv.classList.remove('collapsed');
-                facilityResultsDiv.classList.add('expanded');
-                // Add dropdown-active class to container
-                document.querySelector('.location-table-container').classList.add('dropdown-active');
-            } else {
-                if (searchTerm.length > 0) {
-                    facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No matching locations found for your search.</div>';
-                } else {
-                    facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No locations available for selected filters.</div>';
-                }
-                facilityResultsDiv.style.display = 'block';
-                // Keep collapsed for "no results" message
-                facilityResultsDiv.classList.remove('expanded');
-                facilityResultsDiv.classList.add('collapsed');
-            }
-        }
-
-        async function selectFacility(facilityId, facilityName, orgunitUid, facilityPath) {
-            console.log('Selecting facility:', { facilityId, facilityName, orgunitUid, facilityPath });
-            
-            document.getElementById('facilitySearch').value = facilityName;
-            document.getElementById('facilityId').value = facilityId;
-            document.getElementById('facilityName').value = facilityName;
-            document.getElementById('facilityOrgunitUid').value = orgunitUid;
-            
-            // Hide results dropdown first and collapse it
-            const facilityResultsDiv = document.getElementById('facilityResults');
-            facilityResultsDiv.style.display = 'none';
-            facilityResultsDiv.classList.remove('expanded');
-            facilityResultsDiv.classList.add('collapsed');
-            // Remove dropdown-active class from container
-            document.querySelector('.location-table-container').classList.remove('dropdown-active');
-            
-            // If no path provided or path is empty, try to get it from the displayed path
-            if (!facilityPath || facilityPath.trim() === '') {
-                const pathElement = document.getElementById(`facility-path-${facilityId}`);
-                if (pathElement && pathElement.textContent !== 'Loading path...' && pathElement.textContent !== 'Path unavailable') {
-                    facilityPath = pathElement.textContent;
-                }
-            }
-            
-            document.getElementById('hierarchyData').value = facilityPath || '';
-            
-            // Update location display in table immediately
-            updateLocationDisplay();
-            
-            // Update participant summary panel
-            updateParticipantSummary();
-            
-            // Update selected location path display with loading state (if element exists)
-            const pathDisplay = document.getElementById('selectedLocationPath');
-            pathDisplay.innerHTML = `
-                <i class="fas fa-check-circle text-success me-2"></i>
-                <div>
-                    <div style="font-weight: 600; color: #155724; margin-bottom: 4px;">${facilityName}</div>
-                    <div style="font-size: 13px; color: #6c757d;">
-                        <i class="fas fa-spinner fa-spin me-1"></i>Loading location path...
-                    </div>
-                </div>
-            `;
-            pathDisplay.className = 'alert alert-success';
-            
-            // Load human-readable path
-            try {
-                const response = await fetch(`/fbs/admin/get_location_path.php?id=${facilityId}`);
-                const data = await response.json();
-                
-                pathDisplay.innerHTML = `
-                    <i class="fas fa-map-marker-alt text-success me-2"></i>
-                    <div>
-                        <div style="font-weight: 600; color: #155724; margin-bottom: 6px;">${facilityName}</div>
-                        <div style="font-size: 13px; color: #6c757d; line-height: 1.4;">
-                            <i class="fas fa-route me-1"></i>${data.path || 'No hierarchy path available'}
-                        </div>
-                    </div>
-                `;
-                pathDisplay.className = 'alert alert-success';
-            } catch (error) {
-                console.error('Error loading selected location path:', error);
-                pathDisplay.innerHTML = `
-                    <i class="fas fa-map-marker-alt text-success me-2"></i>
-                    <div>
-                        <div style="font-weight: 600; color: #155724; margin-bottom: 6px;">${facilityName}</div>
-                        <div style="font-size: 13px; color: #dc3545; font-style: italic;">
-                            <i class="fas fa-exclamation-triangle me-1"></i>Hierarchy path could not be loaded
-                        </div>
-                    </div>
-                `;
-                pathDisplay.className = 'alert alert-success';
-            }
-            
-            // Hide results
-            document.getElementById('facilityResults').style.display = 'none';
-            
-            console.log('Selected facility:', { facilityId, facilityName, orgunitUid, facilityPath });
-            
-            // Update location display in table
-            updateLocationDisplay();
-        }
-
-        // Location table functions
-        function toggleLocationEdit() {
-            const searchField = document.getElementById('facilitySearch');
-            const editBtn = document.getElementById('editLocationBtn');
-            const saveBtn = document.getElementById('saveLocationBtn');
-            const cancelBtn = document.getElementById('cancelLocationBtn');
-            
-            if (searchField.readOnly) {
-                // Enable editing
-                searchField.readOnly = false;
-                searchField.classList.add('editable');
-                editBtn.style.display = 'none';
-                saveBtn.style.display = 'inline-block';
-                cancelBtn.style.display = 'inline-block';
-            }
-        }
-        
-        function saveLocationData() {
-            const searchField = document.getElementById('facilitySearch');
-            const editBtn = document.getElementById('editLocationBtn');
-            const saveBtn = document.getElementById('saveLocationBtn');
-            const cancelBtn = document.getElementById('cancelLocationBtn');
-            
-            // Make readonly
-            searchField.readOnly = true;
-            searchField.classList.remove('editable');
-            editBtn.style.display = 'inline-block';
-            saveBtn.style.display = 'none';
-            cancelBtn.style.display = 'none';
-            
-            updateLocationDisplay();
-        }
-        
-        function cancelLocationEdit() {
-            const searchField = document.getElementById('facilitySearch');
-            const editBtn = document.getElementById('editLocationBtn');
-            const saveBtn = document.getElementById('saveLocationBtn');
-            const cancelBtn = document.getElementById('cancelLocationBtn');
-            
-            // Restore original value
-            searchField.value = document.getElementById('facilityName').value || '';
-            searchField.readOnly = true;
-            searchField.classList.remove('editable');
-            editBtn.style.display = 'inline-block';
-            saveBtn.style.display = 'none';
-            cancelBtn.style.display = 'none';
-        }
-        
-        async function updateLocationDisplay() {
-            const facilityName = document.getElementById('facilityName').value;
-            const facilityId = document.getElementById('facilityId').value;
-            let hierarchyData = document.getElementById('hierarchyData').value;
-            const locationDisplay = document.getElementById('selectedLocationDisplay');
-            
-            console.log('Updating location display:', { facilityName, facilityId, hierarchyData });
-            
-            if (facilityName && facilityId) {
-                let displayText = facilityName;
-                
-                // If we don't have hierarchy data or it's incomplete, or if it contains UIDs, fetch it from the API
-                if (!hierarchyData || hierarchyData.trim() === '' || hierarchyData === 'undefined' || hierarchyData.includes('/')) {
-                    try {
-                        locationDisplay.innerHTML = '<div style="color: #6c757d;"><i class="fas fa-spinner fa-spin"></i> Loading location path...</div>';
-                        
-                        const response = await fetch(`/fbs/admin/get_location_path.php?id=${facilityId}`);
-                        const data = await response.json();
-                        
-                        console.log('API response for location path:', data);
-                        
-                        if (data.path && data.path.trim() && !data.path.includes('/')) {
-                            // Good! We got a clean human-readable path
-                            hierarchyData = data.path;
-                            document.getElementById('hierarchyData').value = hierarchyData;
-                        } else if (data.error) {
-                            console.error('API error fetching location path:', data.error);
-                            hierarchyData = '';
-                        }
-                    } catch (error) {
-                        console.error('Error fetching location path:', error);
-                        hierarchyData = '';
-                    }
-                }
-                
-                if (hierarchyData && hierarchyData.trim() !== '' && hierarchyData !== 'undefined') {
-                    try {
-                        // Try to parse as JSON first
-                        const pathData = JSON.parse(hierarchyData);
-                        if (pathData && Array.isArray(pathData) && pathData.length > 0) {
-                            // Build full path from root to selected facility
-                            const pathNames = pathData.map(item => item.name || item);
-                            if (!pathNames.includes(facilityName)) {
-                                pathNames.push(facilityName);
-                            }
-                            displayText = pathNames.join(' → ');
-                        }
-                    } catch (e) {
-                        // If JSON parsing fails, treat as plain text path
-                        if (hierarchyData.includes('→') && !hierarchyData.includes('/')) {
-                            // Already formatted with arrows and no UIDs, just use it
-                            displayText = hierarchyData;
-                        } else if (hierarchyData.includes('/')) {
-                            // This means we still have UIDs in the path, which shouldn't happen after API call
-                            console.warn('Location path still contains UIDs after API call:', hierarchyData);
-                            displayText = facilityName; // Fallback to just facility name
-                        } else {
-                            // If it's clean text without arrows, show both hierarchy and facility
-                            displayText = hierarchyData !== facilityName ? `${hierarchyData} → ${facilityName}` : facilityName;
-                        }
-                    }
-                } else {
-                    // No hierarchy data available
-                    displayText = facilityName;
-                }
-                
-                locationDisplay.innerHTML = `<div style="color: #2c3e50; font-weight: 500; line-height: 1.4;">${displayText}</div>`;
-            } else {
-                locationDisplay.innerHTML = '<div style="color: #6c757d; font-style: italic;">No location selected yet</div>';
-            }
-        }
-
-        // Utility function to clean display names by removing prefixes
-        function cleanDisplayName(displayName) {
-            if (!displayName) return '';
-            
-            // Remove common prefixes like "PM_", "TE_", etc. and any leading underscores
-            let cleaned = displayName.replace(/^[A-Z]{1,3}_+/g, '');
-            
-            // If no prefix was removed, return original
-            if (cleaned === displayName) {
-                return displayName;
-            }
-            
-            // Capitalize first letter of cleaned name
-            return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-        }
-
-        // Participant table functions - simplified since edit now directly opens modal
-        
-        function updateParticipantTable() {
-            const tableBody = document.querySelector('#participantTable tbody');
-            tableBody.innerHTML = '';
-            
-            // Add status row
-            const statusRow = document.createElement('tr');
-            const hasData = formData.trackedEntityAttributes && Object.keys(formData.trackedEntityAttributes).length > 0;
-            statusRow.innerHTML = `
-                <td class="field-label">Registration Status</td>
-                <td class="field-value">
-                    <div class="readonly-value" style="color: ${hasData ? '#28a745' : '#6c757d'};">
-                        ${hasData ? 'Registered' : 'Not registered'}
-                    </div>
-                </td>
-            `;
-            tableBody.appendChild(statusRow);
-            
-            // Add participant attributes if available
-            if (formData.trackedEntityAttributes && programData?.program?.programTrackedEntityAttributes) {
-                Object.keys(formData.trackedEntityAttributes).forEach(attributeId => {
-                    const value = formData.trackedEntityAttributes[attributeId];
-                    if (value) {
-                        const attribute = programData.program.programTrackedEntityAttributes
-                            .find(attr => attr.trackedEntityAttribute.id === attributeId);
-                        
-                        if (attribute) {
-                            const cleanName = cleanDisplayName(attribute.trackedEntityAttribute.displayName);
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td class="field-label">${cleanName}</td>
-                                <td class="field-value">
-                                    <div class="readonly-value">${value}</div>
-                                </td>
-                            `;
-                            tableBody.appendChild(row);
-                        }
-                    }
-                });
-            }
-        }
-
-        // Stage table management functions
-        function initializeStageTables() {
-            if (programData?.program?.programStages) {
-                programData.program.programStages.forEach(stage => {
-                    updateStageTable(stage.id);
-                });
-            }
-        }
-        
-        // Combined Stage Table Management
-        let currentActiveStage = null;
-        
-        function initializeCombinedStageTable() {
-            // Initialize with first stage if available
-            if (programData?.program?.programStages && programData.program.programStages.length > 0) {
-                const firstStage = programData.program.programStages[0];
-                switchToStage(firstStage.id);
-            }
-            
-            // Update all stage status indicators
-            updateAllStageStatuses();
-        }
-        
-        function switchToStage(stageId) {
-            // Update active tab
-            document.querySelectorAll('.stage-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelector(`[data-stage-id="${stageId}"]`)?.classList.add('active');
-            
-            currentActiveStage = stageId;
-            updateCombinedStageTable(stageId);
-        }
-        
-        function updateCombinedStageTable(stageId) {
-            console.log('updateCombinedStageTable called with stageId:', stageId);
-            
-            const stage = programData?.program?.programStages?.find(s => s.id === stageId);
-            if (!stage) {
-                console.warn('Stage not found for ID:', stageId);
-                return;
-            }
-            
-            // Update header only if element exists
-            const stageTitle = document.getElementById('currentStageTitle');
-            if (stageTitle) {
-                stageTitle.textContent = stage.name;
-                console.log('Stage title updated to:', stage.name);
-            } else {
-                console.warn('currentStageTitle element not found, skipping title update');
-            }
-            
-            // Update actions only if container exists
-            const actionsContainer = document.getElementById('currentStageActions');
-            if (!actionsContainer) {
-                console.warn('currentStageActions element not found, skipping actions update');
-                return;
-            }
-            let actionsHtml = '';
-            
-            if (stage.repeatable) {
-                actionsHtml += `
-                    <button type="button" class="btn btn-sm btn-outline-success" onclick="addStageOccurrence('${stageId}')" title="Add occurrence">
-                        <i class="fas fa-plus me-1"></i>Add
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeStageOccurrence('${stageId}')" id="removeBtn_${stageId}" title="Remove occurrence">
-                        <i class="fas fa-minus me-1"></i>Remove
-                    </button>
-                `;
-            }
-            
-            actionsHtml += `
-                <button type="button" class="btn btn-sm btn-primary" onclick="openStageModal('${stageId}')">
-                    <i class="fas fa-edit me-1"></i>Edit Data
-                </button>
-            `;
-            
-            actionsContainer.innerHTML = actionsHtml;
-            console.log('Actions container updated');
-            
-            // Update table body only if it exists
-            const tableBody = document.getElementById('stageTableBody');
-            if (!tableBody) {
-                console.warn('stageTableBody element not found, skipping table update');
-                return;
-            }
-            tableBody.innerHTML = '';
-            console.log('Table body cleared');
-            
-            // Check if we have data for this stage
-            const stageData = formData.stages?.[stageId];
-            const hasData = stageData && Object.keys(stageData).length > 0;
-            
-            // Add event date row
-            const eventDateRow = document.createElement('tr');
-            const eventDate = hasData && stageData.eventDate ? stageData.eventDate : 'Not set';
-            eventDateRow.innerHTML = `
-                <td class="stage-field-name"><strong>Event Date</strong></td>
-                <td class="stage-field-value">
-                    <div class="readonly-value" style="color: ${eventDate !== 'Not set' ? '#2c3e50' : '#6c757d'};">${eventDate}</div>
-                </td>
-                <td class="stage-actions">
-                    <small class="text-muted">Required</small>
-                </td>
-            `;
-            tableBody.appendChild(eventDateRow);
-            
-            // Add data element rows
-            stage.programStageDataElements.forEach(element => {
-                const dataElement = element.dataElement;
-                const value = hasData && stageData[dataElement.id] ? stageData[dataElement.id] : 'No data';
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="stage-field-name">${dataElement.displayName}</td>
-                    <td class="stage-field-value">
-                        <div class="readonly-value" style="color: ${value !== 'No data' ? '#2c3e50' : '#6c757d'};">${value}</div>
-                    </td>
-                    <td class="stage-actions">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="editSingleField('${stageId}', '${dataElement.id}')" title="Edit this field">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        ${value !== 'No data' ? `
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSingleField('${stageId}', '${dataElement.id}')" title="Clear this field">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                        ` : ''}
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-            
-            // Update stage status in tab
-            updateStageTabStatus(stageId);
-            
-            console.log('updateCombinedStageTable completed successfully for stage:', stageId);
-        }
-        
-        function updateAllStageStatuses() {
-            if (programData?.program?.programStages) {
-                programData.program.programStages.forEach(stage => {
-                    updateStageTabStatus(stage.id);
-                });
-            }
-        }
-        
-        function updateStageTabStatus(stageId) {
-            const statusElement = document.getElementById(`tabStatus_${stageId}`);
-            if (!statusElement) return;
-            
-            const stageData = formData.stages?.[stageId];
-            const hasData = stageData && Object.keys(stageData).length > 0;
-            
-            statusElement.textContent = hasData ? '●' : '○';
-            statusElement.className = hasData ? 'stage-status filled' : 'stage-status empty';
-        }
-        
-        function editSingleField(stageId, fieldId) {
-            // This will open the full stage modal for now
-            // In future, could implement inline editing
-            openStageModal(stageId);
-        }
-        
-        function clearSingleField(stageId, fieldId) {
-            if (confirm('Are you sure you want to clear this field?')) {
-                // Clear the field from formData
-                if (formData.stages && formData.stages[stageId]) {
-                    delete formData.stages[stageId][fieldId];
-                }
-                
-                // Update the display
-                updateCombinedStageTable(stageId);
-                updateAllStageStatuses();
-            }
-        }
-        
-        function updateStageTable(stageId) {
-            // Update both old and new systems for compatibility
-            updateCombinedStageTable(stageId);
-            updateAllStageStatuses();
-        }
-
-        // Add new stage occurrence - creates a new table row
-        function addStageOccurrence(stageId = null) {
-            // Use selected stage if no stage ID provided
-            const targetStageId = stageId || selectedStageId;
-            
-            if (!targetStageId) {
-                alert('Please select a stage first');
-                return;
-            }
-            
-            const currentCount = stageOccurrences[targetStageId];
-            const newOccurrence = currentCount + 1;
-            stageOccurrences[targetStageId] = newOccurrence;
-            
-            // Find the stage data
-            const stage = programData.program.programStages.find(s => s.id === targetStageId);
-            if (!stage || !stage.repeatable) {
-                alert('This stage is not repeatable');
-                return;
-            }
-            
-            // Create new table row
-            const tbody = document.getElementById('stageOccurrencesBody');
-            const newRow = document.createElement('tr');
-            newRow.className = 'stage-occurrence-row';
-            newRow.setAttribute('data-stage-id', targetStageId);
-            newRow.setAttribute('data-occurrence', newOccurrence);
-            
-            newRow.innerHTML = `
-                <td class="stage-info">
-                    <div class="stage-name">${stage.name}</div>
-                    <small class="badge bg-secondary" style="font-size: 9px;">Repeatable</small>
-                </td>
-                <td class="occurrence-number">
-                    <span class="occurrence-badge">${newOccurrence}</span>
-                </td>
-                <td class="stage-status">
-                    <span class="status-indicator" id="status_${targetStageId}_${newOccurrence}">
-                        <i class="fas fa-circle text-muted"></i> No data
-                    </span>
-                </td>
-                <td class="stage-actions">
-                    <div class="btn-group btn-group-sm" style="width: 100%;">
-                        <button type="button" class="btn btn-primary btn-sm" onclick="openStageModal('${targetStageId}', ${newOccurrence})" title="Edit data">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeStageOccurrence('${targetStageId}', ${newOccurrence})" title="Remove occurrence">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                        <span class="save-indicator d-none" id="saveIndicator_${targetStageId}_${newOccurrence}">
-                            <i class="fas fa-check-circle text-success" title="Saved"></i>
-                        </span>
-                    </div>
-                </td>
-            `;
-            
-            // Insert the new row after the last occurrence of this stage
-            const existingRows = tbody.querySelectorAll(`tr[data-stage-id="${targetStageId}"]`);
-            const lastRow = existingRows[existingRows.length - 1];
-            lastRow.insertAdjacentElement('afterend', newRow);
-            
-            // Update occurrence count in navigation
-            const navCountElement = document.getElementById(`navCount_${targetStageId}`);
-            if (navCountElement) {
-                const visibleRows = tbody.querySelectorAll(`tr[data-stage-id="${targetStageId}"]`);
-                navCountElement.textContent = `${visibleRows.length} occurrence${visibleRows.length > 1 ? 's' : ''}`;
-            }
-            
-            console.log(`Added occurrence ${newOccurrence} for stage ${targetStageId}`);
-        }
-
-        // Remove stage occurrence - deletes specific table row
-        function removeStageOccurrence(stageId, occurrence) {
-            // Find all rows for this stage
-            const stageRows = document.querySelectorAll(`tr[data-stage-id="${stageId}"]`);
-            
-            if (stageRows.length <= 1) {
-                alert('Cannot remove the last occurrence of a stage');
-                return;
-            }
-            
-            // Find and remove the specific row
-            const targetRow = document.querySelector(`tr[data-stage-id="${stageId}"][data-occurrence="${occurrence}"]`);
-            if (targetRow) {
-                targetRow.remove();
-                
-                // Remove data for this occurrence
-                const occurrenceKey = `${stageId}_${occurrence}`;
-                if (stageData[stageId] && stageData[stageId][occurrenceKey]) {
-                    delete stageData[stageId][occurrenceKey];
-                }
-                
-                // Update occurrence count in memory
-                const remainingRows = document.querySelectorAll(`tr[data-stage-id="${stageId}"]`);
-                stageOccurrences[stageId] = remainingRows.length;
-                
-                // Update occurrence count in navigation
-                const navCountElement = document.getElementById(`navCount_${stageId}`);
-                if (navCountElement) {
-                    navCountElement.textContent = `${remainingRows.length} occurrence${remainingRows.length > 1 ? 's' : ''}`;
-                }
-                
-                console.log(`Removed occurrence ${occurrence} for stage ${stageId}. Remaining: ${remainingRows.length}`);
-            } else {
-                console.log('Target row not found');
-            }
-        }
-        
-        function addOccurrence(stageId) {
-            const stage = programData.program.programStages.find(s => s.id === stageId);
-            if (!stage.repeatable) return;
-            
-            const currentCount = stageOccurrences[stageId];
-            const newOccurrence = currentCount + 1;
-            stageOccurrences[stageId] = newOccurrence;
-            
-            // Add new tab
-            const tabsContainer = document.getElementById(`occurrenceTabs_${stageId}`);
-            const newTab = document.createElement('div');
-            newTab.className = 'occurrence-tab';
-            newTab.onclick = () => switchOccurrence(stageId, newOccurrence);
-            newTab.textContent = `${stage.name} ${newOccurrence}`;
-            tabsContainer.insertBefore(newTab, tabsContainer.lastElementChild);
-            
-            // Clone data elements section
-            const originalSection = document.getElementById(`dataElements_${stageId}_1`);
-            const newSection = originalSection.cloneNode(true);
-            newSection.id = `dataElements_${stageId}_${newOccurrence}`;
-            newSection.style.display = 'none';
-            
-            // Update IDs and clear values
-            newSection.querySelectorAll('.stage-data-element').forEach(element => {
-                const oldId = element.id;
-                const newId = oldId.replace(/_1$/, `_${newOccurrence}`);
-                element.id = newId;
-                element.setAttribute('data-occurrence', newOccurrence);
-                element.value = '';
-                
-                // Update associated label
-                const label = newSection.querySelector(`label[for="${oldId}"]`);
-                if (label) {
-                    label.setAttribute('for', newId);
-                }
-            });
-            
-            // Add event date for new occurrence
-            const eventDate = document.createElement('input');
-            eventDate.type = 'date';
-            eventDate.className = 'form-control event-date';
-            eventDate.setAttribute('data-stage-id', stageId);
-            eventDate.setAttribute('data-occurrence', newOccurrence);
-            eventDate.value = new Date().toISOString().split('T')[0];
-            eventDate.required = true;
-            eventDate.style.display = 'none';
-            
-            originalSection.parentNode.insertBefore(newSection, originalSection.nextSibling);
-            originalSection.parentNode.insertBefore(eventDate, newSection);
-            
-            // Switch to new occurrence
-            switchOccurrence(stageId, newOccurrence);
-        }
-        
-        function switchOccurrence(stageId, occurrence) {
-            // Update tabs
-            document.querySelectorAll(`[id^="occurrenceTabs_${stageId}"] .occurrence-tab`).forEach(tab => {
-                tab.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // Show/hide data elements sections
-            const stageSection = document.querySelector(`[data-stage-id="${stageId}"]`);
-            stageSection.querySelectorAll('.stage-data-elements').forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            const targetSection = document.getElementById(`dataElements_${stageId}_${occurrence}`);
-            if (targetSection) {
-                targetSection.style.display = 'block';
-            }
-            
-            // Show/hide event dates
-            stageSection.querySelectorAll('.event-date').forEach(input => {
-                input.style.display = input.getAttribute('data-occurrence') == occurrence ? 'block' : 'none';
-            });
-        }
-        
-        async function handleSubmit(event) {
-            event.preventDefault();
-            
-            document.getElementById('loadingSpinner').style.display = 'block';
-            document.querySelector('.btn-submit').style.display = 'none';
-            
-            try {
-                // Collect TEI attributes
-                const teaInputs = document.querySelectorAll('[name^="tea_"]');
-                teaInputs.forEach(input => {
-                    const teaId = input.name.replace('tea_', '');
-                    if (input.value) {
-                        formData.trackedEntityAttributes[teaId] = input.value;
-                    }
-                });
-                
-                // Collect events data
-                programData.program.programStages.forEach(stage => {
-                    const occurrenceCount = stageOccurrences[stage.id];
-                    
-                    for (let i = 1; i <= occurrenceCount; i++) {
-                        const eventDate = document.querySelector(`[data-stage-id="${stage.id}"][data-occurrence="${i}"].event-date`).value;
-                        
-                        const event = {
-                            programStage: stage.id,
-                            eventDate: eventDate,
-                            dataValues: {}
-                        };
-                        
-                        // Collect data elements for this occurrence
-                        const dataElements = document.querySelectorAll(`[data-stage-id="${stage.id}"][data-occurrence="${i}"].stage-data-element`);
-                        dataElements.forEach(element => {
-                            if (element.value) {
-                                const deId = element.getAttribute('data-de-id');
-                                event.dataValues[deId] = element.value;
+                // Debug option sets structure
+                if (programData.program) {
+                    console.log('=== PROGRAM DATA DEBUGGING ===');
+                    if (programData.program.programTrackedEntityAttributes) {
+                        console.log('TEI Attributes:', programData.program.programTrackedEntityAttributes.length);
+                        programData.program.programTrackedEntityAttributes.forEach((attr, i) => {
+                            if (attr.trackedEntityAttribute.optionSet) {
+                                console.log(`TEI Attr ${i}:`, attr.trackedEntityAttribute.name, 'has optionSet with', attr.trackedEntityAttribute.optionSet.options?.length, 'options');
                             }
                         });
-                        
-                        formData.events.push(event);
-                    }
-                });
-                
-                console.log('Form data collected:', formData);
-                
-                // Submit to backend
-                const response = await fetch('tracker_program_submit.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        survey_id: document.getElementById('surveyId').value,
-                        form_data: formData
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    alert('Data submitted successfully to DHIS2!');
-                    window.location.href = '/tracker-success/' + document.getElementById('surveyId').value;
-                } else {
-                    alert('Error submitting data: ' + result.message);
-                    document.getElementById('loadingSpinner').style.display = 'none';
-                    document.querySelector('.btn-submit').style.display = 'inline-block';
-                }
-                
-            } catch (error) {
-                console.error('Submission error:', error);
-                alert('Error submitting form. Please try again.');
-                document.getElementById('loadingSpinner').style.display = 'none';
-                document.querySelector('.btn-submit').style.display = 'inline-block';
-            }
-        }
-
-        // Enhanced Stage Navigation Functionality
-        function toggleStageNavigation() {
-            const nav = document.getElementById('stageNavigation');
-            const mainContent = document.getElementById('mainContent');
-            const toggleIcon = nav.querySelector('.stage-nav-toggle i');
-            
-            nav.classList.toggle('collapsed');
-            mainContent.classList.toggle('nav-collapsed');
-            
-            // Update toggle icon
-            if (nav.classList.contains('collapsed')) {
-                toggleIcon.className = 'fas fa-chevron-left';
-            } else {
-                toggleIcon.className = 'fas fa-chevron-right';
-            }
-        }
-
-        function navigateToStage(stageId, navElement) {
-            console.log('navigateToStage called with stageId:', stageId);
-            
-            // Debug: Check what navigation items exist right now
-            const allNavItems = document.querySelectorAll('.stage-nav-item[data-stage]');
-            console.log('Current navigation items:');
-            allNavItems.forEach((item, index) => {
-                const itemStageId = item.getAttribute('data-stage');
-                const stageTitle = item.querySelector('.stage-nav-title')?.textContent?.trim();
-                console.log(`  ${index + 1}: stageId="${itemStageId}", title="${stageTitle}"`);
-            });
-            
-            // Open the stage modal instead of navigating directly
-            if (stageId === 'tei-section') {
-                openTEIModal();
-            } else {
-                openStageModal(stageId);
-            }
-
-            // Update navigation active state
-            console.log('Setting active stage to:', stageId);
-            document.querySelectorAll('.stage-nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-
-            if (navElement) {
-                navElement.classList.add('active');
-                console.log('Successfully set active stage to:', stageId);
-            } else {
-                const navItem = document.querySelector(`[data-stage="${stageId}"]`);
-                if (navItem) {
-                    navItem.classList.add('active');
-                    console.log('Successfully set active stage to (fallback):', stageId);
-                } else {
-                    console.error('Could not find nav item for stage:', stageId);
-                }
-            }
-
-            // Auto-collapse navigation on mobile
-            if (window.innerWidth < 992) {
-                const nav = document.getElementById('stageNavigation');
-                if (!nav.classList.contains('collapsed')) {
-                    toggleStageNavigation();
-                }
-            }
-        }
-
-        // Global variables to track current modal stage and occurrence
-        let currentModalStage = null;
-        let currentModalOccurrence = null;
-        let selectedStageId = null;
-        
-        // Initialize with first stage selected
-        document.addEventListener('DOMContentLoaded', function() {
-            const firstStage = document.querySelector('.stage-nav-item');
-            if (firstStage) {
-                const firstStageId = firstStage.getAttribute('data-stage-id');
-                selectStage(firstStageId);
-            }
-        });
-        
-        // Stage navigation function
-        function selectStage(stageId) {
-            selectedStageId = stageId;
-            
-            // Update navigation active state
-            document.querySelectorAll('.stage-nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            const activeNavItem = document.querySelector(`[data-stage-id="${stageId}"]`);
-            if (activeNavItem) {
-                activeNavItem.classList.add('active');
-            }
-            
-            // Filter table rows to show only selected stage
-            const allRows = document.querySelectorAll('.stage-occurrence-row');
-            allRows.forEach(row => {
-                if (row.getAttribute('data-stage-id') === stageId) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-            
-            // Enable/disable Add Stage button
-            const addBtn = document.getElementById('addStageBtn');
-            const stage = programData.program.programStages.find(s => s.id === stageId);
-            if (stage && stage.repeatable) {
-                addBtn.disabled = false;
-                addBtn.textContent = `Add ${stage.name}`;
-            } else {
-                addBtn.disabled = true;
-                addBtn.textContent = 'Add Stage (Not Repeatable)';
-            }
-            
-            console.log(`Selected stage: ${stageId}`);
-        }
-
-        function openStageModal(stageId, occurrence = 1) {
-            if (!programData || !programData.program || !programData.program.programStages) {
-                console.error('Program data not available');
-                alert('Form data not loaded properly. Please refresh the page.');
-                return;
-            }
-            
-            currentModalStage = stageId;
-            currentModalOccurrence = occurrence;
-            const stage = programData.program.programStages.find(s => s.id === stageId);
-            if (!stage) {
-                console.error('Stage not found:', stageId);
-                return;
-            }
-
-            const modal = document.getElementById('stageQuestionsModal');
-            
-            // Directly show the stage form for the specific occurrence
-            showStageForm(stageId, stage, occurrence);
-
-            // Show modal
-            modal.style.display = 'flex';
-        }
-
-        function showOccurrenceSelector(stageId, stage) {
-            const modal = document.getElementById('stageQuestionsModal');
-            const modalContent = modal.querySelector('.modal-content');
-            
-            modalContent.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="mb-0">
-                        <i class="fas fa-clipboard-list text-primary me-2"></i>
-                        ${stage.name} - Select Occurrence
-                    </h5>
-                    <button type="button" class="btn-close" onclick="closeStageModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    This stage is repeatable and has ${stageOccurrences[stageId]} occurrence(s). Select which one you want to fill or review:
-                </div>
-                
-                <div class="row g-3">
-                    ${Array.from({length: stageOccurrences[stageId]}, (_, i) => {
-                        const occurrenceNum = i + 1;
-                        const hasData = stageData[stageId] && stageData[stageId][`${stageId}_${occurrenceNum}`];
-                        return `
-                            <div class="col-md-6">
-                                <div class="card h-100 occurrence-selector ${hasData ? 'border-success' : ''}" 
-                                     onclick="showStageForm('${stageId}', null, ${occurrenceNum})" 
-                                     style="cursor: pointer; transition: all 0.3s;">
-                                    <div class="card-body text-center">
-                                        <i class="fas fa-calendar-alt text-primary mb-2" style="font-size: 2rem;"></i>
-                                        <h6>${stage.name} ${occurrenceNum}</h6>
-                                        <p class="text-muted mb-0">
-                                            ${hasData ? 
-                                                '<i class="fas fa-check-circle text-success me-1"></i>Data saved' : 
-                                                '<i class="fas fa-circle text-muted me-1"></i>Not filled'
-                                            }
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-                
-                <div class="text-center mt-4">
-                    <button type="button" class="btn btn-secondary" onclick="closeStageModal()">
-                        <i class="fas fa-times me-1"></i> Close
-                    </button>
-                </div>
-            `;
-        }
-
-        async function showStageForm(stageId, stage, occurrenceNum) {
-            currentModalOccurrence = occurrenceNum;
-            if (!stage) {
-                stage = programData.program.programStages.find(s => s.id === stageId);
-            }
-            
-            const modal = document.getElementById('stageQuestionsModal');
-            const modalContent = modal.querySelector('.modal-content');
-            
-            modalContent.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center mb-5">
-                    <h4 class="mb-0" id="modalStageTitle" style="color: #2c3e50; font-weight: 700;">
-                        <i class="fas fa-clipboard-list text-primary me-3"></i>
-                        ${stage.name} ${stage.repeatable ? `- Occurrence ${occurrenceNum}` : ''}
-                        ${stage.repeatable ? '<span class="badge bg-secondary ms-3"><i class="fas fa-repeat me-1"></i>Repeatable</span>' : ''}
-                    </h4>
-                    <button type="button" class="btn-close btn-lg" onclick="closeStageModal()" style="font-size: 1.5rem; padding: 10px;">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                ${stage.description ? `
-                    <div class="alert alert-info" id="modalStageDescription">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <span id="stageDescriptionText">${stage.description}</span>
-                    </div>
-                ` : ''}
-                
-                <div class="mb-5">
-                    <label class="form-label" style="font-size: 18px; font-weight: 600; color: #2c3e50;">
-                        <i class="fas fa-calendar-alt text-primary me-3"></i>
-                        Visit/Event Date
-                        <span class="text-danger">*</span>
-                    </label>
-                    <input type="date" id="modalEventDate" class="form-control" required 
-                           style="font-size: 16px; padding: 15px 18px; border-radius: 10px; border: 2px solid #e9ecef; min-height: 50px;">
-                </div>
-                
-                <div id="modalQuestionsContainer" style="max-height: 600px; overflow-y: auto; padding-right: 10px;">
-                    <div class="modal-questions-grid"></div>
-                </div>
-                
-                <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
-                    <div class="flex-grow-1">
-                        <p class="text-muted mb-0">
-                            <i class="fas fa-info-circle me-2 text-info"></i>
-                            <strong>Note:</strong> Fill in all required fields to proceed with the tracker submission
-                        </p>
-                    </div>
-                    <div class="d-flex gap-3" id="modalButtonsContainer">
-                        <!-- Buttons will be added dynamically -->
-                    </div>
-                </div>
-            `;
-            
-            // Set today's date as default
-            const eventDateInput = modal.querySelector('#modalEventDate');
-            eventDateInput.value = new Date().toISOString().split('T')[0];
-
-            // Add buttons dynamically to avoid template literal issues
-            const buttonsContainer = modal.querySelector('#modalButtonsContainer');
-            let buttonsHTML = '';
-            
-            // Back to list button removed as requested
-            
-            // Add cancel and save buttons
-            buttonsHTML += `
-                <button type="button" class="btn btn-outline-secondary btn-lg px-4" onclick="closeStageModal()">
-                    <i class="fas fa-times me-2"></i> Cancel
-                </button>
-                <button type="button" class="btn btn-success btn-lg px-5" onclick="saveStageData('${stageId}', ${occurrenceNum})">
-                    <i class="fas fa-save me-2"></i> Save 
-                </button>
-            `;
-            
-            buttonsContainer.innerHTML = buttonsHTML;
-
-            // Load stage questions
-            const container = modal.querySelector('#modalQuestionsContainer');
-            await loadStageQuestions(stageId, container);
-            
-            // Load existing data if available
-            loadExistingData(stageId, occurrenceNum);
-            
-            // Load existing files for this stage - disabled to keep files empty initially
-            // setTimeout(async () => {
-            //     await loadExistingFiles();
-            // }, 200);
-            
-            // Initialize Select2 for searchable dropdowns
-            initializeSelect2InModal();
-        }
-
-        async function openTEIModal() {
-            const modal = document.getElementById('stageQuestionsModal');
-            const modalContent = modal.querySelector('.modal-content');
-            
-            modalContent.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center mb-5">
-                    <h4 class="mb-0" style="color: #2c3e50; font-weight: 700;">
-                        <i class="fas fa-user-circle text-primary me-3"></i>
-                        Participant Information
-                    </h4>
-                    <button type="button" class="btn-close btn-lg" onclick="closeStageModal()" style="font-size: 1.5rem; padding: 10px;">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Please provide the following information about the participant. This information will remain constant throughout the program.
-                </div>
-                
-                <div id="modalQuestionsContainer" style="max-height: 600px; overflow-y: auto; padding-right: 10px;">
-                    <div class="modal-questions-grid"></div>
-                </div>
-                
-                <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
-                    <div class="flex-grow-1">
-                        <p class="text-muted mb-0">
-                            <i class="fas fa-info-circle me-2 text-info"></i>
-                            <strong>Note:</strong> Fill in all required fields to proceed with the tracker submission
-                        </p>
-                    </div>
-                    <div class="d-flex gap-3">
-                        <button type="button" class="btn btn-outline-secondary btn-lg px-4" onclick="closeStageModal()">
-                            <i class="fas fa-times me-2"></i> Cancel
-                        </button>
-                        <button type="button" class="btn btn-success btn-lg px-5" onclick="saveTEIData()">
-                            <i class="fas fa-save me-2"></i> Save 
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            // Load TEI attributes
-            const container = modal.querySelector('#modalQuestionsContainer');
-            await loadTEIAttributes(container);
-            
-            // Load existing TEI data if available
-            loadExistingTEIData();
-            
-            // Show modal
-            modal.style.display = 'flex';
-
-            // Initialize Select2 for searchable dropdowns
-            initializeSelect2InModal();
-        }
-
-        async function loadTEIAttributes(container) {
-            if (!programData.program.programTrackedEntityAttributes || programData.program.programTrackedEntityAttributes.length === 0) {
-                const grid = container.querySelector('.modal-questions-grid');
-                grid.innerHTML = '<p class="text-center text-muted">No participant information fields configured.</p>';
-                return;
-            }
-
-            // Load groupings from database for TEI section  
-            // Use a special identifier for TEI attributes
-            const groupingData = await loadGroupingsFromDatabase('tei_attributes');
-
-            // If we have groupings for TEI, apply them
-            if (groupingData && groupingData.length > 0) {
-                loadGroupedTEIAttributes(container, groupingData);
-            } else {
-                loadUngroupedTEIAttributes(container);
-            }
-        }
-
-        function loadUngroupedTEIAttributes(container) {
-            const grid = container.querySelector('.modal-questions-grid');
-            
-            programData.program.programTrackedEntityAttributes.forEach((teaConfig, index) => {
-                const tea = teaConfig.trackedEntityAttribute;
-                const questionItem = createTEIQuestionItem(tea, teaConfig, index);
-                grid.appendChild(questionItem);
-            });
-        }
-
-        function loadGroupedTEIAttributes(container, groupingData) {
-            container.innerHTML = '<div class="grouped-questions-container"></div>';
-            const mainContainer = container.querySelector('.grouped-questions-container');
-
-            // Create groups first
-            groupingData.forEach(group => {
-                if (group.questions && group.questions.length > 0) {
-                    const groupDiv = document.createElement('div');
-                    groupDiv.className = 'modal-group-section';
-                    groupDiv.innerHTML = `
-                        <div class="modal-group-header">
-                            <h5 class="modal-group-title">
-                                <i class="fas fa-folder-open text-info me-3"></i>
-                                ${group.groupTitle}
-                            </h5>
-                        </div>
-                        <div class="modal-group-content">
-                            <div class="modal-questions-grid group-grid"></div>
-                        </div>
-                    `;
-
-                    const groupGrid = groupDiv.querySelector('.group-grid');
-                    
-                    // Add attributes to this group
-                    group.questions.forEach(questionRef => {
-                        const teaConfig = programData.program.programTrackedEntityAttributes.find(tea => 
-                            tea.trackedEntityAttribute.id === questionRef.questionId
-                        );
-                        
-                        if (teaConfig) {
-                            const index = programData.program.programTrackedEntityAttributes.indexOf(teaConfig);
-                            const questionItem = createTEIQuestionItem(teaConfig.trackedEntityAttribute, teaConfig, index);
-                            groupGrid.appendChild(questionItem);
-                        }
-                    });
-
-                    if (groupGrid.children.length > 0) {
-                        mainContainer.appendChild(groupDiv);
-                    }
-                }
-            });
-
-            // Add ungrouped attributes if any
-            const groupedAttributeIds = new Set();
-            groupingData.forEach(group => {
-                if (group.questions) {
-                    group.questions.forEach(q => groupedAttributeIds.add(q.questionId));
-                }
-            });
-
-            const ungroupedAttributes = programData.program.programTrackedEntityAttributes.filter(teaConfig => 
-                !groupedAttributeIds.has(teaConfig.trackedEntityAttribute.id)
-            );
-
-            if (ungroupedAttributes.length > 0) {
-                const ungroupedDiv = document.createElement('div');
-                ungroupedDiv.className = 'modal-group-section';
-                ungroupedDiv.innerHTML = `
-                    <div class="modal-group-header">
-                        <h5 class="modal-group-title">
-                            <i class="fas fa-list text-secondary me-3"></i>
-                            Other Information
-                        </h5>
-                    </div>
-                    <div class="modal-group-content">
-                        <div class="modal-questions-grid group-grid"></div>
-                    </div>
-                `;
-
-                const ungroupedGrid = ungroupedDiv.querySelector('.group-grid');
-                
-                ungroupedAttributes.forEach((teaConfig, index) => {
-                    const questionItem = createTEIQuestionItem(teaConfig.trackedEntityAttribute, teaConfig, index);
-                    ungroupedGrid.appendChild(questionItem);
-                });
-
-                mainContainer.appendChild(ungroupedDiv);
-            }
-        }
-
-        function createTEIQuestionItem(attribute, config, index) {
-            const div = document.createElement('div');
-            div.className = 'modal-question-item';
-            
-            // Add compact class for TRUE_ONLY checkboxes
-            if (attribute.valueType === 'TRUE_ONLY') {
-                div.className += ' checkbox-item';
-            }
-            
-            // Clean the label by removing prefixes
-            let cleanLabel = attribute.name;
-            cleanLabel = cleanLabel.replace(/^[A-Z]+_/, '');
-
-            const inputId = `tei_${attribute.id}_${index}`;
-            
-            div.innerHTML = `
-                <div class="question-header">
-                    <h6 class="question-label">
-                        ${cleanLabel}
-                        ${config.mandatory ? '<span class="question-required">*</span>' : ''}
-                    </h6>
-                </div>
-                <div class="question-input-container" id="input_container_${inputId}">
-                    ${createTEIQuestionInput(attribute, inputId, cleanLabel)}
-                </div>
-                <div class="question-help">
-                    ${getTEIQuestionHelp(attribute.valueType)}
-                </div>
-            `;
-
-            return div;
-        }
-
-        function createTEIQuestionInput(attribute, inputId, label) {
-            const placeholder = getTEIPlaceholderText(attribute.valueType, label);
-            const isRequired = attribute.mandatory || false;
-            
-            if (attribute.valueType === 'TEXT') {
-                // Check if this TEXT attribute has option set - force dropdown if it does
-                if (attribute.optionSet && attribute.optionSet.options) {
-                    console.log('Converting TEI TEXT attribute with options to dropdown:', attribute.name);
-                    let options = '<option value="">Search or select an option...</option>';
-                    attribute.optionSet.options.forEach(option => {
-                        options += `<option value="${option.code}">${option.displayName}</option>`;
-                    });
-                    return `<div class="option-set-field"><select id="${inputId}" name="${inputId}" class="form-control searchable-select" ${isRequired ? 'required' : ''} data-placeholder="Search for ${label}...">${options}</select></div>`;
-                } else {
-                    return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
-                }
-            } else if (['NUMBER', 'INTEGER'].includes(attribute.valueType)) {
-                return `<input type="number" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
-            } else if (attribute.valueType === 'DATE') {
-                return `<input type="date" id="${inputId}" name="${inputId}" class="form-control" ${isRequired ? 'required' : ''}>`;
-            } else if (attribute.valueType === 'LONG_TEXT') {
-                return `<textarea id="${inputId}" name="${inputId}" class="form-control" rows="3" placeholder="${placeholder}" ${isRequired ? 'required' : ''}></textarea>`;
-            } else if (attribute.valueType === 'BOOLEAN') {
-                return `
-                    <select id="${inputId}" name="${inputId}" class="form-control" ${isRequired ? 'required' : ''}>
-                        <option value="">Select...</option>
-                        <option value="true">Yes</option>
-                        <option value="false">No</option>
-                    </select>
-                `;
-            } else if (attribute.valueType === 'EMAIL') {
-                return `<input type="email" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
-            } else if (attribute.valueType === 'PHONE_NUMBER') {
-                return `<input type="tel" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
-            } else if (attribute.valueType === 'TRUE_ONLY') {
-                return `
-                    <div class="form-check">
-                        <input type="checkbox" id="${inputId}" name="${inputId}" class="form-check-input" value="true" ${isRequired ? 'required' : ''}>
-                        <label class="form-check-label" for="${inputId}">Yes</label>
-                    </div>
-                `;
-            } else if (attribute.valueType === 'URL') {
-                return `<input type="url" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
-            } else if (attribute.valueType === 'PERCENTAGE') {
-                return `<input type="number" id="${inputId}" name="${inputId}" class="form-control" min="0" max="100" step="0.01" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
-            } else if (attribute.valueType === 'TIME') {
-                return `<input type="time" id="${inputId}" name="${inputId}" class="form-control" ${isRequired ? 'required' : ''}>`;
-            } else if (attribute.valueType === 'DATETIME') {
-                return `<input type="datetime-local" id="${inputId}" name="${inputId}" class="form-control" ${isRequired ? 'required' : ''}>`;
-            } else if (attribute.valueType === 'FILE_RESOURCE') {
-                return `<div class="alert alert-info">
-                    <i class="fas fa-file-upload me-2"></i>
-                    <strong>File Upload:</strong> ${label}<br>
-                    <small class="text-muted">File upload functionality is not available in this form. This field will be skipped.</small>
-                </div>`;
-            } else if (attribute.optionSet && attribute.optionSet.options) {
-                let options = '<option value="">Search or select an option...</option>';
-                attribute.optionSet.options.forEach(option => {
-                    options += `<option value="${option.code}">${option.displayName}</option>`;
-                });
-                return `<div class="option-set-field"><select id="${inputId}" name="${inputId}" class="form-control searchable-select" ${isRequired ? 'required' : ''} data-placeholder="Search for ${label}...">${options}</select></div>`;
-            } else {
-                return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${isRequired ? 'required' : ''}>`;
-            }
-        }
-
-        function getTEIPlaceholderText(valueType, label) {
-            switch(valueType) {
-                case 'TEXT': return `Enter ${label.toLowerCase()}...`;
-                case 'NUMBER':
-                case 'INTEGER': return `Enter a number for ${label.toLowerCase()}...`;
-                case 'LONG_TEXT': return `Enter detailed information about ${label.toLowerCase()}...`;
-                case 'DATE': return 'Select date';
-                case 'EMAIL': return 'Enter email address...';
-                case 'PHONE_NUMBER': return 'Enter phone number...';
-                case 'URL': return 'Enter website URL...';
-                case 'PERCENTAGE': return 'Enter percentage (0-100)...';
-                case 'TIME': return 'Select time';
-                case 'DATETIME': return 'Select date and time';
-                default: return `Enter ${label.toLowerCase()}...`;
-            }
-        }
-
-        function getTEIQuestionHelp(valueType) {
-            switch(valueType) {
-                case 'TEXT': return 'Enter text information';
-                case 'NUMBER':
-                case 'INTEGER': return 'Enter numeric values only';
-                case 'DATE': return 'Select or enter a valid date';
-                case 'LONG_TEXT': return 'You can enter longer text with multiple lines';
-                case 'BOOLEAN': return 'Choose Yes or No';
-                case 'TRUE_ONLY': return 'Check this box if applicable';
-                case 'EMAIL': return 'Enter a valid email address';
-                case 'PHONE_NUMBER': return 'Enter a valid phone number';
-                case 'URL': return 'Enter a valid website URL';
-                case 'PERCENTAGE': return 'Enter a percentage value between 0 and 100';
-                case 'TIME': return 'Select or enter a time';
-                case 'DATETIME': return 'Select or enter date and time';
-                default: return 'Enter the required information';
-            }
-        }
-
-        function loadExistingTEIData() {
-            // Load existing TEI data if available
-            if (formData.trackedEntityAttributes && Object.keys(formData.trackedEntityAttributes).length > 0) {
-                Object.keys(formData.trackedEntityAttributes).forEach(attributeId => {
-                    const inputs = document.querySelectorAll(`[id^="tei_${attributeId}"]`);
-                    inputs.forEach(input => {
-                        if (input) {
-                            input.value = formData.trackedEntityAttributes[attributeId];
-                        }
-                    });
-                });
-            }
-        }
-
-        function saveTEIData() {
-            console.log('saveTEIData function called');
-            const container = document.getElementById('modalQuestionsContainer');
-            
-            if (!container) {
-                console.error('Modal questions container not found');
-                alert('Error: Form container not found. Please try again.');
-                return;
-            }
-            
-            console.log('Container found:', container);
-            
-            // Collect all TEI attribute data
-            const teiData = {};
-            const inputs = container.querySelectorAll('input, select, textarea');
-            console.log('Found inputs:', inputs.length);
-            let hasRequiredErrors = false;
-            
-            inputs.forEach(input => {
-                console.log('Processing input:', input.id, 'value:', input.value, 'required:', input.hasAttribute('required'));
-                
-                if (input.hasAttribute('required') && !input.value.trim()) {
-                    hasRequiredErrors = true;
-                    input.classList.add('is-invalid');
-                    console.log('Required field empty:', input.id);
-                } else {
-                    input.classList.remove('is-invalid');
-                    if (input.value) {
-                        // Extract attribute ID from input ID (format: tei_ATTRIBUTEID_index)
-                        const match = input.id.match(/^tei_([^_]+)_\d+$/);
-                        if (match) {
-                            const attributeId = match[1];
-                            teiData[attributeId] = input.value;
-                            console.log('Added to teiData:', attributeId, '=', input.value);
-                        }
-                    }
-                }
-            });
-            
-            if (hasRequiredErrors) {
-                console.log('Validation failed - required fields empty');
-                alert('Please fill in all required fields marked with *');
-                return;
-            }
-            
-            console.log('Validation passed, proceeding to save');
-            console.log('TEI data to save:', teiData);
-            
-            // Store TEI data
-            formData.trackedEntityAttributes = teiData;
-            
-            console.log('TEI data stored in formData:', formData.trackedEntityAttributes);
-            
-            // Update UI to show TEI data has been saved
-            updateTEIProgress();
-            updateParticipantSummary();
-            updateParticipantTable();
-            
-            // Close modal
-            closeStageModal();
-            
-            console.log('About to show success message');
-            
-            // Show success message
-            try {
-                showSuccessMessage('Participant information saved successfully!');
-                console.log('Success message shown successfully');
-            } catch (error) {
-                console.error('Error showing success message:', error);
-            }
-            
-            console.log('=== SAVE TEI DATA COMPLETED ===');
-        }
-
-        function updateTEIProgress() {
-            const navItem = document.querySelector('[data-stage="tei-section"]');
-            if (navItem) {
-                const hasData = formData.trackedEntityAttributes && Object.keys(formData.trackedEntityAttributes).length > 0;
-                if (hasData) {
-                    navItem.classList.add('completed');
-                } else {
-                    navItem.classList.remove('completed');
-                }
-            }
-        }
-        
-        function updateParticipantSummary() {
-            console.log('updateParticipantSummary called');
-            
-            // Check if elements exist before trying to update them
-            const statusElement = document.getElementById('participantStatus');
-            const locationElement = document.getElementById('participantLocation');
-            const summaryContainer = document.getElementById('participantSummary');
-            
-            console.log('Participant summary elements found:', {
-                statusElement: !!statusElement,
-                locationElement: !!locationElement,
-                summaryContainer: !!summaryContainer
-            });
-            
-            // Update status only if element exists
-            if (statusElement) {
-                if (formData.trackedEntityAttributes && Object.keys(formData.trackedEntityAttributes).length > 0) {
-                    statusElement.textContent = 'Registered';
-                    statusElement.style.color = '#28a745';
-                } else {
-                    statusElement.textContent = 'Not registered';
-                    statusElement.style.color = '#6c757d';
-                }
-                console.log('Status updated successfully');
-            } else {
-                console.warn('participantStatus element not found, skipping status update');
-            }
-            
-            // Update location only if element exists
-            if (locationElement) {
-                const facilityNameInput = document.getElementById('facilityName');
-                const facilityName = facilityNameInput ? facilityNameInput.value : null;
-                if (facilityName) {
-                    locationElement.textContent = facilityName;
-                    locationElement.style.color = '#2c3e50';
-                } else {
-                    locationElement.textContent = 'No location selected';
-                    locationElement.style.color = '#6c757d';
-                }
-                console.log('Location updated successfully');
-            } else {
-                console.warn('participantLocation element not found, skipping location update');
-            }
-            
-            // Add participant attributes to summary only if container exists
-            if (formData.trackedEntityAttributes && summaryContainer) {
-                // Remove existing dynamic attributes
-                const existingDynamic = summaryContainer.querySelectorAll('.dynamic-attribute');
-                existingDynamic.forEach(el => el.remove());
-                
-                // Add new attributes
-                Object.keys(formData.trackedEntityAttributes).forEach(attributeId => {
-                    const value = formData.trackedEntityAttributes[attributeId];
-                    if (value) {
-                        // Find attribute definition to get display name
-                        const attribute = programData.program.programTrackedEntityAttributes
-                            ?.find(attr => attr.trackedEntityAttribute.id === attributeId);
-                        
-                        if (attribute) {
-                            const cleanName = cleanDisplayName(attribute.trackedEntityAttribute.displayName);
-                            const summaryItem = document.createElement('div');
-                            summaryItem.className = 'summary-item dynamic-attribute';
-                            summaryItem.innerHTML = `
-                                <div class="summary-label">${cleanName}</div>
-                                <div class="summary-value">${value}</div>
-                            `;
-                            summaryContainer.appendChild(summaryItem);
-                        }
-                    }
-                });
-                console.log('Participant summary attributes updated successfully');
-            } else if (!summaryContainer) {
-                console.warn('participantSummary container not found, skipping attributes update');
-            }
-            
-            console.log('updateParticipantSummary completed');
-        }
-
-        async function loadStageQuestions(stageId, container) {
-            const stage = programData.program.programStages.find(s => s.id === stageId);
-            if (!stage) {
-                console.log('❌ Stage not found:', stageId);
-                return;
-            }
-
-            console.log('🚀 Loading stage questions for stage:', stageId, stage.name);
-
-            // Load groupings from database
-            const groupingData = await loadGroupingsFromDatabase(stageId);
-
-            // If we have groupings for this stage, apply them
-            if (groupingData && groupingData.length > 0) {
-                console.log('📋 Using grouped layout for stage:', stageId);
-                loadGroupedQuestions(container, stage, groupingData);
-            } else {
-                console.log('📝 Using ungrouped layout for stage:', stageId);
-                loadUngroupedQuestions(container, stage);
-            }
-        }
-
-        async function loadGroupingsFromDatabase(stageId) {
-            try {
-                const surveyId = document.getElementById('surveyId').value;
-                console.log('🔍 Attempting to load groupings for survey:', surveyId, 'stage:', stageId);
-                
-                const response = await fetch(`/fbs/public/api/groupings.php?survey_id=${surveyId}`);
-                console.log('📡 API Response status:', response.status);
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('📊 Full groupings data from API:', result);
-                    
-                    if (result.success && result.data && result.data[stageId]) {
-                        console.log('✅ Loading groupings from database for stage:', stageId, result.data[stageId]);
-                        return result.data[stageId];
-                    } else {
-                        console.log('❌ No groupings found for stage:', stageId, 'Available stages:', Object.keys(result.data || {}));
-                    }
-                } else {
-                    console.error('❌ API request failed with status:', response.status);
-                }
-                
-                return null;
-            } catch (error) {
-                console.error('❌ Error loading groupings from database:', error);
-                return null;
-            }
-        }
-
-        function loadUngroupedQuestions(container, stage) {
-            container.innerHTML = '<div class="modal-questions-grid"></div>';
-            const grid = container.querySelector('.modal-questions-grid');
-
-            stage.programStageDataElements.forEach((deConfig, index) => {
-                const de = deConfig.dataElement;
-                const questionItem = createQuestionItem(de, deConfig, index);
-                grid.appendChild(questionItem);
-            });
-        }
-
-        function loadGroupedQuestions(container, stage, groupingData) {
-            container.innerHTML = '<div class="grouped-questions-container"></div>';
-            const mainContainer = container.querySelector('.grouped-questions-container');
-
-            // Create groups first
-            groupingData.forEach(group => {
-                if (group.questions && group.questions.length > 0) {
-                    const groupDiv = document.createElement('div');
-                    groupDiv.className = 'modal-group-section';
-                    groupDiv.innerHTML = `
-                        <div class="modal-group-header">
-                            <h5 class="modal-group-title">
-                                <i class="fas fa-folder-open text-info me-3"></i>
-                                ${group.groupTitle}
-                            </h5>
-                        </div>
-                        <div class="modal-group-content">
-                            <div class="modal-questions-grid group-grid"></div>
-                        </div>
-                    `;
-
-                    const groupGrid = groupDiv.querySelector('.group-grid');
-                    
-                    // Add questions to this group
-                    group.questions.forEach(questionRef => {
-                        const deConfig = stage.programStageDataElements.find(de => 
-                            de.dataElement.id === questionRef.questionId
-                        );
-                        
-                        if (deConfig) {
-                            const index = stage.programStageDataElements.indexOf(deConfig);
-                            const questionItem = createQuestionItem(deConfig.dataElement, deConfig, index);
-                            groupGrid.appendChild(questionItem);
-                        }
-                    });
-
-                    if (groupGrid.children.length > 0) {
-                        mainContainer.appendChild(groupDiv);
-                    }
-                }
-            });
-
-            // Add ungrouped questions if any
-            const groupedQuestionIds = new Set();
-            groupingData.forEach(group => {
-                if (group.questions) {
-                    group.questions.forEach(q => groupedQuestionIds.add(q.questionId));
-                }
-            });
-
-            const ungroupedElements = stage.programStageDataElements.filter(deConfig => 
-                !groupedQuestionIds.has(deConfig.dataElement.id)
-            );
-
-            if (ungroupedElements.length > 0) {
-                const ungroupedDiv = document.createElement('div');
-                ungroupedDiv.className = 'modal-group-section';
-                ungroupedDiv.innerHTML = `
-                    <div class="modal-group-header">
-                        <h5 class="modal-group-title">
-                            <i class="fas fa-list text-secondary me-3"></i>
-                            Other Questions
-                        </h5>
-                    </div>
-                    <div class="modal-group-content">
-                        <div class="modal-questions-grid group-grid"></div>
-                    </div>
-                `;
-
-                const ungroupedGrid = ungroupedDiv.querySelector('.group-grid');
-                
-                ungroupedElements.forEach((deConfig, index) => {
-                    const questionItem = createQuestionItem(deConfig.dataElement, deConfig, index);
-                    ungroupedGrid.appendChild(questionItem);
-                });
-
-                mainContainer.appendChild(ungroupedDiv);
-            }
-        }
-
-        function createQuestionItem(dataElement, config, index) {
-            const div = document.createElement('div');
-            div.className = 'modal-question-item';
-            
-            // Add compact class for TRUE_ONLY checkboxes
-            if (dataElement.valueType === 'TRUE_ONLY') {
-                div.className += ' checkbox-item';
-            }
-            
-            // Clean the label by removing prefixes
-            let cleanLabel = dataElement.name;
-            cleanLabel = cleanLabel.replace(/^[A-Z]+_/, '');
-
-            // Use occurrence number instead of index to ensure unique IDs across events
-            const occurrenceNum = currentModalOccurrence || 1;
-            const inputId = `modal_${dataElement.id}_${occurrenceNum}`;
-            
-            div.innerHTML = `
-                <div class="question-header">
-                    <h6 class="question-label">
-                        ${cleanLabel}
-                        ${config.compulsory ? '<span class="question-required">*</span>' : ''}
-                    </h6>
-                </div>
-                <div class="question-input-container" id="input_container_${inputId}">
-                    ${createQuestionInput(dataElement, inputId, cleanLabel)}
-                </div>
-                <div class="question-help">
-                    ${getQuestionHelp(dataElement.valueType)}
-                </div>
-            `;
-
-            return div;
-        }
-
-        function createQuestionInput(dataElement, inputId, label) {
-            console.log('Creating input for:', dataElement.name, 'ID:', dataElement.id, 'optionSet:', dataElement.optionSet);
-            
-            // Special debugging for the problematic field
-            if (dataElement.id === 'ebmdvu4hMqa') {
-                console.log('SPECIAL DEBUG for ebmdvu4hMqa:', {
-                    valueType: dataElement.valueType,
-                    hasOptionSet: !!dataElement.optionSet,
-                    hasOptions: !!(dataElement.optionSet && dataElement.optionSet.options),
-                    optionCount: dataElement.optionSet?.options?.length
-                });
-            }
-            
-            const placeholder = getPlaceholderText(dataElement.valueType, label);
-            
-            if (dataElement.valueType === 'TEXT') {
-                // Check if this TEXT field has option set - force dropdown if it does
-                if (dataElement.optionSet && dataElement.optionSet.options) {
-                    console.log('Converting TEXT field with options to dropdown:', dataElement.name);
-                    let options = '<option value="">Search or select an option...</option>';
-                    dataElement.optionSet.options.forEach(option => {
-                        options += `<option value="${option.code}">${option.displayName}</option>`;
-                    });
-                    return `<div class="option-set-field"><select id="${inputId}" name="${inputId}" class="form-control searchable-select" ${dataElement.compulsory ? 'required' : ''} data-placeholder="Search for ${label}...">${options}</select></div>`;
-                } else {
-                    return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
-                }
-            } else if (['NUMBER', 'INTEGER'].includes(dataElement.valueType)) {
-                return `<input type="number" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
-            } else if (dataElement.valueType === 'DATE') {
-                return `<input type="date" id="${inputId}" name="${inputId}" class="form-control" ${dataElement.compulsory ? 'required' : ''}>`;
-            } else if (dataElement.valueType === 'LONG_TEXT') {
-                return `<textarea id="${inputId}" name="${inputId}" class="form-control" rows="3" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}></textarea>`;
-            } else if (dataElement.valueType === 'BOOLEAN') {
-                return `
-                    <select id="${inputId}" name="${inputId}" class="form-control" ${dataElement.compulsory ? 'required' : ''}>
-                        <option value="">Select...</option>
-                        <option value="true">Yes</option>
-                        <option value="false">No</option>
-                    </select>
-                `;
-            } else if (dataElement.valueType === 'TRUE_ONLY') {
-                return `
-                    <div class="form-check">
-                        <input type="checkbox" id="${inputId}" name="${inputId}" class="form-check-input" value="true" ${dataElement.compulsory ? 'required' : ''}>
-                        <label class="form-check-label" for="${inputId}">Yes</label>
-                    </div>
-                `;
-            } else if (dataElement.valueType === 'EMAIL') {
-                return `<input type="email" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
-            } else if (dataElement.valueType === 'PHONE_NUMBER') {
-                return `<input type="tel" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
-            } else if (dataElement.valueType === 'URL') {
-                return `<input type="url" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
-            } else if (dataElement.valueType === 'PERCENTAGE') {
-                return `<input type="number" id="${inputId}" name="${inputId}" class="form-control" min="0" max="100" step="0.01" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
-            } else if (dataElement.valueType === 'TIME') {
-                return `<input type="time" id="${inputId}" name="${inputId}" class="form-control" ${dataElement.compulsory ? 'required' : ''}>`;
-            } else if (dataElement.valueType === 'DATETIME') {
-                return `<input type="datetime-local" id="${inputId}" name="${inputId}" class="form-control" ${dataElement.compulsory ? 'required' : ''}>`;
-            } else if (dataElement.valueType === 'FILE_RESOURCE') {
-                console.log('FILE_RESOURCE field detected:', {
-                    name: dataElement.name,
-                    id: dataElement.id,
-                    hasSchoolKeyword: dataElement.name ? dataElement.name.toLowerCase().includes('school') : false,
-                    hasInstitutionKeyword: dataElement.name ? dataElement.name.toLowerCase().includes('institution') : false,
-                    isSpecificId: dataElement.id === 'fkipjGtgOHg',
-                    hasSurveySettings: !!programData.surveySettings,
-                    hasDhis2Program: !!(programData.surveySettings && programData.surveySettings.dhis2_program_uid)
-                });
-                
-                // Check if this is a school-related field for this specific survey
-                if (dataElement.name && (
-                    dataElement.name.toLowerCase().includes('school') || 
-                    dataElement.name.toLowerCase().includes('institution') ||
-                    dataElement.id === 'fkipjGtgOHg' // Specific ID for "Names of schools supported by the organization"
-                ) && programData.surveySettings && programData.surveySettings.dhis2_program_uid) {
-                    console.log('Converting FILE_RESOURCE field to CSV/XLSX upload:', dataElement.name);
-                    return `<div class="file-upload-container" onclick="document.getElementById('${inputId}').click();" style="cursor: pointer;">
-                                <div class="file-upload-area">
-                                    <div class="file-upload-icon">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                    </div>
-                                    <div class="file-upload-text">
-                                        <strong>Click to upload a file</strong>
-                                    </div>
-                                    <small class="text-muted mt-2 d-block">
-                                        Upload a CSV or Excel file containing the list of schools. The file should have columns: School Name, School Code/UID
-                                    </small>
-                                </div>
-                            </div>
-                            <input type="file" 
-                                   id="${inputId}" 
-                                   name="${inputId}" 
-                                   accept=".csv,.xlsx,.xls"
-                                   style="display: none;"
-                                   ${dataElement.compulsory ? 'required' : ''}
-                                   onchange="handleSchoolFileUpload(this, '${inputId}')">
-                            <div id="${inputId}_info" class="file-upload-info" style="display: none;">
-                                <div class="uploaded-file-info">
-                                    <i class="fas fa-file-excel text-success me-2"></i>
-                                    <span class="file-name"></span>
-                                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeSchoolFile('${inputId}')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                                <div class="file-preview mt-2" id="${inputId}_preview"></div>
-                            </div>`;
-                } else {
-                    return `<div class="alert alert-info">
-                        <i class="fas fa-file-upload me-2"></i>
-                        <strong>File Upload:</strong> ${label}<br>
-                        <small class="text-muted">File upload functionality is not available in this form. This field will be skipped.</small>
-                    </div>`;
-                }
-            } else if (dataElement.optionSet && dataElement.optionSet.options) {
-                let options = '<option value="">Search or select an option...</option>';
-                dataElement.optionSet.options.forEach(option => {
-                    options += `<option value="${option.code}">${option.displayName}</option>`;
-                });
-                return `<div class="option-set-field"><select id="${inputId}" name="${inputId}" class="form-control searchable-select" ${dataElement.compulsory ? 'required' : ''} data-placeholder="Search for ${label}...">${options}</select></div>`;
-            } else {
-                return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" placeholder="${placeholder}" ${dataElement.compulsory ? 'required' : ''}>`;
-            }
-        }
-
-        function getPlaceholderText(valueType, label) {
-            switch(valueType) {
-                case 'TEXT': return `Enter ${label.toLowerCase()}...`;
-                case 'NUMBER':
-                case 'INTEGER': return `Enter a number for ${label.toLowerCase()}...`;
-                case 'LONG_TEXT': return `Enter detailed information about ${label.toLowerCase()}...`;
-                case 'DATE': return 'Select date';
-                case 'EMAIL': return 'Enter email address...';
-                case 'PHONE_NUMBER': return 'Enter phone number...';
-                case 'URL': return 'Enter website URL...';
-                case 'PERCENTAGE': return 'Enter percentage (0-100)...';
-                case 'TIME': return 'Select time';
-                case 'DATETIME': return 'Select date and time';
-                default: return `Enter ${label.toLowerCase()}...`;
-            }
-        }
-
-        function getQuestionHelp(valueType) {
-            switch(valueType) {
-                case 'TEXT': return 'Enter text information';
-                case 'NUMBER':
-                case 'INTEGER': return 'Enter numeric values only';
-                case 'DATE': return 'Select or enter a valid date';
-                case 'LONG_TEXT': return 'You can enter longer text with multiple lines';
-                case 'BOOLEAN': return 'Choose Yes or No';
-                case 'TRUE_ONLY': return 'Check this box if applicable';
-                case 'EMAIL': return 'Enter a valid email address';
-                case 'PHONE_NUMBER': return 'Enter a valid phone number';
-                case 'URL': return 'Enter a valid website URL';
-                case 'PERCENTAGE': return 'Enter a percentage value between 0 and 100';
-                case 'TIME': return 'Select or enter a time';
-                case 'DATETIME': return 'Select or enter date and time';
-                default: return 'Enter the required information';
-            }
-        }
-
-
-        function initializeSelect2InModal() {
-            // Destroy existing Select2 instances to avoid conflicts
-            $('#stageQuestionsModal .searchable-select').each(function() {
-                if ($(this).hasClass('select2-hidden-accessible')) {
-                    $(this).select2('destroy');
-                }
-            });
-            
-            // Initialize Select2 with enhanced configuration
-            $('#stageQuestionsModal .searchable-select').select2({
-                dropdownParent: $('#stageQuestionsModal .modal-content'),
-                theme: "default",
-                placeholder: function() {
-                    return $(this).data('placeholder') || 'Search and select an option...';
-                },
-                allowClear: true,
-                width: '100%',
-                minimumResultsForSearch: 5, // Show search when 5+ options
-                language: {
-                    noResults: function () {
-                        return "No options found";
-                    },
-                    searching: function () {
-                        return "Searching...";
-                    }
-                }
-            });
-            
-            // Add change event handler for validation
-            $('#stageQuestionsModal .searchable-select').on('change', function() {
-                const $this = $(this);
-                if ($this.prop('required') && !$this.val()) {
-                    $this.next('.select2-container').addClass('is-invalid');
-                } else {
-                    $this.next('.select2-container').removeClass('is-invalid');
-                }
-            });
-            
-            // File upload initialization is handled inline
-            console.log('Select2 initialization complete');
-        }
-        
-        // File upload handling functions
-        async function handleSchoolFileUpload(input, inputId) {
-            const file = input.files[0];
-            if (!file) return;
-            
-            console.log('School file uploaded:', file.name, file.type);
-            
-            // Show loading state
-            const infoDiv = document.getElementById(inputId + '_info');
-            const fileNameSpan = infoDiv.querySelector('.file-name');
-            const previewDiv = document.getElementById(inputId + '_preview');
-            
-            fileNameSpan.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Uploading...';
-            infoDiv.style.display = 'block';
-            
-            try {
-                // Upload file to server
-                const surveyId = document.getElementById('surveyId').value;
-                const questionId = inputId.replace(/^modal_/, '').replace(/_\d+$/, ''); // Extract question ID
-                
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('survey_id', surveyId);
-                formData.append('question_id', questionId);
-                
-                const response = await fetch('/fbs/public/api/file_uploads.php', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Store upload info for later use
-                    const uploadInfo = {
-                        uploadId: result.upload_id,
-                        filename: result.filename,
-                        savedFilename: result.saved_filename,
-                        size: result.size,
-                        uploaded: true
-                    };
-                    
-                    // Store in a data attribute for persistence
-                    input.setAttribute('data-upload-info', JSON.stringify(uploadInfo));
-                    
-                    // Update UI
-                    fileNameSpan.innerHTML = `<i class="fas fa-file-excel text-success me-2"></i>${result.filename}`;
-                    
-                    // Add file size info
-                    const sizeInfo = document.createElement('small');
-                    sizeInfo.className = 'text-muted d-block';
-                    sizeInfo.textContent = `Size: ${(result.size / 1024).toFixed(1)} KB`;
-                    fileNameSpan.appendChild(sizeInfo);
-                    
-                    // Show preview if available
-                    if (result.preview) {
-                        displayFilePreview(result.preview, previewDiv);
                     }
                     
-                    console.log('✅ File uploaded successfully:', uploadInfo);
-                } else {
-                    throw new Error(result.error || 'Upload failed');
-                }
-                
-            } catch (error) {
-                console.error('❌ File upload error:', error);
-                fileNameSpan.innerHTML = `<i class="fas fa-exclamation-triangle text-danger me-2"></i>Upload failed: ${error.message}`;
-                
-                // Reset file input
-                input.value = '';
-                setTimeout(() => {
-                    infoDiv.style.display = 'none';
-                }, 3000);
-            }
-        }
-        
-        function displayFilePreview(preview, previewDiv) {
-            if (!preview || !Array.isArray(preview)) return;
-            
-            let html = '<p class="mb-2"><strong>File Preview (first 5 rows):</strong></p>';
-            html += '<table class="table table-sm table-bordered">';
-            
-            preview.forEach((line, index) => {
-                if (line.trim()) {
-                    const cells = line.split(',');
-                    html += '<tr>';
-                    if (index === 0) {
-                        // Header row
-                        cells.forEach(cell => {
-                            html += `<th class="small">${cell.trim()}</th>`;
-                        });
-                    } else {
-                        // Data rows
-                        cells.forEach(cell => {
-                            html += `<td class="small">${cell.trim()}</td>`;
-                        });
-                    }
-                    html += '</tr>';
-                }
-            });
-            
-            html += '</table>';
-            previewDiv.innerHTML = html;
-        }
-        
-        async function removeSchoolFile(inputId) {
-            const input = document.getElementById(inputId);
-            const infoDiv = document.getElementById(inputId + '_info');
-            
-            // Check if there's an uploaded file to delete from server
-            const uploadInfo = input.getAttribute('data-upload-info');
-            if (uploadInfo) {
-                try {
-                    const uploadData = JSON.parse(uploadInfo);
-                    
-                    // Delete from server
-                    const response = await fetch(`/fbs/public/api/file_uploads.php?upload_id=${uploadData.uploadId}`, {
-                        method: 'DELETE'
-                    });
-                    
-                    const result = await response.json();
-                    if (result.success) {
-                        console.log('✅ File deleted from server:', uploadData.filename);
-                    } else {
-                        console.warn('⚠️ Failed to delete from server:', result.error);
-                    }
-                } catch (error) {
-                    console.error('❌ Error deleting file from server:', error);
-                }
-            }
-            
-            // Clear UI and input
-            input.value = '';
-            input.removeAttribute('data-upload-info');
-            infoDiv.style.display = 'none';
-            
-            console.log('File removed for:', inputId);
-        }
-        
-        // Function to load existing files when form opens
-        async function loadExistingFiles() {
-            const surveyId = document.getElementById('surveyId').value;
-            const fileInputs = document.querySelectorAll('input[type="file"]');
-            
-            console.log('🔍 Loading existing files for survey:', surveyId);
-            
-            for (const input of fileInputs) {
-                const inputId = input.id;
-                const questionId = inputId.replace(/^modal_/, '').replace(/_\d+$/, '');
-                
-                try {
-                    const response = await fetch(`/fbs/public/api/file_uploads.php?survey_id=${surveyId}&question_id=${questionId}`);
-                    const result = await response.json();
-                    
-                    if (result.success && result.file) {
-                        const file = result.file;
-                        
-                        // Store upload info
-                        const uploadInfo = {
-                            uploadId: file.id,
-                            filename: file.original_filename,
-                            savedFilename: file.saved_filename,
-                            size: file.file_size,
-                            uploaded: true
-                        };
-                        
-                        input.setAttribute('data-upload-info', JSON.stringify(uploadInfo));
-                        
-                        // Update UI to show existing file
-                        const infoDiv = document.getElementById(inputId + '_info');
-                        const fileNameSpan = infoDiv.querySelector('.file-name');
-                        
-                        if (infoDiv && fileNameSpan) {
-                            fileNameSpan.innerHTML = `<i class="fas fa-file-excel text-success me-2"></i>${file.original_filename}`;
-                            
-                            // Add file size info
-                            const sizeInfo = document.createElement('small');
-                            sizeInfo.className = 'text-muted d-block';
-                            sizeInfo.textContent = `Size: ${(file.file_size / 1024).toFixed(1)} KB • Uploaded: ${new Date(file.uploaded_at).toLocaleDateString()}`;
-                            fileNameSpan.appendChild(sizeInfo);
-                            
-                            infoDiv.style.display = 'block';
-                            
-                            console.log('✅ Loaded existing file:', file.original_filename);
-                        }
-                    }
-                } catch (error) {
-                    console.log('No existing file for question:', questionId);
-                }
-            }
-        }
-        
-        function previewCSVFile(file, previewDiv) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const csv = e.target.result;
-                const lines = csv.split('\\n').slice(0, 6); // Show first 5 rows + header
-                
-                let html = '<p class="mb-2"><strong>File Preview (first 5 rows):</strong></p>';
-                html += '<table class="table table-sm">';
-                
-                lines.forEach((line, index) => {
-                    if (line.trim()) {
-                        const cells = line.split(',');
-                        html += '<tr>';
-                        cells.forEach(cell => {
-                            const tag = index === 0 ? 'th' : 'td';
-                            html += `<${tag}>${cell.trim()}</${tag}>`;
-                        });
-                        html += '</tr>';
-                    }
-                });
-                
-                html += '</table>';
-                previewDiv.innerHTML = html;
-            };
-            reader.readAsText(file);
-        }
-        
-        function previewExcelFile(file, previewDiv) {
-            // For Excel files, show basic info since we can't parse without a library
-            previewDiv.innerHTML = `
-                <p class="mb-2"><strong>Excel File Information:</strong></p>
-                <ul class="list-unstyled">
-                    <li><i class="fas fa-file-excel text-success me-2"></i>File: ${file.name}</li>
-                    <li><i class="fas fa-weight text-info me-2"></i>Size: ${(file.size / 1024).toFixed(1)} KB</li>
-                    <li><i class="fas fa-calendar text-warning me-2"></i>Modified: ${new Date(file.lastModified).toLocaleDateString()}</li>
-                </ul>
-                <p class="text-muted small">Preview not available for Excel files. File will be processed upon submission.</p>
-            `;
-        }
-
-        // End of file upload functions
-        
-
-
-        function closeStageModal() {
-            console.log('Closing modal for stage:', currentModalStage);
-            
-            // Destroy Select2 instances before closing modal
-            $('#stageQuestionsModal .searchable-select').each(function() {
-                if ($(this).hasClass('select2-hidden-accessible')) {
-                    $(this).select2('destroy');
-                }
-            });
-            
-            const modal = document.getElementById('stageQuestionsModal');
-            modal.style.display = 'none';
-            
-            // Check navigation state before clearing currentModalStage
-            const activeNavItem = document.querySelector('.stage-nav-item.active');
-            console.log('Active nav item before modal close:', activeNavItem?.getAttribute('data-stage'));
-            
-            currentModalStage = null;
-            
-            // Check navigation state after clearing currentModalStage
-            const activeNavItemAfter = document.querySelector('.stage-nav-item.active');
-            console.log('Active nav item after modal close:', activeNavItemAfter?.getAttribute('data-stage'));
-        }
-
-        function saveStageData(stageId, occurrenceNum) {
-            console.log('=== SAVE STAGE DATA START ===');
-            console.log('Parameters received:', { stageId, occurrenceNum });
-            console.log('Global variables:', { currentModalStage, currentModalOccurrence });
-            
-            // Use current modal values if parameters not provided
-            if (!stageId || stageId === 'undefined') {
-                stageId = currentModalStage;
-                console.log('Using currentModalStage:', stageId);
-            }
-            if (!occurrenceNum || occurrenceNum === 'undefined') {
-                occurrenceNum = currentModalOccurrence;
-                console.log('Using currentModalOccurrence:', occurrenceNum);
-            }
-            
-            if (!stageId || !occurrenceNum) {
-                console.error('Missing stage or occurrence data:', { stageId, occurrenceNum });
-                alert('Error: Stage or occurrence information missing. Please try closing and reopening the form.');
-                return;
-            }
-            
-            console.log('Final values to use:', { stageId, occurrenceNum });
-            
-            const eventDate = document.getElementById('modalEventDate');
-            const container = document.getElementById('modalQuestionsContainer');
-            
-            console.log('Save stage data - DOM elements found:', { 
-                eventDate: !!eventDate, 
-                eventDateValue: eventDate?.value,
-                container: !!container,
-                modalVisible: document.getElementById('stageQuestionsModal')?.style.display !== 'none'
-            });
-            
-            if (!eventDate) {
-                console.error('Event date element not found in DOM');
-                alert('Error: Event date field not found. Please try closing and reopening the form.');
-                return;
-            }
-            
-            if (!eventDate.value || eventDate.value.trim() === '') {
-                console.error('Event date value is empty:', eventDate.value);
-                alert('Please select an event date');
-                // Focus on the event date field
-                eventDate.focus();
-                return;
-            }
-            
-            if (!container) {
-                console.error('Questions container not found in DOM');
-                alert('Error: Questions container not found. Please try closing and reopening the form.');
-                return;
-            }
-            
-            // Validate required fields
-            const requiredInputs = container.querySelectorAll('input[required], select[required], textarea[required]');
-            let hasRequiredErrors = false;
-            
-            requiredInputs.forEach(input => {
-                if (!input.value || (input.type === 'checkbox' && !input.checked)) {
-                    hasRequiredErrors = true;
-                    input.classList.add('is-invalid');
-                } else {
-                    input.classList.remove('is-invalid');
-                }
-            });
-            
-            if (hasRequiredErrors) {
-                alert('Please fill in all required fields marked with *');
-                return;
-            }
-            
-            console.log('Starting data collection...');
-            
-            // Collect all form data
-            const occurrenceData = { eventDate: eventDate.value, dataElements: {} };
-            const inputs = container.querySelectorAll('input, select, textarea');
-            
-            console.log('Found form inputs:', inputs.length);
-            
-            inputs.forEach((input, index) => {
-                console.log(`Processing input ${index + 1}/${inputs.length}:`, {
-                    id: input.id,
-                    type: input.type,
-                    value: input.value,
-                    tagName: input.tagName
-                });
-                // Handle different input types appropriately
-                if (input.type === 'file') {
-                    // Handle file inputs specially
-                    if (input.files && input.files[0]) {
-                        occurrenceData.dataElements[input.id] = {
-                            fileName: input.files[0].name,
-                            fileSize: input.files[0].size,
-                            fileType: input.files[0].type,
-                            fileObject: input.files[0], // Store the actual file
-                            isFile: true
-                        };
-                        console.log('Saved file data for field:', input.id, occurrenceData.dataElements[input.id].fileName);
-                    }
-                } else if (input.type === 'checkbox') {
-                    // Handle checkboxes - store checked state
-                    occurrenceData.dataElements[input.id] = {
-                        value: input.checked ? input.value : '',
-                        checked: input.checked,
-                        isCheckbox: true
-                    };
-                    console.log('Saved checkbox data for field:', input.id, 'checked:', input.checked);
-                } else if (input.type === 'radio') {
-                    // Handle radio buttons - only store if checked
-                    if (input.checked) {
-                        occurrenceData.dataElements[input.name] = {
-                            value: input.value,
-                            isRadio: true
-                        };
-                        console.log('Saved radio data for field:', input.name, 'value:', input.value);
-                    }
-                } else if (input.tagName.toLowerCase() === 'select') {
-                    // Handle select elements (including Select2)
-                    if (input.value) {
-                        occurrenceData.dataElements[input.id] = {
-                            value: input.value,
-                            selectedText: input.options[input.selectedIndex]?.text || input.value,
-                            isSelect: true
-                        };
-                        console.log('Saved select data for field:', input.id, 'value:', input.value);
-                    }
-                } else if (input.value !== undefined && input.value !== '') {
-                    // Handle all other input types (text, number, date, email, etc.)
-                    occurrenceData.dataElements[input.id] = {
-                        value: input.value,
-                        type: input.type
-                    };
-                    console.log('Saved input data for field:', input.id, 'type:', input.type, 'value:', input.value);
-                }
-            });
-            
-            // Store the data independently for this stage occurrence
-            if (!stageData[stageId]) {
-                stageData[stageId] = {};
-            }
-            
-            const occurrenceKey = `${stageId}_${occurrenceNum}`;
-            stageData[stageId][occurrenceKey] = occurrenceData;
-            
-            console.log('Saving stage data:', { stageId, occurrenceNum, data: occurrenceData });
-            
-            // Update UI to show data has been saved
-            updateStageProgress(stageId);
-            updateStageTable(stageId);
-            
-            // Show save indicator with green tick
-            const saveIndicator = document.getElementById(`saveIndicator_${stageId}_${occurrenceNum}`);
-            if (saveIndicator) {
-                saveIndicator.classList.remove('d-none');
-                
-                // Hide it after 3 seconds
-                setTimeout(() => {
-                    saveIndicator.classList.add('d-none');
-                }, 3000);
-            }
-            
-            // Update status to show data has been saved
-            const statusIndicator = document.getElementById(`status_${stageId}_${occurrenceNum}`);
-            if (statusIndicator) {
-                statusIndicator.innerHTML = '<i class="fas fa-check-circle text-success"></i> Data saved';
-                console.log(`Status updated for stage ${stageId} occurrence ${occurrenceNum}`);
-            }
-            
-            // Close modal
-            closeStageModal();
-            
-            // Show success message
-            const stageName = programData.program.programStages.find(s => s.id === stageId)?.name || 'Stage';
-            console.log('About to show success message for stage:', stageName);
-            
-            try {
-                showSuccessMessage(`${stageName} ${occurrenceNum > 1 ? `occurrence ${occurrenceNum}` : ''} saved successfully!`);
-                console.log('Success message shown for stage save');
-            } catch (error) {
-                console.error('Error showing stage save success message:', error);
-            }
-            
-            console.log('=== SAVE STAGE DATA FUNCTION COMPLETED ===');
-        }
-
-        function loadExistingData(stageId, occurrenceNum) {
-            const occurrenceKey = `${stageId}_${occurrenceNum}`;
-            const existingData = stageData[stageId] && stageData[stageId][occurrenceKey];
-            
-            if (!existingData) return;
-            
-            // Load event date
-            const eventDateInput = document.getElementById('modalEventDate');
-            if (eventDateInput && existingData.eventDate) {
-                eventDateInput.value = existingData.eventDate;
-            }
-            
-            // Load data element values
-            if (existingData.dataElements) {
-                Object.keys(existingData.dataElements).forEach(inputId => {
-                    const input = document.getElementById(inputId);
-                    if (input) {
-                        const savedData = existingData.dataElements[inputId];
-                        
-                        // Handle different field types appropriately
-                        if (savedData && savedData.isFile) {
-                            // Handle file inputs - show comprehensive indicator and maintain data
-                            
-                            // Create enhanced file status indicator
-                            const fileIndicator = document.createElement('div');
-                            fileIndicator.className = 'alert alert-warning py-2 px-3 mt-2 mb-0';
-                            fileIndicator.style.fontSize = '0.875rem';
-                            fileIndicator.innerHTML = `
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
-                                        <strong>File Previously Selected:</strong> ${savedData.fileName}
-                                        <span class="text-muted ms-2">(${(savedData.fileSize / 1024).toFixed(1)} KB)</span>
-                                    </div>
-                                    <div>
-                                        <span class="badge bg-warning-subtle text-warning-emphasis">⚠ Needs Re-selection</span>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="clearSavedFile('${inputId}')">
-                                            <i class="fas fa-times"></i> Clear
-                                        </button>
-                                    </div>
-                                </div>
-                                <small class="text-warning d-block mt-1">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    <strong>Action Required:</strong> Please re-select this file to ensure it's uploaded to DHIS2. 
-                                    File inputs lose their selection when modals are closed.
-                                </small>
-                            `;
-                            fileIndicator.id = `file-indicator-${inputId}`;
-                            
-                            // Remove existing indicator if any
-                            const existingIndicator = document.getElementById(`file-indicator-${inputId}`);
-                            if (existingIndicator) {
-                                existingIndicator.remove();
-                            }
-                            
-                            // Add the indicator after the file input
-                            input.parentNode.insertBefore(fileIndicator, input.nextSibling);
-                            
-                            // Also add a data attribute to the input to track the saved file
-                            input.setAttribute('data-saved-file', JSON.stringify({
-                                fileName: savedData.fileName,
-                                fileSize: savedData.fileSize,
-                                hasSavedFile: true
-                            }));
-                            
-                            // Make the file input more prominent to encourage re-selection
-                            input.style.border = '2px solid #ffc107';
-                            input.style.backgroundColor = '#fff3cd';
-                            input.setAttribute('title', 'Please re-select this file to ensure it gets uploaded to DHIS2');
-                            
-                            // Add event listener to clear warning styling when file is selected
-                            input.addEventListener('change', function() {
-                                if (this.files && this.files[0]) {
-                                    // User has selected a new file - clear warning styling
-                                    this.style.border = '';
-                                    this.style.backgroundColor = '';
-                                    this.removeAttribute('title');
-                                    
-                                    // Update the indicator to show success
-                                    const indicator = document.getElementById(`file-indicator-${inputId}`);
-                                    if (indicator) {
-                                        indicator.className = 'alert alert-success py-2 px-3 mt-2 mb-0';
-                                        indicator.innerHTML = `
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div>
-                                                    <i class="fas fa-file-excel me-2 text-success"></i>
-                                                    <strong>File Selected:</strong> ${this.files[0].name}
-                                                    <span class="text-muted ms-2">(${(this.files[0].size / 1024).toFixed(1)} KB)</span>
-                                                </div>
-                                                <div>
-                                                    <span class="badge bg-success-subtle text-success-emphasis">✓ Ready for Upload</span>
-                                                </div>
-                                            </div>
-                                        `;
+                    if (programData.program.programStages) {
+                        console.log('Program Stages:', programData.program.programStages.length);
+                        programData.program.programStages.forEach((stage, s) => {
+                            console.log(`Stage ${s}:`, stage.name);
+                            if (stage.programStageDataElements) {
+                                stage.programStageDataElements.forEach((de, d) => {
+                                    if (de.dataElement.optionSet) {
+                                        console.log(`  DE ${d}:`, de.dataElement.name, 'has optionSet with', de.dataElement.optionSet.options?.length, 'options');
                                     }
-                                }
-                            });
-                            
-                            console.log('Restored enhanced file indicator for:', inputId, savedData.fileName);
-                        } else if (savedData && savedData.isCheckbox) {
-                            // Handle checkboxes - restore checked state
-                            input.checked = savedData.checked;
-                            console.log('Restored checkbox for:', inputId, 'checked:', savedData.checked);
-                        } else if (savedData && savedData.isRadio) {
-                            // Handle radio buttons - find by name and value
-                            const radioInputs = document.querySelectorAll(`input[name="${inputId}"]`);
-                            radioInputs.forEach(radio => {
-                                if (radio.value === savedData.value) {
-                                    radio.checked = true;
-                                    console.log('Restored radio for:', inputId, 'value:', savedData.value);
-                                }
-                            });
-                        } else if (savedData && savedData.isSelect) {
-                            // Handle select elements (including Select2)
-                            input.value = savedData.value;
-                            
-                            // Trigger change event for Select2 or other plugins
-                            const changeEvent = new Event('change', { bubbles: true });
-                            input.dispatchEvent(changeEvent);
-                            console.log('Restored select for:', inputId, 'value:', savedData.value);
-                        } else if (savedData && savedData.value !== undefined) {
-                            // Handle regular inputs with stored value
-                            input.value = savedData.value;
-                            console.log('Restored input for:', inputId, 'type:', savedData.type || 'unknown', 'value:', savedData.value);
-                        } else if (typeof savedData === 'string' || typeof savedData === 'number') {
-                            // Handle legacy simple values (backward compatibility)
-                            input.value = savedData;
-                            console.log('Restored legacy value for:', inputId, 'value:', savedData);
-                        }
-                    } else {
-                        console.warn('Input element not found for saved data:', inputId);
+                                });
+                            }
+                        });
                     }
-                });
-            }
-        }
-
-        function updateStageProgress(stageId) {
-            // Update the visual progress indicator for this stage
-            const navItem = document.querySelector(`[data-stage="${stageId}"]`);
-            if (navItem) {
-                // Check if any occurrence has data
-                let hasData = false;
-                if (stageData[stageId]) {
-                    hasData = Object.keys(stageData[stageId]).length > 0;
                 }
                 
-                if (hasData) {
-                    navItem.classList.add('completed');
-                } else {
-                    navItem.classList.remove('completed');
-                }
+                // Enhance window functions with full implementations now that DOM is ready
+                enhanceWindowFunctions();
+                
+                // Initialize with location step
+                await initializeLocationSelection();
+                
+                // Initialize step completion statuses
+                updateAllStepStatuses();
+                
+                console.log('Tracker form initialized successfully with new UI');
+                
+            } catch (error) {
+                console.error('Error initializing tracker form:', error);
             }
-        }
-
-        // Debug function to test data saving and loading
-        function debugStageData() {
-            console.log('=== STAGE DATA DEBUG ===');
-            console.log('Current stageData:', JSON.stringify(stageData, (key, value) => {
-                // Don't stringify file objects
-                if (key === 'fileObject') return '[File Object]';
-                return value;
-            }, 2));
+        });
+        
+        // Function to enhance window functions with full implementations
+        function enhanceWindowFunctions() {
+            // Enhanced functions will be defined here if needed
             
-            // Test data collection from current modal if open
-            const modal = document.getElementById('stageQuestionsModal');
-            if (modal && modal.style.display !== 'none') {
-                const container = document.getElementById('modalQuestionsContainer');
-                const inputs = container.querySelectorAll('input, select, textarea');
-                console.log('=== CURRENT MODAL INPUTS ===');
-                inputs.forEach(input => {
-                    if (input.type === 'file') {
-                        console.log(`${input.id} (file): ${input.files?.[0]?.name || 'No file selected'}`);
-                    } else if (input.type === 'checkbox') {
-                        console.log(`${input.id} (checkbox): checked=${input.checked}, value=${input.value}`);
-                    } else if (input.type === 'radio') {
-                        console.log(`${input.name} (radio): checked=${input.checked}, value=${input.value}`);
-                    } else {
-                        console.log(`${input.id} (${input.type || input.tagName}): ${input.value}`);
+            // Enhanced stage occurrence functions
+            window.addStageOccurrence = function(stageId) {
+                console.log(`=== addStageOccurrence called for stageId: ${stageId} ===`);
+                const currentCount = getStageOccurrences(stageId);
+                console.log(`Current count: ${currentCount}`);
+                const newCount = currentCount + 1;
+                console.log(`New count will be: ${newCount}`);
+                
+                // Initialize stage data if not exists
+                if (!formData.stages) formData.stages = {};
+                if (!formData.stages[stageId]) formData.stages[stageId] = {};
+                
+                // Update tracking variable
+                stageOccurrences[stageId] = newCount;
+                console.log(`Updated stageOccurrences[${stageId}] to: ${newCount}`);
+                
+                // Create placeholder for new occurrence
+                formData.stages[stageId][`occurrence_${newCount}`] = {};
+                console.log(`Created occurrence_${newCount} for stage ${stageId}`);
+                console.log('Current formData.stages:', formData.stages[stageId]);
+                
+                // Refresh the display
+                console.log('Calling populateStagesCards...');
+                populateStagesCards();
+                
+                // Update the specific stage's occurrences display
+                console.log(`Calling populateStageOccurrences(${stageId}, ${newCount})...`);
+                populateStageOccurrences(stageId, newCount);
+                
+                // Show success message
+                showSuccessMessage(`Added occurrence ${newCount} for this stage`);
+                
+                // Automatically open the new occurrence modal
+                setTimeout(() => {
+                    openStageModal(stageId, newCount);
+                }, 500);
+                
+                console.log(`Added occurrence ${newCount} for stage ${stageId}`);
+            };
+            
+            window.removeStageOccurrence = function(stageId, occurrence) {
+                if (confirm('Are you sure you want to remove this occurrence?')) {
+                    console.log(`Removing occurrence ${occurrence} for stage ${stageId}`);
+                    
+                    if (formData.stages && formData.stages[stageId]) {
+                        // Get all current occurrences
+                        const allOccurrences = {};
+                        const occurrenceKeys = Object.keys(formData.stages[stageId])
+                            .filter(key => key.startsWith('occurrence_'))
+                            .sort((a, b) => {
+                                const numA = parseInt(a.split('_')[1]);
+                                const numB = parseInt(b.split('_')[1]);
+                                return numA - numB;
+                            });
+                        
+                        console.log('Current occurrence keys:', occurrenceKeys);
+                        
+                        // Collect all occurrence data except the one being deleted
+                        occurrenceKeys.forEach(key => {
+                            const occurrenceNum = parseInt(key.split('_')[1]);
+                            if (occurrenceNum !== occurrence) {
+                                allOccurrences[key] = formData.stages[stageId][key];
+                            }
+                        });
+                        
+                        // Clear all existing occurrences
+                        occurrenceKeys.forEach(key => {
+                            delete formData.stages[stageId][key];
+                        });
+                        
+                        // Re-add occurrences with consecutive numbering
+                        let newOccurrenceNum = 1;
+                        Object.keys(allOccurrences).forEach(oldKey => {
+                            formData.stages[stageId][`occurrence_${newOccurrenceNum}`] = allOccurrences[oldKey];
+                            newOccurrenceNum++;
+                        });
+                        
+                        // Update tracking variable
+                        stageOccurrences[stageId] = newOccurrenceNum - 1;
+                        
+                        console.log(`Reordered occurrences. New count: ${newOccurrenceNum - 1}`);
                     }
-                });
-            }
-            console.log('=== END DEBUG ===');
-        }
-
-        // Make debug function available globally for testing
-        window.debugStageData = debugStageData;
-        
-        // Function to clear saved file data
-        function clearSavedFile(inputId) {
-            const input = document.getElementById(inputId);
-            if (input) {
-                // Remove data attribute
-                input.removeAttribute('data-saved-file');
-                
-                // Clear the file input
-                input.value = '';
-                
-                // Remove the indicator
-                const indicator = document.getElementById(`file-indicator-${inputId}`);
-                if (indicator) {
-                    indicator.remove();
+                    
+                    // Refresh the display
+                    populateStagesCards();
+                    
+                    // Show success message
+                    showSuccessMessage('Stage occurrence removed successfully');
+                    
+                    console.log(`Successfully removed occurrence ${occurrence} for stage ${stageId}`);
                 }
-                
-                console.log('Cleared saved file for:', inputId);
-            }
+            };
         }
         
-        // Make clearSavedFile available globally
-        window.clearSavedFile = clearSavedFile;
-        
-        // Debug function to show complete submission data
-        function debugSubmissionData() {
-            console.log('=== COMPLETE SUBMISSION DEBUG ===');
-            
-            // Show stageData
-            console.log('Current stageData:', JSON.stringify(stageData, (key, value) => {
-                if (key === 'fileObject') return '[File Object]';
-                return value;
-            }, 2));
-            
-            // Show formData
-            console.log('Current formData:', JSON.stringify(formData, null, 2));
-            
-            // Show all stages in DOM
-            const stageCards = document.querySelectorAll('.stage-card, .stage-nav-item');
-            console.log('=== DOM STAGES ===');
-            stageCards.forEach(stage => {
-                const stageId = stage.getAttribute('data-stage-id') || stage.getAttribute('data-stage');
-                const stageName = stage.textContent.trim();
-                console.log(`Stage: ${stageId} - ${stageName}`);
-            });
-            
-            // Show current modal state
-            const modal = document.getElementById('stageQuestionsModal');
-            console.log('Modal open:', modal?.style.display !== 'none');
-            console.log('Current modal stage:', currentModalStage);
-            console.log('Current modal occurrence:', currentModalOccurrence);
-            
-            // Show all file inputs
-            const allFileInputs = document.querySelectorAll('input[type="file"]');
-            console.log('=== ALL FILE INPUTS ===');
-            allFileInputs.forEach(input => {
-                console.log(`${input.id}: ${input.files?.[0]?.name || 'No file'}`);
-            });
-            
-            console.log('=== END SUBMISSION DEBUG ===');
-        }
-        
-        window.debugSubmissionData = debugSubmissionData;
-
+        // DHIS2 Submission Functions
         async function submitAllData() {
             // Check if we're in offline mode
             <?php if (isset($offlineMode) && $offlineMode): ?>
@@ -5052,7 +4287,7 @@ if (!empty($programStages)) {
             <?php endif; ?>
             
             const loadingSpinner = document.getElementById('loadingSpinner');
-            const submitBtn = document.querySelector('[onclick="submitAllData()"]');
+            const submitBtn = document.querySelector('[onclick="submitAllData()"]') || document.getElementById('finalSubmitBtn');
             
             // Validate location selection
             const facilityId = document.getElementById('facilityId').value;
@@ -5064,254 +4299,75 @@ if (!empty($programStages)) {
             }
             
             // Show loading state
-            loadingSpinner.style.display = 'block';
-            submitBtn.style.display = 'none';
+            if (loadingSpinner) loadingSpinner.style.display = 'block';
+            if (submitBtn) submitBtn.style.display = 'none';
             
             try {
                 // Collect all form data for DHIS2 submission
-                // Ensure TEI data is collected from any open modal
-                const teiModal = document.getElementById('stageQuestionsModal');
-                if (teiModal && teiModal.style.display !== 'none') {
-                    const modalTitle = teiModal.querySelector('h4');
-                    if (modalTitle && modalTitle.textContent.includes('Participant Information')) {
-                        console.log('Collecting TEI data from open modal...');
-                        const container = document.getElementById('modalQuestionsContainer');
-                        const teiInputs = container.querySelectorAll('input, select, textarea');
-                        
-                        teiInputs.forEach(input => {
-                            if (input.value) {
-                                const match = input.id.match(/^tei_([^_]+)_\d+$/);
-                                if (match) {
-                                    const attributeId = match[1];
-                                    if (!formData.trackedEntityAttributes) {
-                                        formData.trackedEntityAttributes = {};
-                                    }
-                                    formData.trackedEntityAttributes[attributeId] = input.value;
-                                    console.log('Added TEI attribute:', attributeId, input.value);
-                                }
-                            }
-                        });
-                    }
-                }
-                
                 const submissionData = {
-                    survey_id: document.getElementById('surveyId').value,
-                    location_data: {
-                        facility_id: document.getElementById('facilityId').value,
-                        facility_name: document.getElementById('facilityName').value,
-                        orgunit_uid: document.getElementById('facilityOrgunitUid').value,
-                        hierarchy_path: document.getElementById('hierarchyData').value
-                    },
+                    survey_id: surveyData.survey.id,
                     form_data: {
-                        trackedEntityAttributes: formData.trackedEntityAttributes || {},
+                        trackedEntityAttributes: {},
                         events: []
+                    },
+                    location_data: {
+                        facility_id: facilityId,
+                        facility_name: document.getElementById('facilityName').textContent,
+                        orgunit_uid: facilityOrgunitUid
                     }
                 };
                 
-                // IMPORTANT: Save current modal data if a stage is currently open
-                const modal = document.getElementById('stageQuestionsModal');
-                if (modal && modal.style.display !== 'none' && currentModalStage) {
-                    console.log('Saving current open modal data before submission...');
-                    const eventDate = document.getElementById('modalEventDate').value;
-                    const container = document.getElementById('modalQuestionsContainer');
-                    
-                    if (eventDate) {
-                        const tempOccurrenceData = { eventDate: eventDate, dataElements: {} };
-                        const inputs = container.querySelectorAll('input, select, textarea');
+                // Collect TEI attributes
+                Object.keys(formData.stages || {}).forEach(stageId => {
+                    Object.keys(formData.stages[stageId] || {}).forEach(occurrenceKey => {
+                        const occurrenceData = formData.stages[stageId][occurrenceKey];
                         
-                        inputs.forEach(input => {
-                            // Use the same logic as saveStageData for consistency
-                            if (input.type === 'file') {
-                                if (input.files && input.files[0]) {
-                                    tempOccurrenceData.dataElements[input.id] = {
-                                        fileName: input.files[0].name,
-                                        fileSize: input.files[0].size,
-                                        fileType: input.files[0].type,
-                                        fileObject: input.files[0],
-                                        isFile: true
-                                    };
+                        // Check if this is TEI data (participant information stage)
+                        const stage = programData.program.programStages.find(s => s.id === stageId);
+                        if (stage && stage.name.toLowerCase().includes('participant')) {
+                            Object.keys(occurrenceData).forEach(inputId => {
+                                const match = inputId.match(/^tei_([^_]+)_\d+$/);
+                                if (match) {
+                                    const attributeId = match[1];
+                                    submissionData.form_data.trackedEntityAttributes[attributeId] = occurrenceData[inputId];
                                 }
-                            } else if (input.type === 'checkbox') {
-                                tempOccurrenceData.dataElements[input.id] = {
-                                    value: input.checked ? input.value : '',
-                                    checked: input.checked,
-                                    isCheckbox: true
-                                };
-                            } else if (input.type === 'radio') {
-                                if (input.checked) {
-                                    tempOccurrenceData.dataElements[input.name] = {
-                                        value: input.value,
-                                        isRadio: true
-                                    };
-                                }
-                            } else if (input.tagName.toLowerCase() === 'select') {
-                                if (input.value) {
-                                    tempOccurrenceData.dataElements[input.id] = {
-                                        value: input.value,
-                                        selectedText: input.options[input.selectedIndex]?.text || input.value,
-                                        isSelect: true
-                                    };
-                                }
-                            } else if (input.value !== undefined && input.value !== '') {
-                                tempOccurrenceData.dataElements[input.id] = {
-                                    value: input.value,
-                                    type: input.type
-                                };
-                            }
-                        });
-                        
-                        // Add current modal data to stageData temporarily for submission
-                        if (!stageData[currentModalStage]) {
-                            stageData[currentModalStage] = {};
+                            });
                         }
-                        const tempOccurrenceKey = `${currentModalStage}_${currentModalOccurrence || 1}`;
-                        stageData[currentModalStage][tempOccurrenceKey] = tempOccurrenceData;
-                        console.log('Added current modal data:', tempOccurrenceKey, tempOccurrenceData);
-                    }
-                }
-                
-                // Also collect any data from visible stage sections (non-modal data)
-                const stageCards = document.querySelectorAll('.stage-card');
-                stageCards.forEach(stageCard => {
-                    const stageId = stageCard.getAttribute('data-stage-id');
-                    if (stageId) {
-                        // Look for any unsaved data in visible stage inputs
-                        const stageInputs = stageCard.querySelectorAll('input, select, textarea');
-                        stageInputs.forEach(input => {
-                            if (input.value && input.getAttribute('data-de-id')) {
-                                const deId = input.getAttribute('data-de-id');
-                                const occurrence = input.getAttribute('data-occurrence') || '1';
-                                const occurrenceKey = `${stageId}_${occurrence}`;
-                                
-                                // Initialize if not exists
-                                if (!stageData[stageId]) {
-                                    stageData[stageId] = {};
-                                }
-                                if (!stageData[stageId][occurrenceKey]) {
-                                    stageData[stageId][occurrenceKey] = {
-                                        eventDate: new Date().toISOString().split('T')[0], // Default to today
-                                        dataElements: {}
-                                    };
-                                }
-                                
-                                // Add data element
-                                stageData[stageId][occurrenceKey].dataElements[input.id] = {
-                                    value: input.value,
-                                    type: input.type
-                                };
-                                console.log('Added visible stage data:', occurrenceKey, deId, input.value);
-                            }
-                        });
-                    }
-                });
-                
-                console.log('Complete stageData before submission:', stageData);
-                
-                // Debug: Check for file field conflicts
-                const fileFieldAnalysis = {};
-                Object.keys(stageData).forEach(stageId => {
-                    Object.keys(stageData[stageId]).forEach(occurrenceKey => {
-                        const elements = stageData[stageId][occurrenceKey].dataElements || {};
-                        Object.keys(elements).forEach(inputId => {
-                            if (elements[inputId].isFile) {
-                                const deId = inputId.match(/^modal_([^_]+)_\d+$/)?.[1];
-                                if (deId) {
-                                    if (!fileFieldAnalysis[deId]) {
-                                        fileFieldAnalysis[deId] = [];
-                                    }
-                                    fileFieldAnalysis[deId].push({
-                                        inputId,
-                                        occurrenceKey,
-                                        fileName: elements[inputId].fileName
-                                    });
-                                }
-                            }
-                        });
                     });
                 });
                 
-                console.log('=== FILE FIELD ANALYSIS ===');
-                Object.keys(fileFieldAnalysis).forEach(deId => {
-                    const files = fileFieldAnalysis[deId];
-                    console.log(`Data Element ${deId}: ${files.length} files`);
-                    files.forEach((file, index) => {
-                        console.log(`  ${index + 1}. ${file.fileName} (${file.occurrenceKey})`);
-                    });
-                    if (files.length > 1) {
-                        console.warn(`⚠️  Multiple files assigned to same data element: ${deId}`);
+                // Collect events data
+                Object.keys(formData.stages || {}).forEach(stageId => {
+                    Object.keys(formData.stages[stageId] || {}).forEach(occurrenceKey => {
+                        const occurrenceData = formData.stages[stageId][occurrenceKey];
                         
-                        // Check if files are in same occurrence (file splitting needed) or different occurrences (legitimate)
-                        const occurrences = [...new Set(files.map(f => f.occurrenceKey))];
-                        if (occurrences.length === 1) {
-                            console.warn(`   → Files are in SAME occurrence (${occurrences[0]}) - will split into separate events`);
-                        } else {
-                            console.log(`   → Files are in DIFFERENT occurrences - this is normal`);
-                        }
-                    }
-                });
-                console.log('=== END FILE ANALYSIS ===');
-                
-                // Convert stage data to DHIS2 events format (simplified - one file per field)
-                Object.keys(stageData).forEach(stageId => {
-                    const stageOccurrences = stageData[stageId];
-                    Object.keys(stageOccurrences).forEach(occurrenceKey => {
-                        const occurrenceData = stageOccurrences[occurrenceKey];
+                        // Skip empty occurrences
+                        if (!occurrenceData || Object.keys(occurrenceData).length === 0) return;
                         
-                        // Create event for DHIS2
                         const event = {
                             programStage: stageId,
-                            eventDate: occurrenceData.eventDate,
+                            eventDate: new Date().toISOString().split('T')[0], // Default to today
                             dataValues: {}
                         };
                         
-                        // Process all data elements (files and non-files)
-                        Object.keys(occurrenceData.dataElements || {}).forEach(inputId => {
-                            const match = inputId.match(/^modal_([^_]+)_\d+$/);
-                            if (match) {
-                                const deId = match[1];
-                                const savedData = occurrenceData.dataElements[inputId];
-                                
-                                let finalValue = '';
-                                if (savedData && savedData.isFile) {
-                                    console.log(`Checking file field ${inputId}:`, {
-                                        fileName: savedData.fileName,
-                                        hasFileObject: !!savedData.fileObject,
-                                        fileObjectType: typeof savedData.fileObject
-                                    });
-                                    
-                                    // Check if this file is actually available for upload
-                                    if (savedData.fileObject && savedData.fileObject instanceof File) {
-                                        finalValue = `FILE_PLACEHOLDER:${inputId}`;
-                                        console.log(`✓ Creating placeholder for ${inputId} - file object available`);
-                                    } else {
-                                        console.warn(`✗ Skipping file field ${inputId} - file object not available (was: ${savedData.fileName})`);
-                                        finalValue = ''; // Skip this field entirely - will not be sent to DHIS2
-                                    }
-                                } else if (savedData && savedData.isCheckbox) {
-                                    finalValue = savedData.checked ? savedData.value : '';
-                                } else if (savedData && savedData.isRadio) {
-                                    finalValue = savedData.value;
-                                } else if (savedData && savedData.isSelect) {
-                                    finalValue = savedData.value;
-                                } else if (savedData && savedData.value !== undefined) {
-                                    finalValue = savedData.value;
-                                } else if (typeof savedData === 'string' || typeof savedData === 'number') {
-                                    finalValue = savedData;
-                                }
-                                
-                                if (finalValue !== '') {
-                                    event.dataValues[deId] = finalValue;
+                        // Process all data in this occurrence
+                        Object.keys(occurrenceData).forEach(inputId => {
+                            const value = occurrenceData[inputId];
+                            if (value && value !== '') {
+                                // Extract data element ID from input ID
+                                const deMatch = inputId.match(/^de_([^_]+)_\d+$/);
+                                if (deMatch) {
+                                    const dataElementId = deMatch[1];
+                                    event.dataValues[dataElementId] = value;
                                 }
                             }
                         });
                         
-                        submissionData.form_data.events.push(event);
+                        // Only add event if it has data values
+                        if (Object.keys(event.dataValues).length > 0) {
+                            submissionData.form_data.events.push(event);
+                        }
                     });
-                });
-                
-                console.log(`Final events to submit: ${submissionData.form_data.events.length} events`);
-                submissionData.form_data.events.forEach((event, index) => {
-                    console.log(`  Event ${index + 1} (${event.programStage}): ${Object.keys(event.dataValues).length} data values`);
                 });
                 
                 console.log('Submitting data to DHIS2:', submissionData);
@@ -5322,101 +4378,29 @@ if (!empty($programStages)) {
                 submissionFormData.append('form_data', JSON.stringify(submissionData.form_data));
                 submissionFormData.append('location_data', JSON.stringify(submissionData.location_data));
                 
-                // Collect ALL files from all sources (no overriding - each input field can have its own file)
-                const finalFiles = new Map(); // Map of input field ID to file
-                console.log('=== FILE COLLECTION DEBUG ===');
-                console.log('Stage data keys:', Object.keys(stageData));
-                
-                // First, collect files from saved stage data
-                Object.keys(stageData).forEach(stageId => {
-                    console.log(`Processing stage: ${stageId}`);
-                    const stageOccurrences = stageData[stageId];
-                    Object.keys(stageOccurrences).forEach(occurrenceKey => {
-                        console.log(`  Processing occurrence: ${occurrenceKey}`);
-                        const occurrenceData = stageOccurrences[occurrenceKey];
-                        if (occurrenceData.dataElements) {
-                            console.log(`    Found ${Object.keys(occurrenceData.dataElements).length} data elements`);
-                            Object.keys(occurrenceData.dataElements).forEach(inputId => {
-                                const value = occurrenceData.dataElements[inputId];
-                                console.log(`    Checking element ${inputId}:`, value);
-                                if (value && value.isFile && value.fileObject) {
-                                    finalFiles.set(inputId, {
-                                        file: value.fileObject,
-                                        fileName: value.fileName,
-                                        inputId: inputId,
-                                        source: 'saved_stage'
-                                    });
-                                    console.log(`✓ File collected from saved data: ${inputId} -> ${value.fileName}`);
-                                } else if (value && value.isFile) {
-                                    console.log(`✗ File data missing fileObject for ${inputId}:`, {
-                                        isFile: value.isFile,
-                                        fileName: value.fileName,
-                                        hasFileObject: !!value.fileObject
-                                    });
-                                }
-                            });
-                        } else {
-                            console.log(`    No data elements found for occurrence ${occurrenceKey}`);
-                        }
+                // Collect files from all stages and occurrences
+                const finalFiles = new Map();
+                Object.keys(formData.stages || {}).forEach(stageId => {
+                    Object.keys(formData.stages[stageId] || {}).forEach(occurrenceKey => {
+                        const occurrenceData = formData.stages[stageId][occurrenceKey];
+                        Object.keys(occurrenceData || {}).forEach(inputId => {
+                            const inputElement = document.getElementById(inputId);
+                            if (inputElement && inputElement.type === 'file' && inputElement.files.length > 0) {
+                                finalFiles.set(inputId, inputElement.files[0]);
+                            }
+                        });
                     });
                 });
                 
-                // Then, add files from ALL file inputs (including saved file states)
-                const fileFields = document.querySelectorAll('input[type="file"]');
-                console.log(`Found ${fileFields.length} visible file inputs`);
-                fileFields.forEach((fileField, index) => {
-                    console.log(`  Visible file input ${index}: ${fileField.id} (has files: ${!!(fileField.files && fileField.files[0])})`);
-                    
-                    // Check if this input has a saved file (from data attribute or saved state indicator)
-                    const savedFileData = fileField.getAttribute('data-saved-file');
-                    let hasSavedFile = false;
-                    if (savedFileData) {
-                        try {
-                            const savedInfo = JSON.parse(savedFileData);
-                            hasSavedFile = savedInfo.hasSavedFile;
-                            console.log(`    Input ${fileField.id} has saved file: ${savedInfo.fileName}`);
-                        } catch (e) {
-                            console.log(`    Could not parse saved file data for ${fileField.id}`);
-                        }
-                    }
-                    
-                    // Collect file if it exists OR if there's a saved file
-                    if (fileField.files && fileField.files[0]) {
-                        console.log(`    Current file: ${fileField.files[0].name}`);
-                        finalFiles.set(fileField.id, {
-                            file: fileField.files[0],
-                            fileName: fileField.files[0].name,
-                            inputId: fileField.id,
-                            source: 'current_visible'
-                        });
-                        console.log(`✓ File collected from visible input: ${fileField.id} -> ${fileField.files[0].name}`);
-                    } else if (hasSavedFile) {
-                        console.log(`✗ File input ${fileField.id} shows saved file but no actual file object available`);
-                        console.log(`    This is expected - file inputs lose their files after modal close/reopen`);
-                        
-                        // For saved files without current file objects, we'll skip sending this to DHIS2
-                        // The placeholder will remain, causing the error we're seeing
-                        // TODO: Need to prompt user to re-select files or implement file persistence
-                        console.warn(`WARNING: File for ${fileField.id} was saved but is no longer available for upload`);
-                    }
+                // Add files to FormData
+                finalFiles.forEach((file, inputId) => {
+                    submissionFormData.append(`files[${inputId}]`, file);
                 });
-                
-                // Add ALL files to FormData
-                console.log(`=== FILE COLLECTION SUMMARY ===`);
-                console.log(`Total files to upload: ${finalFiles.size}`);
-                if (finalFiles.size === 0) {
-                    console.warn('WARNING: No files collected! This means no files will be uploaded to DHIS2.');
-                }
-                finalFiles.forEach((fileInfo, inputId) => {
-                    submissionFormData.append('files[' + fileInfo.inputId + ']', fileInfo.file);
-                    console.log(`✓ Added to FormData: files[${fileInfo.inputId}] = ${fileInfo.fileName} (${fileInfo.source})`);
-                });
-                console.log('=== END FILE COLLECTION ===');
                 
                 // Submit to backend
                 const response = await fetch('tracker_program_submit.php', {
                     method: 'POST',
-                    body: submissionFormData // No Content-Type header needed for FormData
+                    body: submissionFormData
                 });
                 
                 const result = await response.json();
@@ -5426,7 +4410,7 @@ if (!empty($programStages)) {
                     
                     // Redirect to success page after short delay
                     setTimeout(() => {
-                        window.location.href = `/tracker-success/${submissionData.survey_id}/${result.submission_id}`;
+                        window.location.href = `/fbs/public/tracker-success.php?survey_id=${submissionData.survey_id}&submission_id=${result.submission_id}`;
                     }, 1500);
                 } else {
                     throw new Error(result.message || 'Submission failed');
@@ -5434,14 +4418,13 @@ if (!empty($programStages)) {
                 
             } catch (error) {
                 console.error('Submission error:', error);
-                loadingSpinner.style.display = 'none';
-                submitBtn.style.display = 'inline-block';
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+                if (submitBtn) submitBtn.style.display = 'inline-block';
                 showErrorMessage(error.message);
             }
         }
 
         function showSuccessMessage(message) {
-            // Simple success notification
             const alert = document.createElement('div');
             alert.className = 'alert alert-success position-fixed';
             alert.style.cssText = 'top: 20px; right: 20px; z-index: 3000; max-width: 300px;';
@@ -5458,445 +4441,21 @@ if (!empty($programStages)) {
         }
 
         function showErrorMessage(message) {
-            // Enhanced error notification with better formatting
             const alert = document.createElement('div');
             alert.className = 'alert alert-danger position-fixed';
-            alert.style.cssText = 'top: 20px; right: 20px; z-index: 3000; max-width: 500px; max-height: 400px; overflow-y: auto;';
-            
-            // Check if the message contains multiple error types and format accordingly
-            let formattedMessage = message;
-            if (message.includes('[Configuration]') || message.includes('[Duplicate]') || message.includes('[Validation]')) {
-                // Split by error type markers and format nicely
-                const errors = message.split(/(?=\[(?:Configuration|Duplicate|Validation)\])/);
-                formattedMessage = errors.map(error => {
-                    if (error.trim()) {
-                        if (error.includes('[Configuration]')) {
-                            return `<div class="mb-2"><strong><i class="fas fa-cog text-warning me-2"></i>Configuration Issue:</strong><br/>${error.replace('[Configuration]', '').trim()}</div>`;
-                        } else if (error.includes('[Duplicate]')) {
-                            return `<div class="mb-2"><strong><i class="fas fa-copy text-info me-2"></i>Duplicate Entry:</strong><br/>${error.replace('[Duplicate]', '').trim()}</div>`;
-                        } else if (error.includes('[Validation]')) {
-                            return `<div class="mb-2"><strong><i class="fas fa-exclamation-triangle text-danger me-2"></i>Validation Error:</strong><br/>${error.replace('[Validation]', '').trim()}</div>`;
-                        }
-                    }
-                    return '';
-                }).filter(e => e).join('');
-            } else {
-                formattedMessage = `<i class="fas fa-exclamation-circle me-2"></i>${message}`;
-            }
-            
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 3000; max-width: 300px;';
             alert.innerHTML = `
-                <div class="d-flex justify-content-between align-items-start">
-                    <div style="flex: 1;">
-                        <h6 class="alert-heading mb-2">Submission Error</h6>
-                        ${formattedMessage}
-                    </div>
-                    <button type="button" class="btn-close ms-3" onclick="this.parentElement.parentElement.remove()"></button>
-                </div>
+                <i class="fas fa-exclamation-circle me-2"></i>
+                ${message}
             `;
             
             document.body.appendChild(alert);
             
-            // Auto-dismiss after 15 seconds for long messages, 8 seconds for short ones
-            const dismissTime = formattedMessage.length > 300 ? 15000 : 8000;
             setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.remove();
-                }
-            }, dismissTime);
+                alert.remove();
+            }, 5000);
         }
-
-        // Function to clear all forms in a stage when navigating to it
-        function clearStageForm(stageId) {
-            const stageSection = document.querySelector(`[data-stage-id="${stageId}"]`);
-            if (!stageSection) return;
-
-            // Clear all occurrence containers for this stage
-            const occurrenceContainers = stageSection.querySelectorAll('.occurrence-container');
-            occurrenceContainers.forEach(container => {
-                clearFormContainer(container);
-            });
-
-            // Reset to first occurrence only and make sure it's visible
-            const occurrenceTabs = stageSection.querySelector(`#occurrenceTabs_${stageId}`);
-            if (occurrenceTabs) {
-                // Remove all tabs except the first one
-                const tabs = occurrenceTabs.querySelectorAll('.occurrence-tab');
-                tabs.forEach((tab, index) => {
-                    if (index > 0) {
-                        tab.remove();
-                    } else {
-                        // Make first tab active
-                        tab.classList.add('active');
-                    }
-                });
-
-                // Remove all occurrence containers except the first one
-                const allContainers = stageSection.querySelectorAll('.occurrence-container');
-                allContainers.forEach((container, index) => {
-                    if (index > 0) {
-                        container.remove();
-                    } else {
-                        // Show first container and clear it
-                        container.style.display = 'block';
-                        clearFormContainer(container);
-                    }
-                });
-            }
-
-            // Update remove button state
-            updateRemoveButton(stageId);
-        }
-
-        // Function to clear all form elements in a container
-        function clearFormContainer(container) {
-            const allFormElements = container.querySelectorAll('input, select, textarea');
-            allFormElements.forEach(element => {
-                // Clear all values
-                if (element.type === 'checkbox' || element.type === 'radio') {
-                    element.checked = false;
-                } else if (element.tagName === 'SELECT') {
-                    element.selectedIndex = 0;
-                    element.value = '';
-                } else if (element.type === 'date') {
-                    // For event date, set to today, for other dates leave blank
-                    if (element.classList.contains('event-date')) {
-                        element.value = new Date().toISOString().split('T')[0];
-                    } else {
-                        element.value = '';
-                    }
-                } else {
-                    element.value = '';
-                }
-                
-                // Remove validation states
-                element.classList.remove('is-valid', 'is-invalid');
-            });
-        }
-
-        // Function to clear TEI section forms
-        function clearFormSection(section) {
-            const allFormElements = section.querySelectorAll('input, select, textarea');
-            allFormElements.forEach(element => {
-                if (element.type === 'checkbox' || element.type === 'radio') {
-                    element.checked = false;
-                } else if (element.tagName === 'SELECT') {
-                    element.selectedIndex = 0;
-                    element.value = '';
-                } else {
-                    element.value = '';
-                }
-                element.classList.remove('is-valid', 'is-invalid');
-            });
-        }
-
-        // Load saved groupings and apply them - prioritize database over localStorage
-        async function loadSavedGroupings() {
-            console.log('Groupings disabled - using default form layout');
-            // Groupings functionality disabled for now to prevent API errors
-            return;
-            
-            const surveyId = document.getElementById('surveyId').value;
-            
-            try {
-                // First, try to load from database
-                const response = await fetch(`/fbs/public/api/groupings.php?survey_id=${surveyId}`);
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    
-                    if (result.success && result.data && Object.keys(result.data).length > 0) {
-                        console.log('Loading groupings from database:', result.data);
-                        
-                        // Apply groupings to form
-                        Object.keys(result.data).forEach(stageId => {
-                            const groups = result.data[stageId];
-                            if (groups && groups.length > 0) {
-                                applyGroupingToStage(stageId, groups);
-                            }
-                        });
-                        return; // Success - don't fall back to localStorage
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading groupings from database:', error);
-            }
-            
-            // Fallback to localStorage if database loading failed
-            const savedGrouping = localStorage.getItem(`tracker_grouping_${surveyId}`);
-            if (savedGrouping) {
-                try {
-                    const groupingData = JSON.parse(savedGrouping);
-                    console.log('Loading saved groupings from localStorage (fallback):', groupingData);
-                    
-                    // Apply groupings to form
-                    Object.keys(groupingData).forEach(stageId => {
-                        const groups = groupingData[stageId];
-                        if (groups && groups.length > 0) {
-                            applyGroupingToStage(stageId, groups);
-                        }
-                    });
-                    
-                } catch (e) {
-                    console.error('Error loading saved groupings from localStorage:', e);
-                }
-            }
-        }
-
-        function applyGroupingToStage(stageId, groups) {
-            const stageSection = document.querySelector(`[data-stage-id="${stageId}"]`);
-            if (!stageSection) return;
-
-            const stageBody = stageSection.querySelector('.stage-body');
-            const occurrenceContainer = stageBody.querySelector('.occurrence-container');
-            
-            if (!occurrenceContainer) return;
-
-            // Create grouped layout
-            const groupedContainer = document.createElement('div');
-            groupedContainer.className = 'grouped-questions-container';
-
-            groups.forEach(group => {
-                if (group.questions && group.questions.length > 0) {
-                    const groupDiv = document.createElement('div');
-                    groupDiv.className = 'form-group-section';
-                    groupDiv.innerHTML = `
-                        <h6 class="group-title mb-3">
-                            <i class="fas fa-folder-open text-info me-2"></i>
-                            ${group.groupTitle}
-                        </h6>
-                        <div class="group-fields"></div>
-                    `;
-
-                    const groupFields = groupDiv.querySelector('.group-fields');
-                    
-                    // Move questions to their groups
-                    group.questions.forEach(questionRef => {
-                        const questionElement = occurrenceContainer.querySelector(`[data-de-id="${questionRef.questionId}"]`);
-                        if (questionElement) {
-                            const formGroup = questionElement.closest('.form-group');
-                            if (formGroup) {
-                                groupFields.appendChild(formGroup);
-                            }
-                        }
-                    });
-
-                    if (groupFields.children.length > 0) {
-                        groupedContainer.appendChild(groupDiv);
-                    }
-                }
-            });
-
-            // Replace the original container with grouped container
-            if (groupedContainer.children.length > 0) {
-                occurrenceContainer.appendChild(groupedContainer);
-            }
-        }
-
-        // Enhanced Add Another function - creates completely blank forms
-        function addOccurrence(stageId) {
-            console.log(`Adding occurrence for stage: ${stageId}`);
-            
-            const occurrenceTabs = document.getElementById(`occurrenceTabs_${stageId}`);
-            if (!occurrenceTabs) {
-                console.error(`Occurrence tabs not found for stage: ${stageId}`);
-                return;
-            }
-            
-            const currentOccurrences = occurrenceTabs.querySelectorAll('.occurrence-tab').length;
-            const newOccurrence = currentOccurrences + 1;
-
-            // Add new tab
-            const newTab = document.createElement('div');
-            newTab.className = 'occurrence-tab';
-            newTab.setAttribute('onclick', `switchOccurrence('${stageId}', ${newOccurrence})`);
-            
-            // Get the stage name from the first tab
-            const firstTab = occurrenceTabs.querySelector('.occurrence-tab');
-            const stageName = firstTab ? firstTab.textContent.split(' ')[0] : 'Visit';
-            newTab.textContent = `${stageName} ${newOccurrence}`;
-            occurrenceTabs.appendChild(newTab);
-
-            // Clone the original container structure to create blank form
-            const stageSection = document.querySelector(`[data-stage-id="${stageId}"]`);
-            const originalContainer = stageSection.querySelector('.occurrence-container[data-occurrence="1"]');
-            
-            if (originalContainer) {
-                const newContainer = originalContainer.cloneNode(true);
-                newContainer.setAttribute('data-occurrence', newOccurrence);
-                newContainer.style.display = 'none';
-
-                // Clear ALL form values and update IDs
-                const allFormElements = newContainer.querySelectorAll('input, select, textarea');
-                allFormElements.forEach(element => {
-                    // Update IDs and data attributes
-                    if (element.id) {
-                        element.id = element.id.replace(/_\d+$/, `_${newOccurrence}`);
-                    }
-                    element.setAttribute('data-occurrence', newOccurrence);
-                    
-                    // Completely clear all values
-                    if (element.type === 'checkbox' || element.type === 'radio') {
-                        element.checked = false;
-                    } else if (element.tagName === 'SELECT') {
-                        element.selectedIndex = 0; // Reset to first option (usually empty)
-                        element.value = ''; // Explicitly clear value
-                    } else if (element.type === 'date') {
-                        // For event date, set to today, for other dates leave blank
-                        if (element.classList.contains('event-date')) {
-                            element.value = new Date().toISOString().split('T')[0];
-                        } else {
-                            element.value = '';
-                        }
-                    } else {
-                        element.value = ''; // Clear all other input types
-                    }
-                    
-                    // Remove any validation messages or states
-                    element.classList.remove('is-valid', 'is-invalid');
-                });
-
-                // Update all labels to reference new occurrence
-                const labels = newContainer.querySelectorAll('label[for]');
-                labels.forEach(label => {
-                    const oldFor = label.getAttribute('for');
-                    if (oldFor) {
-                        const newFor = oldFor.replace(/_\d+$/, `_${newOccurrence}`);
-                        label.setAttribute('for', newFor);
-                    }
-                });
-
-                // Insert the new container after the last occurrence container
-                const stageBody = originalContainer.parentNode;
-                stageBody.appendChild(newContainer);
-            }
-
-            // Update remove button state
-            updateRemoveButton(stageId);
-
-            // Switch to new occurrence
-            switchOccurrence(stageId, newOccurrence);
-            
-            console.log(`Successfully added occurrence ${newOccurrence} for stage ${stageId}`);
-        }
-
-        // Add remove occurrence function
-        function removeOccurrence(stageId) {
-            console.log(`Removing occurrence for stage: ${stageId}`);
-            
-            const occurrenceTabs = document.getElementById(`occurrenceTabs_${stageId}`);
-            if (!occurrenceTabs) {
-                console.error(`Occurrence tabs not found for stage: ${stageId}`);
-                return;
-            }
-            
-            const tabs = occurrenceTabs.querySelectorAll('.occurrence-tab');
-            const currentOccurrences = tabs.length;
-            console.log(`Current occurrences: ${currentOccurrences}`);
-
-            if (currentOccurrences <= 1) {
-                console.log('Cannot remove the last occurrence');
-                return; // Cannot remove the last occurrence
-            }
-
-            // Find the active tab
-            const activeTab = occurrenceTabs.querySelector('.occurrence-tab.active');
-            const activeOccurrence = parseInt(activeTab.textContent.split(' ')[1]);
-
-            // Remove the container
-            const stageSection = document.querySelector(`[data-stage-id="${stageId}"]`);
-            const containerToRemove = stageSection.querySelector(`.occurrence-container[data-occurrence="${activeOccurrence}"]`);
-            if (containerToRemove) {
-                containerToRemove.remove();
-            }
-
-            // Remove the tab
-            activeTab.remove();
-
-            // Renumber remaining tabs
-            const remainingTabs = occurrenceTabs.querySelectorAll('.occurrence-tab');
-            remainingTabs.forEach((tab, index) => {
-                const newNumber = index + 1;
-                const stageName = tab.textContent.split(' ')[0];
-                tab.textContent = `${stageName} ${newNumber}`;
-                tab.setAttribute('onclick', `switchOccurrence('${stageId}', ${newNumber})`);
-            });
-
-            // Renumber remaining containers
-            const remainingContainers = stageSection.querySelectorAll('.occurrence-container');
-            remainingContainers.forEach((container, index) => {
-                const newNumber = index + 1;
-                container.setAttribute('data-occurrence', newNumber);
-                
-                // Update field IDs and attributes
-                const fields = container.querySelectorAll('input, select, textarea');
-                fields.forEach(field => {
-                    const oldId = field.id;
-                    const newId = oldId.replace(/_\d+$/, `_${newNumber}`);
-                    field.id = newId;
-                    field.setAttribute('data-occurrence', newNumber);
-                });
-
-                // Update labels
-                const labels = container.querySelectorAll('label[for]');
-                labels.forEach(label => {
-                    const oldFor = label.getAttribute('for');
-                    const newFor = oldFor.replace(/_\d+$/, `_${newNumber}`);
-                    label.setAttribute('for', newFor);
-                });
-            });
-
-            // Switch to first occurrence
-            if (remainingTabs.length > 0) {
-                switchOccurrence(stageId, 1);
-            }
-
-            // Update remove button state
-            updateRemoveButton(stageId);
-        }
-
-        // Update remove button state
-        function updateRemoveButton(stageId) {
-            const occurrenceTabs = document.getElementById(`occurrenceTabs_${stageId}`);
-            if (!occurrenceTabs) return;
-            
-            const tabs = occurrenceTabs.querySelectorAll('.occurrence-tab');
-            const stageSection = document.querySelector(`[data-stage-id="${stageId}"]`);
-            const removeButton = stageSection ? stageSection.querySelector('.remove-occurrence-btn-fixed') : null;
-            
-            if (removeButton) {
-                removeButton.disabled = tabs.length <= 1;
-                console.log(`Updated remove button for stage ${stageId}: disabled = ${removeButton.disabled}, tabs = ${tabs.length}`);
-            } else {
-                console.log(`Remove button not found for stage ${stageId}`);
-            }
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('Tracker form JavaScript loaded successfully');
-            
-            await loadSavedGroupings();
-            
-            // Load existing files after a short delay to ensure DOM is ready - disabled to keep files empty initially
-            // setTimeout(async () => {
-            //     await loadExistingFiles();
-            // }, 500);
-            
-            // Navigation active state is managed by navigateToStage function
-            // Don't automatically set first section as active here
-            
-            // Debug: Check if elements exist
-            const stageNavigation = document.getElementById('stageNavigation');
-            const stageSections = document.querySelectorAll('.stage-section');
-            console.log('Stage navigation found:', !!stageNavigation);
-            console.log('Stage sections found:', stageSections.length);
-            
-            // Initialize remove button states
-            document.querySelectorAll('.stage-section').forEach(section => {
-                const stageId = section.dataset.stageId;
-                updateRemoveButton(stageId);
-            });
-        });
+        
     </script>
 </body>
 </html>
