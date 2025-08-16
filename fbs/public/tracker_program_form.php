@@ -4305,7 +4305,7 @@ if (!empty($programStages)) {
             try {
                 // Collect all form data for DHIS2 submission
                 const submissionData = {
-                    survey_id: surveyData.survey.id,
+                    survey_id: programData.surveySettings.id,
                     form_data: {
                         trackedEntityAttributes: {},
                         events: []
@@ -4317,23 +4317,21 @@ if (!empty($programStages)) {
                     }
                 };
                 
-                // Collect TEI attributes
-                Object.keys(formData.stages || {}).forEach(stageId => {
-                    Object.keys(formData.stages[stageId] || {}).forEach(occurrenceKey => {
-                        const occurrenceData = formData.stages[stageId][occurrenceKey];
-                        
-                        // Check if this is TEI data (participant information stage)
-                        const stage = programData.program.programStages.find(s => s.id === stageId);
-                        if (stage && stage.name.toLowerCase().includes('participant')) {
-                            Object.keys(occurrenceData).forEach(inputId => {
-                                const match = inputId.match(/^tei_([^_]+)_\d+$/);
-                                if (match) {
-                                    const attributeId = match[1];
-                                    submissionData.form_data.trackedEntityAttributes[attributeId] = occurrenceData[inputId];
-                                }
-                            });
+                // Save any currently open modal data before collecting submission data
+                saveStageData();
+                
+                // Collect TEI attributes from the direct formData.trackedEntityAttributes object
+                Object.keys(formData.trackedEntityAttributes || {}).forEach(attributeId => {
+                    const value = formData.trackedEntityAttributes[attributeId];
+                    if (value !== undefined && value !== null && value !== '') {
+                        // Handle file uploads for TEI attributes
+                        if (typeof value === 'object' && value.isFile) {
+                            // For TEI file attributes, use a different format: tei_attributeId
+                            submissionData.form_data.trackedEntityAttributes[attributeId] = `FILE_PLACEHOLDER:tei_${attributeId}`;
+                        } else {
+                            submissionData.form_data.trackedEntityAttributes[attributeId] = value;
                         }
-                    });
+                    }
                 });
                 
                 // Collect events data
@@ -4353,13 +4351,27 @@ if (!empty($programStages)) {
                         // Process all data in this occurrence
                         Object.keys(occurrenceData).forEach(inputId => {
                             const value = occurrenceData[inputId];
-                            if (value && value !== '') {
-                                // Extract data element ID from input ID
-                                const deMatch = inputId.match(/^de_([^_]+)_\d+$/);
-                                if (deMatch) {
-                                    const dataElementId = deMatch[1];
-                                    event.dataValues[dataElementId] = value;
+                            if (value && value !== '' && inputId !== 'eventDate') {
+                                // Find the data element to check its type
+                                const stage = programData.program.programStages.find(s => s.id === stageId);
+                                const dataElement = stage?.programStageDataElements?.find(psde => 
+                                    psde.dataElement.id === inputId
+                                )?.dataElement;
+                                
+                                let finalValue = value;
+                                
+                                // Handle different data types
+                                if (dataElement?.valueType === 'BOOLEAN') {
+                                    // Convert checkbox values to proper boolean strings
+                                    finalValue = (value === true || value === 'true' || value === '1') ? 'true' : 'false';
+                                } else if (typeof value === 'object' && value.isFile) {
+                                    // Handle file uploads - send placeholder, backend will replace with resource ID
+                                    // Use same format as file key: modal_inputId_occurrenceNumber
+                                    const occurrenceNumber = occurrenceKey.replace('occurrence_', '');
+                                    finalValue = `FILE_PLACEHOLDER:modal_${inputId}_${occurrenceNumber}`;
                                 }
+                                
+                                event.dataValues[inputId] = finalValue;
                             }
                         });
                         
@@ -4380,21 +4392,34 @@ if (!empty($programStages)) {
                 
                 // Collect files from all stages and occurrences
                 const finalFiles = new Map();
+                
+                // Collect TEI file uploads
+                Object.keys(formData.trackedEntityAttributes || {}).forEach(attributeId => {
+                    const value = formData.trackedEntityAttributes[attributeId];
+                    if (typeof value === 'object' && value.isFile && value.fileObject) {
+                        const fileKey = `tei_${attributeId}`;
+                        finalFiles.set(fileKey, value.fileObject);
+                    }
+                });
+                
+                // Collect stage event file uploads
                 Object.keys(formData.stages || {}).forEach(stageId => {
                     Object.keys(formData.stages[stageId] || {}).forEach(occurrenceKey => {
                         const occurrenceData = formData.stages[stageId][occurrenceKey];
                         Object.keys(occurrenceData || {}).forEach(inputId => {
-                            const inputElement = document.getElementById(inputId);
-                            if (inputElement && inputElement.type === 'file' && inputElement.files.length > 0) {
-                                finalFiles.set(inputId, inputElement.files[0]);
+                            const value = occurrenceData[inputId];
+                            if (typeof value === 'object' && value.isFile && value.fileObject) {
+                                // Create unique key that includes occurrence info to avoid conflicts
+                                const fileKey = `modal_${inputId}_${occurrenceKey.replace('occurrence_', '')}`;
+                                finalFiles.set(fileKey, value.fileObject);
                             }
                         });
                     });
                 });
                 
                 // Add files to FormData
-                finalFiles.forEach((file, inputId) => {
-                    submissionFormData.append(`files[${inputId}]`, file);
+                finalFiles.forEach((file, fileKey) => {
+                    submissionFormData.append(`files[${fileKey}]`, file);
                 });
                 
                 // Submit to backend
@@ -4410,7 +4435,7 @@ if (!empty($programStages)) {
                     
                     // Redirect to success page after short delay
                     setTimeout(() => {
-                        window.location.href = `/fbs/public/tracker-success.php?survey_id=${submissionData.survey_id}&submission_id=${result.submission_id}`;
+                        window.location.href = `/tracker-success/${submissionData.survey_id}/${result.submission_id}`;
                     }, 1500);
                 } else {
                     throw new Error(result.message || 'Submission failed');
