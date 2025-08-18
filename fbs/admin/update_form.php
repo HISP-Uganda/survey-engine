@@ -849,7 +849,7 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
                     
                     // Redirect to preview_form.php with survey_id
                     const surveyId = document.querySelector('input[name="survey_id"]').value;
-                    window.location.href = `preview_form?survey_id=${surveyId}`;
+                    window.location.href = `preview_form.php?survey_id=${surveyId}`;
                 } else {
                     showAlert('danger', data.message);
                 }

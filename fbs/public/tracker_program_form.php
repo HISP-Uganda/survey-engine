@@ -1294,37 +1294,59 @@ if (!empty($programStages)) {
             max-width: 100%;
         }
         
-        /* Responsive adjustments for side-by-side layout */
+        /* MOBILE RESPONSIVE STYLES - MODAL ONLY */
         @media (max-width: 768px) {
-            .form-group {
-                flex-direction: column;
-                gap: 16px;
-                padding: 16px;
+            /* Modal dialog responsive adjustments */
+            .modal-dialog.modal-xl {
+                max-width: 95%;
+                margin: 0.5rem auto;
             }
-            
-            .form-group .form-label {
-                width: 100%;
-                min-width: auto;
-                max-width: none;
-                padding-top: 0;
+
+            .modal-content {
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             }
-            
-            .form-group .answer-area {
-                width: 100%;
-                min-width: auto;
+
+            .modal-header {
+                padding: 16px 20px 12px;
+                border-bottom: 1px solid #e9ecef;
             }
-            
-            /* Mobile responsive for modal */
+
+            .modal-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: #374151;
+            }
+
+            .modal-footer {
+                padding: 12px 20px 16px;
+                gap: 12px;
+            }
+
+            .modal-footer .btn {
+                padding: 10px 20px;
+                font-size: 15px;
+                min-height: 44px;
+            }
+
+            .modal-body {
+                padding: 8px 4px;
+            }
+
+            /* Modal form groups - mobile responsive */
             .modal-group-content .form-group {
                 flex-direction: column;
-                gap: 12px;
-                padding: 16px 8px;
+                gap: 6px;
+                padding: 10px 8px;
             }
             
             .modal-group-content .form-group .form-label {
                 width: 100%;
                 min-width: auto;
                 max-width: none;
+                font-size: 14px;
+                font-weight: 500;
+                padding-bottom: 4px;
             }
             
             .modal-group-content .form-group .answer-area {
@@ -1332,25 +1354,93 @@ if (!empty($programStages)) {
                 min-width: auto;
                 max-width: none;
             }
-            
+
+            /* Modal input controls - mobile friendly but compact */
+            .modal-group-content .form-group .answer-area .form-control,
+            .modal-group-content .form-group .answer-area select,
+            .modal-group-content .form-group .answer-area textarea,
+            .modal-group-content .form-group .answer-area input {
+                width: 100%;
+                min-height: 42px;
+                padding: 10px 12px;
+                font-size: 16px;
+                border-radius: 6px;
+                border: 1px solid #d1d5db;
+                box-sizing: border-box;
+            }
+
+            .modal-group-content .form-group.input-type-textarea .answer-area textarea {
+                min-height: 100px;
+                resize: vertical;
+            }
+
+            /* Override input-type specific sizing for mobile */
+            .modal-group-content .form-group.input-type-number .answer-area,
+            .modal-group-content .form-group.input-type-date .answer-area,
+            .modal-group-content .form-group.input-type-dropdown .answer-area,
+            .modal-group-content .form-group.input-type-textarea .answer-area,
+            .modal-group-content .form-group.input-type-checkbox .answer-area {
+                width: 100%;
+                min-width: auto;
+                max-width: none;
+            }
+        }
+
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            .modal-dialog.modal-xl {
+                max-width: 98%;
+                margin: 0.25rem auto;
+            }
+
+            .modal-header,
+            .modal-footer {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
             .modal-body {
-                padding: 16px 8px;
+                padding: 8px 4px;
+            }
+
+            #modalQuestionsContainer {
+                padding: 0 2px;
+            }
+
+            .modal-group-content .form-group {
+                padding: 10px 6px;
+                margin-bottom: 10px;
+            }
+
+            .modal-group-content .form-group .form-label {
+                font-size: 13px;
+                margin-bottom: 6px;
+            }
+
+            .modal-group-content .form-group .answer-area .form-control,
+            .modal-group-content .form-group .answer-area select,
+            .modal-group-content .form-group .answer-area textarea,
+            .modal-group-content .form-group .answer-area input {
+                padding: 10px 12px;
+                font-size: 16px;
             }
         }
         
         @media (max-width: 1024px) {
             .modal-group-content .form-group .form-label {
                 width: 40%;
-                min-width: 150px;
-                max-width: 250px;
+                min-width: 120px;
+                max-width: 200px;
             }
             
             .modal-group-content .form-group .answer-area {
                 width: 55%;
-                min-width: 200px;
-                max-width: 300px;
+                min-width: 150px;
+                max-width: 250px;
             }
         }
+
+        /* Tablet responsive adjustments */
         
         @media (min-width: 1200px) {
             .modal-group-content .form-group .form-label {
@@ -1413,13 +1503,13 @@ if (!empty($programStages)) {
             cursor: pointer;
         }
         
-        /* Hidden by default */
+        /* Form section display control - highest priority */
         .form-section {
-            display: none;
+            display: none !important;
         }
         
         .form-section.active {
-            display: block;
+            display: block !important;
         }
         
         /* Checkbox styling for modal questions - positioned to the right */
@@ -1519,7 +1609,7 @@ if (!empty($programStages)) {
         }
 
         .modal-group-content {
-            padding: 16px 8px;
+            padding: 8px 12px;
             background: white;
         }
         
@@ -1529,7 +1619,7 @@ if (!empty($programStages)) {
             width: 100%;
         }
         
-        /* Adjust modal form groups for modal-lg with proper left-right layout */
+        /* Adjust modal form groups for modal-xl with optimized spacing and visibility */
         .modal-group-content .form-group {
             display: flex;
             flex-direction: row;
@@ -1537,8 +1627,8 @@ if (!empty($programStages)) {
             background: #ffffff;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
-            padding: 18px 150px 18px 16px;
-            margin-bottom: 14px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
             transition: all 0.3s ease;
             width: 100%;
             max-width: 100%;
@@ -1546,6 +1636,9 @@ if (!empty($programStages)) {
             justify-content: space-between;
             margin-left: 0px;
             margin-right: 0px;
+            overflow: hidden;
+            gap: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
         
         /* Remove gaps - using space-between layout now */
@@ -1558,97 +1651,131 @@ if (!empty($programStages)) {
         .modal-group-content .form-group .form-label {
             width: 40%;
             min-width: 200px;
-            max-width: 300px;
+            max-width: 320px;
             font-size: 14px;
             line-height: 1.4;
-            font-weight: 500;
-            color: #374151;
+            font-weight: 600;
+            color: #1f2937;
             margin-bottom: 0;
             padding-top: 8px;
-            padding-right: 20px;
+            padding-right: 8px;
             word-wrap: break-word;
             hyphens: auto;
             flex-shrink: 0;
+            display: flex;
+            align-items: flex-start;
         }
         
         .modal-group-content .form-group .answer-area {
             width: 55%;
             min-width: 250px;
-            max-width: 400px;
-            flex-shrink: 0;
+            max-width: 500px;
+            flex-shrink: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
         }
         
-        /* Dynamic answer area sizing based on input type */
+        /* Dynamic answer area sizing - optimized for better space utilization */
         .modal-group-content .form-group.input-type-number .answer-area {
-            min-width: 150px;
-            max-width: 200px;
+            width: 30%;
+            min-width: 120px;
+            max-width: 180px;
         }
         
         .modal-group-content .form-group.input-type-date .answer-area {
-            min-width: 180px;
-            max-width: 220px;
+            width: 35%;
+            min-width: 160px;
+            max-width: 200px;
         }
         
         .modal-group-content .form-group.input-type-dropdown .answer-area {
-            width: 60%;
-            min-width: 320px;
-            max-width: 480px;
+            width: 65%;
+            min-width: 350px;
+            max-width: 600px;
         }
         
         .modal-group-content .form-group.input-type-textarea .answer-area {
-            min-width: 300px;
-            max-width: 420px;
+            width: 60%;
+            min-width: 320px;
+            max-width: 520px;
         }
         
         .modal-group-content .form-group.input-type-checkbox .answer-area {
-            min-width: 100px;
-            max-width: 150px;
+            width: 25%;
+            min-width: 80px;
+            max-width: 120px;
         }
         
-        /* Enhanced dropdown styling for larger answer area */
-        .modal-group-content .form-group .answer-area select.form-control {
-            min-height: 46px;
-            padding: 12px 16px;
-            font-size: 15px;
+        .modal-group-content .form-group.input-type-radio .answer-area {
+            width: 55%;
+            min-width: 240px;
+            max-width: 420px;
+        }
+        
+        /* Optimized form control styling with compact design */
+        .modal-group-content .form-group .answer-area .form-control,
+        .modal-group-content .form-group .answer-area select,
+        .modal-group-content .form-group .answer-area textarea,
+        .modal-group-content .form-group .answer-area input {
             width: 100%;
+            max-width: 100%;
+            min-height: 38px;
+            padding: 8px 12px;
+            font-size: 14px;
+            box-sizing: border-box;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .modal-group-content .form-group .answer-area select.form-control {
+            min-height: 40px;
         }
         
-        /* Add Bootstrap mb-3 equivalent for form groups */
+        /* Reduced spacing for mb-3 form groups in modal */
         .modal-group-content .form-group.mb-3 {
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
         
         /* Ensure modal body uses full width and reaches edges */
         .modal-body {
-            padding: 12px 0px;
+            padding: 8px 0px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            max-height: 75vh;
         }
         
         #modalQuestionsContainer {
             width: 100%;
             max-width: 100%;
             padding: 0 8px;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
         
-        /* TEI Attributes Container styling - separate from modal styling */
+        /* TEI Attributes Container styling - completely isolated */
         #teiAttributesContainer {
-            width: 100%;
-            max-width: 100%;
-            padding: 20px;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 20px !important;
+            box-sizing: border-box !important;
         }
         
         #teiAttributesContainer .form-group {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 20px 24px;
-            margin-bottom: 16px;
-            gap: 50px;
-            transition: all 0.3s ease;
-            width: 100%;
-            box-sizing: border-box;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-start !important;
+            background: #f8f9fa !important;
+            border: 1px solid #e9ecef !important;
+            border-radius: 8px !important;
+            padding: 20px 24px !important;
+            margin-bottom: 16px !important;
+            gap: 50px !important;
+            transition: all 0.3s ease !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
         
         #teiAttributesContainer .form-group:hover {
@@ -1657,24 +1784,24 @@ if (!empty($programStages)) {
         }
         
         #teiAttributesContainer .form-group .form-label {
-            width: 30%;
-            max-width: 250px;
-            min-width: 200px;
-            flex-shrink: 0;
-            margin-bottom: 0;
-            padding-top: 8px;
-            word-wrap: break-word;
-            font-size: 14px;
-            line-height: 1.4;
-            font-weight: 500;
-            color: #374151;
+            width: 30% !important;
+            max-width: 250px !important;
+            min-width: 200px !important;
+            flex-shrink: 0 !important;
+            margin-bottom: 0 !important;
+            padding-top: 8px !important;
+            word-wrap: break-word !important;
+            font-size: 14px !important;
+            line-height: 1.4 !important;
+            font-weight: 500 !important;
+            color: #374151 !important;
         }
         
         #teiAttributesContainer .form-group .answer-area {
-            flex: 1;
-            width: 70%;
-            min-width: 300px;
-            max-width: 100%;
+            flex: 1 !important;
+            width: 70% !important;
+            min-width: 300px !important;
+            max-width: 100% !important;
         }
         
         #teiAttributesContainer .form-group .answer-area .form-control,
@@ -1700,24 +1827,24 @@ if (!empty($programStages)) {
             color: #6b7280;
         }
         
-        /* Responsive adjustments for TEI section */
+        /* Responsive adjustments for TEI section - highest priority */
         @media (max-width: 768px) {
             #teiAttributesContainer .form-group {
-                flex-direction: column;
-                gap: 12px;
-                padding: 16px;
+                flex-direction: column !important;
+                gap: 12px !important;
+                padding: 16px !important;
             }
             
             #teiAttributesContainer .form-group .form-label {
-                width: 100%;
-                min-width: auto;
-                max-width: none;
-                padding-top: 0;
+                width: 100% !important;
+                min-width: auto !important;
+                max-width: none !important;
+                padding-top: 0 !important;
             }
             
             #teiAttributesContainer .form-group .answer-area {
-                width: 100%;
-                min-width: auto;
+                width: 100% !important;
+                min-width: auto !important;
             }
         }
 
@@ -2127,7 +2254,7 @@ if (!empty($programStages)) {
 
     <!-- Stage Modal -->
     <div class="modal fade" id="stageModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle">Stage Data</h5>
