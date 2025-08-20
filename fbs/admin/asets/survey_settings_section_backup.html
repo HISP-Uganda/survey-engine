@@ -1,0 +1,168 @@
+                    
+                    <div id="settingsInterface" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Settings Mode:</strong> Configure logos, flag colors, and other visual elements for your tracker form.
+                        </div>
+                        <div class="mb-3">
+                            <button class="btn btn-success btn-sm me-2" onclick="saveSettings()">
+                                <i class="fas fa-save me-1"></i>
+                                Save Settings
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="resetSettings()">
+                                <i class="fas fa-undo me-1"></i>
+                                Reset to Defaults
+                            </button>
+                        </div>
+                        
+                        <!-- Settings Form -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <h6><i class="fas fa-cog me-1"></i> Layout Settings</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="layoutType" class="form-label">Layout Type</label>
+                                            <select class="form-control" id="layoutType">
+                                                <option value="horizontal">Horizontal</option>
+                                                <option value="vertical">Vertical</option>
+                                                <option value="center">Center</option>
+                                                <option value="left-right">Left-Right</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6><i class="fas fa-images me-1"></i> Dynamic Image Settings</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="imageCount" class="form-label">Number of Images</label>
+                                            <select class="form-control" id="imageCount" onchange="updateImageFields()">
+                                                <option value="0" selected>No Images</option>
+                                                <option value="1">1 Image</option>
+                                                <option value="2">2 Images</option>
+                                                <option value="3">3 Images</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="imageLayout" class="form-label">Image Layout</label>
+                                            <select class="form-control" id="imageLayout">
+                                                <option value="horizontal">Horizontal (side by side)</option>
+                                                <option value="vertical">Vertical (stacked)</option>
+                                                <option value="center">Center aligned</option>
+                                                <option value="left-right">Left and Right aligned</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Dynamic Image Fields -->
+                                        <div id="imageFieldsContainer">
+                                            <!-- Will be populated by JavaScript -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                            
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6><i class="fas fa-flag me-1"></i> National Flag Settings</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" role="switch" id="showFlagBar" <?= $surveySettings['show_flag_bar'] ? 'checked' : '' ?> onchange="updateFlagPreview()">
+                                                <label class="form-check-label" for="showFlagBar">
+                                                    <strong>Display Flag Bar</strong>
+                                                    <small class="d-block text-muted">Show the national colors bar on forms</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div id="flagColorControls">
+                                            <div class="mb-3">
+                                                <label class="form-label mb-2"><strong>Flag Colors Preview</strong></label>
+                                                <div class="flag-preview" id="flagPreview" style="height: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; overflow: hidden;">
+                                                    <div class="flag-segment-preview" id="flagBlackPreview" style="flex: 1; background-color: <?= htmlspecialchars($surveySettings['flag_black_color'] ?? '#000000') ?>;"></div>
+                                                    <div class="flag-segment-preview" id="flagYellowPreview" style="flex: 1; background-color: <?= htmlspecialchars($surveySettings['flag_yellow_color'] ?? '#FCD116') ?>;"></div>
+                                                    <div class="flag-segment-preview" id="flagRedPreview" style="flex: 1; background-color: <?= htmlspecialchars($surveySettings['flag_red_color'] ?? '#D21034') ?>;"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row g-2">
+                                                <div class="col-4">
+                                                    <label for="flagBlackColor" class="form-label small">
+                                                        <i class="fas fa-square" style="color: #000000;"></i> Left Section
+                                                    </label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" class="form-control form-control-color" 
+                                                               id="flagBlackColor" 
+                                                               value="<?= htmlspecialchars($surveySettings['flag_black_color'] ?? '#000000') ?>"
+                                                               onchange="updateFlagPreview()" 
+                                                               title="Choose left section color">
+                                                        <input type="text" class="form-control form-control-sm mt-1" 
+                                                               id="flagBlackColorText" 
+                                                               value="<?= htmlspecialchars($surveySettings['flag_black_color'] ?? '#000000') ?>"
+                                                               onchange="updateColorFromText('flagBlackColor', this.value)"
+                                                               placeholder="#000000" 
+                                                               style="font-family: monospace; font-size: 11px;">
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <label for="flagYellowColor" class="form-label small">
+                                                        <i class="fas fa-square" style="color: #FCD116;"></i> Center Section
+                                                    </label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" class="form-control form-control-color" 
+                                                               id="flagYellowColor" 
+                                                               value="<?= htmlspecialchars($surveySettings['flag_yellow_color'] ?? '#FCD116') ?>"
+                                                               onchange="updateFlagPreview()" 
+                                                               title="Choose center section color">
+                                                        <input type="text" class="form-control form-control-sm mt-1" 
+                                                               id="flagYellowColorText" 
+                                                               value="<?= htmlspecialchars($surveySettings['flag_yellow_color'] ?? '#FCD116') ?>"
+                                                               onchange="updateColorFromText('flagYellowColor', this.value)"
+                                                               placeholder="#FCD116" 
+                                                               style="font-family: monospace; font-size: 11px;">
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <label for="flagRedColor" class="form-label small">
+                                                        <i class="fas fa-square" style="color: #D21034;"></i> Right Section
+                                                    </label>
+                                                    <div class="color-input-group">
+                                                        <input type="color" class="form-control form-control-color" 
+                                                               id="flagRedColor" 
+                                                               value="<?= htmlspecialchars($surveySettings['flag_red_color'] ?? '#D21034') ?>"
+                                                               onchange="updateFlagPreview()" 
+                                                               title="Choose right section color">
+                                                        <input type="text" class="form-control form-control-sm mt-1" 
+                                                               id="flagRedColorText" 
+                                                               value="<?= htmlspecialchars($surveySettings['flag_red_color'] ?? '#D21034') ?>"
+                                                               onchange="updateColorFromText('flagRedColor', this.value)"
+                                                               placeholder="#D21034" 
+                                                               style="font-family: monospace; font-size: 11px;">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-3">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetToUgandaFlag()">
+                                                    <i class="fas fa-undo me-1"></i> Reset to Uganda Flag
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>

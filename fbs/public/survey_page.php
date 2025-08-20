@@ -227,6 +227,24 @@ try {
 $selectedInstanceKey = $surveySettings['selected_instance_key'] ?? null;
 $selectedHierarchyLevel = $surveySettings['selected_hierarchy_level'] ?? null;
 
+// Process dynamic images from survey settings
+$dynamicImages = [];
+$imageLayout = 'horizontal'; // default
+if (!empty($surveySettings['dynamic_images_data'])) {
+    try {
+        $imagesData = json_decode($surveySettings['dynamic_images_data'], true);
+        if (is_array($imagesData)) {
+            $dynamicImages = $imagesData;
+        }
+        error_log("Loaded dynamic images: " . count($dynamicImages) . " images");
+    } catch (Exception $e) {
+        error_log("Error parsing dynamic images JSON: " . $e->getMessage());
+    }
+}
+if (!empty($surveySettings['image_layout_type'])) {
+    $imageLayout = $surveySettings['image_layout_type'];
+}
+
 // Debug: Log the survey settings being applied
 error_log("Survey ID: $surveyId, Survey Type: $surveyType");
 error_log("Survey Settings: " . json_encode($surveySettings));
@@ -339,6 +357,53 @@ unset($option);
             margin: 15px 0;
             padding: 10px 0;
             box-sizing: border-box;
+        }
+        
+        /* Dynamic Images Styling */
+        .dynamic-images-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .dynamic-images-container.horizontal {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .dynamic-images-container.vertical {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .dynamic-image-item {
+            display: inline-block;
+            margin: 5px;
+            background: white;
+            padding: 8px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dynamic-image-item img {
+            border-radius: 8px;
+            object-fit: contain;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .dynamic-images-container.horizontal {
+                flex-direction: column;
+            }
+            
+            .dynamic-image-item img {
+                max-width: 100%;
+                height: auto;
+            }
         }
         
         /* Enhanced responsive body styles */
@@ -1456,13 +1521,19 @@ unset($option);
 
 
         <div class="header-section" id="logo-section">
-            <div class="logo-container">
-             <img id="moh-logo"
-     src="<?php echo htmlspecialchars($surveySettings['logo_path'] ?? '/assets/img/logo.jpg'); ?>"
-     alt="Ministry of Health Logo"
-     style="background: #fff; border: 1px solid #ccc; padding: 8px; border-radius: 8px; max-width: 100%; height: 170px; object-fit: contain;"
-     onerror="this.onerror=null;this.src='/assets/img/logo.jpg';">
+            <?php if (!empty($dynamicImages) && ($surveySettings['show_dynamic_images'] ?? true)): ?>
+            <div class="dynamic-images-container <?= htmlspecialchars($imageLayout) ?>" style="text-align: center; margin: 20px 0;">
+                <?php foreach ($dynamicImages as $image): ?>
+                    <div class="dynamic-image-item" style="display: inline-block; margin: 10px;">
+                        <img src="/fbs/admin/<?= htmlspecialchars($image['path']) ?>" 
+                             alt="<?= htmlspecialchars($image['alt_text']) ?>"
+                             style="width: <?= intval($image['width']) ?>px; height: <?= intval($image['height']) ?>px; object-fit: contain; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                             onerror="this.style.display='none';"
+                             title="<?= htmlspecialchars($image['alt_text']) ?>">
+                    </div>
+                <?php endforeach; ?>
             </div>
+            <?php endif; ?>
             <div class="title" id="republic-title"><?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? 'THE REPUBLIC OF UGANDA'); ?></div>
             <div class="subtitle" id="ministry-subtitle"><?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? 'MINISTRY OF HEALTH'); ?></div>
         </div>
@@ -1474,7 +1545,7 @@ unset($option);
         </div>
 
         <h2 id="survey-title" data-translate="title"><?php echo htmlspecialchars($surveySettings['title_text'] ?? $defaultSurveyTitle); ?></h2>
-       
+
         <div class="subheading rich-text-content" id="survey-subheading" data-translate="subheading">
             <?php echo $surveySettings['subheading_text'] ?? $translations['subheading'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.'; ?>
         </div>

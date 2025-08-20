@@ -1,54 +1,114 @@
 <?php
-session_start();
-
+// Include the database connection file
 require_once '../admin/connect.php';
 
-// Get survey_id from URL
-$surveyId = $_GET['survey_id'] ?? null;
-if (!$surveyId) {
-    die("Survey ID is missing.");
+// Check if the PDO object is available from connect.php
+if (!isset($pdo)) {
+    error_log("Database connection failed in tracker_program_success.php. Please check connect.php.");
+    die("Database connection failed. Please try again later.");
 }
 
-// Fetch survey details
-$survey = null;
-try {
-    $surveyStmt = $pdo->prepare("SELECT * FROM survey WHERE id = ?");
-    $surveyStmt->execute([$surveyId]);
-    $survey = $surveyStmt->fetch(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Error fetching survey: " . $e->getMessage());
+// Get the submission UID from URL
+$uid = $_GET['uid'] ?? null;
+
+if (!$uid) {
+    die("Invalid access. No submission reference found.");
 }
 
-if (!$survey) {
-    die("Survey not found.");
-}
-
-// Get latest submission for this survey
+// Get basic submission data
 $submission = null;
 try {
-    $submissionStmt = $pdo->prepare("SELECT * FROM tracker_submissions WHERE survey_id = ? ORDER BY submitted_at DESC LIMIT 1");
-    $submissionStmt->execute([$surveyId]);
-    $submission = $submissionStmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare("
+        SELECT id, survey_id, submitted_at, form_data, dhis2_response, tracked_entity_instance
+        FROM tracker_submissions
+        WHERE uid = ?
+    ");
+    $stmt->execute([$uid]);
+    $submission = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    // Submission details not critical for success page
-    $submission = null;
+    error_log("Database error fetching tracker submission details: " . $e->getMessage());
+    die("Error retrieving submission details.");
 }
 
-// Get survey settings for styling
+// If no submission found with this UID
+if (!$submission) {
+    die("Submission not found.");
+}
+
+$surveyId = $submission['survey_id'];
+
+// Initialize variables
+$surveyName = null;
+$participantData = null;
+
+// Decode form data if available
+if ($submission['form_data']) {
+    try {
+        $participantData = json_decode($submission['form_data'], true);
+    } catch (Exception $e) {
+        error_log("Error decoding participant data: " . $e->getMessage());
+    }
+}
+
+// Fetch survey information
+if ($surveyId) {
+    try {
+        $stmt = $pdo->prepare("SELECT name, dhis2_program_uid FROM survey WHERE id = ?");
+        $stmt->execute([$surveyId]);
+        $surveyInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($surveyInfo) {
+            $surveyName = $surveyInfo['name'];
+        }
+    } catch (PDOException $e) {
+        error_log("Database error fetching survey name: " . $e->getMessage());
+    }
+}
+
+// Get tracker settings from dedicated tables
 $surveySettings = [];
+$dynamicImages = [];
+
 try {
-    $settingsStmt = $pdo->prepare("SELECT * FROM survey_settings WHERE survey_id = ?");
-    $settingsStmt->execute([$surveyId]);
-    $surveySettings = $settingsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    // Load layout settings
+    $layoutStmt = $pdo->prepare("
+        SELECT layout_type, show_flag_bar, flag_black_color, flag_yellow_color, flag_red_color
+        FROM tracker_layout_settings 
+        WHERE survey_id = ?
+    ");
+    $layoutStmt->execute([$surveyId]);
+    $layoutSettings = $layoutStmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Load active images
+    $imageStmt = $pdo->prepare("
+        SELECT image_order, image_path, image_alt_text, width_px, height_px, position_type
+        FROM tracker_images 
+        WHERE survey_id = ? AND is_active = 1
+        ORDER BY image_order ASC
+    ");
+    $imageStmt->execute([$surveyId]);
+    $dynamicImages = $imageStmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Merge layout settings
+    if ($layoutSettings) {
+        $surveySettings = [
+            'layout_type' => $layoutSettings['layout_type'],
+            'show_flag_bar' => (bool)$layoutSettings['show_flag_bar'],
+            'flag_black_color' => $layoutSettings['flag_black_color'],
+            'flag_yellow_color' => $layoutSettings['flag_yellow_color'],
+            'flag_red_color' => $layoutSettings['flag_red_color']
+        ];
+    }
+    
 } catch (PDOException $e) {
+    error_log("Database error fetching tracker settings: " . $e->getMessage());
     $surveySettings = [];
+    $dynamicImages = [];
 }
 
 // Default settings
 $defaultSettings = [
-    'title_text' => $survey['name'] ?? 'DHIS2 Tracker Program',
-    'show_logo' => true,
-    'logo_path' => '../admin/asets/asets/img/loog.jpg',
+    'title_text' => $surveyName ?? 'DHIS2 Tracker Program',
+    'layout_type' => 'horizontal',
     'show_flag_bar' => true,
     'flag_black_color' => '#000000',
     'flag_yellow_color' => '#FCD116', 
@@ -63,16 +123,25 @@ $surveySettings = array_merge($defaultSettings, $surveySettings);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submission Complete - <?= htmlspecialchars($surveySettings['title_text']) ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
+    <title>Thank You - Tracker Data Submitted</title>
     <style>
-        /* Flag Bar Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        /* Flag Bar */
         .flag-bar {
-            height: 8px;
+            height: 12px;
             display: flex;
             width: 100%;
+            margin-bottom: 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .flag-section {
@@ -80,308 +149,431 @@ $surveySettings = array_merge($defaultSettings, $surveySettings);
             height: 100%;
         }
         
-        /* Success Page Styles */
-        .success-container {
-            max-width: 600px;
+        .thank-you-container {
+            max-width: 800px;
             margin: 0 auto;
-            padding: 40px 20px;
-            text-align: center;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         
-        .success-card {
-            background: white;
-            border-radius: 20px;
-            padding: 50px 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        .header-section {
+            text-align: center;
             margin-bottom: 30px;
         }
         
-        .success-icon {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 30px;
-            animation: successPulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes successPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .success-title {
-            color: #2c3e50;
-            font-weight: 700;
+        .title-section {
             margin-bottom: 20px;
         }
         
-        .success-message {
-            color: #6c757d;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        
-        .submission-details {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 25px;
-            margin: 30px 0;
-            text-align: left;
-        }
-        
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .detail-row:last-child {
-            border-bottom: none;
-        }
-        
-        .detail-label {
+        .title-section h2 {
+            margin: 0;
+            font-size: 24px;
             font-weight: 600;
-            color: #495057;
         }
         
-        .detail-value {
+        /* Success Page Dynamic Images Styles */
+        .success-dynamic-images-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .success-dynamic-images-container.horizontal {
+            flex-direction: row;
+        }
+        
+        .success-dynamic-images-container.vertical {
+            flex-direction: column;
+        }
+        
+        .success-dynamic-images-container.center {
+            justify-content: center;
+        }
+        
+        .success-dynamic-images-container.left-right {
+            justify-content: space-between;
+        }
+        
+        .success-dynamic-image-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            padding: 8px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 5px;
+        }
+        
+        .success-dynamic-image-item.position-left {
+            justify-content: flex-start;
+        }
+        
+        .success-dynamic-image-item.position-center {
+            justify-content: center;
+        }
+        
+        .success-dynamic-image-item.position-right {
+            justify-content: flex-end;
+        }
+        
+        .success-dynamic-image-item img {
+            border-radius: 8px;
+            object-fit: contain;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-section img {
+            height: 60px;
+            margin-right: 15px;
+        }
+        
+        .success-icon {
+            font-size: 64px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #28a745;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            font-size: 18px;
             color: #6c757d;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .reference-id {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .reference-id strong {
             font-family: monospace;
-            font-size: 0.9rem;
+            font-size: 20px;
+            color: #495057;
         }
         
         .action-buttons {
             display: flex;
-            gap: 15px;
             justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 30px;
+            gap: 15px;
+            margin: 30px 0;
         }
         
-        .btn-success-page {
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        .action-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
             text-decoration: none;
         }
         
-        .btn-primary-page {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
+        .action-button:hover {
+            background-color: #218838;
             color: white;
         }
         
-        .btn-primary-page:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-            color: white;
+        .action-button.secondary {
+            background-color: #6c757d;
         }
         
-        .btn-outline-page {
-            border: 2px solid #667eea;
-            color: #667eea;
-            background: transparent;
+        .action-button.secondary:hover {
+            background-color: #5a6268;
         }
         
-        .btn-outline-page:hover {
-            background: #667eea;
-            color: white;
+        .submission-details {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px solid #dee2e6;
+            padding-top: 30px;
         }
         
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+        .details-section {
+            margin-bottom: 30px;
+        }
+        
+        .details-section h3 {
+            color: #28a745;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f8f9fa;
             font-weight: 600;
+            width: 40%;
+            color: #495057;
         }
         
-        .status-success {
-            background: #d4edda;
-            color: #155724;
+        td {
+            color: #6c757d;
         }
         
-        .dhis2-info {
-            background: linear-gradient(135deg, #e3f2fd 0%, #f0f4ff 100%);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
+        .footer-text {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #6c757d;
+            text-align: center;
         }
         
-        .dhis2-icon {
-            color: #1976d2;
-            font-size: 2rem;
-            margin-bottom: 10px;
+        @media print {
+            .action-buttons, .footer-text {
+                display: none !important;
+            }
+            
+            .submission-details {
+                display: block !important;
+            }
+            
+            body {
+                background-color: white;
+                font-size: 12pt;
+            }
+            
+            .thank-you-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 20px;
+            }
+            
+            .success-icon {
+                font-size: 32px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
         }
         
-        /* Responsive Design */
         @media (max-width: 768px) {
-            .success-container {
-                padding: 20px 10px;
-            }
-            
-            .success-card {
-                padding: 30px 20px;
-            }
-            
             .action-buttons {
                 flex-direction: column;
                 align-items: center;
             }
             
-            .btn-success-page {
-                width: 100%;
-                max-width: 250px;
+            .thank-you-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .logo-section {
+                flex-direction: column;
+            }
+            
+            .logo-section img {
+                margin-right: 0;
+                margin-bottom: 10px;
             }
         }
     </style>
 </head>
-
-<body style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh;">
-    <!-- Flag Bar -->
-    <?php if ($surveySettings['show_flag_bar']): ?>
-        <div class="flag-bar">
-            <div class="flag-section" style="background-color: <?= $surveySettings['flag_black_color'] ?>;"></div>
-            <div class="flag-section" style="background-color: <?= $surveySettings['flag_yellow_color'] ?>;"></div>
-            <div class="flag-section" style="background-color: <?= $surveySettings['flag_red_color'] ?>;"></div>
-        </div>
-    <?php endif; ?>
-
-    <div class="success-container">
-        <!-- Header -->
-        <div class="text-center mb-4">
-            <?php if ($surveySettings['show_logo']): ?>
-                <img src="<?= htmlspecialchars($surveySettings['logo_path']) ?>" alt="Logo" class="mb-3" style="max-height: 60px;">
-            <?php endif; ?>
-        </div>
-
-        <!-- Success Card -->
-        <div class="success-card">
-            <div class="success-icon">
-                <i class="fas fa-check fa-3x text-white"></i>
+<body>
+    <div class="thank-you-container" id="printableArea">
+        <!-- Flag Bar inside container -->
+        <?php if ($surveySettings['show_flag_bar']): ?>
+            <div class="flag-bar">
+                <div class="flag-section" style="background-color: <?= htmlspecialchars($surveySettings['flag_black_color']) ?>;"></div>
+                <div class="flag-section" style="background-color: <?= htmlspecialchars($surveySettings['flag_yellow_color']) ?>;"></div>
+                <div class="flag-section" style="background-color: <?= htmlspecialchars($surveySettings['flag_red_color']) ?>;"></div>
             </div>
-            
-            <h2 class="success-title">Tracker Program Submission Successful!</h2>
-            
-            <p class="success-message">
-                Your tracker program data has been successfully submitted to DHIS2. 
-                The tracked entity instance and all program events have been created in the system.
-            </p>
-            
-            <!-- DHIS2 Integration Info -->
-            <div class="dhis2-info">
-                <i class="fas fa-database dhis2-icon"></i>
-                <h5 class="mb-2">DHIS2 Integration Complete</h5>
-                <p class="mb-1">✓ Tracked Entity Instance created</p>
-                <p class="mb-1">✓ Program enrollment processed</p>
-                <p class="mb-0">✓ All stage events submitted</p>
-            </div>
-            
-            <!-- Submission Details -->
-            <?php if ($submission): ?>
-                <div class="submission-details">
-                    <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Submission Details</h5>
-                    
-                    <div class="detail-row">
-                        <span class="detail-label">Program Name:</span>
-                        <span class="detail-value"><?= htmlspecialchars($survey['name']) ?></span>
-                    </div>
-                    
-                    <?php if (!empty($submission['uid'])): ?>
-                    <div class="detail-row">
-                        <span class="detail-label">Participant ID:</span>
-                        <span class="detail-value"><strong><?= htmlspecialchars($submission['uid']) ?></strong></span>
-                    </div>
-                    <?php endif; ?>
-                    
-                    <div class="detail-row">
-                        <span class="detail-label">DHIS2 Program:</span>
-                        <span class="detail-value"><?= htmlspecialchars($survey['dhis2_program_uid']) ?></span>
-                    </div>
-                    
-                    <?php if ($submission['tracked_entity_instance']): ?>
-                        <div class="detail-row">
-                            <span class="detail-label">TEI ID:</span>
-                            <span class="detail-value"><?= htmlspecialchars($submission['tracked_entity_instance']) ?></span>
+        <?php endif; ?>
+        
+        <div class="header-section">
+            <!-- Images above title, centered -->
+            <?php if (!empty($dynamicImages)): ?>
+                <div class="success-dynamic-images-container center" style="margin-bottom: 20px; justify-content: center;">
+                    <?php foreach ($dynamicImages as $image): ?>
+                        <div class="success-dynamic-image-item">
+                            <img src="/fbs/admin/<?= htmlspecialchars($image['image_path']) ?>" 
+                                 alt="<?= htmlspecialchars($image['image_alt_text']) ?>"
+                                 style="width: <?= intval($image['width_px']) ?>px; height: <?= intval($image['height_px']) ?>px;"
+                                 onerror="this.style.display='none';" 
+                                 title="<?= htmlspecialchars($image['image_alt_text']) ?>">
                         </div>
-                    <?php endif; ?>
-                    
-                    <div class="detail-row">
-                        <span class="detail-label">Submitted:</span>
-                        <span class="detail-value"><?= date('F j, Y g:i A', strtotime($submission['submitted_at'])) ?></span>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <span class="detail-label">Status:</span>
-                        <span class="detail-value">
-                            <span class="status-badge status-success">
-                                <i class="fas fa-check-circle"></i>
-                                Successfully Submitted to DHIS2
-                            </span>
-                        </span>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             <?php endif; ?>
             
-            <!-- Thank You Message -->
-            <div class="mt-4 p-3 bg-light rounded">
-                <p class="mb-0 text-muted">
-                    <i class="fas fa-heart text-danger me-2"></i>
-                    Thank you for your participation in this tracker program. Your data will help improve health outcomes and program effectiveness.
-                </p>
+            <!-- Title centered -->
+            <div class="title-section" style="text-align: center;">
+                <h2 style="color: #2c3e50; margin-bottom: 20px;"><?= htmlspecialchars($surveySettings['title_text']) ?></h2>
+            </div>
+            
+            <div class="success-icon">✓</div>
+            <h1>Thank You!</h1>
+            <div class="message">
+                Your tracker program data has been successfully submitted to DHIS2.<br>
+                We appreciate you taking the time to provide this important information.
             </div>
         </div>
-          
+        
+        <div class="reference-id">
+            <div>Your Reference ID:</div>
+            <strong><?php echo htmlspecialchars($uid); ?></strong>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-button" id="viewDetailsBtn">View Submission Details</button>
+            <button class="action-button secondary" id="printSummaryBtn">Print Summary</button>
+        </div>
+        
+        <div class="submission-details" id="submissionDetails">
+            <div class="details-section">
+                <h3>Submission Information</h3>
+                <table>
+                    <tr>
+                        <th>Reference ID</th>
+                        <td><?php echo htmlspecialchars($uid); ?></td>
+                    </tr>
+                    <?php if ($surveyName): ?>
+                    <tr>
+                        <th>Program Name</th>
+                        <td><?php echo htmlspecialchars($surveyName); ?></td>
+                    </tr>
+                    <?php endif; ?>
+                    <tr>
+                        <th>Submission Date</th>
+                        <td><?php echo date('F j, Y g:i A', strtotime($submission['submitted_at'])); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td>Successfully submitted to DHIS2</td>
+                    </tr>
+                </table>
+            </div>
+
+            <?php if ($participantData): ?>
+            <div class="details-section">
+                <h3>Participant Information</h3>
+                <table>
+                    <?php foreach ($participantData as $key => $value): ?>
+                        <?php if (!empty($value)): ?>
+                        <tr>
+                            <th><?php echo htmlspecialchars(ucwords(str_replace('_', ' ', $key))); ?></th>
+                            <td><?php echo htmlspecialchars($value); ?></td>
+                        </tr>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </table>
+            </div>
+            <?php endif; ?>
+        </div>
+        
+        <div class="footer-text">
+            Your data helps improve healthcare services. Thank you for your participation!
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
-        // Prevent back navigation after submission
-        (function() {
-            // Replace current history entry to prevent going back
-            if (window.history.replaceState) {
-                window.history.replaceState(null, null, window.location.href);
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up event listeners...');
+            
+            // Toggle submission details
+            var viewDetailsBtn = document.getElementById('viewDetailsBtn');
+            var submissionDetails = document.getElementById('submissionDetails');
+            
+            console.log('viewDetailsBtn:', viewDetailsBtn);
+            console.log('submissionDetails:', submissionDetails);
+            
+            if (viewDetailsBtn && submissionDetails) {
+                viewDetailsBtn.addEventListener('click', function() {
+                    console.log('View details button clicked');
+                    var computedStyle = window.getComputedStyle(submissionDetails);
+                    var isVisible = computedStyle.display !== 'none';
+                    
+                    console.log('Current display:', computedStyle.display, 'isVisible:', isVisible);
+                    
+                    if (isVisible) {
+                        submissionDetails.style.display = 'none';
+                        this.textContent = 'View Submission Details';
+                    } else {
+                        submissionDetails.style.display = 'block';
+                        this.textContent = 'Hide Submission Details';
+                    }
+                });
             }
             
-            // Handle back button attempts
-            window.addEventListener('popstate', function(event) {
-                // Prevent navigation and show message
-                event.preventDefault();
-                event.stopPropagation();
-                
-                // Push current state again to block back navigation
-                window.history.pushState(null, null, window.location.href);
-                
-                // Show alert to user
-                alert('Thank you for your submission! For security reasons, you cannot navigate back to the form. Your data has been successfully submitted to DHIS2.');
-                
-                return false;
-            });
-            
-            // Push an additional state to prevent direct back navigation
-            window.history.pushState(null, null, window.location.href);
-        })();
-
-        // Auto-close window after 30 seconds if opened as popup
-        <?php if (!isset($_SESSION['admin_logged_in'])): ?>
-        setTimeout(function() {
-            if (window.opener) {
-                window.close();
+            // Add event listener for print button
+            var printBtn = document.getElementById('printSummaryBtn');
+            if (printBtn) {
+                printBtn.addEventListener('click', printSummary);
             }
-        }, 30000);
-        <?php endif; ?>
+        });
+        
+        // Prevent navigation back to form
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() {
+            history.go(1);
+        };
+        
+        // Disable right-click context menu
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        
+        // Disable common keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Disable F5, Ctrl+R (refresh)
+            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                e.preventDefault();
+            }
+            // Disable Ctrl+W (close tab)
+            if (e.ctrlKey && e.key === 'w') {
+                e.preventDefault();
+            }
+            // Disable Alt+Left (back)
+            if (e.altKey && e.key === 'ArrowLeft') {
+                e.preventDefault();
+            }
+            // Disable Backspace (back)
+            if (e.key === 'Backspace' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        });
+        
+        // Print summary function
+        function printSummary() {
+            // Make sure details are visible before printing
+            document.getElementById('submissionDetails').style.display = 'block';
+            window.print();
+        }
     </script>
 </body>
 </html>

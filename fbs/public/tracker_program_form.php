@@ -339,21 +339,51 @@ if (!$trackerProgram) {
     $offlineMode = false;
 }
 
-// Get survey settings for styling
+// Get tracker settings from dedicated tables
 $surveySettings = [];
+$dynamicImages = [];
+
 try {
-    $settingsStmt = $pdo->prepare("SELECT * FROM survey_settings WHERE survey_id = ?");
-    $settingsStmt->execute([$surveyId]);
-    $surveySettings = $settingsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    // Load layout settings
+    $layoutStmt = $pdo->prepare("
+        SELECT layout_type, show_flag_bar, flag_black_color, flag_yellow_color, flag_red_color
+        FROM tracker_layout_settings 
+        WHERE survey_id = ?
+    ");
+    $layoutStmt->execute([$surveyId]);
+    $layoutSettings = $layoutStmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Load active images
+    $imageStmt = $pdo->prepare("
+        SELECT image_order, image_path, image_alt_text, width_px, height_px, position_type
+        FROM tracker_images 
+        WHERE survey_id = ? AND is_active = 1
+        ORDER BY image_order ASC
+    ");
+    $imageStmt->execute([$surveyId]);
+    $dynamicImages = $imageStmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Merge layout settings
+    if ($layoutSettings) {
+        $surveySettings = [
+            'layout_type' => $layoutSettings['layout_type'],
+            'show_flag_bar' => (bool)$layoutSettings['show_flag_bar'],
+            'flag_black_color' => $layoutSettings['flag_black_color'],
+            'flag_yellow_color' => $layoutSettings['flag_yellow_color'],
+            'flag_red_color' => $layoutSettings['flag_red_color']
+        ];
+    }
+    
 } catch (PDOException $e) {
+    error_log("Database error fetching tracker settings: " . $e->getMessage());
     $surveySettings = [];
+    $dynamicImages = [];
 }
 
 // Default settings
 $defaultSettings = [
-    'title_text' => $trackerProgram['name'] ?? 'DHIS2 Tracker Program',
-    'show_logo' => true,
-    'logo_path' => 'admin/argon-dashboard-master/assets/img/loog.jpg',
+    'title_text' => $trackerProgram['name'],
+    'layout_type' => 'horizontal',
     'show_flag_bar' => true,
     'flag_black_color' => '#000000',
     'flag_yellow_color' => '#FCD116', 
@@ -412,14 +442,17 @@ if (!empty($programStages)) {
     <!-- Custom Styles -->
     <style>
         :root {
-            --primary-color: #2563eb;
-            --success-color: #10b981;
-            --secondary-color: #6b7280;
+            --primary-color: #4a5568;
+            --success-color: #38a169;
+            --secondary-color: #718096;
+            --accent-color: #2d3748;
+            --neutral-gray: #e2e8f0;
+            --light-bg: #f7fafc;
             --border-radius: 12px;
         }
         
         body {
-            background: #f8fafc;
+            background: var(--light-bg);
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             margin: 0;
@@ -453,6 +486,196 @@ if (!empty($programStages)) {
             display: flex;
             height: 4px;
             margin-top: 0.5rem;
+        }
+        
+        /* Enhanced Header Layout */
+        .header-main {
+            padding: 20px 0;
+        }
+        
+        .header-with-images {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+        }
+        
+        .header-with-images.vertical {
+            flex-direction: column;
+            text-align: center;
+            gap: 20px;
+        }
+        
+        .header-with-images.center {
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .header-with-images.left-right {
+            justify-content: space-between;
+        }
+        
+        .header-with-images-vertical {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .header-images-section-under {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .header-title-section {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .tracker-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        
+        .tracker-subtitle {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+        
+        .header-title-only {
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        .header-title-only .tracker-title {
+            font-size: 32px;
+        }
+        
+        /* Enhanced Dynamic Images Styles */
+        .header-images-section {
+            display: flex;
+            align-items: center;
+        }
+        
+        .dynamic-images-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .dynamic-images-container.horizontal {
+            flex-direction: row;
+        }
+        
+        .dynamic-images-container.vertical {
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .dynamic-images-container.center {
+            justify-content: center;
+        }
+        
+        .dynamic-images-container.left-right {
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        .dynamic-image-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .dynamic-image-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dynamic-image-item.position-left {
+            justify-content: flex-start;
+        }
+        
+        .dynamic-image-item.position-center {
+            justify-content: center;
+        }
+        
+        .dynamic-image-item.position-right {
+            justify-content: flex-end;
+        }
+        
+        .header-image {
+            border-radius: 8px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        
+        .header-image:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Flag Bar Enhancement */
+        .flag-bar {
+            height: 6px;
+            display: flex;
+            border-radius: 3px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .flag-segment {
+            transition: transform 0.3s ease;
+        }
+        
+        .flag-segment:hover {
+            transform: scaleY(1.2);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-with-images {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .tracker-title {
+                font-size: 24px;
+            }
+            
+            .dynamic-images-container {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .dynamic-image-item {
+                padding: 6px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tracker-title {
+                font-size: 20px;
+            }
+            
+            .header-main {
+                padding: 15px 0;
+            }
+            
+            .dynamic-images-container.left-right {
+                justify-content: center;
+            }
         }
         
         .flag-segment {
@@ -615,7 +838,7 @@ if (!empty($programStages)) {
             display: grid;
             grid-template-columns: 1fr;
             gap: 0.8rem;
-            max-width: 500px;
+            width: 100%;
         }
         
         .form-group {
@@ -661,7 +884,6 @@ if (!empty($programStages)) {
         }
         
         .form-group .answer-area .form-control,
-        .form-group .answer-area .form-check,
         .form-group .answer-area select {
             width: 100%;
             min-height: 42px;
@@ -1298,7 +1520,7 @@ if (!empty($programStages)) {
         @media (max-width: 768px) {
             /* Modal dialog responsive adjustments */
             .modal-dialog.modal-xl {
-                max-width: 95%;
+                max-width: 90%;
                 margin: 0.5rem auto;
             }
 
@@ -1349,6 +1571,27 @@ if (!empty($programStages)) {
                 padding-bottom: 4px;
             }
             
+            .modal-group-content .form-group.mb-3 {
+                flex-direction: column !important;
+                gap: 6px !important;
+                padding: 10px 8px !important;
+            }
+            
+            .modal-group-content .form-group.mb-3 .form-label {
+                width: 100% !important;
+                min-width: auto !important;
+                max-width: none !important;
+                font-size: 14px !important;
+                font-weight: 500 !important;
+                padding-bottom: 4px !important;
+            }
+            
+            .modal-group-content .form-group.mb-3 .answer-area {
+                width: 100% !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
+            
             .modal-group-content .form-group .answer-area {
                 width: 100%;
                 min-width: auto;
@@ -1374,23 +1617,140 @@ if (!empty($programStages)) {
                 resize: vertical;
             }
 
-            /* Override input-type specific sizing for mobile */
-            .modal-group-content .form-group.input-type-number .answer-area,
-            .modal-group-content .form-group.input-type-date .answer-area,
-            .modal-group-content .form-group.input-type-dropdown .answer-area,
-            .modal-group-content .form-group.input-type-textarea .answer-area,
+            /* Mobile specific sizing for all input types */
+            .modal-group-content .form-group.input-type-number .answer-area {
+                width: 40% !important;
+                min-width: 100px !important;
+                max-width: 150px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-date .answer-area {
+                width: 50% !important;
+                min-width: 140px !important;
+                max-width: 180px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-dropdown .answer-area {
+                width: 80% !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
+            
+            .modal-group-content .form-group.input-type-text .answer-area {
+                width: 75% !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
+            
+            .modal-group-content .form-group.input-type-email .answer-area {
+                width: 75% !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
+            
+            .modal-group-content .form-group.input-type-file .answer-area {
+                width: 70% !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
+            
+            .modal-group-content .form-group.input-type-textarea .answer-area {
+                width: 100% !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
+            
             .modal-group-content .form-group.input-type-checkbox .answer-area {
-                width: 100%;
-                min-width: auto;
-                max-width: none;
+                width: 12% !important;
+                min-width: 40px !important;
+                max-width: 60px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-radio .answer-area {
+                width: 70% !important;
+                min-width: 200px !important;
+                max-width: 300px !important;
+            }
+        }
+
+        /* Small tablets and large mobile devices */
+        @media (max-width: 992px) and (min-width: 769px) {
+            .modal-group-content .form-group {
+                padding: 12px 14px;
+                gap: 60px;
+            }
+            
+            .modal-group-content .form-group .form-label {
+                font-size: 13px;
+                line-height: 1.3;
+            }
+            
+            .modal-group-content .form-group .answer-area .form-control,
+            .modal-group-content .form-group .answer-area select,
+            .modal-group-content .form-group .answer-area textarea,
+            .modal-group-content .form-group .answer-area input {
+                font-size: 13px;
+                padding: 6px 10px;
+                min-height: 36px;
+            }
+            
+            .modal-group-content .form-group.mb-3 {
+                gap: 60px !important;
+                padding: 12px 14px !important;
+            }
+            
+            .modal-group-content .form-group.mb-3 .form-label {
+                font-size: 13px !important;
+                line-height: 1.3 !important;
             }
         }
 
         /* Extra small mobile devices */
         @media (max-width: 480px) {
             .modal-dialog.modal-xl {
-                max-width: 98%;
+                max-width: 95%;
                 margin: 0.25rem auto;
+            }
+            
+            .modal-group-content .form-group {
+                flex-direction: column !important;
+                gap: 4px !important;
+                padding: 8px 6px !important;
+            }
+            
+            .modal-group-content .form-group .form-label {
+                width: 100% !important;
+                min-width: auto !important;
+                max-width: none !important;
+                font-size: 13px !important;
+                font-weight: 500 !important;
+                margin-bottom: 4px !important;
+            }
+            
+            .modal-group-content .form-group .answer-area {
+                width: 100% !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
+            
+            .modal-group-content .form-group.mb-3 {
+                flex-direction: column !important;
+                gap: 4px !important;
+                padding: 8px 6px !important;
+            }
+            
+            .modal-group-content .form-group.mb-3 .form-label {
+                width: 100% !important;
+                min-width: auto !important;
+                max-width: none !important;
+                font-size: 13px !important;
+                margin-bottom: 4px !important;
+            }
+            
+            .modal-group-content .form-group.mb-3 .answer-area {
+                width: 100% !important;
+                min-width: auto !important;
+                max-width: none !important;
             }
 
             .modal-header,
@@ -1428,20 +1788,107 @@ if (!empty($programStages)) {
         
         @media (max-width: 1024px) {
             .modal-group-content .form-group .form-label {
-                width: 40%;
-                min-width: 120px;
-                max-width: 200px;
+                width: 45%;
+                min-width: 140px;
+                max-width: 220px;
             }
             
             .modal-group-content .form-group .answer-area {
-                width: 55%;
+                width: 60%;
                 min-width: 150px;
-                max-width: 250px;
+                max-width: none;
+            }
+            
+            /* Tablet specific sizing for all input types */
+            .modal-group-content .form-group.input-type-number .answer-area {
+                width: 30% !important;
+                min-width: 110px !important;
+                max-width: 160px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-date .answer-area {
+                width: 35% !important;
+                min-width: 150px !important;
+                max-width: 190px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-dropdown .answer-area {
+                width: 50% !important;
+                min-width: 220px !important;
+                max-width: 350px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-text .answer-area {
+                width: 50% !important;
+                min-width: 180px !important;
+                max-width: 300px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-email .answer-area {
+                width: 50% !important;
+                min-width: 180px !important;
+                max-width: 300px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-file .answer-area {
+                width: 45% !important;
+                min-width: 160px !important;
+                max-width: 280px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-textarea .answer-area {
+                width: 60% !important;
+                min-width: 280px !important;
+                max-width: 450px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-checkbox .answer-area {
+                width: 10% !important;
+                min-width: 40px !important;
+                max-width: 65px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-radio .answer-area {
+                width: 55% !important;
+                min-width: 220px !important;
+                max-width: 350px !important;
             }
         }
 
         /* Tablet responsive adjustments */
         
+        /* Medium devices optimization */
+        @media (max-width: 1199px) and (min-width: 993px) {
+            .modal-group-content .form-group {
+                gap: 70px;
+                padding: 14px 16px;
+            }
+            
+            .modal-group-content .form-group .form-label {
+                font-size: 13.5px;
+                line-height: 1.4;
+            }
+            
+            .modal-group-content .form-group .answer-area .form-control,
+            .modal-group-content .form-group .answer-area select,
+            .modal-group-content .form-group .answer-area textarea,
+            .modal-group-content .form-group .answer-area input {
+                font-size: 13.5px;
+                padding: 7px 11px;
+                min-height: 37px;
+            }
+            
+            .modal-group-content .form-group.mb-3 {
+                gap: 70px !important;
+                padding: 14px 16px !important;
+            }
+            
+            .modal-group-content .form-group.mb-3 .form-label {
+                font-size: 13.5px !important;
+                line-height: 1.4 !important;
+            }
+        }
+
         @media (min-width: 1200px) {
             .modal-group-content .form-group .form-label {
                 width: 40%;
@@ -1449,10 +1896,71 @@ if (!empty($programStages)) {
                 max-width: 320px;
             }
             
+            .modal-group-content .form-group .answer-area {
+                width: 65%;
+                min-width: 200px;
+                max-width: none;
+            }
+            
+            /* Desktop specific sizing for all input types */
+            .modal-group-content .form-group.input-type-number .answer-area {
+                width: 25% !important;
+                min-width: 120px !important;
+                max-width: 180px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-date .answer-area {
+                width: 30% !important;
+                min-width: 160px !important;
+                max-width: 200px !important;
+            }
+            
             .modal-group-content .form-group.input-type-dropdown .answer-area {
-                width: 55%;
+                width: 45% !important;
+                min-width: 250px !important;
+                max-width: 400px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-text .answer-area {
+                width: 45% !important;
+                min-width: 200px !important;
+                max-width: 350px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-email .answer-area {
+                width: 45% !important;
+                min-width: 200px !important;
+                max-width: 350px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-file .answer-area {
+                width: 40% !important;
+                min-width: 180px !important;
+                max-width: 300px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-textarea .answer-area {
+                width: 60% !important;
+                min-width: 320px !important;
+                max-width: none !important;
+            }
+            
+            .modal-group-content .form-group.input-type-checkbox .answer-area {
+                width: 8% !important;
+                min-width: 40px !important;
+                max-width: 60px !important;
+            }
+            
+            .modal-group-content .form-group.input-type-radio .answer-area {
+                width: 55% !important;
+                min-width: 250px !important;
+                max-width: none !important;
+            }
+            
+            .modal-group-content .form-group.input-type-dropdown .answer-area {
+                width: 65%;
                 min-width: 300px;
-                max-width: 450px;
+                max-width: none;
             }
         }
         
@@ -1527,8 +2035,8 @@ if (!empty($programStages)) {
         }
 
         .modal-question-item .form-check-input {
-            width: 20px;
-            height: 20px;
+            width: 8px;
+            height: 12px;
             margin: 0;
             position: static;
             transform: none;
@@ -1617,6 +2125,7 @@ if (!empty($programStages)) {
         .modal-group-content .form-grid {
             gap: 0;
             width: 100%;
+            max-width: none;
         }
         
         /* Adjust modal form groups for modal-xl with optimized spacing and visibility */
@@ -1649,9 +2158,9 @@ if (!empty($programStages)) {
         }
         
         .modal-group-content .form-group .form-label {
-            width: 40%;
-            min-width: 200px;
-            max-width: 320px;
+            width: 65%;
+            min-width: 250px;
+            max-width: 500px;
             font-size: 14px;
             line-height: 1.4;
             font-weight: 600;
@@ -1667,9 +2176,9 @@ if (!empty($programStages)) {
         }
         
         .modal-group-content .form-group .answer-area {
-            width: 55%;
-            min-width: 250px;
-            max-width: 500px;
+            width: 60%;
+            min-width: 200px;
+            max-width: none;
             flex-shrink: 1;
             overflow: hidden;
             display: flex;
@@ -1679,39 +2188,57 @@ if (!empty($programStages)) {
         
         /* Dynamic answer area sizing - optimized for better space utilization */
         .modal-group-content .form-group.input-type-number .answer-area {
-            width: 30%;
-            min-width: 120px;
-            max-width: 180px;
+            width: 35% !important;
+            min-width: 120px !important;
+            max-width: 200px !important;
         }
         
         .modal-group-content .form-group.input-type-date .answer-area {
-            width: 35%;
-            min-width: 160px;
-            max-width: 200px;
+            width: 40% !important;
+            min-width: 160px !important;
+            max-width: 220px !important;
         }
         
         .modal-group-content .form-group.input-type-dropdown .answer-area {
-            width: 65%;
-            min-width: 350px;
-            max-width: 600px;
+            width: 60% !important;
+            min-width: 250px !important;
+            max-width: 500px !important;
+        }
+        
+        .modal-group-content .form-group.input-type-text .answer-area {
+            width: 45% !important;
+            min-width: 200px !important;
+            max-width: 350px !important;
+        }
+        
+        .modal-group-content .form-group.input-type-email .answer-area {
+            width: 45% !important;
+            min-width: 200px !important;
+            max-width: 350px !important;
+        }
+        
+        .modal-group-content .form-group.input-type-file .answer-area {
+            width: 40% !important;
+            min-width: 180px !important;
+            max-width: 300px !important;
         }
         
         .modal-group-content .form-group.input-type-textarea .answer-area {
-            width: 60%;
-            min-width: 320px;
-            max-width: 520px;
+            width: 60% !important;
+            min-width: 300px !important;
+            max-width: none !important;
         }
         
         .modal-group-content .form-group.input-type-checkbox .answer-area {
-            width: 25%;
-            min-width: 80px;
-            max-width: 120px;
+            width: 8% !important;
+            min-width: 40px !important;
+            max-width: 60px !important;
         }
         
         .modal-group-content .form-group.input-type-radio .answer-area {
-            width: 55%;
-            min-width: 240px;
-            max-width: 420px;
+            width: 55% !important;
+            min-width: 240px !important;
+            max-width: 420px !important;
         }
         
         /* Optimized form control styling with compact design */
@@ -1737,6 +2264,47 @@ if (!empty($programStages)) {
         /* Reduced spacing for mb-3 form groups in modal */
         .modal-group-content .form-group.mb-3 {
             margin-bottom: 0.5rem;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 16px;
+            gap: 80px;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .modal-group-content .form-group.mb-3:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+        
+        .modal-group-content .form-group.mb-3 .form-label {
+            width: 45% !important;
+            min-width: 200px !important;
+            max-width: 350px !important;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #374151;
+            font-weight: 500;
+            margin: 0;
+            padding: 8px 0;
+            flex-shrink: 0;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .modal-group-content .form-group.mb-3 .answer-area {
+            width: 60% !important;
+            min-width: 200px !important;
+            max-width: none !important;
+            flex-shrink: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
         }
         
         /* Ensure modal body uses full width and reaches edges */
@@ -1805,7 +2373,6 @@ if (!empty($programStages)) {
         }
         
         #teiAttributesContainer .form-group .answer-area .form-control,
-        #teiAttributesContainer .form-group .answer-area .form-check,
         #teiAttributesContainer .form-group .answer-area select {
             width: 100%;
             min-height: 40px;
@@ -1969,6 +2536,10 @@ if (!empty($programStages)) {
             if (facilityResults) facilityResults.style.display = 'none';
             if (locationNextBtn) locationNextBtn.disabled = false;
             
+            // Update hidden facility name field for submission
+            const facilityNameInput = document.getElementById('facilityName');
+            if (facilityNameInput) facilityNameInput.value = facilityName;
+            
             // Update location status
             const locationStatus = document.getElementById('locationStatus');
             if (locationStatus) {
@@ -2057,18 +2628,46 @@ if (!empty($programStages)) {
     <!-- Header -->
     <header class="tracker-header">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="logo-section">
-                        <?php if ($surveySettings['show_logo'] && !empty($surveySettings['logo_path'])): ?>
-                            <img src="/fbs/admin/<?= htmlspecialchars($surveySettings['logo_path']) ?>" alt="Logo" style="height: 40px;" onerror="this.style.display='none'">
-                        <?php endif; ?>
-                        <h1 class="h5 mb-0"><?= htmlspecialchars($trackerProgram['name'] ?? $surveySettings['title_text']) ?></h1>
-                    </div>
+            <!-- Flag Bar -->
+            <?php if ($surveySettings['show_flag_bar']): ?>
+                <div class="flag-bar mb-3">
+                    <div class="flag-segment" style="background-color: <?= htmlspecialchars($surveySettings['flag_black_color']) ?>; flex: 1;"></div>
+                    <div class="flag-segment" style="background-color: <?= htmlspecialchars($surveySettings['flag_yellow_color']) ?>; flex: 1;"></div>
+                    <div class="flag-segment" style="background-color: <?= htmlspecialchars($surveySettings['flag_red_color']) ?>; flex: 1;"></div>
                 </div>
-                <!-- <div class="col-md-6 text-end">
-                    <span class="text-muted">Tracker Program</span>
-                </div> -->
+            <?php endif; ?>
+            
+            <!-- Header Content -->
+            <div class="header-main">
+                <?php if (!empty($dynamicImages)): ?>
+                    <!-- Images Under Title Layout -->
+                    <div class="header-with-images-vertical">
+                        <div class="header-title-section">
+                            <h1 class="tracker-title"><?= htmlspecialchars($trackerProgram['name'] ?? $surveySettings['title_text']) ?></h1>
+                        </div>
+                        
+                        <div class="header-images-section-under">
+                            <div class="dynamic-images-container <?= htmlspecialchars($surveySettings['layout_type']) ?>">
+                                <?php foreach ($dynamicImages as $image): ?>
+                                    <div class="dynamic-image-item position-<?= htmlspecialchars($image['position_type']) ?>">
+                                        <img src="/fbs/admin/<?= htmlspecialchars($image['image_path']) ?>" 
+                                             alt="<?= htmlspecialchars($image['image_alt_text']) ?>"
+                                             class="header-image"
+                                             style="width: <?= intval($image['width_px']) ?>px; height: <?= intval($image['height_px']) ?>px;"
+                                             onerror="this.style.display='none';" 
+                                             title="<?= htmlspecialchars($image['image_alt_text']) ?>">
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <!-- Title Only Layout -->
+                    <div class="header-title-only">
+                        <h1 class="tracker-title"><?= htmlspecialchars($trackerProgram['name'] ?? $surveySettings['title_text']) ?></h1>
+                       
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </header>
@@ -3559,8 +4158,9 @@ if (!empty($programStages)) {
                 const surveyId = programData.surveySettings?.id;
                 
                 if (!surveyId) {
-                    console.log('No survey ID available, using default grouping');
-                    return groupQuestionsByCategory(dataElements);
+                    console.log('No survey ID available, showing questions without grouping');
+                    // Return questions in a single group without title
+                    return { '': dataElements };
                 }
                 
                 // Use the working API path
@@ -3627,64 +4227,17 @@ if (!empty($programStages)) {
                 console.error('Error loading saved groupings:', error);
             }
             
-            // Fallback to automatic grouping
-            console.log('Using automatic grouping as fallback');
-            return groupQuestionsByCategory(dataElements);
+            // Fallback: show questions without grouping titles
+            console.log('No saved groupings found, showing questions without group titles');
+            return { '': dataElements };
         }
         
         // Function to group questions by category based on naming patterns
+        // DISABLED: Only use groupings from groupings.php API
         function groupQuestionsByCategory(dataElements) {
-            const groups = {};
-            
-            dataElements.forEach(elementConfig => {
-                const dataElement = elementConfig.dataElement;
-                if (!dataElement) return;
-                
-                // Extract group name from data element name
-                let groupName = 'General Information';
-                const elementName = dataElement.displayName || dataElement.name || '';
-                
-                // Common grouping patterns for DHIS2 data elements
-                if (elementName.match(/^(TP_|PM_|TR_)/i)) {
-                    // Remove prefix and extract group from next part
-                    const withoutPrefix = elementName.replace(/^[A-Z]{2,3}_/i, '');
-                    const words = withoutPrefix.split(/[_\s]+/);
-                    
-                    if (words.length > 1) {
-                        // Use first word or two words as group name
-                        groupName = words.slice(0, 2).join(' ');
-                        groupName = groupName.charAt(0).toUpperCase() + groupName.slice(1).toLowerCase();
-                    }
-                } else {
-                    // Try to extract group from element name patterns
-                    const words = elementName.split(/[_\s]+/);
-                    if (words.length > 1) {
-                        // Use first word as group, or look for common patterns
-                        if (elementName.toLowerCase().includes('contact')) {
-                            groupName = 'Contact Information';
-                        } else if (elementName.toLowerCase().includes('address') || elementName.toLowerCase().includes('location')) {
-                            groupName = 'Address & Location';
-                        } else if (elementName.toLowerCase().includes('date') || elementName.toLowerCase().includes('time')) {
-                            groupName = 'Date & Time Information';
-                        } else if (elementName.toLowerCase().includes('health') || elementName.toLowerCase().includes('medical')) {
-                            groupName = 'Health Information';
-                        } else if (elementName.toLowerCase().includes('school') || elementName.toLowerCase().includes('education')) {
-                            groupName = 'Education Information';
-                        } else {
-                            groupName = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase() + ' Information';
-                        }
-                    }
-                }
-                
-                // Initialize group if it doesn't exist
-                if (!groups[groupName]) {
-                    groups[groupName] = [];
-                }
-                
-                groups[groupName].push(elementConfig);
-            });
-            
-            return groups;
+            // This function is disabled - only use saved groupings from groupings.php
+            console.log('Default grouping function disabled - use groupings.php only');
+            return {};
         }
         
         // Helper function to create question input HTML (like committed version)
@@ -3963,8 +4516,9 @@ if (!empty($programStages)) {
             try {
                 questionGroups = await loadSavedGroupings(stage.id, stage.programStageDataElements || []);
             } catch (error) {
-                console.error('Failed to load groupings, using default:', error);
-                questionGroups = groupQuestionsByCategory(stage.programStageDataElements || []);
+                console.error('Failed to load groupings:', error);
+                // Show questions without grouping
+                questionGroups = { '': stage.programStageDataElements || [] };
             }
             
             // Create questions with grouping
@@ -3975,10 +4529,14 @@ if (!empty($programStages)) {
                 const groupSection = document.createElement('div');
                 groupSection.className = 'modal-group-section';
                 
-                // Group header
+                // Group header (only show if groupName is not empty)
                 const groupHeader = document.createElement('div');
-                groupHeader.className = 'modal-group-header';
-                groupHeader.innerHTML = `<h6 class="modal-group-title">${groupName}</h6>`;
+                if (groupName.trim()) {
+                    groupHeader.className = 'modal-group-header';
+                    groupHeader.innerHTML = `<h6 class="modal-group-title">${groupName}</h6>`;
+                } else {
+                    groupHeader.style.display = 'none';
+                }
                 
                 // Group content container
                 const groupContent = document.createElement('div');
@@ -4439,7 +4997,7 @@ if (!empty($programStages)) {
                     },
                     location_data: {
                         facility_id: facilityId,
-                        facility_name: document.getElementById('facilityName').textContent,
+                        facility_name: document.getElementById('facilityName').value,
                         orgunit_uid: facilityOrgunitUid
                     }
                 };
@@ -4562,7 +5120,7 @@ if (!empty($programStages)) {
                     
                     // Redirect to success page after short delay
                     setTimeout(() => {
-                        window.location.href = `/tracker-success/${submissionData.survey_id}/${result.submission_id}`;
+                        window.location.href = `/tracker-success/${result.participant_uid}`;
                     }, 1500);
                 } else {
                     throw new Error(result.message || 'Submission failed');

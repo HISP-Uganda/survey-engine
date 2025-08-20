@@ -107,6 +107,24 @@ if (isset($pdo)) {
     ];
 }
 
+// Process dynamic images from survey settings
+$dynamicImages = [];
+$imageLayout = 'horizontal'; // default
+if (!empty($surveySettings['dynamic_images_data'])) {
+    try {
+        $imagesData = json_decode($surveySettings['dynamic_images_data'], true);
+        if (is_array($imagesData)) {
+            $dynamicImages = $imagesData;
+        }
+        error_log("Loaded dynamic images for share page: " . count($dynamicImages) . " images");
+    } catch (Exception $e) {
+        error_log("Error parsing dynamic images JSON in share_page.php: " . $e->getMessage());
+    }
+}
+if (!empty($surveySettings['image_layout_type'])) {
+    $imageLayout = $surveySettings['image_layout_type'];
+}
+
 // **** THIS IS THE NEW CRITICAL LOGIC FOR DYNAMIC URL CONSTRUCTION ****
 
 // Get the scheme (http or https)
@@ -396,14 +414,71 @@ error_log("QR Code Target URL: " . $qrCodeTargetUrl);
                 padding: 12px 25px;
             }
         }
+        
+        /* Dynamic Images Styling */
+        .dynamic-images-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .dynamic-images-container.horizontal {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .dynamic-images-container.vertical {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .dynamic-image-item {
+            display: inline-block;
+            margin: 5px;
+            background: white;
+            padding: 8px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dynamic-image-item img {
+            border-radius: 8px;
+            object-fit: contain;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .dynamic-images-container.horizontal {
+                flex-direction: column;
+            }
+            
+            .dynamic-image-item img {
+                max-width: 100%;
+                height: auto;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="feedback-container">
         <div class="header-section" id="share-header-section">
-            <div class="logo-container" style="display: <?php echo ($surveySettings['show_logo'] ?? true) ? 'flex' : 'none'; ?>;">
-                <img id="moh-logo" src="<?php echo htmlspecialchars($surveySettings['logo_path'] ?? 'asets/asets/img/loog.jpg'); ?>" alt="Ministry of Health Logo">
+            <?php if (!empty($dynamicImages) && ($surveySettings['show_dynamic_images'] ?? true)): ?>
+            <div class="dynamic-images-container <?= htmlspecialchars($imageLayout) ?>" style="text-align: center; margin: 20px 0;">
+                <?php foreach ($dynamicImages as $image): ?>
+                    <div class="dynamic-image-item" style="display: inline-block; margin: 10px;">
+                        <img src="/fbs/admin/<?= htmlspecialchars($image['path']) ?>" 
+                             alt="<?= htmlspecialchars($image['alt_text']) ?>"
+                             style="width: <?= intval($image['width']) ?>px; height: <?= intval($image['height']) ?>px; object-fit: contain; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                             onerror="this.style.display='none';"
+                             title="<?= htmlspecialchars($image['alt_text']) ?>">
+                    </div>
+                <?php endforeach; ?>
             </div>
+            <?php endif; ?>
             <div class="title-uganda" id="republic-title-share" style="display: <?php echo ($surveySettings['show_republic_title_share'] ?? true) ? 'block' : 'none'; ?>;"><?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? 'THE REPUBLIC OF UGANDA'); ?></div>
             <div class="subtitle-moh" id="ministry-subtitle-share" style="display: <?php echo ($surveySettings['show_ministry_subtitle_share'] ?? true) ? 'block' : 'none'; ?>;"><?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? 'MINISTRY OF HEALTH'); ?></div>
         </div>

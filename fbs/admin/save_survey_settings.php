@@ -42,8 +42,7 @@ if (!$surveyId) {
 error_log("Processing survey ID: " . $surveyId);
 
 // Extract other settings from $data
-$logoPath = $data['logoSrc'] ?? null; // Can be base64 data URL or existing path
-$showLogo = $data['showLogo'] ?? false;
+$showDynamicImages = $data['showDynamicImages'] ?? false;
 $flagBlackColor = $data['flagBlackColor'] ?? '#000000';
 $flagYellowColor = $data['flagYellowColor'] ?? '#FCD116';
 $flagRedColor = $data['flagRedColor'] ?? '#D21034';
@@ -74,24 +73,10 @@ $selectedHierarchyLevel = $data['selectedHierarchyLevel'] ?? null;
 $showNumbering = $data['showNumbering'] ?? true;
 $numberingStyle = $data['numberingStyle'] ?? 'numeric';
 
-// Handle logo upload if it's a new base64 image
-if (strpos($logoPath, 'data:image/') === 0) {
-    $base64Image = explode(',', $logoPath)[1];
-    $imageType = explode(';', explode(':', $logoPath)[1])[0]; // e.g., image/jpeg
-    $extension = explode('/', $imageType)[1]; // e.g., jpeg
-    $uploadDir = 'asets/asets/img/';
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
-    }
-    $fileName = 'logo_' . uniqid() . '.' . $extension;
-    $filePath = $uploadDir . $fileName;
-    if (file_put_contents($filePath, base64_decode($base64Image))) {
-        $logoPath = $filePath; // Update logoPath to the saved file path
-    } else {
-        error_log("Failed to save uploaded logo.");
-        $logoPath = 'asets/asets/img/loog.jpg'; // Fallback to default
-    }
-}
+// Dynamic images settings
+$dynamicImages = $data['dynamicImages'] ?? [];
+$imageLayout = $data['imageLayout'] ?? 'horizontal';
+
 
 try {
     error_log("Starting database operations");
@@ -108,7 +93,7 @@ try {
         error_log("Updating existing settings");
         
         $updateParams = [
-            $logoPath, (int)$showLogo,
+            (int)$showDynamicImages,
             $flagBlackColor, $flagYellowColor, $flagRedColor, (int)$showFlagBar,
             $titleText, (int)$showTitle,
             $subheadingText, (int)$showSubheading, (int)$showSubmitButton,
@@ -125,7 +110,7 @@ try {
         
         $stmt = $pdo->prepare("
             UPDATE survey_settings SET
-                logo_path = ?, show_logo = ?,
+                show_dynamic_images = ?,
                 flag_black_color = ?, flag_yellow_color = ?, flag_red_color = ?, show_flag_bar = ?,
                 title_text = ?, show_title = ?,
                 subheading_text = ?, show_subheading = ?, show_submit_button = ?,
@@ -149,17 +134,17 @@ try {
         // but included here for completeness/robustness.
         $stmt = $pdo->prepare("
             INSERT INTO survey_settings (
-                survey_id, logo_path, show_logo, flag_black_color, flag_yellow_color, flag_red_color, show_flag_bar,
+                survey_id, show_dynamic_images, flag_black_color, flag_yellow_color, flag_red_color, show_flag_bar,
                 title_text, show_title, subheading_text, show_subheading, show_submit_button,
                 rating_instruction1_text, rating_instruction2_text, show_rating_instructions,
                 show_facility_section, republic_title_text, show_republic_title_share, ministry_subtitle_text, show_ministry_subtitle_share,
                 qr_instructions_text, show_qr_instructions_share, footer_note_text, show_footer_note_share,
                 selected_instance_key, selected_hierarchy_level,
                 show_numbering, numbering_style
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
-            $surveyId, $logoPath, (int)$showLogo,
+            $surveyId, (int)$showDynamicImages,
             $flagBlackColor, $flagYellowColor, $flagRedColor, (int)$showFlagBar,
             $titleText, (int)$showTitle,
             $subheadingText, (int)$showSubheading, (int)$showSubmitButton,
@@ -169,6 +154,63 @@ try {
             $qrInstructionsText, (int)$showQrInstructionsShare, $footerNoteText, (int)$showFooterNoteShare,
             $selectedInstanceKey, $selectedHierarchyLevel,
             (int)$showNumbering, $numberingStyle
+        ]);
+    }
+
+    // Handle dynamic images - store as JSON in survey_settings table
+    // First, let's check if we need to add columns to survey_settings table
+    try {
+        $pdo->exec("ALTER TABLE survey_settings ADD COLUMN show_dynamic_images TINYINT(1) DEFAULT 0");
+        $pdo->exec("ALTER TABLE survey_settings ADD COLUMN dynamic_images_data JSON");
+        $pdo->exec("ALTER TABLE survey_settings ADD COLUMN image_layout_type VARCHAR(20) DEFAULT 'horizontal'");
+    } catch (PDOException $e) {
+        // Columns may already exist, which is fine
+    }
+    
+    // Prepare dynamic images data for storage
+    $processedImages = [];
+    if (!empty($dynamicImages)) {
+        foreach ($dynamicImages as $index => $imageData) {
+            if (!empty($imageData['imageData'])) {
+                // Handle base64 image upload
+                $base64Image = explode(',', $imageData['imageData'])[1];
+                $imageType = explode(';', explode(':', $imageData['imageData'])[1])[0];
+                $extension = explode('/', $imageType)[1];
+                
+                $uploadDir = 'asets/img/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                
+                $fileName = 'survey_img_' . $surveyId . '_' . ($index + 1) . '_' . time() . '_' . uniqid() . '.' . $extension;
+                $filePath = $uploadDir . $fileName;
+                
+                if (file_put_contents($filePath, base64_decode($base64Image))) {
+                    $processedImages[] = [
+                        'order' => $index + 1,
+                        'path' => $filePath,
+                        'alt_text' => $imageData['altText'] ?? 'Survey Image ' . ($index + 1),
+                        'width' => intval($imageData['width'] ?? 100),
+                        'height' => intval($imageData['height'] ?? 80),
+                        'position' => $imageData['position'] ?? 'center'
+                    ];
+                }
+            }
+        }
+    }
+    
+    // Update dynamic images data in survey_settings table
+    if (!empty($processedImages) || !empty($dynamicImages)) {
+        $updateImagesStmt = $pdo->prepare("
+            UPDATE survey_settings 
+            SET dynamic_images_data = ?, image_layout_type = ? 
+            WHERE survey_id = ?
+        ");
+        
+        $updateImagesStmt->execute([
+            json_encode($processedImages),
+            $imageLayout,
+            $surveyId
         ]);
     }
 

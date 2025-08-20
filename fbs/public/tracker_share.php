@@ -79,44 +79,59 @@ try {
     error_log("Error fetching DHIS2 program info: " . $e->getMessage());
 }
 
-// Fetch survey settings from the database
+// Get tracker settings from dedicated tables
 $surveySettings = [];
-if (isset($pdo)) {
-    try {
-        $settingsStmt = $pdo->prepare("SELECT * FROM survey_settings WHERE survey_id = ?");
-        if ($settingsStmt) {
-            $settingsStmt->execute([$surveyId]);
-            $existingSettings = $settingsStmt->fetch(PDO::FETCH_ASSOC);
+$dynamicImages = [];
 
-            if ($existingSettings) {
-                $surveySettings = $existingSettings;
-                if (!isset($surveySettings['title_text'])) {
-                    $surveySettings['title_text'] = $defaultSurveyTitle;
-                }
-            } else {
-                $surveySettings = [
-                    'logo_path' => 'asets/asets/img/loog.jpg',
-                    'show_logo' => 1,
-                    'flag_black_color' => '#000000',
-                    'flag_yellow_color' => '#FCD116',
-                    'flag_red_color' => '#D21034',
-                    'show_flag_bar' => 1,
-                    'republic_title_text' => 'THE REPUBLIC OF UGANDA',
-                    'show_republic_title_share' => 1,
-                    'ministry_subtitle_text' => 'MINISTRY OF HEALTH',
-                    'show_ministry_subtitle_share' => 1,
-                    'qr_instructions_text' => 'Scan this QR Code to Access the DHIS2 Tracker Program',
-                    'show_qr_instructions_share' => 1,
-                    'footer_note_text' => 'Thank you for participating in our health data collection program.',
-                    'show_footer_note_share' => 1,
-                    'title_text' => $defaultSurveyTitle,
-                ];
-            }
-        }
-    } catch (PDOException $e) {
-        error_log("Database Query failed in tracker_share.php (survey settings fetch): " . $e->getMessage());
+try {
+    // Load layout settings
+    $layoutStmt = $pdo->prepare("
+        SELECT layout_type, show_flag_bar, flag_black_color, flag_yellow_color, flag_red_color
+        FROM tracker_layout_settings 
+        WHERE survey_id = ?
+    ");
+    $layoutStmt->execute([$surveyId]);
+    $layoutSettings = $layoutStmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Load active images
+    $imageStmt = $pdo->prepare("
+        SELECT image_order, image_path, image_alt_text, width_px, height_px, position_type
+        FROM tracker_images 
+        WHERE survey_id = ? AND is_active = 1
+        ORDER BY image_order ASC
+    ");
+    $imageStmt->execute([$surveyId]);
+    $dynamicImages = $imageStmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Merge layout settings
+    if ($layoutSettings) {
+        $surveySettings = [
+            'layout_type' => $layoutSettings['layout_type'],
+            'show_flag_bar' => (bool)$layoutSettings['show_flag_bar'],
+            'flag_black_color' => $layoutSettings['flag_black_color'],
+            'flag_yellow_color' => $layoutSettings['flag_yellow_color'],
+            'flag_red_color' => $layoutSettings['flag_red_color']
+        ];
     }
+    
+} catch (PDOException $e) {
+    error_log("Database error fetching tracker settings: " . $e->getMessage());
+    $surveySettings = [];
+    $dynamicImages = [];
 }
+
+$surveySettings = array_merge([
+    'layout_type' => 'horizontal',
+    'show_flag_bar' => true,
+    'flag_black_color' => '#000000',
+    'flag_yellow_color' => '#FCD116',
+    'flag_red_color' => '#D21034',
+    'qr_instructions_text' => 'Scan this QR Code to Access the DHIS2 Tracker Program',
+    'show_qr_instructions_share' => 1,
+    'footer_note_text' => 'Thank you for participating in our data collection program.',
+    'show_footer_note_share' => 1,
+    'title_text' => $defaultSurveyTitle,
+], $surveySettings);
 
 // Construct the full URL for tracker_program_form.php
 $scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
@@ -146,22 +161,24 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #667eea;
-            --dark-blue: #5a6fd8;
-            --secondary-purple: #764ba2;
+            --primary-color: #4a5568;
+            --secondary-color: #718096;
+            --accent-color: #2d3748;
             --uganda-black: #000000;
             --uganda-yellow: #FCD116;
             --uganda-red: #D21034;
-            --light-blue-bg: #f0f4ff;
+            --light-bg: #f7fafc;
             --primary-font: 'Poppins', sans-serif;
-            --text-color-dark: #2c3e50;
-            --success-green: #28a745;
-            --info-blue: #17a2b8;
+            --text-color-dark: #2d3748;
+            --success-color: #38a169;
+            --info-color: #3182ce;
+            --neutral-gray: #e2e8f0;
+            --dark-gray: #4a5568;
         }
 
         body {
             font-family: var(--primary-font);
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, var(--light-bg) 0%, var(--neutral-gray) 100%);
             margin: 0;
             padding: 20px;
             display: flex;
@@ -181,14 +198,84 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
             width: 100%;
             position: relative;
             overflow: hidden;
-            border: 1px solid #f0f0f0;
+            border: 1px solid var(--neutral-gray);
         }
 
         .header-section {
+            margin-bottom: 25px;
+        }
+
+        /* Share Page Dynamic Images Styles */
+        .share-dynamic-images-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .share-dynamic-images-container.horizontal {
+            flex-direction: row;
+        }
+        
+        .share-dynamic-images-container.vertical {
+            flex-direction: column;
+        }
+        
+        .share-dynamic-images-container.center {
+            justify-content: center;
+        }
+        
+        .share-dynamic-images-container.left-right {
+            justify-content: space-between;
+        }
+        
+        .share-dynamic-image-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 8px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+        
+        .share-dynamic-image-item.position-left {
+            justify-content: flex-start;
+        }
+        
+        .share-dynamic-image-item.position-center {
+            justify-content: center;
+        }
+        
+        .share-dynamic-image-item.position-right {
+            justify-content: flex-end;
+        }
+        
+        .share-dynamic-image-item img {
+            border-radius: 6px;
+            object-fit: contain;
+        }
+        
+        .share-header-with-images-vertical {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 30px;
+            gap: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .share-header-images-section-under {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .share-header-title-section {
+            text-align: center;
+        }
+        
+        .share-header-title-only {
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         .logo-container {
@@ -198,11 +285,11 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
             align-items: center;
             justify-content: center;
             margin-bottom: 25px;
-            border: 2px solid var(--primary-blue);
+            border: 2px solid var(--primary-color);
             border-radius: 50%;
             padding: 10px;
             background: white;
-            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 6px 15px rgba(74, 85, 104, 0.15);
             overflow: hidden;
         }
 
@@ -229,7 +316,7 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
             font-size: 34px;
             font-weight: 700;
             margin-bottom: 30px;
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -254,7 +341,7 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
             font-weight: 700;
             text-align: center;
             margin: 20px 0;
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -273,7 +360,7 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: linear-gradient(135deg, var(--success-green), #20c997);
+            background: linear-gradient(135deg, var(--success-color), #48bb78);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -299,15 +386,15 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
         .flag-red { background-color: var(--uganda-red); }
 
         .qr-section {
-            background: linear-gradient(135deg, var(--light-blue-bg), #e8f2ff);
+            background: linear-gradient(135deg, var(--light-bg), #f1f5f9);
             padding: 40px;
             border-radius: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-top: 35px;
-            border: 2px solid var(--primary-blue);
-            box-shadow: inset 0 2px 10px rgba(102, 126, 234, 0.1);
+            border: 2px solid var(--primary-color);
+            box-shadow: inset 0 2px 10px rgba(74, 85, 104, 0.1);
         }
 
         .qr-code-container {
@@ -316,7 +403,7 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
             background: white;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            border: 3px solid var(--primary-blue);
+            border: 3px solid var(--primary-color);
             transition: transform 0.3s ease-in-out;
             display: flex;
             justify-content: center;
@@ -331,7 +418,7 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
             left: -3px;
             right: -3px;
             bottom: -3px;
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             border-radius: 18px;
             z-index: -1;
         }
@@ -362,7 +449,7 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
 
         .instructions .icon {
             font-size: 40px;
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -393,15 +480,15 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
         }
 
         .action-button.primary {
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
         }
 
         .action-button.success {
-            background: linear-gradient(135deg, var(--success-green), #20c997);
+            background: linear-gradient(135deg, var(--success-color), #48bb78);
         }
 
         .action-button.info {
-            background: linear-gradient(135deg, var(--info-blue), #138496);
+            background: linear-gradient(135deg, var(--info-color), #2c5aa0);
         }
 
         .action-button:hover {
@@ -434,11 +521,11 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
             padding: 20px;
             border-radius: 10px;
             margin: 20px 0;
-            border-left: 4px solid var(--primary-blue);
+            border-left: 4px solid var(--primary-color);
         }
 
         .info-section h4 {
-            color: var(--primary-blue);
+            color: var(--primary-color);
             margin-bottom: 10px;
             display: flex;
             align-items: center;
@@ -494,28 +581,45 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
 </head>
 <body>
     <div class="feedback-container">
-        <div class="header-section" id="share-header-section">
-            <div class="logo-container" style="display: <?php echo ($surveySettings['show_logo'] ?? true) ? 'flex' : 'none'; ?>;">
-                <img id="moh-logo" src="<?php echo htmlspecialchars($surveySettings['logo_path'] ?? 'asets/asets/img/loog.jpg'); ?>" alt="Ministry of Health Logo">
-            </div>
-            <div class="title-uganda" id="republic-title-share" style="display: <?php echo ($surveySettings['show_republic_title_share'] ?? true) ? 'block' : 'none'; ?>;"><?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? 'THE REPUBLIC OF UGANDA'); ?></div>
-            <div class="subtitle-moh" id="ministry-subtitle-share" style="display: <?php echo ($surveySettings['show_ministry_subtitle_share'] ?? true) ? 'block' : 'none'; ?>;"><?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? 'MINISTRY OF HEALTH'); ?></div>
-        </div>
 
-        <div class="flag-bar" id="flag-bar-share" style="display: <?php echo ($surveySettings['show_flag_bar'] ?? true) ? 'flex' : 'none'; ?>;">
+     <div class="flag-bar" id="flag-bar-share" style="display: <?php echo ($surveySettings['show_flag_bar'] ?? true) ? 'flex' : 'none'; ?>;">
             <div class="flag-black" style="background-color: <?php echo htmlspecialchars($surveySettings['flag_black_color'] ?? '#000000'); ?>;"></div>
             <div class="flag-yellow" style="background-color: <?php echo htmlspecialchars($surveySettings['flag_yellow_color'] ?? '#FCD116'); ?>;"></div>
             <div class="flag-red" style="background-color: <?php echo htmlspecialchars($surveySettings['flag_red_color'] ?? '#D21034'); ?>;"></div>
         </div>
-
-        <div class="text-center">
-            <div class="tracker-badge">
-                <i class="fas fa-database"></i>
-                DHIS2 Tracker Program
-            </div>
+        
+        <div class="header-section" id="share-header-section">
+            <?php if (!empty($dynamicImages)): ?>
+                <!-- Images Under Title Layout -->
+                <div class="share-header-with-images-vertical">
+                    <div class="share-header-title-section">
+                        <h1 class="program-title"><?php echo htmlspecialchars($surveySettings['title_text'] ?? $defaultSurveyTitle); ?></h1>
+                    </div>
+                    
+                    <div class="share-header-images-section-under">
+                        <div class="share-dynamic-images-container <?= htmlspecialchars($surveySettings['layout_type']) ?>">
+                            <?php foreach ($dynamicImages as $image): ?>
+                                <div class="share-dynamic-image-item position-<?= htmlspecialchars($image['position_type']) ?>">
+                                    <img src="/fbs/admin/<?= htmlspecialchars($image['image_path']) ?>" 
+                                         alt="<?= htmlspecialchars($image['image_alt_text']) ?>"
+                                         style="width: <?= intval($image['width_px']) ?>px; height: <?= intval($image['height_px']) ?>px;"
+                                         onerror="this.style.display='none';" 
+                                         title="<?= htmlspecialchars($image['image_alt_text']) ?>">
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <!-- Title Only Layout -->
+                <div class="share-header-title-only">
+                    <h1 class="program-title"><?php echo htmlspecialchars($surveySettings['title_text'] ?? $defaultSurveyTitle); ?></h1>
+                </div>
+            <?php endif; ?>
         </div>
 
-        <h1 class="program-title"><?php echo htmlspecialchars($surveySettings['title_text'] ?? $defaultSurveyTitle); ?></h1>
+       
+
 
         <?php if ($trackerProgram && !empty($trackerProgram['description'])): ?>
             <p class="program-description"><?php echo htmlspecialchars($trackerProgram['description']); ?></p>
@@ -550,7 +654,7 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
         </div>
 
         <div class="footer-note" id="footer-note-text" style="display: <?php echo ($surveySettings['show_footer_note_share'] ?? true) ? 'block' : 'none'; ?>;">
-            <?php echo htmlspecialchars($surveySettings['footer_note_text'] ?? 'Thank you for participating in our health data collection program.'); ?>
+            <?php echo htmlspecialchars($surveySettings['footer_note_text'] ?? 'Thank you for participating in our data collection program.'); ?>
         </div>
     </div>
 

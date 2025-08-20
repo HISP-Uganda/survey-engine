@@ -182,6 +182,24 @@ try {
     ];
 }
 
+// Process dynamic images from survey settings for preview
+$savedDynamicImages = [];
+$savedImageLayout = 'horizontal';
+if (!empty($surveySettings['dynamic_images_data'])) {
+    try {
+        $imagesData = json_decode($surveySettings['dynamic_images_data'], true);
+        if (is_array($imagesData)) {
+            $savedDynamicImages = $imagesData;
+        }
+        error_log("Loaded " . count($savedDynamicImages) . " saved dynamic images for preview");
+    } catch (Exception $e) {
+        error_log("Error parsing saved dynamic images JSON in preview_form.php: " . $e->getMessage());
+    }
+}
+if (!empty($surveySettings['image_layout_type'])) {
+    $savedImageLayout = $surveySettings['image_layout_type'];
+}
+
 // Fetch distinct instance_keys for the dropdown
 $instanceKeys = [];
 try {
@@ -1087,6 +1105,56 @@ try {
             overflow-x: hidden !important;
         }
         
+        /* Align content with navbar - use default Argon positioning */
+        .main-content {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        
+        /* Only affect the main content container, not navbar */
+        .main-content .container-fluid {
+            padding-left: 16rem !important;
+            padding-right: 1rem !important;
+            transition: padding-left 0.3s ease;
+        }
+        
+        /* Responsive behavior for sidebar collapse */
+        .g-sidenav-hidden .main-content .container-fluid {
+            padding-left: 1rem !important;
+        }
+        
+        /* Ensure smooth transitions for sidebar collapse */
+        body.g-sidenav-show .main-content {
+            transition: margin-left 0.3s ease;
+        }
+        
+        body.g-sidenav-hidden .main-content {
+            transition: margin-left 0.3s ease;
+        }
+        
+        @media (max-width: 1199.98px) {
+            .main-content .container-fluid {
+                padding-left: 1rem !important;
+            }
+        }
+        
+        .card {
+            border: 1px solid #e9ecef !important;
+            border-radius: 10px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            margin-left: 1rem !important;
+            margin-right: 1rem !important;
+        }
+        
+        /* Let Argon handle the sidebar positioning naturally */
+        
+        /* Ensure preview area doesn't overflow */
+        #previewImagesDisplay {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        
         /* Handle wide content gracefully */
         * {
             box-sizing: border-box !important;
@@ -1094,6 +1162,69 @@ try {
         
         .form-control, textarea, input, select {
             max-width: 100% !important;
+        }
+        
+        /* Dynamic Images Preview Styles */
+        .preview-images-container {
+            background: #f8f9fa;
+        }
+        
+        #previewImagesDisplay, #configPreviewImages {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 60px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9f9f9;
+            visibility: visible !important;
+            width: 100%;
+        }
+        
+        #previewImagesDisplay:empty::before {
+            content: "Upload images to see them here";
+            color: #999;
+            font-style: italic;
+        }
+        
+        #configPreviewImages:empty::before {
+            content: "Upload images to see them here";
+            color: #999;
+            font-style: italic;
+        }
+        
+        #previewImagesDisplay.horizontal, #configPreviewImages.horizontal {
+            flex-direction: row;
+        }
+        
+        #previewImagesDisplay.vertical, #configPreviewImages.vertical {
+            flex-direction: column;
+        }
+        
+        #previewImagesDisplay.center, #configPreviewImages.center {
+            justify-content: center;
+        }
+        
+        #previewImagesDisplay.left-right, #configPreviewImages.left-right {
+            justify-content: space-between;
+        }
+        
+        .preview-image-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dynamic-image-field {
+            background: #fafafa;
+        }
+        
+        .dynamic-image-field h5 {
+            font-size: 14px;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -1114,13 +1245,51 @@ try {
                             <div class="accordion-item">
                                 <button class="accordion-header">Branding & Appearance <i class="fas fa-chevron-down"></i></button>
                                 <div class="accordion-content">
+                                    
+                                    <!-- Dynamic Images Section -->
                                     <div class="setting-group">
-                                        <label for="logo-upload">Upload Logo:</label>
-                                        <input type="file" id="logo-upload" accept="image/*">
-                                        <div class="checkbox-group">
+                                        <h4 style="margin-bottom: 15px; color: #2c3e50;">
+                                            <i class="fas fa-images" style="margin-right: 8px;"></i>
+                                            Dynamic Images
+                                        </h4>
+                                        
+                                        <div class="checkbox-group mb-3">
                                             <label>
-                                                <input type="checkbox" id="toggle-logo" <?php echo $surveySettings['show_logo'] ? 'checked' : ''; ?>> Show Logo
+                                                <input type="checkbox" id="toggle-dynamic-images" checked> Show Dynamic Images
                                             </label>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="imageCount" class="form-label">Number of Images</label>
+                                            <select class="form-control" id="imageCount" onchange="updateImageFields()">
+                                                <option value="0" selected>No Images</option>
+                                                <option value="1">1 Image</option>
+                                                <option value="2">2 Images</option>
+                                                <option value="3">3 Images</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="imageLayout" class="form-label">Image Layout</label>
+                                            <select class="form-control" id="imageLayout">
+                                                <option value="horizontal">Horizontal (side by side)</option>
+                                                <option value="vertical">Vertical (stacked)</option>
+                                                <option value="center">Center aligned</option>
+                                                <option value="left-right">Left and Right aligned</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Dynamic Image Fields -->
+                                        <div id="imageFieldsContainer">
+                                            <!-- Will be populated by JavaScript -->
+                                        </div>
+                                        
+                                        <!-- Preview Images Container -->
+                                        <div class="preview-images-container" id="previewImagesContainer" style="margin-top: 20px; padding: 15px; border: 2px dashed #ddd; border-radius: 8px; text-align: center; display: none;">
+                                            <h5 style="color: #666; margin-bottom: 10px;">Image Preview</h5>
+                                            <div id="configPreviewImages" class="horizontal">
+                                                <!-- Preview images will appear here -->
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1360,11 +1529,12 @@ try {
                         <div class="card-body">
                             <div class="container preview-container" id="form-content">
             <div class="header-section" id="logo-section">
-                <div class="logo-container">
-                  <img id="moh-logo" src="<?php echo htmlspecialchars($surveySettings['logo_path'] ?? ''); ?>" alt="Ministry of Health Logo">
+                <!-- Dynamic Images Preview Section -->
+                <div class="dynamic-images-container horizontal" id="previewImagesDisplay" style="margin: 20px 0;">
+                    <!-- Images will be displayed here via JavaScript -->
                 </div>
-             <div class="title hidden-element" id="republic-title"><?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? ''); ?></div>
-            <div class="subtitle hidden-element" id="ministry-subtitle"><?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? ''); ?></div>
+                <div class="title hidden-element" id="republic-title"><?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? ''); ?></div>
+                <div class="subtitle hidden-element" id="ministry-subtitle"><?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? ''); ?></div>
             </div>
 
             <div class="flag-bar" id="flag-bar">
@@ -1510,16 +1680,15 @@ try {
     window.savePreviewSettings = async function() {
         console.log('savePreviewSettings called');
 
-        // Check if required elements exist
-        const logoImg = document.getElementById('moh-logo');
-        if (!logoImg) {
+        // Check if dynamic images toggle exists
+        const toggleDynamicImages = document.getElementById('toggle-dynamic-images');
+        if (!toggleDynamicImages) {
             console.error('Required elements not found');
             showToast('Error: Page not fully loaded', 'error');
             return;
         }
 
         // Collect settings (your existing logic)
-        const toggleLogo = document.getElementById('toggle-logo');
         const flagBlackColorPicker = document.getElementById('flag-black-color-picker');
         const flagYellowColorPicker = document.getElementById('flag-yellow-color-picker');
         const flagRedColorPicker = document.getElementById('flag-red-color-picker');
@@ -1546,10 +1715,35 @@ try {
         const toggleNumbering = document.getElementById('toggle-numbering');
         const numberingStyle = document.getElementById('numbering-style');
 
+        // Collect dynamic images data
+        const imageCountEl = document.getElementById('imageCount');
+        const imageLayoutEl = document.getElementById('imageLayout');
+        const dynamicImages = [];
+        
+        if (imageCountEl && imageLayoutEl) {
+            const imageCount = parseInt(imageCountEl.value) || 0;
+            for (let i = 1; i <= imageCount; i++) {
+                const imageData = window[`imageData${i}`];
+                if (imageData) {
+                    const widthEl = document.getElementById(`imageWidth${i}`);
+                    const heightEl = document.getElementById(`imageHeight${i}`);
+                    const altTextEl = document.getElementById(`imageAlt${i}`);
+                    const positionEl = document.getElementById(`imagePosition${i}`);
+                    
+                    dynamicImages.push({
+                        imageData: imageData,
+                        width: widthEl ? parseInt(widthEl.value) : 100,
+                        height: heightEl ? parseInt(heightEl.value) : 80,
+                        altText: altTextEl ? altTextEl.value : `Image ${i}`,
+                        position: positionEl ? positionEl.value : 'center'
+                    });
+                }
+            }
+        }
+
         const settings = {
             surveyId: surveyId,
-            logoSrc: logoImg.src,
-            showLogo: toggleLogo ? toggleLogo.checked : false,
+            showDynamicImages: toggleDynamicImages.checked,
             flagBlackColor: flagBlackColorPicker ? flagBlackColorPicker.value : '#000000',
             flagYellowColor: flagYellowColorPicker ? flagYellowColorPicker.value : '#FCD116',
             flagRedColor: flagRedColorPicker ? flagRedColorPicker.value : '#D21034',
@@ -1575,6 +1769,8 @@ try {
             selectedHierarchyLevel: controlHierarchyLevelSelect ? (controlHierarchyLevelSelect.value === '' ? null : parseInt(controlHierarchyLevelSelect.value, 10)) : null,
             showNumbering: toggleNumbering ? toggleNumbering.checked : true,
             numberingStyle: numberingStyle ? numberingStyle.value : 'numeric',
+            dynamicImages: dynamicImages,
+            imageLayout: imageLayoutEl ? imageLayoutEl.value : 'horizontal'
         };
 
         try {
@@ -1681,10 +1877,6 @@ try {
 
     document.addEventListener('DOMContentLoaded', function() {
         // --- 2. DOM Element References (rest of your code) ---
-        const logoImg = document.getElementById('moh-logo');
-        const logoUpload = document.getElementById('logo-upload');
-        const toggleLogo = document.getElementById('toggle-logo');
-        const logoSection = document.getElementById('logo-section');
         const flagBlackColorPicker = document.getElementById('flag-black-color-picker');
         const flagYellowColorPicker = document.getElementById('flag-yellow-color-picker');
         const flagRedColorPicker = document.getElementById('flag-red-color-picker');
@@ -1719,8 +1911,6 @@ try {
         const hierarchyDataInput = document.getElementById('hierarchy_data');
         const toggleSubmitButton = document.getElementById('toggle-submit-button');
         const submitButtonPreview = document.getElementById('submit-button-preview');
-        const logoUrlInput = document.getElementById('edit-logo-url');
-        const toggleLogoUrl = document.getElementById('toggle-logo-url');
         const republicTitleElement = document.getElementById('republic-title');
         const editRepublicTitleShare = document.getElementById('edit-republic-title-share');
         const toggleRepublicTitleShare = document.getElementById('toggle-republic-title-share');
@@ -1939,30 +2129,6 @@ try {
         // --- 4. Event Listeners ---
         // All event listeners now safely inside DOMContentLoaded where the elements exist.
 
-        if (logoUpload && logoImg && logoUrlInput) {
-            logoUpload.addEventListener('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        logoImg.src = e.target.result;
-                        logoUrlInput.value = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        if (toggleLogo && logoSection && toggleLogoUrl) {
-            toggleLogo.addEventListener('change', function() {
-                logoSection.classList.toggle('hidden-element', !this.checked);
-                toggleLogoUrl.checked = this.checked;
-            });
-            toggleLogoUrl.addEventListener('change', function() {
-                toggleLogo.checked = this.checked;
-                logoSection.classList.toggle('hidden-element', !this.checked);
-            });
-        }
 
         if (flagBlackColorPicker && flagBlackElement) flagBlackColorPicker.addEventListener('input', function() { flagBlackElement.style.backgroundColor = this.value; });
         if (flagYellowColorPicker && flagYellowElement) flagYellowColorPicker.addEventListener('input', function() { flagYellowElement.style.backgroundColor = this.value; });
@@ -2070,14 +2236,14 @@ try {
         // --- 5. Initial Setup Call ---
         // Moved the loadPreviewSettings call to the end of DOMContentLoaded
         window.loadPreviewSettings = function() {
-            if (!logoImg) {
+            const toggleDynamicImages = document.getElementById('toggle-dynamic-images');
+            if (!toggleDynamicImages) {
                 console.error("Critical DOM elements not found on page load. Load Preview Settings aborted.");
                 return;
             }
             
-            logoImg.src = <?php echo json_encode($surveySettings['logo_path'] ?? ''); ?>;
-            toggleLogo.checked = <?php echo $surveySettings['show_logo'] ? 'true' : 'false'; ?>;
-            logoSection.classList.toggle('hidden-element', !toggleLogo.checked);
+            // Set dynamic images visibility (default to true if not set)
+            toggleDynamicImages.checked = <?php echo !empty($surveySettings['show_dynamic_images']) ? 'true' : 'true'; ?>;
 
             flagBlackColorPicker.value = <?php echo json_encode($surveySettings['flag_black_color'] ?? '#000000'); ?>;
             flagYellowColorPicker.value = <?php echo json_encode($surveySettings['flag_yellow_color'] ?? '#FCD116'); ?>;
@@ -2191,12 +2357,263 @@ try {
         });
 
     });
+    
+    // Dynamic Images Functions
+    function updateImageFields() {
+        const imageCount = document.getElementById('imageCount').value;
+        const container = document.getElementById('imageFieldsContainer');
+        const previewContainer = document.getElementById('previewImagesContainer');
+        
+        // Clear existing fields
+        container.innerHTML = '';
+        
+        if (imageCount > 0) {
+            previewContainer.style.display = 'block';
+            for (let i = 1; i <= imageCount; i++) {
+                const fieldHTML = `
+                    <div class="dynamic-image-field" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+                        <h5 style="color: #2c3e50; margin-bottom: 10px;">Image ${i}</h5>
+                        
+                        <div class="mb-2">
+                            <label for="imageUpload${i}" class="form-label">Upload Image:</label>
+                            <input type="file" id="imageUpload${i}" accept="image/*" onchange="handleImageUpload(${i})" class="form-control">
+                        </div>
+                        
+                        <div class="mb-2">
+                            <label for="imageAlt${i}" class="form-label">Alt Text:</label>
+                            <input type="text" id="imageAlt${i}" placeholder="Description of image ${i}" class="form-control">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="imageWidth${i}" class="form-label">Width (px):</label>
+                                <input type="number" id="imageWidth${i}" value="100" min="50" max="500" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="imageHeight${i}" class="form-label">Height (px):</label>
+                                <input type="number" id="imageHeight${i}" value="80" min="50" max="500" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="imagePosition${i}" class="form-label">Position:</label>
+                                <select id="imagePosition${i}" class="form-control">
+                                    <option value="left">Left</option>
+                                    <option value="center" selected>Center</option>
+                                    <option value="right">Right</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', fieldHTML);
+            }
+        } else {
+            previewContainer.style.display = 'none';
+        }
+        
+        updatePreviewImages();
+    }
+    
+    function handleImageUpload(imageNumber) {
+        const fileInput = document.getElementById(`imageUpload${imageNumber}`);
+        const file = fileInput.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Store the image data for later use
+                window[`imageData${imageNumber}`] = e.target.result;
+                updatePreviewImages();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    function updatePreviewImages() {
+        const imageCount = document.getElementById('imageCount')?.value || 0;
+        const layout = document.getElementById('imageLayout')?.value || 'horizontal';
+        const previewDisplay = document.getElementById('previewImagesDisplay');
+        const configPreview = document.getElementById('configPreviewImages');
+        const toggleDynamicImages = document.getElementById('toggle-dynamic-images');
+        
+        if (!previewDisplay) {
+            console.error('Preview display element not found');
+            return;
+        }
+        
+        // Check visibility toggle
+        if (toggleDynamicImages && !toggleDynamicImages.checked) {
+            previewDisplay.style.display = 'none';
+            if (configPreview) configPreview.style.display = 'none';
+            return;
+        } else {
+            previewDisplay.style.display = 'block';
+            if (configPreview) configPreview.style.display = 'flex';
+        }
+        
+        // Update layout class for both preview areas
+        previewDisplay.className = 'dynamic-images-container ' + layout;
+        if (configPreview) {
+            configPreview.className = layout;
+        }
+        
+        // Clear existing previews
+        previewDisplay.innerHTML = '';
+        if (configPreview) configPreview.innerHTML = '';
+        
+        console.log('Updating preview with', imageCount, 'images');
+        
+        if (imageCount > 0) {
+            let imagesAdded = 0;
+            for (let i = 1; i <= imageCount; i++) {
+                const imageData = window[`imageData${i}`];
+                console.log(`Checking image ${i}:`, imageData ? 'has data' : 'no data');
+                if (imageData) {
+                    const width = document.getElementById(`imageWidth${i}`)?.value || 100;
+                    const height = document.getElementById(`imageHeight${i}`)?.value || 80;
+                    const altText = document.getElementById(`imageAlt${i}`)?.value || `Image ${i}`;
+                    
+                    const imgElement = document.createElement('div');
+                    imgElement.className = 'preview-image-item';
+                    imgElement.innerHTML = `
+                        <img src="${imageData}" 
+                             alt="${altText}" 
+                             style="width: ${width}px; height: ${height}px; object-fit: contain; margin: 5px; border: 1px solid #ddd; border-radius: 4px;"
+                             title="${altText}">
+                    `;
+                    previewDisplay.appendChild(imgElement);
+                    imagesAdded++;
+                    console.log(`Added image ${i} to preview`);
+                }
+            }
+            console.log(`Total images added to preview: ${imagesAdded}`);
+        } else {
+            console.log('No images to display (imageCount = 0)');
+        }
+    }
+    
+    // Add event listener for layout changes
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageLayoutSelect = document.getElementById('imageLayout');
+        if (imageLayoutSelect) {
+            imageLayoutSelect.addEventListener('change', updatePreviewImages);
+        }
+        
+        // Add event listener for dynamic images toggle
+        const toggleDynamicImages = document.getElementById('toggle-dynamic-images');
+        if (toggleDynamicImages) {
+            toggleDynamicImages.addEventListener('change', updatePreviewImages);
+        }
+        
+        // Load saved dynamic images from database
+        const savedImages = <?php echo json_encode($savedDynamicImages); ?>;
+        const savedLayout = <?php echo json_encode($savedImageLayout); ?>;
+        
+        console.log('Loading saved images:', savedImages);
+        console.log('Number of saved images:', savedImages ? savedImages.length : 0);
+        console.log('Image layout:', savedLayout);
+        
+        if (savedImages && savedImages.length > 0) {
+            // Set the image count
+            const imageCountSelect = document.getElementById('imageCount');
+            if (imageCountSelect) {
+                imageCountSelect.value = savedImages.length;
+                updateImageFields(); // This creates the input fields
+            }
+            
+            // Set the layout
+            const imageLayoutSelect = document.getElementById('imageLayout');
+            if (imageLayoutSelect) {
+                imageLayoutSelect.value = savedLayout;
+            }
+            
+            // Load the image data after a short delay to ensure fields are created
+            setTimeout(() => {
+                savedImages.forEach((image, index) => {
+                    const imageNumber = index + 1;
+                    
+                    // Set form field values
+                    const altField = document.getElementById(`imageAlt${imageNumber}`);
+                    const widthField = document.getElementById(`imageWidth${imageNumber}`);
+                    const heightField = document.getElementById(`imageHeight${imageNumber}`);
+                    const positionField = document.getElementById(`imagePosition${imageNumber}`);
+                    
+                    if (altField) altField.value = image.alt_text || '';
+                    if (widthField) widthField.value = image.width || 100;
+                    if (heightField) heightField.value = image.height || 80;
+                    if (positionField) positionField.value = image.position || 'center';
+                    
+                    // Load the actual image and store it in memory
+                    if (image.path) {
+                        // The path is stored as "asets/img/filename", we need "/fbs/admin/asets/img/filename"
+                        const fullImagePath = '/fbs/admin/' + image.path;
+                        console.log(`Loading saved image ${imageNumber} from:`, fullImagePath);
+                        console.log('Original path from database:', image.path);
+                        
+                        // Convert the server image back to base64 for preview
+                        fetch(fullImagePath)
+                            .then(response => {
+                                console.log(`Response status for image ${imageNumber}:`, response.status);
+                                if (!response.ok) {
+                                    throw new Error(`HTTP ${response.status}`);
+                                }
+                                return response.blob();
+                            })
+                            .then(blob => {
+                                console.log(`Got blob for image ${imageNumber}, size:`, blob.size);
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    window[`imageData${imageNumber}`] = e.target.result;
+                                    console.log(`Loaded image ${imageNumber} into memory, data length:`, e.target.result.length);
+                                    updatePreviewImages();
+                                };
+                                reader.readAsDataURL(blob);
+                            })
+                            .catch(error => {
+                                console.error(`Failed to load saved image ${imageNumber} from ${fullImagePath}:`, error);
+                            });
+                    }
+                });
+            }, 100);
+        }
+        
+        // Initial call to setup the preview
+        console.log('DOM loaded, calling updatePreviewImages');
+        
+        
+        updatePreviewImages();
+        
+        // Handle sidebar toggle functionality
+        const sidebarToggle = document.querySelector('[data-bs-toggle="sidenav"]');
+        const body = document.body;
+        
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                // Toggle the sidebar visibility class
+                body.classList.toggle('g-sidenav-hidden');
+                
+                // Force a small delay to ensure CSS transitions work
+                setTimeout(() => {
+                    // Trigger any layout recalculations if needed
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
+            });
+        }
+        
+        // Also handle any existing Argon sidebar toggles
+        document.querySelectorAll('.sidenav-toggler').forEach(toggler => {
+            toggler.addEventListener('click', function() {
+                body.classList.toggle('g-sidenav-hidden');
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
+            });
+        });
+    });
 </script>
 
     <script src="argon-dashboard-master/assets/js/core/popper.min.js"></script>
     <script src="argon-dashboard-master/assets/js/core/bootstrap.min.js"></script>
     <script src="argon-dashboard-master/assets/js/plugins/perfect-scrollbar.min.js"></script>
     <script src="argon-dashboard-master/assets/js/plugins/smooth-scrollbar.min.js"></script>
-    <script defer src="survey_page.js"></script>
 </body>
 </html>
