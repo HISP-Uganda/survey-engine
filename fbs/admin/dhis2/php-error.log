@@ -3024,3 +3024,34 @@
 [11-Aug-2025 17:50:02 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
 [11-Aug-2025 17:50:02 UTC] HTTP Status: 200
 [11-Aug-2025 17:50:02 UTC] DHIS2 Response (first 1000 chars): {"name":"testing District partner mapping tool","id":"i2j7a1b1ZZY","programStages":[{"programStageDataElements":[{"dataElement":{"name":"PM_Does the District have a strategy/mechanism in place to support School Health Programmes","id":"ahf2oYbp4wQ"}},{"dataElement":{"name":"PM_Number of benefiting Primary schools (Government)","id":"uEEIHjPYMGO"}},{"dataElement":{"name":"PM_Number of benefiting Primary schools (Private)","id":"lID4wrE2yVu"}}]},{"programStageDataElements":[{"dataElement":{"name":"PM_Has the district profiled the partners in the district supporting School Health in the district?","id":"Zw49RKyXYRj"}},{"dataElement":{"name":"PM_Name of the organization","optionSet":{"name":"Organizations","id":"Fi9jUfxyYNe"},"id":"ebmdvu4hMqa"}},{"dataElement":{"name":"PM_Names of schools supported by the organization","id":"fkipjGtgOHg"}},{"dataElement":{"name":"PM_Years of Support","id":"jwJogFZa78i"}}]}]}
+[21-Aug-2025 07:27:09 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[21-Aug-2025 07:27:09 UTC] Binding parameter :key with value: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[21-Aug-2025 07:27:09 UTC] Binding parameter :key with value: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[21-Aug-2025 07:27:09 UTC] Binding parameter :key with value: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] DHIS2 API call: GET https://emisuganda.org/emis/api/organisationUnitLevels?fields=id,level,displayName
+[21-Aug-2025 07:27:09 UTC] Attempting to get DHIS2 config for provided key: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] SQL Query for DHIS2 config: SELECT url, username, password, instance_key, description, status 
+                    FROM dhis2_instances 
+                    WHERE instance_key = :key AND status = 1 
+                    LIMIT 1
+[21-Aug-2025 07:27:09 UTC] Binding parameter :key with value: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] Successfully retrieved DHIS2 config for key: 'EMIS'
+[21-Aug-2025 07:27:09 UTC] HTTP Status: 200
+[21-Aug-2025 07:27:09 UTC] DHIS2 Response (first 1000 chars): {"pager":{"page":1,"total":8,"pageSize":50,"pageCount":1},"organisationUnitLevels":[{"level":3,"displayName":"District","id":"rIJqxNmVvMR"},{"level":8,"displayName":"Level 8","id":"JEg76BKStvd"},{"level":4,"displayName":"MC/CC/DLG","id":"QsWp5TJdnn6"},{"level":1,"displayName":"National","id":"tK8wKE2QH6p"},{"level":6,"displayName":"Parishes","id":"RfPeRkILLJJ"},{"level":2,"displayName":"Region","id":"e0b1slUmwcK"},{"level":7,"displayName":"Schools","id":"OT9v7uJbcKb"},{"level":5,"displayName":"Subcounty/Div/TC","id":"DAbGWDPmsIf"}]}

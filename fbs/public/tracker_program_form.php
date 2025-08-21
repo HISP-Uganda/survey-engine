@@ -687,12 +687,86 @@ if (!empty($programStages)) {
             background: white;
             padding: 1.5rem 0;
             margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         .step-navigation .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 0 1rem;
+        }
+        
+        .steps-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .step:hover {
+            background: #f3f4f6;
+        }
+        
+        .step.active {
+            color: #3b82f6;
+        }
+        
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active .step-number {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .step.completed .step-number {
+            background: #10b981;
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .step-connector {
+            position: absolute;
+            top: 16px;
+            left: 100%;
+            width: calc(100% - 32px);
+            height: 2px;
+            background: #e5e7eb;
+            z-index: -1;
+        }
+        
+        .step:last-child .step-connector {
+            display: none;
+        }
+        
+        .step.completed .step-connector {
+            background: #10b981;
         }
         
         .steps-container {
@@ -1195,29 +1269,75 @@ if (!empty($programStages)) {
         }
         
         .facility-item {
-            padding: 8px 12px;
+            padding: 16px 12px;
             cursor: pointer;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
+            border: 1px solid #e0e0e0;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            margin: 6px;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 calc(25% - 12px);
+            min-width: 180px;
+            max-width: 220px;
         }
         
-        .facility-item:hover {
-            background-color: #f8f9fa;
+        .facility-item:hover,
+        .facility-item.selected {
+            background-color: #f0f8ff;
+            border-color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.15);
         }
         
-        .facility-item:last-child {
-            border-bottom: none;
+        .facility-item.selected {
+            background-color: #e3f2fd;
+            border-color: #1976d2;
+        }
+        
+        #facilityResults {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            padding: 16px;
+            max-height: 280px;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #fafbfc 0%, #f8f9fa 100%);
+        }
+        
+        /* Add a subtle grid background pattern */
+        #facilityResults::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: 20px 20px;
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.02) 1px, transparent 1px);
+            pointer-events: none;
+            opacity: 0.3;
         }
         
         .facility-name {
             font-weight: 500;
             color: #333;
+            line-height: 1.3;
+            word-break: break-word;
         }
         
         .facility-path {
-            font-size: 11px;
+            font-size: 12px;
             color: #666;
-            margin-top: 2px;
+            line-height: 1.3;
         }
         
         /* Stage Cards */
@@ -1227,6 +1347,20 @@ if (!empty($programStages)) {
             margin-bottom: 1rem;
             overflow: hidden;
             transition: all 0.2s ease;
+        }
+        
+        .stage-card.collapsed .stage-card-body,
+        .stage-card.collapsed .stage-card-actions {
+            display: none;
+        }
+        
+        .stage-collapse-toggle {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .stage-card.collapsed .stage-collapse-toggle {
+            transform: rotate(-90deg);
         }
         
         .stage-card:hover {
@@ -1351,6 +1485,41 @@ if (!empty($programStages)) {
             text-align: center;
             font-style: italic;
             padding-top: 4px;
+        }
+        
+        /* Compact summary table for better space utilization */
+        .summary-table-compact {
+            width: 100%;
+            font-size: 12px;
+            margin-bottom: 4px;
+            border-collapse: collapse;
+        }
+        
+        .summary-table-compact td {
+            padding: 2px 6px;
+            vertical-align: top;
+            border: none;
+        }
+        
+        .summary-table-compact .field-name {
+            font-weight: 500;
+            color: #374151;
+            width: 25%;
+            font-size: 11px;
+        }
+        
+        .summary-table-compact .field-value {
+            color: #6b7280;
+            width: 25%;
+            word-break: break-word;
+            font-size: 11px;
+        }
+        
+        .summary-table-compact .more-fields {
+            text-align: center;
+            font-style: italic;
+            padding-top: 4px;
+            color: #9ca3af;
         }
         
         
@@ -2570,6 +2739,22 @@ if (!empty($programStages)) {
             console.log('Removing stage occurrence:', stageId, occurrence);
         };
         
+        window.toggleStageCollapse = function(stageId) {
+            const stageCard = document.querySelector(`[id*="${stageId}"]`)?.closest('.stage-card');
+            if (stageCard) {
+                stageCard.classList.toggle('collapsed');
+            }
+        };
+        
+        window.addSingleStageEntry = function(stageId) {
+            // Initialize stage data if not exists
+            if (!formData.stages) formData.stages = {};
+            if (!formData.stages[stageId]) formData.stages[stageId] = {};
+            
+            // Open the modal directly for non-repeatable stages
+            openStageModal(stageId, 1);
+        };
+        
         // Utility functions
         window.showSuccessMessage = function(message) {
             // Create or update success toast
@@ -2730,11 +2915,10 @@ if (!empty($programStages)) {
                                             <div id="facilityResults" 
                                                  class="facility-results expandable-dropdown" 
                                                  style="display: none; position: absolute; z-index: 1050; 
-                                                        background: white; border: 1px solid #ccc; 
-                                                        border-radius: 6px; max-height: 120px; 
-                                                        overflow-y: auto; width: 100%; margin-top: 2px; 
-                                                        box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
-                                                        transition: max-height 0.3s ease;"></div>
+                                                        background: white; border: 1px solid #ddd; 
+                                                        border-radius: 8px; max-height: 250px; 
+                                                        overflow-y: auto; width: 100%; margin-top: 2px;
+                                                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
                                         </div>
                                     </td>
                                 </tr>
@@ -2904,25 +3088,26 @@ if (!empty($programStages)) {
                 return;
             }
             
-            // Fetch locations for this survey
-            console.log('About to fetch locations...');
-            await fetchLocationsForSurveyPage();
+            // Fetch program-specific org units from DHIS2
+            console.log('About to fetch program org units...');
+            await fetchProgramOrgUnits();
             
             // Set up search functionality
             facilitySearch.addEventListener('input', function() {
                 const searchTerm = this.value.trim();
-                if (searchTerm.length >= 2) {
-                    searchAndDisplayFacilities(searchTerm);
+                if (searchTerm.length === 0) {
+                    // Show all locations when empty
+                    searchAndDisplayFacilities('');
                 } else {
-                    facilityResults.style.display = 'none';
+                    // Filter as user types
+                    searchAndDisplayFacilities(searchTerm);
                 }
             });
             
             facilitySearch.addEventListener('focus', function() {
+                // Show all locations on focus
                 const searchTerm = this.value.trim();
-                if (searchTerm.length >= 2) {
-                    searchAndDisplayFacilities(searchTerm);
-                }
+                searchAndDisplayFacilities(searchTerm);
             });
             
             // Hide results when clicking outside
@@ -2931,6 +3116,200 @@ if (!empty($programStages)) {
                     facilityResults.style.display = 'none';
                 }
             });
+            
+            // Add keyboard navigation for grid
+            facilitySearch.addEventListener('keydown', function(e) {
+                const facilityItems = facilityResults.querySelectorAll('.facility-item');
+                if (facilityItems.length === 0) return;
+                
+                let selectedIndex = Array.from(facilityItems).findIndex(item => item.classList.contains('selected'));
+                
+                switch(e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        selectedIndex = selectedIndex < 0 ? 0 : Math.min(selectedIndex + 4, facilityItems.length - 1);
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        selectedIndex = selectedIndex < 0 ? 0 : Math.max(selectedIndex - 4, 0);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        selectedIndex = selectedIndex < 0 ? 0 : Math.min(selectedIndex + 1, facilityItems.length - 1);
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        selectedIndex = selectedIndex < 0 ? 0 : Math.max(selectedIndex - 1, 0);
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        if (selectedIndex >= 0) {
+                            facilityItems[selectedIndex].click();
+                        }
+                        return;
+                    default:
+                        return;
+                }
+                
+                // Update selection
+                facilityItems.forEach(item => item.classList.remove('selected'));
+                if (selectedIndex >= 0) {
+                    facilityItems[selectedIndex].classList.add('selected');
+                    facilityItems[selectedIndex].scrollIntoView({ block: 'nearest' });
+                }
+            });
+        }
+        
+        async function fetchProgramOrgUnits() {
+            try {
+                const programUid = programData.program?.id;
+                console.log('Program data:', programData);
+                console.log('Program UID:', programUid);
+                
+                if (!programUid) {
+                    console.error('No program UID available, falling back to survey locations');
+                    return await fetchLocationsForSurveyPage(); // Fallback
+                }
+                
+                console.log('Fetching org units for program:', programUid);
+                
+                // Fetch program-specific org units from DHIS2
+                const surveyId = programData.surveySettings?.id;
+                const dhis2Url = `/fbs/admin/dhis2_api_proxy.php?endpoint=programs/orgUnits&programs=${programUid}&survey_id=${surveyId}`;
+                console.log('DHIS2 API URL:', dhis2Url);
+                console.log('Survey ID:', surveyId);
+                
+                // Create fetch request with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                
+                const dhis2Response = await fetch(dhis2Url, {
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                clearTimeout(timeoutId);
+                
+                console.log('DHIS2 org units response status:', dhis2Response.status);
+                console.log('DHIS2 response headers:', dhis2Response.headers);
+                
+                if (!dhis2Response.ok) {
+                    const errorText = await dhis2Response.text();
+                    console.warn('DHIS2 org units fetch failed:', dhis2Response.status, errorText);
+                    console.warn('Error details:', {
+                        status: dhis2Response.status,
+                        statusText: dhis2Response.statusText,
+                        url: dhis2Url
+                    });
+                    console.warn('Falling back to survey locations');
+                    
+                    // Show user-friendly message about the issue
+                    const facilityResults = document.getElementById('facilityResults');
+                    if (facilityResults) {
+                        let errorMessage = 'DHIS2 connection issue';
+                        if (dhis2Response.status === 0 || errorText.includes('timeout')) {
+                            errorMessage = 'DHIS2 server timeout - using survey locations';
+                        } else if (dhis2Response.status >= 500) {
+                            errorMessage = 'DHIS2 server error - using survey locations';
+                        } else if (dhis2Response.status === 401) {
+                            errorMessage = 'DHIS2 authentication failed - using survey locations';
+                        }
+                        
+                        facilityResults.innerHTML = `<div class="facility-item" style="color: orange; padding: 10px;"><i class="fas fa-exclamation-triangle me-2"></i>${errorMessage}</div>`;
+                        facilityResults.style.display = 'block';
+                        setTimeout(() => {
+                            facilityResults.style.display = 'none';
+                        }, 5000);
+                    }
+                    
+                    return await fetchLocationsForSurveyPage();
+                }
+                
+                const dhis2OrgUnits = await dhis2Response.json();
+                console.log('DHIS2 org units:', dhis2OrgUnits);
+                
+                if (!dhis2OrgUnits || !Array.isArray(dhis2OrgUnits.organisationUnits)) {
+                    console.warn('Invalid DHIS2 org units response, falling back to survey locations');
+                    return await fetchLocationsForSurveyPage();
+                }
+                
+                // Cross-reference with local location table for paths/names
+                const enrichedLocations = await enrichWithLocalData(dhis2OrgUnits.organisationUnits);
+                console.log('Enriched locations:', enrichedLocations);
+                
+                currentFilteredLocations = enrichedLocations;
+                console.log(`✅ Successfully loaded ${currentFilteredLocations.length} program-specific org units from DHIS2`);
+                
+                // Show user confirmation that program-specific locations are loaded
+                if (currentFilteredLocations.length > 0) {
+                    const facilitySearch = document.getElementById('facilitySearch');
+                    if (facilitySearch) {
+                        facilitySearch.placeholder = `Type to search ${currentFilteredLocations.length} program-specific locations...`;
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error fetching program org units:', error);
+                console.log('Falling back to survey locations');
+                
+                // Determine error type for user message
+                let errorMessage = 'DHIS2 connection issue - using survey locations';
+                if (error.name === 'AbortError') {
+                    errorMessage = 'DHIS2 request timed out - using survey locations';
+                } else if (error.message && error.message.includes('fetch')) {
+                    errorMessage = 'Cannot reach DHIS2 server - using survey locations';
+                }
+                
+                // Show user a message about the fallback
+                const facilityResults = document.getElementById('facilityResults');
+                if (facilityResults) {
+                    facilityResults.innerHTML = `<div class="facility-item" style="color: orange; padding: 10px;"><i class="fas fa-exclamation-triangle me-2"></i>${errorMessage}</div>`;
+                    facilityResults.style.display = 'block';
+                    setTimeout(() => {
+                        facilityResults.style.display = 'none';
+                    }, 5000);
+                }
+                
+                return await fetchLocationsForSurveyPage();
+            }
+        }
+        
+        async function enrichWithLocalData(dhis2OrgUnits) {
+            try {
+                console.log('Enriching DHIS2 org units with local data');
+                
+                const response = await fetch('/fbs/admin/enrich_locations.php', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        orgUnits: dhis2OrgUnits,
+                        surveyId: programData.surveySettings?.id
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const enrichedData = await response.json();
+                console.log('Enrichment response:', enrichedData);
+                
+                return Array.isArray(enrichedData) ? enrichedData : [];
+                
+            } catch (error) {
+                console.error('Error enriching locations:', error);
+                // Fallback: use DHIS2 data as-is
+                return dhis2OrgUnits.map(orgUnit => ({
+                    id: orgUnit.id,
+                    uid: orgUnit.id,
+                    name: orgUnit.displayName || orgUnit.name,
+                    path: orgUnit.path || 'Path unavailable'
+                }));
+            }
         }
         
         async function fetchLocationsForSurveyPage() {
@@ -2975,9 +3354,17 @@ if (!empty($programStages)) {
             const facilityResults = document.getElementById('facilityResults');
             if (!facilityResults) return;
             
-            const filteredLocations = currentFilteredLocations.filter(location => 
-                location.name.toLowerCase().includes(searchTerm.toLowerCase())
-            ).slice(0, 10); // Limit to 10 results
+            let filteredLocations;
+            if (searchTerm === '') {
+                // Show all locations when no search term
+                filteredLocations = currentFilteredLocations.slice(0, 15);
+            } else {
+                // Filter by search term
+                filteredLocations = currentFilteredLocations.filter(location => 
+                    location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (location.readablePath && location.readablePath.toLowerCase().includes(searchTerm.toLowerCase()))
+                ).slice(0, 10);
+            }
             
             facilityResults.innerHTML = '';
             
@@ -2989,16 +3376,16 @@ if (!empty($programStages)) {
                     facilityItem.className = 'facility-item';
                     facilityItem.innerHTML = `
                         <div class="facility-name">${location.name}</div>
-                        <div class="facility-path">Loading path...</div>
                     `;
                     
                     // Store location data for later use
                     facilityItem.dataset.locationId = location.id;
                     facilityItem.dataset.locationName = location.name;
                     facilityItem.dataset.orgunitUid = location.uid || '';
+                    facilityItem.dataset.locationPath = location.path || '';
                     
                     facilityItem.onclick = () => {
-                        const path = facilityItem.dataset.locationPath || '';
+                        const path = location.path || '';
                         selectFacility(
                             location.id, 
                             location.name, 
@@ -3009,8 +3396,9 @@ if (!empty($programStages)) {
                     
                     facilityResults.appendChild(facilityItem);
                     
-                    // Load path asynchronously
-                    loadLocationPath(location.id, facilityItem.querySelector('.facility-path'), facilityItem);
+                    // Store the readable path
+                    const readablePath = location.readablePath || location.displayName || location.path || '';
+                    facilityItem.dataset.locationPath = readablePath;
                 });
             }
             
@@ -3047,8 +3435,8 @@ if (!empty($programStages)) {
             // Hide dropdown
             document.getElementById('facilityResults').style.display = 'none';
             
-            // Update location display
-            updateLocationDisplay(facilityId, facilityName);
+            // Update location display with readable path
+            updateLocationDisplay(facilityId, facilityName, facilityPath);
             
             selectedLocation = { id: facilityId, name: facilityName, orgunitUid, path: facilityPath };
             
@@ -3062,26 +3450,17 @@ if (!empty($programStages)) {
             }
         }
         
-        async function updateLocationDisplay(facilityId, facilityName) {
+        function updateLocationDisplay(facilityId, facilityName, facilityPath = '') {
             const display = document.getElementById('selectedLocationDisplay');
             if (!display) return;
             
-            display.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Loading location details...`;
-            
-            try {
-                const response = await fetch(`/fbs/admin/get_location_path.php?id=${facilityId}`);
-                const data = await response.json();
-                
-                if (data.success && data.path) {
-                    display.innerHTML = `
-                        <div class="facility-name">${facilityName}</div>
-                        <div class="facility-path">${data.path}</div>
-                    `;
-                } else {
-                    display.innerHTML = facilityName;
-                }
-            } catch (error) {
-                display.innerHTML = facilityName;
+            if (facilityPath && facilityPath.trim()) {
+                display.innerHTML = `
+                    <div class="facility-name">${facilityName}</div>
+                    <div class="facility-path">${facilityPath}</div>
+                `;
+            } else {
+                display.innerHTML = `<div class="facility-name">${facilityName}</div>`;
             }
         }
         
@@ -3554,26 +3933,27 @@ if (!empty($programStages)) {
                 const occurrences = getStageOccurrences(stage.id);
                 
                 stageCard.innerHTML = `
-                    <div class="stage-card-header">
+                    <div class="stage-card-header" onclick="toggleStageCollapse('${stage.id}')">
                         <div class="stage-card-title">
+                            <i class="fas fa-chevron-down stage-collapse-toggle" id="toggle_${stage.id}"></i>
                             <i class="fas fa-clipboard-list"></i>
                             ${stage.name}
                             ${stage.repeatable ? '<span class="occurrence-badge">Repeatable</span>' : ''}
                         </div>
-                        <span class="stage-card-status status-${stageDataExists ? 'completed' : 'pending'}">
-                            ${stageDataExists ? 'COMPLETED' : 'PENDING'}
+                        <span class="stage-card-status status-${stageDataExists ? 'completed' : 'ready'}">
+                            ${stageDataExists ? 'COMPLETED' : 'READY'}
                         </span>
                     </div>
                     <div class="stage-card-body">
-                        <div class="stage-description">
-                            ${stage.description || 'No description available'}
-                        </div>
+                        ${stage.description ? `<div class="stage-description">
+                            ${stage.description}
+                        </div>` : ''}
                         ${stage.repeatable ? `
                             <div class="occurrence-instructions mb-3">
                                 <div class="alert alert-info py-2">
                                     <i class="fas fa-info-circle me-2"></i>
-                                    <strong>Instructions:</strong> This stage can have multiple occurrences. 
-                                    Click <i class="fas fa-edit"></i> to enter data, then <i class="fas fa-plus"></i> to add more occurrences.
+                                    <strong>Instructions:</strong> This stage can have multiple entries. 
+                                    Click <i class="fas fa-plus"></i> "Add New" below to create your first entry, then add more as needed.
                                 </div>
                             </div>
                             <div class="occurrence-list" id="occurrences_${stage.id}">
@@ -3583,28 +3963,21 @@ if (!empty($programStages)) {
                             <div class="single-stage-instructions mb-3">
                                 <div class="alert alert-light py-2">
                                     <i class="fas fa-clipboard-list me-2"></i>
-                                    <strong>Single Entry Stage:</strong> Click "Enter Data" below to fill in the required information.
+                                    <strong>Single Entry Stage:</strong> Click "Add Data" below to create your entry.
                                 </div>
+                            </div>
+                            <div id="occurrences_${stage.id}">
+                                <div class="text-muted small text-center py-2">Click "Add Data" to create your first entry</div>
                             </div>
                         `}
                     </div>
                     <div class="stage-card-actions">
-                        ${!stage.repeatable ? `
-                            <button type="button" class="btn btn-primary btn-sm" 
-                                    onclick="openStageModal('${stage.id}', 1)"
-                                    title="${stageDataExists ? 'Edit the data for this stage' : 'Enter data for this stage'}"
-                                    data-bs-toggle="tooltip">
-                                <i class="fas fa-edit"></i> ${stageDataExists ? 'Edit' : 'Enter'} Data
-                            </button>
-                        ` : ''}
-                        ${stage.repeatable ? `
-                            <button type="button" class="btn btn-success btn-sm" 
-                                    onclick="addStageOccurrence('${stage.id}')"
-                                    title="Add a new occurrence of this stage"
-                                    data-bs-toggle="tooltip">
-                                <i class="fas fa-plus"></i> Add New ${stage.name}
-                            </button>
-                        ` : ''}
+                        <button type="button" class="btn btn-success btn-sm" 
+                                onclick="${stage.repeatable ? `addStageOccurrence('${stage.id}')` : `addSingleStageEntry('${stage.id}')`}"
+                                title="Add ${stage.repeatable ? 'a new occurrence of' : 'data for'} this stage"
+                                data-bs-toggle="tooltip">
+                            <i class="fas fa-plus"></i> Add ${stage.repeatable ? `New ${stage.name}` : 'Data'}
+                        </button>
                     </div>
                 `;
                 
@@ -3613,11 +3986,17 @@ if (!empty($programStages)) {
                 
                 // Populate occurrences for repeatable stages
                 if (stage.repeatable) {
-                    // Ensure at least one occurrence exists
-                    if (!stageOccurrences[stage.id]) {
-                        stageOccurrences[stage.id] = 1;
+                    // Only populate if there are already occurrences with data
+                    const existingOccurrences = getStageOccurrences(stage.id);
+                    if (existingOccurrences > 0) {
+                        populateStageOccurrences(stage.id, existingOccurrences);
+                    } else {
+                        // Show empty state with just the add button
+                        const container = document.getElementById(`occurrences_${stage.id}`);
+                        if (container) {
+                            container.innerHTML = '<div class="text-muted small text-center py-2">Click "Add New" to create the first occurrence</div>';
+                        }
                     }
-                    populateStageOccurrences(stage.id, stageOccurrences[stage.id]);
                 }
             });
         }
@@ -3635,10 +4014,10 @@ if (!empty($programStages)) {
             const dataElements = stage.programStageDataElements || [];
             const filledData = [];
             
-            // Get the first 3 filled fields
+            // Get up to 6 filled fields for a more comprehensive summary
             let count = 0;
             for (const dataElementWrapper of dataElements) {
-                if (count >= 3) break;
+                if (count >= 6) break;
                 
                 const dataElement = dataElementWrapper.dataElement;
                 const value = occurrenceData[dataElement.id];
@@ -3646,8 +4025,8 @@ if (!empty($programStages)) {
                 if (value !== undefined && value !== '' && value !== null) {
                     // Clean the field name
                     let fieldName = (dataElement.displayName || dataElement.name || '').replace(/^[A-Z]{2,3}_/i, '');
-                    if (fieldName.length > 25) {
-                        fieldName = fieldName.substring(0, 25) + '...';
+                    if (fieldName.length > 20) {
+                        fieldName = fieldName.substring(0, 20) + '...';
                     }
                     
                     // Format the value
@@ -3662,8 +4041,8 @@ if (!empty($programStages)) {
                         }
                     } else if (typeof value === 'boolean') {
                         displayValue = value ? '✓ Yes' : '✗ No';
-                    } else if (String(displayValue).length > 30) {
-                        displayValue = String(displayValue).substring(0, 30) + '...';
+                    } else if (String(displayValue).length > 25) {
+                        displayValue = String(displayValue).substring(0, 25) + '...';
                     }
                     
                     filledData.push({ field: fieldName, value: displayValue });
@@ -3675,29 +4054,46 @@ if (!empty($programStages)) {
                 return '<div class="text-muted small">No data entered</div>';
             }
             
-            // Calculate how many more fields are filled beyond the first 3
+            // Calculate how many more fields are filled beyond the first 6
             const totalFilled = Object.keys(occurrenceData).filter(key => {
                 const val = occurrenceData[key];
                 return val !== undefined && val !== '' && val !== null;
             }).length;
             
             let summaryHTML = '<div class="occurrence-summary">';
-            summaryHTML += '<table class="summary-table">';
+            summaryHTML += '<table class="summary-table-compact">';
             
-            filledData.forEach(item => {
+            // Display fields in pairs (2 columns) for more compact view
+            for (let i = 0; i < filledData.length; i += 2) {
+                summaryHTML += '<tr>';
+                
+                // First field in this row
+                const firstItem = filledData[i];
                 summaryHTML += `
-                    <tr>
-                        <td class="field-name">${item.field}:</td>
-                        <td class="field-value">${item.value}</td>
-                    </tr>
+                    <td class="field-name">${firstItem.field}:</td>
+                    <td class="field-value">${firstItem.value}</td>
                 `;
-            });
+                
+                // Second field in this row (if exists)
+                if (i + 1 < filledData.length) {
+                    const secondItem = filledData[i + 1];
+                    summaryHTML += `
+                        <td class="field-name">${secondItem.field}:</td>
+                        <td class="field-value">${secondItem.value}</td>
+                    `;
+                } else {
+                    // Fill empty cells if odd number of fields
+                    summaryHTML += '<td colspan="2"></td>';
+                }
+                
+                summaryHTML += '</tr>';
+            }
             
-            if (totalFilled > 3) {
+            if (totalFilled > 6) {
                 summaryHTML += `
                     <tr>
-                        <td colspan="2" class="more-fields">
-                            <small class="text-muted">+ ${totalFilled - 3} more fields</small>
+                        <td colspan="4" class="more-fields">
+                            <small class="text-muted">+ ${totalFilled - 6} more fields</small>
                         </td>
                     </tr>
                 `;
@@ -3746,19 +4142,14 @@ if (!empty($programStages)) {
                 const occurrenceKeys = Object.keys(formData.stages[stageId]).filter(key => key.startsWith('occurrence_'));
                 console.log(`Found occurrence keys: ${occurrenceKeys}`);
                 
-                // Always ensure at least occurrence_1 exists for repeatable stages
-                if (occurrenceKeys.length === 0) {
-                    console.log('No occurrence keys found, creating occurrence_1');
-                    formData.stages[stageId][`occurrence_1`] = {};
-                    return 1;
-                }
+                // Return the actual count without auto-creating occurrences
                 
                 const count = occurrenceKeys.length;
                 console.log(`Returning count: ${count}`);
                 return count;
             }
-            console.log('No stage data found, returning 1');
-            return 1;
+            console.log('No stage data found, returning 0');
+            return 0;
         }
         
         function populateStageOccurrences(stageId, count) {
@@ -3811,7 +4202,7 @@ if (!empty($programStages)) {
                     occurrenceItem.innerHTML = `
                         <div class="occurrence-main">
                             <div class="occurrence-info">
-                                <span class="occurrence-number">Occurrence ${displayNum}</span>
+                                <span class="occurrence-number">${displayNum}</span>
                                 <span class="occurrence-status ${hasData ? 'text-success' : 'text-muted'}">
                                     <i class="fas fa-${hasData ? 'check-circle' : 'circle'}"></i>
                                     ${hasData ? 'Completed' : 'Empty'}
@@ -3840,31 +4231,9 @@ if (!empty($programStages)) {
                     container.appendChild(occurrenceItem);
                 });
             } else {
-                // No stage data, create empty occurrence_1
-                console.log('No stage data found, creating default occurrence_1');
-                if (!formData.stages) formData.stages = {};
-                if (!formData.stages[stageId]) formData.stages[stageId] = {};
-                formData.stages[stageId][`occurrence_1`] = {};
-                
-                const occurrenceItem = document.createElement('div');
-                occurrenceItem.className = 'occurrence-item empty';
-                occurrenceItem.innerHTML = `
-                    <div class="occurrence-main">
-                        <div class="occurrence-info">
-                            <span class="occurrence-number">Occurrence 1</span>
-                            <span class="occurrence-status text-muted">
-                                <i class="fas fa-circle"></i>
-                                Empty
-                            </span>
-                        </div>
-                        <div class="occurrence-actions">
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openStageModal('${stageId}', 1)">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(occurrenceItem);
+                // No stage data - show clean empty state with instruction
+                console.log('No stage data found, showing empty state');
+                container.innerHTML = '<div class="text-muted small text-center py-2">Click "Add New" to create your first entry</div>';
             }
         }
         
@@ -4086,31 +4455,69 @@ if (!empty($programStages)) {
                 if (stage.repeatable && hasData) {
                     // Show occurrences for repeatable stages
                     const occurrenceKeys = Object.keys(stageData).filter(key => key.startsWith('occurrence_'));
-                    const occurrenceCount = Math.max(occurrenceKeys.length, Object.keys(stageData).length > 0 ? 1 : 0);
+                    // Only count occurrences that actually have data
+                    let occurrenceCount = 0;
+                    occurrenceKeys.forEach(key => {
+                        const occData = stageData[key];
+                        if (occData && Object.keys(occData).some(dataKey => {
+                            const value = occData[dataKey];
+                            return value !== undefined && value !== '' && value !== null;
+                        })) {
+                            occurrenceCount++;
+                        }
+                    });
+                    // If no occurrence data but stage has data, it might be non-repeatable format
+                    if (occurrenceCount === 0 && occurrenceKeys.length === 0) {
+                        occurrenceCount = 1;
+                    }
                     
                     stageContent = `
                         <div class="summary-content">
                             <div class="text-success mb-2">
                                 <i class="fas fa-check me-2"></i>
-                                ${occurrenceCount} occurrence${occurrenceCount !== 1 ? 's' : ''} completed
+                                ${occurrenceCount} ${occurrenceCount !== 1 ? 'entries' : 'entry'} completed
                             </div>
                     `;
                     
-                    // Show details for each occurrence with summary tables
-                    for (let i = 1; i <= occurrenceCount; i++) {
-                        const occurrenceData = stageData[`occurrence_${i}`] || stageData;
-                        const hasOccurrenceData = occurrenceData && Object.keys(occurrenceData).length > 0;
+                    // Show details for each occurrence with summary tables (only those with data)
+                    let displayIndex = 1;
+                    occurrenceKeys.forEach(key => {
+                        const occurrenceData = stageData[key];
+                        const hasOccurrenceData = occurrenceData && Object.keys(occurrenceData).some(dataKey => {
+                            const value = occurrenceData[dataKey];
+                            return value !== undefined && value !== '' && value !== null;
+                        });
                         
+                        // Only show occurrences that have actual data
+                        if (hasOccurrenceData) {
+                            stageContent += `
+                                <div class="occurrence-review-item has-data">
+                                    <div class="occurrence-header">
+                                        <span class="occurrence-title">${displayIndex}</span>
+                                        <span class="occurrence-status text-success">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Completed
+                                        </span>
+                                    </div>
+                                    ${generateOccurrenceSummary(stage.id, occurrenceData)}
+                                </div>
+                            `;
+                            displayIndex++;
+                        }
+                    });
+                    
+                    // Handle non-repeatable format fallback
+                    if (occurrenceKeys.length === 0 && occurrenceCount === 1) {
                         stageContent += `
-                            <div class="occurrence-review-item ${hasOccurrenceData ? 'has-data' : 'empty'}">
+                            <div class="occurrence-review-item has-data">
                                 <div class="occurrence-header">
-                                    <span class="occurrence-title">Occurrence ${i}</span>
-                                    <span class="occurrence-status ${hasOccurrenceData ? 'text-success' : 'text-muted'}">
-                                        <i class="fas fa-${hasOccurrenceData ? 'check-circle' : 'circle'} me-1"></i>
-                                        ${hasOccurrenceData ? 'Completed' : 'Empty'}
+                                    <span class="occurrence-title">1</span>
+                                    <span class="occurrence-status text-success">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        Completed
                                     </span>
                                 </div>
-                                ${hasOccurrenceData ? generateOccurrenceSummary(stage.id, occurrenceData) : '<div class="text-muted small">No data entered</div>'}
+                                ${generateOccurrenceSummary(stage.id, stageData)}
                             </div>
                         `;
                     }
@@ -4462,7 +4869,7 @@ if (!empty($programStages)) {
             // Update modal title
             const modalTitle = document.getElementById('modalTitle');
             if (modalTitle) {
-                modalTitle.textContent = stage.repeatable ? `${stage.name} - Occurrence ${occurrence}` : stage.name;
+                modalTitle.textContent = stage.repeatable ? `${stage.name} - ${occurrence}` : stage.name;
             }
             
             // Clear and populate modal content
@@ -4807,7 +5214,7 @@ if (!empty($programStages)) {
             updateAllStepStatuses();
             
             // Show success message
-            showSuccessMessage(`Stage data saved successfully for ${isRepeatable ? `occurrence ${currentOccurrence}` : 'stage'}`);
+            showSuccessMessage(`Stage data saved successfully for ${isRepeatable ? `${currentOccurrence}` : 'stage'}`);
         }
         
         // Initialize the form
@@ -4899,14 +5306,14 @@ if (!empty($programStages)) {
                 populateStageOccurrences(stageId, newCount);
                 
                 // Show success message
-                showSuccessMessage(`Added occurrence ${newCount} for this stage`);
+                showSuccessMessage(`Added ${newCount} for this stage`);
                 
                 // Automatically open the new occurrence modal
                 setTimeout(() => {
                     openStageModal(stageId, newCount);
                 }, 500);
                 
-                console.log(`Added occurrence ${newCount} for stage ${stageId}`);
+                console.log(`Added ${newCount} for stage ${stageId}`);
             };
             
             window.removeStageOccurrence = function(stageId, occurrence) {
@@ -4960,6 +5367,37 @@ if (!empty($programStages)) {
                     
                     console.log(`Successfully removed occurrence ${occurrence} for stage ${stageId}`);
                 }
+            };
+            
+            window.toggleStageCollapse = function(stageId) {
+                const stageCard = document.querySelector(`[onclick*="${stageId}"]`)?.closest('.stage-card');
+                if (stageCard) {
+                    stageCard.classList.toggle('collapsed');
+                    const toggle = document.getElementById(`toggle_${stageId}`);
+                    if (toggle) {
+                        if (stageCard.classList.contains('collapsed')) {
+                            toggle.classList.remove('fa-chevron-down');
+                            toggle.classList.add('fa-chevron-right');
+                        } else {
+                            toggle.classList.remove('fa-chevron-right');
+                            toggle.classList.add('fa-chevron-down');
+                        }
+                    }
+                }
+            };
+            
+            window.addSingleStageEntry = function(stageId) {
+                // Initialize stage data if not exists
+                if (!formData.stages) formData.stages = {};
+                if (!formData.stages[stageId]) formData.stages[stageId] = {};
+                
+                // Open the modal directly for non-repeatable stages
+                openStageModal(stageId, 1);
+                
+                // After saving, refresh the display to show the entry
+                setTimeout(() => {
+                    populateStagesCards();
+                }, 100);
             };
         }
         
