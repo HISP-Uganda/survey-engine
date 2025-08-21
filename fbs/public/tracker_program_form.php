@@ -3722,7 +3722,7 @@ if (!empty($programStages)) {
                         inputElement = document.createElement('input');
                         inputElement.type = 'text';
                         inputElement.className = 'form-control';
-                        inputElement.placeholder = 'Enter text...';
+                        inputElement.placeholder = '........................';
                         break;
                         
                     case 'LONG_TEXT':
@@ -3769,7 +3769,7 @@ if (!empty($programStages)) {
                         inputElement = document.createElement('input');
                         inputElement.type = 'tel';
                         inputElement.className = 'form-control';
-                        inputElement.placeholder = '+256 xxx xxx xxx';
+                        inputElement.placeholder = '+256xxxxxxxxx';
                         break;
                         
                     case 'BOOLEAN':

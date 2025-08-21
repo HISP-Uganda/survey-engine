@@ -438,7 +438,7 @@ $surveySettings = array_merge($defaultSettings, $surveySettings);
             <div class="success-icon">✓</div>
             <h1>Thank You!</h1>
             <div class="message">
-                Your tracker program data has been successfully submitted to DHIS2.<br>
+               
                 We appreciate you taking the time to provide this important information.
             </div>
         </div>
@@ -448,10 +448,10 @@ $surveySettings = array_merge($defaultSettings, $surveySettings);
             <strong><?php echo htmlspecialchars($uid); ?></strong>
         </div>
         
-        <div class="action-buttons">
+        <!-- <div class="action-buttons">
             <button class="action-button" id="viewDetailsBtn">View Submission Details</button>
             <button class="action-button secondary" id="printSummaryBtn">Print Summary</button>
-        </div>
+        </div> -->
         
         <div class="submission-details" id="submissionDetails">
             <div class="details-section">

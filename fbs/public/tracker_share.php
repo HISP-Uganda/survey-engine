@@ -625,13 +625,7 @@ error_log("Tracker QR Code Target URL: " . $qrCodeTargetUrl);
             <p class="program-description"><?php echo htmlspecialchars($trackerProgram['description']); ?></p>
         <?php endif; ?>
 
-        <div class="info-section">
-            <h4><i class="fas fa-info-circle"></i> About This Program</h4>
-            <p><strong>Program Type:</strong> DHIS2 Tracker Program with Repeatable Stages</p>
-            <p><strong>Data Collection:</strong> Participant data with multiple visits/events</p>
-            <p><strong>Integration:</strong> Data is directly synchronized with DHIS2</p>
-        </div>
-
+    
         <div class="qr-section">
             <div class="qr-code-container">
                 <div id="qr-code"></div>
