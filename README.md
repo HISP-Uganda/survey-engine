@@ -80,7 +80,7 @@ The database schema is defined in the SQL files located in the `db/` directory. 
 
 The application includes a few API endpoints for asynchronous data retrieval:
 
-*   `fbs/admin/api/groupings.php`
+*   `fbs/admin/api/question_groupings.php`
 *   `fbs/admin/api/questions.php`
 *   `fbs/api/get_submissions.php`
 *   `fbs/admin/dhis2/`: Contains several endpoints for DHIS2 integration.
@@ -88,12 +88,28 @@ The application includes a few API endpoints for asynchronous data retrieval:
 
 ## Recent Updates
 
+### DHIS2 Location Management & UI Improvements (August 2025)
+*   **DHIS2 Path Conversion:** Implemented system to convert DHIS2 UIDs to human-readable location paths (e.g., `MoES Uganda → Acholi Region → Gulu District`)
+*   **Unified Location API:** Created `location_manager.php` to handle all location operations (get map, fetch missing, enrich locations) in a single endpoint
+*   **Enhanced Facility Dropdown:** Redesigned facility selection with horizontal scrollable columns (5 items per column) for better space utilization
+*   **Smart Search:** Dropdown only appears after typing 2+ characters and hides automatically after selection
+*   **Improved Layout:** Moved tracker header and step navigation inside main container for better visual cohesion and consistent styling
+*   **Location Caching:** Added automatic caching of DHIS2 location data in local database for improved performance
+
 ### Tracker Program Support (August 2025)
 *   **Enhanced Dashboard Analytics:** Fixed tracker program dashboard to properly display analytics for DHIS2 tracker programs
 *   **Question Analysis:** Improved question response analysis for tracker programs that store data in JSON format in the `tracker_submissions` table
 *   **Survey Type Identification:** Removed T, E, A bracket indicators from survey names since `domain_type` column now properly identifies survey types
 *   **Vendor Cleanup:** Consolidated dependencies to use `fbs/vendor/` directory only, removing duplicate root-level `vendor/` folder
+*   **Question Grouping System:** Enhanced tracker preview with drag-and-drop question grouping functionality for better form organization
 
 ### Database Schema
-*   **Tracker Tables:** Added `tracker_submissions` table for DHIS2 tracker program data storage
+*   **Location Table:** Enhanced with better hierarchy management and path conversion support
+*   **Tracker Tables:** Added `tracker_submissions` table for DHIS2 tracker program data storage  
 *   **Program Types:** Enhanced `survey` table with `program_type` and `domain_type` columns for better survey classification
+
+### Technical Improvements
+*   **File Consolidation:** Merged multiple location-related PHP files into unified endpoints
+*   **CSS Enhancements:** Added responsive flexbox layouts, improved container styling, and better visual hierarchy
+*   **JavaScript Optimization:** Enhanced dropdown behavior, keyboard navigation, and search functionality
+*   **Error Handling:** Improved error logging and user feedback for DHIS2 API operations

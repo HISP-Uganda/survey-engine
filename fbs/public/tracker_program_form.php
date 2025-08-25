@@ -3,6 +3,7 @@ session_start();
 
 require_once '../admin/connect.php';
 require_once '../admin/includes/skip_logic_helper.php';
+require_once '../admin/includes/location_helper.php';
 
 // Function to show survey status messages with good design
 function showSurveyMessage($title, $message, $type = 'info') {
@@ -462,18 +463,11 @@ if (!empty($programStages)) {
         /* Header Styles */
         .tracker-header {
             background: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .tracker-header .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         .logo-section {
@@ -685,15 +679,11 @@ if (!empty($programStages)) {
         /* Step Navigation */
         .step-navigation {
             background: white;
-            padding: 1.5rem 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .step-navigation .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 1rem;
         }
         
         .steps-container {
@@ -1263,37 +1253,76 @@ if (!empty($programStages)) {
             width: 75%;
         }
         
-        .facility-results {
-            max-height: 200px;
-            overflow-y: auto;
+        .facility-results.expandable-dropdown {
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            gap: 8px;
+            padding: 8px;
+            height: 200px;
+            scroll-snap-type: x mandatory;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+            flex-wrap: nowrap !important;
+        }
+        
+        .facility-column {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 3px;
+            min-width: 120px !important;
+            flex-shrink: 0 !important;
+            width: auto !important;
+        }
+        
+        .facility-results::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .facility-results::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .facility-results::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .facility-results::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
         
         .facility-item {
-            padding: 16px 12px;
+            width: auto !important;
+            height: 25px;
+            padding: 2px 8px;
             cursor: pointer;
             border: 1px solid #e0e0e0;
-            font-size: 14px;
+            font-size: 9px;
             transition: all 0.2s ease;
-            margin: 6px;
-            border-radius: 8px;
+            margin: 0;
+            border-radius: 4px;
             background: #ffffff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            text-align: center;
-            min-height: 60px;
-            display: flex;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            scroll-snap-align: start;
+            display: block !important;
             align-items: center;
             justify-content: center;
-            flex: 0 0 calc(25% - 12px);
-            min-width: 180px;
-            max-width: 220px;
+            text-align: center;
+            overflow: hidden;
+            flex-shrink: 0;
         }
         
         .facility-item:hover,
         .facility-item.selected {
             background-color: #f0f8ff;
             border-color: #007bff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,123,255,0.15);
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+            z-index: 10;
         }
         
         .facility-item.selected {
@@ -1330,16 +1359,169 @@ if (!empty($programStages)) {
         .facility-name {
             font-weight: 500;
             color: #333;
-            line-height: 1.3;
+            line-height: 1.1;
             word-break: break-word;
+            font-size: 10px;
+            text-align: center;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
         
         .facility-path {
             font-size: 12px;
             color: #666;
             line-height: 1.3;
+            margin-top: 4px;
+            opacity: 0.8;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
         
+        /* Add scroll indicator and container styling */
+        .facility-results-container {
+            position: relative;
+            display: none;
+        }
+        
+        .facility-results-container.dropdown-visible {
+            display: block;
+        }
+        
+        .facility-results-container.dropdown-visible::after {
+            content: '← Scroll to see more columns →';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #999;
+            pointer-events: none;
+            white-space: nowrap;
+            opacity: 0.7;
+            z-index: 10;
+            background: rgba(255,255,255,0.9);
+            padding: 4px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        /* Modal Question Groups */
+        .modal-group-section {
+            margin-bottom: 2rem;
+        }
+        
+        .modal-group-header {
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .modal-group-title {
+            color: #374151;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .modal-group-title::before {
+            content: '📋';
+            font-size: 18px;
+        }
+        
+        .modal-group-content {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        /*  Date Field Responsive Styling */
+        #modalQuestionsContainer .form-group.mb-3 {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #fff7ed;
+            border: 2px solid #fed7aa;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        #modalQuestionsContainer .form-group.mb-3 label {
+            font-weight: 600;
+            color: #9a3412;
+            margin: 0;
+            white-space: nowrap;
+            min-width: 120px;
+        }
+
+        #modalQuestionsContainer .form-group.mb-3 input[type="date"] {
+            flex: 1;
+            max-width: 200px;
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #d97706;
+            font-size: 14px;
+        }
+
+        #modalQuestionsContainer .form-group.mb-3 .form-help {
+            font-size: 12px;
+            color: #92400e;
+            margin: 0;
+            margin-left: 1rem;
+        }
+        
+        /* Mobile responsive design for event date field */
+        @media (max-width: 576px) {
+            #modalQuestionsContainer .form-group.mb-3 {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                padding: 0.75rem;
+            }
+            
+            #modalQuestionsContainer .form-group.mb-3 label {
+                min-width: auto;
+                white-space: normal;
+                width: 100%;
+            }
+            
+            #modalQuestionsContainer .form-group.mb-3 input[type="date"] {
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            #modalQuestionsContainer .form-group.mb-3 .form-help {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) and (min-width: 577px) {
+            #modalQuestionsContainer .form-group.mb-3 {
+                gap: 0.75rem;
+                padding: 0.875rem;
+            }
+            
+            #modalQuestionsContainer .form-group.mb-3 label {
+                min-width: 100px;
+                font-size: 14px;
+            }
+            
+            #modalQuestionsContainer .form-group.mb-3 input[type="date"] {
+                max-width: 180px;
+            }
+        }
+
         /* Stage Cards */
         .stage-card {
             border: 1px solid #e5e7eb;
@@ -2608,6 +2790,7 @@ if (!empty($programStages)) {
             'program' => $trackerProgram,
             'surveySettings' => array_merge($surveySettings, [
                 'dhis2_program_uid' => $survey['dhis2_program_uid'] ?? null,
+                'dhis2_instance' => $survey['dhis2_instance'] ?? null,
                 'id' => $survey['id']
             ])
         ]) ?>
@@ -2615,6 +2798,90 @@ if (!empty($programStages)) {
     
     <!-- Core JavaScript Functions - Must be defined before HTML onclick handlers -->
     <script>
+        // Location conversion functionality
+        let locationMap = {};
+        
+        // Function to convert DHIS2 path to readable format
+        function convertPathToReadable(dhis2Path) {
+            if (!dhis2Path) return '';
+            
+            const uids = dhis2Path.split('/').filter(uid => uid.length > 0);
+            const readableNames = uids.map(uid => {
+                const name = locationMap[uid];
+                if (name) {
+                    return name;
+                } else {
+                    // For missing UIDs, try to make them more readable
+                    console.warn(`UID ${uid} not found in location map`);
+                    return `[${uid}]`; // Keep UID but mark as unknown
+                }
+            });
+            
+            return readableNames.join(' → ');
+        }
+        
+        // Function to fetch missing location names from DHIS2
+        async function fetchMissingLocationNames(dhis2Path, dhis2Instance) {
+            if (!dhis2Path || !dhis2Instance) return dhis2Path;
+            
+            const uids = dhis2Path.split('/').filter(uid => uid.length > 0);
+            const missingUids = uids.filter(uid => !locationMap[uid]);
+            
+            if (missingUids.length === 0) {
+                return convertPathToReadable(dhis2Path);
+            }
+            
+            try {
+                const response = await fetch('/fbs/admin/location_manager.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'fetch_missing',
+                        uids: missingUids,
+                        dhis2_instance: dhis2Instance
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const fetchedNames = await response.json();
+                
+                // Update location map with newly fetched names
+                Object.assign(locationMap, fetchedNames);
+                
+                // Return the converted path
+                return convertPathToReadable(dhis2Path);
+                
+            } catch (error) {
+                console.error('Error fetching missing location names:', error);
+                return convertPathToReadable(dhis2Path); // Return with [UID] format
+            }
+        }
+        
+        // Function to load location map from server
+        async function loadLocationMap() {
+            try {
+                const response = await fetch('/fbs/admin/location_manager.php?action=get_map');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const data = await response.json();
+                locationMap = data;
+                console.log('Location map loaded:', Object.keys(locationMap).length, 'locations');
+                
+                // Debug: check for specific UIDs
+                const testPath = "KJPN4PduBWe/yXncUmqtQYF/ztIyIYAzFKp/S2jpKJZLT9Q";
+                const uids = testPath.split('/');
+                console.log('Sample conversion test:', uids.map(uid => locationMap[uid] || `[${uid} not found]`).join(' → '));
+            } catch (error) {
+                console.error('Error loading location map:', error);
+            }
+        }
+        
         // Global variables
         let programData;
         let formData = {
@@ -2632,7 +2899,7 @@ if (!empty($programStages)) {
         let selectedLocation = null;
 
         // Navigation Functions - declared at window level for onclick access
-        window.navigateToStep = function(stepName) {
+        window.navigateToStep = async function(stepName) {
             console.log('Navigating to step:', stepName);
             
             // Update step navigation
@@ -2670,7 +2937,7 @@ if (!empty($programStages)) {
                     break;
                 case 'data-entry':
                     if (typeof populateStagesCards === 'function') {
-                        populateStagesCards();
+                        await populateStagesCards();
                     }
                     break;
                 case 'review':
@@ -2702,7 +2969,11 @@ if (!empty($programStages)) {
             const locationNextBtn = document.getElementById('locationNextBtn');
             
             if (facilitySearch) facilitySearch.value = facilityName;
-            if (facilityResults) facilityResults.style.display = 'none';
+            if (facilityResults) {
+                facilityResults.style.display = 'none';
+                const container = facilityResults.parentElement;
+                if (container) container.classList.remove('dropdown-visible');
+            }
             if (locationNextBtn) locationNextBtn.disabled = false;
             
             // Update hidden facility name field for submission
@@ -2719,13 +2990,32 @@ if (!empty($programStages)) {
             // Update the selected location display with readable path
             const selectedLocationDisplay = document.getElementById('selectedLocationDisplay');
             if (selectedLocationDisplay) {
+                // Show loading state first
                 selectedLocationDisplay.innerHTML = `
                     <div><strong>${facilityName}</strong></div>
-                    <div class="text-muted" style="font-size: 0.9em;" id="locationPathDisplay">Loading path...</div>
+                    <div class="text-muted" style="font-size: 0.9em;">Loading path...</div>
                 `;
                 
-                // Load the actual path
-                loadLocationPath(facilityId, document.getElementById('locationPathDisplay'));
+                // Then fetch and update with readable path
+                (async () => {
+                    try {
+                        const dhis2Instance = programData.surveySettings?.dhis2_instance;
+                        const readablePath = await fetchMissingLocationNames(facilityPath, dhis2Instance);
+                        
+                        selectedLocationDisplay.innerHTML = `
+                            <div><strong>${facilityName}</strong></div>
+                            <div class="text-muted" style="font-size: 0.9em;">${readablePath || facilityPath || 'Path not available'}</div>
+                        `;
+                    } catch (error) {
+                        console.error('Error updating selected location display:', error);
+                        // Fallback to basic conversion
+                        const readablePath = convertPathToReadable(facilityPath);
+                        selectedLocationDisplay.innerHTML = `
+                            <div><strong>${facilityName}</strong></div>
+                            <div class="text-muted" style="font-size: 0.9em;">${readablePath || facilityPath || 'Path not available'}</div>
+                        `;
+                    }
+                })();
             }
         };
         
@@ -2810,26 +3100,17 @@ if (!empty($programStages)) {
     </script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="tracker-header">
-        <div class="container">
-            <!-- Flag Bar -->
-            <?php if ($surveySettings['show_flag_bar']): ?>
-                <div class="flag-bar mb-3">
-                    <div class="flag-segment" style="background-color: <?= htmlspecialchars($surveySettings['flag_black_color']) ?>; flex: 1;"></div>
-                    <div class="flag-segment" style="background-color: <?= htmlspecialchars($surveySettings['flag_yellow_color']) ?>; flex: 1;"></div>
-                    <div class="flag-segment" style="background-color: <?= htmlspecialchars($surveySettings['flag_red_color']) ?>; flex: 1;"></div>
-                </div>
-            <?php endif; ?>
-            
+    <!-- Main Content -->
+    <div class="main-container">
+        
+        <!-- Header -->
+        <header class="tracker-header">
             <!-- Header Content -->
             <div class="header-main">
                 <?php if (!empty($dynamicImages)): ?>
                     <!-- Images Under Title Layout -->
                     <div class="header-with-images-vertical">
-                        <div class="header-title-section">
-                            <h1 class="tracker-title"><?= htmlspecialchars($trackerProgram['name'] ?? $surveySettings['title_text']) ?></h1>
-                        </div>
+                        
                         
                         <div class="header-images-section-under">
                             <div class="dynamic-images-container <?= htmlspecialchars($surveySettings['layout_type']) ?>">
@@ -2845,6 +3126,9 @@ if (!empty($programStages)) {
                                 <?php endforeach; ?>
                             </div>
                         </div>
+                        <div class="header-title-section">
+                            <h1 class="tracker-title"><?= htmlspecialchars($trackerProgram['name'] ?? $surveySettings['title_text']) ?></h1>
+                        </div>
                     </div>
                 <?php else: ?>
                     <!-- Title Only Layout -->
@@ -2853,13 +3137,20 @@ if (!empty($programStages)) {
                        
                     </div>
                 <?php endif; ?>
-            </div>
-        </div>
-    </header>
+                 <!-- Flag Bar -->
+                    <?php if ($surveySettings['show_flag_bar']): ?>
+                        <div class="flag-bar mb-3">
+                            <div class="flag-segment" style="background-color: <?= htmlspecialchars($surveySettings['flag_black_color']) ?>; flex: 1;"></div>
+                            <div class="flag-segment" style="background-color: <?= htmlspecialchars($surveySettings['flag_yellow_color']) ?>; flex: 1;"></div>
+                            <div class="flag-segment" style="background-color: <?= htmlspecialchars($surveySettings['flag_red_color']) ?>; flex: 1;"></div>
+                        </div>
+                    <?php endif; ?>
 
-    <!-- Step Navigation -->
-    <div class="step-navigation">
-        <div class="container">
+            </div>
+        </header>
+
+        <!-- Step Navigation -->
+        <div class="step-navigation">
             <div class="steps-container">
                 <div class="step active" data-step="location" onclick="navigateToStep('location')">
                     <div class="step-number">1</div>
@@ -2882,10 +3173,6 @@ if (!empty($programStages)) {
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-container">
         <!-- Location Section -->
         <div class="form-section active" id="locationSection" data-step="location">
             <div class="section-header">
@@ -2909,16 +3196,17 @@ if (!empty($programStages)) {
                                                    id="facilitySearch" 
                                                    name="facility_search" 
                                                    class="form-control" 
-                                                   placeholder="Type to search locations..."
+                                                   placeholder="Type facility name or scroll horizontally → → →"
                                                    autocomplete="off"
                                                    required>
-                                            <div id="facilityResults" 
-                                                 class="facility-results expandable-dropdown" 
-                                                 style="display: none; position: absolute; z-index: 1050; 
-                                                        background: white; border: 1px solid #ddd; 
-                                                        border-radius: 8px; max-height: 250px; 
-                                                        overflow-y: auto; width: 100%; margin-top: 2px;
-                                                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
+                                            <div class="facility-results-container">
+                                                <div id="facilityResults" 
+                                                     class="facility-results expandable-dropdown" 
+                                                     style="display: none; position: absolute; z-index: 9999; 
+                                                            background: white; border: 1px solid #ddd; 
+                                                            border-radius: 8px; width: 100%; margin-top: 2px;
+                                                            box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -3095,25 +3383,35 @@ if (!empty($programStages)) {
             // Set up search functionality
             facilitySearch.addEventListener('input', function() {
                 const searchTerm = this.value.trim();
+                const container = facilityResults.parentElement;
                 if (searchTerm.length === 0) {
-                    // Show all locations when empty
-                    searchAndDisplayFacilities('');
-                } else {
-                    // Filter as user types
+                    // Hide dropdown when empty
+                    facilityResults.style.display = 'none';
+                    if (container) container.classList.remove('dropdown-visible');
+                } else if (searchTerm.length >= 2) {
+                    // Show dropdown and filter when 2+ characters
                     searchAndDisplayFacilities(searchTerm);
+                } else {
+                    // Hide dropdown for 1 character
+                    facilityResults.style.display = 'none';
+                    if (container) container.classList.remove('dropdown-visible');
                 }
             });
             
             facilitySearch.addEventListener('focus', function() {
-                // Show all locations on focus
+                // Only show locations on focus if 2+ characters
                 const searchTerm = this.value.trim();
-                searchAndDisplayFacilities(searchTerm);
+                if (searchTerm.length >= 2) {
+                    searchAndDisplayFacilities(searchTerm);
+                }
             });
             
             // Hide results when clicking outside
             document.addEventListener('click', function(e) {
                 if (!facilitySearch.contains(e.target) && !facilityResults.contains(e.target)) {
                     facilityResults.style.display = 'none';
+                    const container = facilityResults.parentElement;
+                    if (container) container.classList.remove('dropdown-visible');
                 }
             });
             
@@ -3125,19 +3423,19 @@ if (!empty($programStages)) {
                 let selectedIndex = Array.from(facilityItems).findIndex(item => item.classList.contains('selected'));
                 
                 switch(e.key) {
-                    case 'ArrowDown':
-                        e.preventDefault();
-                        selectedIndex = selectedIndex < 0 ? 0 : Math.min(selectedIndex + 4, facilityItems.length - 1);
-                        break;
-                    case 'ArrowUp':
-                        e.preventDefault();
-                        selectedIndex = selectedIndex < 0 ? 0 : Math.max(selectedIndex - 4, 0);
-                        break;
                     case 'ArrowRight':
                         e.preventDefault();
                         selectedIndex = selectedIndex < 0 ? 0 : Math.min(selectedIndex + 1, facilityItems.length - 1);
                         break;
                     case 'ArrowLeft':
+                        e.preventDefault();
+                        selectedIndex = selectedIndex < 0 ? 0 : Math.max(selectedIndex - 1, 0);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        selectedIndex = selectedIndex < 0 ? 0 : Math.min(selectedIndex + 1, facilityItems.length - 1);
+                        break;
+                    case 'ArrowUp':
                         e.preventDefault();
                         selectedIndex = selectedIndex < 0 ? 0 : Math.max(selectedIndex - 1, 0);
                         break;
@@ -3147,6 +3445,12 @@ if (!empty($programStages)) {
                             facilityItems[selectedIndex].click();
                         }
                         return;
+                    case 'Escape':
+                        e.preventDefault();
+                        facilityResults.style.display = 'none';
+                        const container = facilityResults.parentElement;
+                        if (container) container.classList.remove('dropdown-visible');
+                        return;
                     default:
                         return;
                 }
@@ -3155,7 +3459,12 @@ if (!empty($programStages)) {
                 facilityItems.forEach(item => item.classList.remove('selected'));
                 if (selectedIndex >= 0) {
                     facilityItems[selectedIndex].classList.add('selected');
-                    facilityItems[selectedIndex].scrollIntoView({ block: 'nearest' });
+                    // Scroll horizontally to keep selected item in view
+                    facilityItems[selectedIndex].scrollIntoView({ 
+                        behavior: 'smooth', 
+                        inline: 'center',
+                        block: 'nearest' 
+                    });
                 }
             });
         }
@@ -3217,11 +3526,8 @@ if (!empty($programStages)) {
                             errorMessage = 'DHIS2 authentication failed - using survey locations';
                         }
                         
-                        facilityResults.innerHTML = `<div class="facility-item" style="color: orange; padding: 10px;"><i class="fas fa-exclamation-triangle me-2"></i>${errorMessage}</div>`;
-                        facilityResults.style.display = 'block';
-                        setTimeout(() => {
-                            facilityResults.style.display = 'none';
-                        }, 5000);
+                        // Log error message without showing dropdown
+                        console.warn(errorMessage);
                     }
                     
                     return await fetchLocationsForSurveyPage();
@@ -3262,15 +3568,8 @@ if (!empty($programStages)) {
                     errorMessage = 'Cannot reach DHIS2 server - using survey locations';
                 }
                 
-                // Show user a message about the fallback
-                const facilityResults = document.getElementById('facilityResults');
-                if (facilityResults) {
-                    facilityResults.innerHTML = `<div class="facility-item" style="color: orange; padding: 10px;"><i class="fas fa-exclamation-triangle me-2"></i>${errorMessage}</div>`;
-                    facilityResults.style.display = 'block';
-                    setTimeout(() => {
-                        facilityResults.style.display = 'none';
-                    }, 5000);
-                }
+                // Log error message without showing dropdown
+                console.warn(errorMessage);
                 
                 return await fetchLocationsForSurveyPage();
             }
@@ -3280,7 +3579,7 @@ if (!empty($programStages)) {
             try {
                 console.log('Enriching DHIS2 org units with local data');
                 
-                const response = await fetch('/fbs/admin/enrich_locations.php', {
+                const response = await fetch('/fbs/admin/location_manager.php', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json'
@@ -3339,14 +3638,7 @@ if (!empty($programStages)) {
                 currentFilteredLocations = [];
                 
                 // Show user-friendly message
-                const facilityResults = document.getElementById('facilityResults');
-                if (facilityResults) {
-                    facilityResults.innerHTML = '<div class="facility-item" style="color: red;">Error loading locations. Please refresh the page.</div>';
-                    facilityResults.style.display = 'block';
-                    setTimeout(() => {
-                        facilityResults.style.display = 'none';
-                    }, 3000);
-                }
+                console.error('Error loading locations. Please refresh the page.');
             }
         }
         
@@ -3357,52 +3649,79 @@ if (!empty($programStages)) {
             let filteredLocations;
             if (searchTerm === '') {
                 // Show all locations when no search term
-                filteredLocations = currentFilteredLocations.slice(0, 15);
+                filteredLocations = currentFilteredLocations;
             } else {
                 // Filter by search term
                 filteredLocations = currentFilteredLocations.filter(location => 
                     location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     (location.readablePath && location.readablePath.toLowerCase().includes(searchTerm.toLowerCase()))
-                ).slice(0, 10);
+                );
             }
             
             facilityResults.innerHTML = '';
+            console.log(`Displaying ${filteredLocations.length} facilities in grid columns (5 rows × ${Math.ceil(filteredLocations.length / 5)} columns)`);
             
             if (filteredLocations.length === 0) {
                 facilityResults.innerHTML = '<div class="facility-item">No locations found</div>';
             } else {
-                filteredLocations.forEach(location => {
-                    const facilityItem = document.createElement('div');
-                    facilityItem.className = 'facility-item';
-                    facilityItem.innerHTML = `
-                        <div class="facility-name">${location.name}</div>
-                    `;
+                console.log('Creating horizontal columns for', filteredLocations.length, 'locations');
+                // Create columns with 5 items each
+                const itemsPerColumn = 5;
+                const columnCount = Math.ceil(filteredLocations.length / itemsPerColumn);
+                console.log('Will create', columnCount, 'columns');
+                
+                for (let col = 0; col < columnCount; col++) {
+                    const column = document.createElement('div');
+                    column.className = 'facility-column';
+                    console.log('Created column', col + 1);
                     
-                    // Store location data for later use
-                    facilityItem.dataset.locationId = location.id;
-                    facilityItem.dataset.locationName = location.name;
-                    facilityItem.dataset.orgunitUid = location.uid || '';
-                    facilityItem.dataset.locationPath = location.path || '';
+                    const startIndex = col * itemsPerColumn;
+                    const endIndex = Math.min(startIndex + itemsPerColumn, filteredLocations.length);
                     
-                    facilityItem.onclick = () => {
-                        const path = location.path || '';
-                        selectFacility(
-                            location.id, 
-                            location.name, 
-                            location.uid || '',
-                            path
-                        );
-                    };
+                    for (let i = startIndex; i < endIndex; i++) {
+                        const location = filteredLocations[i];
+                        const facilityItem = document.createElement('div');
+                        facilityItem.className = 'facility-item';
+                        facilityItem.innerHTML = `
+                            <div class="facility-name">${location.name}</div>
+                        `;
+                        
+                        // Store location data for later use
+                        facilityItem.dataset.locationId = location.id;
+                        facilityItem.dataset.locationName = location.name;
+                        facilityItem.dataset.orgunitUid = location.uid || '';
+                        facilityItem.dataset.locationPath = location.path || '';
+                        
+                        facilityItem.onclick = () => {
+                            const path = location.path || '';
+                            selectFacility(
+                                location.id, 
+                                location.name, 
+                                location.uid || '',
+                                path
+                            );
+                        };
+                        
+                        column.appendChild(facilityItem);
+                        
+                        // Store the readable path for later use (if needed)
+                        const readablePath = location.readablePath || location.displayName || location.path || '';
+                        facilityItem.dataset.locationPath = readablePath;
+                    }
                     
-                    facilityResults.appendChild(facilityItem);
-                    
-                    // Store the readable path
-                    const readablePath = location.readablePath || location.displayName || location.path || '';
-                    facilityItem.dataset.locationPath = readablePath;
-                });
+                    facilityResults.appendChild(column);
+                }
             }
             
-            facilityResults.style.display = 'block';
+            // Only show dropdown if there's a search term
+            const container = facilityResults.parentElement;
+            if (searchTerm && searchTerm.length >= 2) {
+                facilityResults.style.display = 'block';
+                if (container) container.classList.add('dropdown-visible');
+            } else {
+                facilityResults.style.display = 'none';
+                if (container) container.classList.remove('dropdown-visible');
+            }
         }
         
         async function loadLocationPath(locationId, pathElement, facilityItem) {
@@ -3432,8 +3751,11 @@ if (!empty($programStages)) {
             // Update search input
             document.getElementById('facilitySearch').value = facilityName;
             
-            // Hide dropdown
-            document.getElementById('facilityResults').style.display = 'none';
+            // Hide dropdown after selection
+            const facilityResults = document.getElementById('facilityResults');
+            facilityResults.style.display = 'none';
+            const container = facilityResults.parentElement;
+            if (container) container.classList.remove('dropdown-visible');
             
             // Update location display with readable path
             updateLocationDisplay(facilityId, facilityName, facilityPath);
@@ -3450,15 +3772,36 @@ if (!empty($programStages)) {
             }
         }
         
-        function updateLocationDisplay(facilityId, facilityName, facilityPath = '') {
+        async function updateLocationDisplay(facilityId, facilityName, facilityPath = '') {
             const display = document.getElementById('selectedLocationDisplay');
             if (!display) return;
             
             if (facilityPath && facilityPath.trim()) {
+                // Show initial display with loading indicator
                 display.innerHTML = `
                     <div class="facility-name">${facilityName}</div>
-                    <div class="facility-path">${facilityPath}</div>
+                    <div class="facility-path text-muted">Loading path...</div>
                 `;
+                
+                try {
+                    // Fetch missing location names and get readable path
+                    const dhis2Instance = programData.surveySettings?.dhis2_instance;
+                    const readablePath = await fetchMissingLocationNames(facilityPath, dhis2Instance);
+                    
+                    // Update with readable path
+                    display.innerHTML = `
+                        <div class="facility-name">${facilityName}</div>
+                        <div class="facility-path">${readablePath || facilityPath}</div>
+                    `;
+                } catch (error) {
+                    console.error('Error updating location display:', error);
+                    // Fallback to basic conversion
+                    const readablePath = convertPathToReadable(facilityPath);
+                    display.innerHTML = `
+                        <div class="facility-name">${facilityName}</div>
+                        <div class="facility-path">${readablePath || facilityPath}</div>
+                    `;
+                }
             } else {
                 display.innerHTML = `<div class="facility-name">${facilityName}</div>`;
             }
@@ -3888,12 +4231,40 @@ if (!empty($programStages)) {
             }
         }
 
+        // Load question groupings from database
+        async function loadQuestionGroupings() {
+            try {
+                const surveyId = programData?.surveySettings?.id;
+                if (!surveyId) {
+                    console.log('No survey ID available for groupings');
+                    return {};
+                }
+
+                const response = await fetch(`/fbs/admin/api/question_groupings.php?survey_id=${surveyId}`);
+                const result = await response.json();
+                
+                if (result.success && result.groupings) {
+                    console.log('✅ Loaded question groupings from database:', result.groupings);
+                    return result.groupings;
+                } else {
+                    console.log('No groupings found in database, using default display');
+                    return {};
+                }
+            } catch (error) {
+                console.error('Error loading question groupings:', error);
+                return {};
+            }
+        }
+
         // Stage Cards Population for Data Entry
-        function populateStagesCards() {
+        async function populateStagesCards() {
             console.log('=== Populating stages cards ===');
             const container = document.getElementById('stagesContainer');
             console.log('Stages container found:', !!container);
             console.log('Program data available:', !!programData);
+
+            // Load question groupings from database
+            const questionGroupings = await loadQuestionGroupings();
             
             if (!container) {
                 console.error('stagesContainer element not found!');
@@ -4389,15 +4760,47 @@ if (!empty($programStages)) {
             // Populate location summary
             const locationSummary = document.getElementById('locationSummary');
             if (selectedLocation) {
+                // Show loading state first
                 locationSummary.innerHTML = `
                     <div class="summary-item">
                         <span class="summary-label">Selected Location</span>
                         <span class="summary-value">
                             <strong>${selectedLocation.name}</strong><br>
-                            <small class="text-muted">${selectedLocation.path || 'Path not available'}</small>
+                            <small class="text-muted">Loading path...</small>
                         </span>
                     </div>
                 `;
+                
+                // Then fetch and update with readable path
+                (async () => {
+                    try {
+                        const dhis2Instance = programData.surveySettings?.dhis2_instance;
+                        const readablePath = await fetchMissingLocationNames(selectedLocation.path, dhis2Instance);
+                        
+                        locationSummary.innerHTML = `
+                            <div class="summary-item">
+                                <span class="summary-label">Selected Location</span>
+                                <span class="summary-value">
+                                    <strong>${selectedLocation.name}</strong><br>
+                                    <small class="text-muted">${readablePath || selectedLocation.path || 'Path not available'}</small>
+                                </span>
+                            </div>
+                        `;
+                    } catch (error) {
+                        console.error('Error updating location summary:', error);
+                        // Fallback to basic conversion
+                        const readablePath = convertPathToReadable(selectedLocation.path);
+                        locationSummary.innerHTML = `
+                            <div class="summary-item">
+                                <span class="summary-label">Selected Location</span>
+                                <span class="summary-value">
+                                    <strong>${selectedLocation.name}</strong><br>
+                                    <small class="text-muted">${readablePath || selectedLocation.path || 'Path not available'}</small>
+                                </span>
+                            </div>
+                        `;
+                    }
+                })();
             } else {
                 locationSummary.innerHTML = `
                     <div class="summary-item">
@@ -4570,8 +4973,8 @@ if (!empty($programStages)) {
                     return { '': dataElements };
                 }
                 
-                // Use the working API path
-                const apiPath = `/fbs/admin/api/groupings.php?survey_id=${surveyId}`;
+                // Use the database-driven API path
+                const apiPath = `/fbs/admin/api/question_groupings.php?survey_id=${surveyId}`;
                 console.log('Loading groupings from:', apiPath);
                 
                 const response = await fetch(apiPath);
@@ -4579,11 +4982,11 @@ if (!empty($programStages)) {
                 if (response.ok) {
                     const result = await response.json();
                     
-                    if (result.success && result.data && result.data[stageId]) {
-                        console.log('Found saved groupings for stage:', stageId, result.data[stageId]);
+                    if (result.success && result.groupings && result.groupings[stageId]) {
+                        console.log('Found saved groupings for stage:', stageId, result.groupings[stageId]);
                         
                         // Convert saved groupings to the format expected by the form
-                        const savedGroups = result.data[stageId];
+                        const savedGroups = result.groupings[stageId];
                         const questionGroups = {};
                         
                         // Create a lookup map of data elements by ID
@@ -4592,16 +4995,19 @@ if (!empty($programStages)) {
                             elementMap[elementConfig.dataElement.id] = elementConfig;
                         });
                         
-                        // Process saved groups
+                        // Process saved groups - updated for new database format
                         savedGroups.forEach(group => {
-                            const groupTitle = group.groupTitle || 'Unnamed Group';
-                            questionGroups[groupTitle] = [];
+                            const groupTitle = group.groupName || 'Unnamed Group';
+                            
+                            // Don't show "Ungrouped Questions" as a header
+                            const displayTitle = (groupTitle === 'Ungrouped Questions') ? '' : groupTitle;
+                            questionGroups[displayTitle] = [];
                             
                             if (group.questions && Array.isArray(group.questions)) {
                                 group.questions.forEach(questionRef => {
                                     const elementConfig = elementMap[questionRef.questionId];
                                     if (elementConfig) {
-                                        questionGroups[groupTitle].push(elementConfig);
+                                        questionGroups[displayTitle].push(elementConfig);
                                     }
                                 });
                             }
@@ -4618,7 +5024,7 @@ if (!empty($programStages)) {
                         );
                         
                         if (ungroupedElements.length > 0) {
-                            questionGroups['General Information'] = ungroupedElements;
+                            questionGroups[''] = ungroupedElements; // Empty string = no group header
                         }
                         
                         console.log('✓ Successfully loaded custom groupings:', questionGroups);
@@ -4640,10 +5046,10 @@ if (!empty($programStages)) {
         }
         
         // Function to group questions by category based on naming patterns
-        // DISABLED: Only use groupings from groupings.php API
+        // Use database-driven grouping system
         function groupQuestionsByCategory(dataElements) {
-            // This function is disabled - only use saved groupings from groupings.php
-            console.log('Default grouping function disabled - use groupings.php only');
+            // This function is disabled - only use saved groupings from question_groupings.php
+            console.log('Default grouping function disabled - use database groupings only');
             return {};
         }
         
@@ -4905,11 +5311,11 @@ if (!empty($programStages)) {
             
             eventDateGroup.innerHTML = `
                 <label class="form-label" for="eventDate_${stageId}">
-                    Event Date <span class="required-indicator">*</span>
+                    Date <span class="required-indicator">*</span>
                 </label>
                 <input type="date" class="form-control event-date" id="eventDate_${stageId}" 
                        value="${savedEventDate}" required>
-                <div class="form-help">The date when this event occurred</div>
+             <div class="form-help">By default the current date is picked unless modified by user</div>
             `;
             modalContainer.appendChild(eventDateGroup);
             
@@ -5201,7 +5607,7 @@ if (!empty($programStages)) {
             // Refresh the data entry view and stage cards if currently active
             if (currentStep === 'data-entry') {
                 populateStageSubTabs();
-                populateStagesCards(); // Refresh stage cards to show updated status
+                populateStagesCards().catch(e => console.error('Error refreshing stage cards:', e)); // Refresh stage cards to show updated status
                 
                 // Also refresh the specific stage's occurrence list to ensure proper status updates
                 if (isRepeatable) {
@@ -5220,6 +5626,9 @@ if (!empty($programStages)) {
         // Initialize the form
         document.addEventListener('DOMContentLoaded', async function() {
             try {
+                // Load location mappings first
+                await loadLocationMap();
+                
                 const programDataElement = document.getElementById('programData');
                 if (!programDataElement) {
                     console.error('Program data element not found');
@@ -5299,7 +5708,7 @@ if (!empty($programStages)) {
                 
                 // Refresh the display
                 console.log('Calling populateStagesCards...');
-                populateStagesCards();
+                populateStagesCards().catch(e => console.error('Error in populateStagesCards:', e));
                 
                 // Update the specific stage's occurrences display
                 console.log(`Calling populateStageOccurrences(${stageId}, ${newCount})...`);

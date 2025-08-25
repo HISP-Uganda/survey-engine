@@ -799,39 +799,6 @@ if (!empty($programStages)) {
             
           
 
-            <!-- Location Filter Settings -->
-            <div class="info-group">
-                <h5><i class="fas fa-map-marker-alt me-2"></i>Location Settings</h5>
-                <p class="text-muted small mb-3">Configure which locations appear in the form's location selector.</p>
-                
-                <div class="filter-group mb-3">
-                    <label for="control-instance-key-select" class="form-label">Filter by Instance:</label>
-                    <select id="control-instance-key-select" class="form-control">
-                        <option value="">All Instances</option>
-                        <?php foreach ($instanceKeys as $key): ?>
-                            <option value="<?php echo htmlspecialchars($key); ?>" <?php echo (isset($surveySettings['selected_instance_key']) && $surveySettings['selected_instance_key'] == $key) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($key); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
-                <div class="filter-group mb-3">
-                    <label for="control-hierarchy-level-select" class="form-label">Filter by Level:</label>
-                    <select id="control-hierarchy-level-select" class="form-control">
-                        <option value="">All Levels</option>
-                        <?php foreach ($hierarchyLevels as $levelInt => $levelName): ?>
-                            <option value="<?php echo htmlspecialchars($levelInt); ?>" <?php echo (isset($surveySettings['selected_hierarchy_level']) && $surveySettings['selected_hierarchy_level'] == $levelInt) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($levelName); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
-                <button onclick="saveLocationSettings()" class="btn btn-primary btn-sm">
-                    <i class="fas fa-save me-1"></i>Save Location Settings
-                </button>
-            </div>
 
 
   
@@ -1477,6 +1444,80 @@ if (!empty($programStages)) {
         let draggedItem = null;
         let questionGroupings = {}; // Store groupings per stage
 
+        async function loadGroupingsFromDatabase() {
+            const surveyId = <?= json_encode($surveyId) ?>;
+            
+            try {
+                const response = await fetch(`api/question_groupings.php?survey_id=${surveyId}`);
+                const result = await response.json();
+                
+                if (result.success && result.groupings) {
+                    console.log('✅ Loading existing groupings from database');
+                    
+                    // Apply groupings to the UI
+                    Object.keys(result.groupings).forEach(stageId => {
+                        const stageGroups = result.groupings[stageId];
+                        const stageContainer = document.querySelector(`[data-stage-id="${stageId}"]`);
+                        
+                        if (!stageContainer) return;
+                        
+                        const groupingView = stageContainer.querySelector('.stage-grouping-view');
+                        
+                        // Clear existing custom groups (keep only default)
+                        const customGroups = groupingView.querySelectorAll('.custom-group');
+                        customGroups.forEach(group => group.remove());
+                        
+                        // Process each group from database
+                        stageGroups.forEach(groupData => {
+                            if (!groupData.isDefault && groupData.groupName !== 'Ungrouped Questions') {
+                                // Create custom group with questions
+                                addGroupToStageFromDB(stageContainer, groupData.groupName, groupData.questions);
+                            }
+                        });
+                    });
+                    
+                    // Reinitialize drag and drop
+                    setTimeout(() => {
+                        initializeDragAndDrop();
+                    }, 200);
+                    
+                } else if (result.success) {
+                    console.log('No existing groupings found in database');
+                }
+            } catch (error) {
+                console.error('Error loading groupings from database:', error);
+            }
+        }
+
+        function addGroupToStageFromDB(stageContainer, groupName, questions) {
+            // Use existing addGroupToStage function then move questions
+            addGroupToStage(stageContainer, groupName);
+            
+            // Find the newly created group
+            const newGroups = stageContainer.querySelectorAll('.custom-group');
+            const newGroup = newGroups[newGroups.length - 1]; // Get the last added group
+            
+            if (newGroup && questions && questions.length > 0) {
+                const groupQuestions = newGroup.querySelector('.group-questions');
+                
+                // Remove placeholder message
+                const placeholder = groupQuestions.querySelector('p');
+                if (placeholder) placeholder.remove();
+                
+                // Move questions to this group
+                questions.forEach(questionData => {
+                    const questionId = questionData.questionId;
+                    const questionItem = document.querySelector(`[data-question-id="${questionId}"]`);
+                    
+                    if (questionItem) {
+                        // Clone the question for grouping view
+                        const questionClone = questionItem.cloneNode(true);
+                        groupQuestions.appendChild(questionClone);
+                    }
+                });
+            }
+        }
+
         function toggleGroupingMode() {
             groupingMode = !groupingMode;
             const groupingModeText = document.getElementById('groupingModeText');
@@ -1491,6 +1532,9 @@ if (!empty($programStages)) {
                 groupingViews.forEach(view => view.style.display = 'block');
                 initializeDragAndDrop();
                 
+                // Load existing groupings from database
+                loadGroupingsFromDatabase();
+                
                 // Populate available questions for all stages
                 setTimeout(() => {
                     const stageContainers = document.querySelectorAll('.stage-container');
@@ -1498,7 +1542,7 @@ if (!empty($programStages)) {
                         const stageId = container.getAttribute('data-stage-id');
                         populateAvailableQuestions(stageId);
                     });
-                }, 100);
+                }, 500);
             } else {
                 groupingModeText.textContent = 'Enable Grouping';
                 groupingInterface.style.display = 'none';
@@ -1700,28 +1744,28 @@ if (!empty($programStages)) {
 
         async function saveGrouping() {
             const stages = document.querySelectorAll('.stage-container');
-            const groupingData = {};
-
+            // Convert grouping data to the format expected by the API
+            const formattedGroupings = {};
+            
             stages.forEach(stage => {
                 const stageId = stage.dataset.stageId;
-                groupingData[stageId] = [];
-
+                formattedGroupings[stageId] = [];
+                
                 const groups = stage.querySelectorAll('.question-group');
-                groups.forEach(group => {
-                    const groupId = group.dataset.groupId;
+                groups.forEach((group, groupIndex) => {
                     const groupTitle = group.querySelector('.group-title').textContent.trim();
-                    const questions = Array.from(group.querySelectorAll('.question-item')).map(item => ({
+                    const isDefault = group.dataset.groupId && group.dataset.groupId.startsWith('default_');
+                    const questions = Array.from(group.querySelectorAll('.question-item')).map((item, questionIndex) => ({
                         questionId: item.dataset.questionId,
-                        questionIndex: item.dataset.questionIndex
+                        questionOrder: questionIndex
                     }));
-
-                    if (questions.length > 0) {
-                        groupingData[stageId].push({
-                            groupId: groupId,
-                            groupTitle: groupTitle,
-                            questions: questions
-                        });
-                    }
+                    
+                    // Always include groups, even if empty
+                    formattedGroupings[stageId].push({
+                        groupName: groupTitle,
+                        isDefault: isDefault,
+                        questions: questions
+                    });
                 });
             });
 
@@ -1729,35 +1773,32 @@ if (!empty($programStages)) {
             const surveyId = <?= json_encode($surveyId) ?>;
             
             try {
-                const response = await fetch('api/groupings.php', {
+                const response = await fetch('api/question_groupings.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         survey_id: surveyId,
-                        groupings: groupingData
+                        groupings: formattedGroupings
                     })
                 });
 
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Also save to localStorage as backup for immediate use
-                    localStorage.setItem(`tracker_grouping_${surveyId}`, JSON.stringify(groupingData));
+                    alert('✅ Grouping saved successfully to database! The form will now display questions in these groups for all users.');
+                    console.log('Saved grouping to database:', formattedGroupings);
                     
-                    alert('Grouping saved successfully! The form will now display questions in these groups for all users.');
-                    console.log('Saved grouping to database:', groupingData);
+                    // Database save successful
                 } else {
-                    alert('Error saving grouping: ' + result.error);
+                    alert('❌ Error saving grouping: ' + result.error);
                     console.error('Database save error:', result.error);
                 }
             } catch (error) {
                 console.error('Error saving grouping to database:', error);
                 
-                // Fallback to localStorage if database save fails
-                localStorage.setItem(`tracker_grouping_${surveyId}`, JSON.stringify(groupingData));
-                alert('Grouping saved locally. Please check your connection and try again to save for all users.');
+                alert('⚠️ Failed to save to database. Please check your connection and try again.');
             }
         }
 
@@ -1784,13 +1825,18 @@ if (!empty($programStages)) {
                     });
                 });
 
-                // Clear saved grouping from both localStorage and database
+                // Clear saved grouping from database
                 const surveyId = <?= json_encode($surveyId) ?>;
-                localStorage.removeItem(`tracker_grouping_${surveyId}`);
                 
                 // Clear from database
-                fetch(`api/groupings.php?survey_id=${surveyId}`, {
-                    method: 'DELETE'
+                fetch(`api/question_groupings.php`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        survey_id: surveyId
+                    })
                 }).then(response => response.json())
                   .then(result => {
                       if (result.success) {
@@ -1806,52 +1852,65 @@ if (!empty($programStages)) {
             }
         }
 
-        // Load saved grouping on page load
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('Tracker preview JavaScript loaded successfully');
+        // Check if existing groupings exist and automatically enable grouping mode
+        async function checkAndLoadExistingGroupings() {
             const surveyId = <?= json_encode($surveyId) ?>;
             
-            // Try to load groupings from database first
             try {
-                const response = await fetch(`api/groupings.php?survey_id=${surveyId}`);
+                const response = await fetch(`api/question_groupings.php?survey_id=${surveyId}`);
                 const result = await response.json();
                 
-                if (result.success && result.data && Object.keys(result.data).length > 0) {
-                    console.log('Loaded grouping from database:', result.data);
-                    // Also save to localStorage for immediate use
-                    localStorage.setItem(`tracker_grouping_${surveyId}`, JSON.stringify(result.data));
-                } else {
-                    // Fallback to localStorage if no database groupings
-                    const savedGrouping = localStorage.getItem(`tracker_grouping_${surveyId}`);
-                    if (savedGrouping) {
-                        try {
-                            const groupingData = JSON.parse(savedGrouping);
-                            console.log('Loaded grouping from localStorage:', groupingData);
-                        } catch (e) {
-                            console.error('Error loading saved grouping from localStorage:', e);
-                        }
+                if (result.success && result.groupings && Object.keys(result.groupings).length > 0) {
+                    // Check if any stage has actual groups (not just empty)
+                    const hasActualGroups = Object.values(result.groupings).some(stageGroups => 
+                        stageGroups && stageGroups.length > 0
+                    );
+                    
+                    if (hasActualGroups) {
+                        console.log('✅ Found existing groupings, automatically enabling grouping mode');
+                        // Automatically enable grouping mode
+                        groupingMode = true;
+                        const groupingModeText = document.getElementById('groupingModeText');
+                        const groupingInterface = document.getElementById('groupingInterface');
+                        const normalViews = document.querySelectorAll('.normal-view');
+                        const groupingViews = document.querySelectorAll('.grouping-view');
+                        
+                        if (groupingModeText) groupingModeText.textContent = 'Disable Grouping';
+                        if (groupingInterface) groupingInterface.style.display = 'block';
+                        normalViews.forEach(view => view.style.display = 'none');
+                        groupingViews.forEach(view => view.style.display = 'block');
+                        
+                        // Initialize drag and drop and load the groupings
+                        initializeDragAndDrop();
+                        await loadGroupingsFromDatabase();
+                        
+                        // Populate available questions
+                        setTimeout(() => {
+                            const stageContainers = document.querySelectorAll('.stage-container');
+                            stageContainers.forEach(container => {
+                                const stageId = container.getAttribute('data-stage-id');
+                                populateAvailableQuestions(stageId);
+                            });
+                        }, 500);
                     }
                 }
             } catch (error) {
-                console.error('Error loading groupings from database:', error);
-                
-                // Fallback to localStorage
-                const savedGrouping = localStorage.getItem(`tracker_grouping_${surveyId}`);
-                if (savedGrouping) {
-                    try {
-                        const groupingData = JSON.parse(savedGrouping);
-                        console.log('Loaded grouping from localStorage (fallback):', groupingData);
-                    } catch (e) {
-                        console.error('Error loading saved grouping from localStorage:', e);
-                    }
-                }
+                console.error('Error checking for existing groupings:', error);
             }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Tracker preview JavaScript loaded successfully');
             
             // Test if the grouping elements exist
             const groupingButton = document.getElementById('groupingModeText');
             const groupingInterface = document.getElementById('groupingInterface');
             console.log('Grouping button found:', !!groupingButton);
             console.log('Grouping interface found:', !!groupingInterface);
+            
+            // Check if there are existing groupings and show them automatically
+            await checkAndLoadExistingGroupings();
         });
 
         // Survey Settings Management Functions
