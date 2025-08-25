@@ -9,66 +9,212 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 require 'connect.php';
 
+// Helper function to check if current user can delete
+function canUserDelete() {
+    if (!isset($_SESSION['admin_role_name']) && !isset($_SESSION['admin_role_id'])) {
+        return false;
+    }
+    
+    // Super users can delete - check by role name or role ID
+    $roleName = $_SESSION['admin_role_name'] ?? '';
+    $roleId = $_SESSION['admin_role_id'] ?? 0;
+    
+    return ($roleName === 'super_user' || $roleName === 'admin' || $roleId == 1);
+}
+
 $submissionId = $_GET['submission_id'] ?? null;
 
 if (!$submissionId) {
     die("Submission ID is required.");
 }
 
-// Get submission details with names instead of IDs
+// First, determine if this is a regular or tracker submission
 $stmt = $pdo->prepare("
-    SELECT 
-        s.id, 
-        s.uid, 
-        s.age,
-        s.sex,
-        s.period,
-        su.name AS service_unit_name,
-        l.name AS location_name,
-        o.name AS ownership_name,
-        surv.name AS survey_name,
-        s.created
-    FROM submission s
-    LEFT JOIN service_unit su ON s.service_unit_id = su.id
-    LEFT JOIN location l ON s.location_id = l.id
-    LEFT JOIN owner o ON s.ownership_id = o.id
-    LEFT JOIN survey surv ON s.survey_id = surv.id
-    WHERE s.id = :submission_id
+    SELECT 'regular' as type, id FROM submission WHERE id = :submission_id
+    UNION
+    SELECT 'tracker' as type, id FROM tracker_submissions WHERE id = :submission_id
 ");
 $stmt->execute(['submission_id' => $submissionId]);
-$submission = $stmt->fetch(PDO::FETCH_ASSOC);
+$submissionType = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$submissionType) {
+    die("Submission not found.");
+}
+
+// Get submission details based on type
+if ($submissionType['type'] === 'regular') {
+    $stmt = $pdo->prepare("
+        SELECT 
+            s.id, 
+            s.uid, 
+            l.name AS location_name,
+            surv.name AS survey_name,
+            s.created,
+            'regular' as submission_type
+        FROM submission s
+        LEFT JOIN location l ON s.location_id = l.id
+        LEFT JOIN survey surv ON s.survey_id = surv.id
+        WHERE s.id = :submission_id
+    ");
+    $stmt->execute(['submission_id' => $submissionId]);
+    $submission = $stmt->fetch(PDO::FETCH_ASSOC);
+} else {
+    // Tracker submission
+    $stmt = $pdo->prepare("
+        SELECT 
+            ts.id, 
+            ts.uid, 
+            ts.selected_facility_name AS location_name,
+            surv.name AS survey_name,
+            ts.submitted_at as created,
+            'tracker' as submission_type,
+            ts.tracked_entity_instance,
+            ts.form_data,
+            ts.dhis2_response
+        FROM tracker_submissions ts
+        LEFT JOIN survey surv ON ts.survey_id = surv.id
+        WHERE ts.id = :submission_id
+    ");
+    $stmt->execute(['submission_id' => $submissionId]);
+    $submission = $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
 if (!$submission) {
     die("Submission not found.");
 }
 
-// Get responses for this submission with question text
-$stmt = $pdo->prepare("
-    SELECT 
-        q.id AS question_id,
-        q.label AS question_text,
-        q.question_type,
-        sr.response_value
-    FROM submission_response sr
-    JOIN question q ON sr.question_id = q.id
-    WHERE sr.submission_id = :submission_id
-    ORDER BY q.id
-");
-$stmt->execute(['submission_id' => $submissionId]);
-$responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Group responses by question (for checkbox questions with multiple responses)
+// Get responses based on submission type
 $groupedResponses = [];
-foreach ($responses as $response) {
-    $questionId = $response['question_id'];
-    if (!isset($groupedResponses[$questionId])) {
-        $groupedResponses[$questionId] = [
-            'question_text' => $response['question_text'],
-            'question_type' => $response['question_type'],
-            'responses' => []
-        ];
+
+if ($submission['submission_type'] === 'regular') {
+    // Regular submission - get responses from submission_response table
+    $stmt = $pdo->prepare("
+        SELECT 
+            q.id AS question_id,
+            q.label AS question_text,
+            q.question_type,
+            sr.response_value
+        FROM submission_response sr
+        JOIN question q ON sr.question_id = q.id
+        WHERE sr.submission_id = :submission_id
+        ORDER BY q.id
+    ");
+    $stmt->execute(['submission_id' => $submissionId]);
+    $responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Group responses by question (for checkbox questions with multiple responses)
+    foreach ($responses as $response) {
+        $questionId = $response['question_id'];
+        if (!isset($groupedResponses[$questionId])) {
+            $groupedResponses[$questionId] = [
+                'question_text' => $response['question_text'],
+                'question_type' => $response['question_type'],
+                'responses' => []
+            ];
+        }
+        $groupedResponses[$questionId]['responses'][] = $response['response_value'];
     }
-    $groupedResponses[$questionId]['responses'][] = $response['response_value'];
+} else {
+    // Tracker submission - parse JSON form_data and get dynamic labels
+    $formData = json_decode($submission['form_data'], true);
+    
+    // Get survey ID to fetch tracker form configuration
+    $surveyId = null;
+    $stmt = $pdo->prepare("SELECT survey_id FROM tracker_submissions WHERE id = ?");
+    $stmt->execute([$submissionId]);
+    $surveyId = $stmt->fetchColumn();
+    
+    // Fetch tracker form field labels from question table
+    $fieldLabels = [];
+    $stageLabels = [];
+    if ($surveyId) {
+        // Get question labels mapped to DHIS2 fields
+        $stmt = $pdo->prepare("
+            SELECT q.label, q.question_type, qm.dhis2_dataelement_id, qm.dhis2_attribute_id, qm.dhis2_program_stage_id
+            FROM question q
+            JOIN survey_question sq ON q.id = sq.question_id
+            LEFT JOIN question_dhis2_mapping qm ON q.id = qm.question_id
+            WHERE sq.survey_id = ? AND (qm.dhis2_dataelement_id IS NOT NULL OR qm.dhis2_attribute_id IS NOT NULL)
+        ");
+        $stmt->execute([$surveyId]);
+        $questionMappings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($questionMappings as $mapping) {
+            if ($mapping['dhis2_dataelement_id']) {
+                $fieldLabels[$mapping['dhis2_dataelement_id']] = $mapping['label'];
+            }
+            if ($mapping['dhis2_attribute_id']) {
+                $fieldLabels[$mapping['dhis2_attribute_id']] = $mapping['label'];
+            }
+            if ($mapping['dhis2_program_stage_id']) {
+                $stageLabels[$mapping['dhis2_program_stage_id']] = $mapping['label'];
+            }
+        }
+    }
+    
+    if ($formData) {
+        // Handle Tracked Entity Attributes with dynamic labels
+        if (isset($formData['trackedEntityAttributes'])) {
+            foreach ($formData['trackedEntityAttributes'] as $attributeId => $value) {
+                $questionLabel = $fieldLabels[$attributeId] ?? "Attribute ($attributeId)";
+                $groupedResponses["tea_$attributeId"] = [
+                    'question_text' => $questionLabel,
+                    'question_type' => 'text',
+                    'responses' => [$value],
+                    'is_attribute' => true
+                ];
+            }
+        }
+        
+        // Handle Program Stage Events (repeatable stages) with dynamic labels
+        if (isset($formData['events'])) {
+            $stageCounter = 1;
+            foreach ($formData['events'] as $eventKey => $eventData) {
+                $programStageId = $eventData['programStage'] ?? '';
+                $stageTitle = $stageLabels[$programStageId] ?? "Program Stage $stageCounter";
+                
+                // Add entry number for repeatable stages
+                if ($stageCounter > 1) {
+                    $stageTitle .= " (Entry $stageCounter)";
+                }
+                
+                // Add stage header with dynamic naming
+                $groupedResponses["stage_header_$eventKey"] = [
+                    'question_text' => $stageTitle,
+                    'question_type' => 'stage_header',
+                    'responses' => [],
+                    'is_stage_header' => true,
+                    'stage_number' => $stageCounter
+                ];
+                
+                // Add data values for this stage with dynamic labels
+                if (isset($eventData['dataValues'])) {
+                    foreach ($eventData['dataValues'] as $dataElementId => $value) {
+                        $questionLabel = $fieldLabels[$dataElementId] ?? "Field ($dataElementId)";
+                        
+                        // Format boolean values for better display
+                        if (is_bool($value)) {
+                            $value = $value ? 'Yes' : 'No';
+                        } elseif ($value === 'true') {
+                            $value = 'Yes';
+                        } elseif ($value === 'false') {
+                            $value = 'No';
+                        }
+                        
+                        $groupedResponses["de_{$eventKey}_$dataElementId"] = [
+                            'question_text' => $questionLabel,
+                            'question_type' => 'text',
+                            'responses' => [$value],
+                            'is_data_element' => true,
+                            'stage_key' => $eventKey,
+                            'stage_number' => $stageCounter
+                        ];
+                    }
+                }
+                $stageCounter++;
+            }
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -78,6 +224,7 @@ foreach ($responses as $response) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Submission</title>
     <!-- Argon Dashboard CSS -->
+      <link rel="icon" type="image/png" href="argon-dashboard-master/assets/img/webhook-icon.png">
     <link href="argon-dashboard-master/assets/css/nucleo-icons.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/nucleo-svg.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
@@ -186,9 +333,11 @@ foreach ($responses as $response) {
                             <button class="btn btn-sm btn-outline-dark mb-0" onclick="goBack()">
                                 <i class="fas fa-arrow-left me-1"></i> Back to List
                             </button>
+                            <?php if (canUserDelete()): ?>
                             <button class="btn btn-sm btn-outline-danger mb-0" onclick="deleteSubmission(<?php echo $submission['id']; ?>)">
                                 <i class="fas fa-trash me-1"></i> Delete
                             </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -217,29 +366,10 @@ foreach ($responses as $response) {
                         <p class="detail-value"><?php echo htmlspecialchars($submission['survey_name']); ?></p>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Age:</span>
-                        <p class="detail-value"><?php echo $submission['age'] ?? 'N/A'; ?></p>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Sex:</span>
-                        <p class="detail-value"><?php echo htmlspecialchars($submission['sex'] ?? 'N/A'); ?></p>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Reporting Period:</span>
-                        <p class="detail-value"><?php echo htmlspecialchars($submission['period'] ?? 'N/A'); ?></p>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Service Unit:</span>
-                        <p class="detail-value"><?php echo htmlspecialchars($submission['service_unit_name'] ?? 'N/A'); ?></p>
-                    </div>
-                    <div class="detail-item">
                         <span class="detail-label">Location:</span>
                         <p class="detail-value"><?php echo htmlspecialchars($submission['location_name'] ?? 'N/A'); ?></p>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Ownership:</span>
-                        <p class="detail-value"><?php echo htmlspecialchars($submission['ownership_name'] ?? 'N/A'); ?></p>
-                    </div>
+                   
                     <div class="detail-item">
                         <span class="detail-label">Date Submitted:</span>
                         <p class="detail-value"><?php echo date('M j, Y g:i A', strtotime($submission['created'])); ?></p>
@@ -294,7 +424,6 @@ foreach ($responses as $response) {
         </div>
     </main>
 
-    <?php include 'components/fixednav.php'; ?>
     
     <!-- Argon Dashboard JS -->
     <script src="argon-dashboard-master/assets/js/core/popper.min.js"></script>
@@ -317,7 +446,13 @@ foreach ($responses as $response) {
 
     function deleteSubmission(submissionId) {
         if (confirm("Are you sure you want to delete this submission? This action cannot be undone.")) {
-            fetch(`delete_submission.php?id=${submissionId}`, { method: 'DELETE' })
+            fetch(`delete_submission.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `id=${submissionId}`
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

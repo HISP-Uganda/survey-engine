@@ -1,8 +1,9 @@
 <?php
 session_start();
-
+require_once 'includes/session_timeout.php';
 // Include the database connection file
 require_once 'connect.php'; // Make sure the path is correct relative to this file
+require_once 'includes/survey_renderer.php';
 
 // Check if $pdo object is available from connect.php
 if (!isset($pdo)) {
@@ -101,8 +102,7 @@ try {
         $surveySettings = $existingSettings;
         // Convert boolean-like strings/integers to actual booleans for JavaScript convenience
         foreach(['show_logo', 'show_flag_bar', 'show_title', 'show_subheading', 'show_submit_button',
-                 'show_rating_instructions', 'show_facility_section', 'show_location_row_general',
-                 'show_location_row_period_age', 'show_ownership_section', 'show_republic_title_share',
+                 'show_rating_instructions', 'show_facility_section', 'show_republic_title_share',
                  'show_ministry_subtitle_share', 'show_qr_instructions_share', 'show_footer_note_share'] as $key) {
             if (isset($surveySettings[$key])) {
                 $surveySettings[$key] = (bool)$surveySettings[$key];
@@ -116,12 +116,11 @@ try {
                 survey_id, logo_path, show_logo, flag_black_color, flag_yellow_color, flag_red_color, show_flag_bar,
                 title_text, show_title, subheading_text, show_subheading, show_submit_button,
                 rating_instruction1_text, rating_instruction2_text, show_rating_instructions,
-                show_facility_section, show_location_row_general, show_location_row_period_age, show_ownership_section,
-                republic_title_text, show_republic_title_share, ministry_subtitle_text, show_ministry_subtitle_share,
+                show_facility_section, republic_title_text, show_republic_title_share, ministry_subtitle_text, show_ministry_subtitle_share,
                 qr_instructions_text, show_qr_instructions_share, footer_note_text, show_footer_note_share,
                 selected_instance_key, selected_hierarchy_level
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         ");
 
@@ -129,8 +128,7 @@ try {
             $surveyId, $defaultLogoPath, $defaultShowLogo, $defaultFlagBlackColor, $defaultFlagYellowColor, $defaultFlagRedColor, $defaultShowFlagBar,
             $defaultTitleText, $defaultShowTitle, $defaultSubheadingText, $defaultShowSubheading, $defaultShowSubmitButton,
             $defaultRatingInstruction1Text, $defaultRatingInstruction2Text, $defaultShowRatingInstructions,
-            $defaultShowFacilitySection, $defaultShowLocationRowGeneral, $defaultShowLocationRowPeriodAge, $defaultShowOwnershipSection,
-            $defaultRepublicTitleText, $defaultShowRepublicTitleShare, $defaultMinistrySubtitleText, $defaultShowMinistrySubtitleShare,
+            $defaultShowFacilitySection, $defaultRepublicTitleText, $defaultShowRepublicTitleShare, $defaultMinistrySubtitleText, $defaultShowMinistrySubtitleShare,
             $defaultQrInstructionsText, $defaultShowQrInstructionsShare, $defaultFooterNoteText, $defaultShowFooterNoteShare,
             $defaultSelectedInstanceKey, $defaultSelectedHierarchyLevel
         ];
@@ -140,8 +138,7 @@ try {
             $surveySettings = $settingsStmt->fetch(PDO::FETCH_ASSOC);
              // Convert boolean-like integers to actual booleans for JavaScript convenience
             foreach(['show_logo', 'show_flag_bar', 'show_title', 'show_subheading', 'show_submit_button',
-                     'show_rating_instructions', 'show_facility_section', 'show_location_row_general',
-                     'show_location_row_period_age', 'show_ownership_section', 'show_republic_title_share',
+                     'show_rating_instructions', 'show_facility_section', 'show_republic_title_share',
                      'show_ministry_subtitle_share', 'show_qr_instructions_share', 'show_footer_note_share'] as $key) {
                 if (isset($surveySettings[$key])) {
                     $surveySettings[$key] = (bool)$surveySettings[$key];
@@ -156,7 +153,7 @@ try {
                 'title_text' => $defaultTitleText, 'show_title' => (bool)$defaultShowTitle,
                 'subheading_text' => $defaultSubheadingText, 'show_subheading' => (bool)$defaultShowSubheading, 'show_submit_button' => (bool)$defaultShowSubmitButton,
                 'rating_instruction1_text' => $defaultRatingInstruction1Text, 'rating_instruction2_text' => $defaultRatingInstruction2Text, 'show_rating_instructions' => (bool)$defaultShowRatingInstructions,
-                'show_facility_section' => (bool)$defaultShowFacilitySection, 'show_location_row_general' => (bool)$defaultShowLocationRowGeneral, 'show_location_row_period_age' => (bool)$defaultShowLocationRowPeriodAge, 'show_ownership_section' => (bool)$defaultShowOwnershipSection,
+                'show_facility_section' => (bool)$defaultShowFacilitySection,
                 'republic_title_text' => $defaultRepublicTitleText, 'show_republic_title_share' => (bool)$defaultShowRepublicTitleShare,
                 'ministry_subtitle_text' => $defaultMinistrySubtitleText, 'show_ministry_subtitle_share' => (bool)$defaultShowMinistrySubtitleShare,
                 'qr_instructions_text' => $defaultQrInstructionsText, 'show_qr_instructions_share' => (bool)$defaultShowQrInstructionsShare,
@@ -175,7 +172,7 @@ try {
         'title_text' => $defaultTitleText, 'show_title' => true,
         'subheading_text' => $defaultSubheadingText, 'show_subheading' => true, 'show_submit_button' => true,
         'rating_instruction1_text' => $defaultRatingInstruction1Text, 'rating_instruction2_text' => $defaultRatingInstruction2Text, 'show_rating_instructions' => true,
-        'show_facility_section' => true, 'show_location_row_general' => true, 'show_location_row_period_age' => true, 'show_ownership_section' => true,
+        'show_facility_section' => true,
         'republic_title_text' => $defaultRepublicTitleText, 'show_republic_title_share' => true,
         'ministry_subtitle_text' => $defaultMinistrySubtitleText, 'show_ministry_subtitle_share' => true,
         'qr_instructions_text' => $defaultQrInstructionsText, 'show_qr_instructions_share' => true,
@@ -183,6 +180,24 @@ try {
         'selected_instance_key' => $defaultSelectedInstanceKey,
         'selected_hierarchy_level' => $defaultSelectedHierarchyLevel,
     ];
+}
+
+// Process dynamic images from survey settings for preview
+$savedDynamicImages = [];
+$savedImageLayout = 'horizontal';
+if (!empty($surveySettings['dynamic_images_data'])) {
+    try {
+        $imagesData = json_decode($surveySettings['dynamic_images_data'], true);
+        if (is_array($imagesData)) {
+            $savedDynamicImages = $imagesData;
+        }
+        error_log("Loaded " . count($savedDynamicImages) . " saved dynamic images for preview");
+    } catch (Exception $e) {
+        error_log("Error parsing saved dynamic images JSON in preview_form.php: " . $e->getMessage());
+    }
+}
+if (!empty($surveySettings['image_layout_type'])) {
+    $savedImageLayout = $surveySettings['image_layout_type'];
 }
 
 // Fetch distinct instance_keys for the dropdown
@@ -242,9 +257,11 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $defaultSurveyTitle; ?></title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../styles.css">
+    <title><?php echo $defaultSurveyTitle; ?> - Preview</title>
+    <link href="argon-dashboard-master/assets/css/nucleo-icons.css" rel="stylesheet">
+    <link href="argon-dashboard-master/assets/css/nucleo-svg.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="argon-dashboard-master/assets/css/argon-dashboard.min.css" rel="stylesheet">
     <style>
         /* Existing CSS from your previous code */
         body {
@@ -516,18 +533,1008 @@ try {
         .searchable-dropdown {
             position: relative;
         }
+        
+        /* Character counter styles */
+        .char-counter {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .char-counter.warning {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        
+        .char-counter.danger {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        /* ===== ENHANCED FORM FIELD STYLES ===== */
+        
+        /* Base form container for all field types */
+        .form-field-container {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .form-field-container:focus-within {
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+        }
+        
+        /* Field labels */
+        .field-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .field-label .required-indicator {
+            color: #dc3545;
+            margin-left: 4px;
+        }
+        
+        /* Base input styling for all text-based inputs */
+        .enhanced-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 16px;
+            line-height: 1.5;
+            background: #fff;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        
+        .enhanced-input:focus {
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+            outline: none;
+        }
+        
+        .enhanced-input:disabled {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        /* Specific input type styling */
+        input[type="text"].enhanced-input,
+        input[type="email"].enhanced-input,
+        input[type="tel"].enhanced-input,
+        input[type="url"].enhanced-input,
+        input[type="number"].enhanced-input,
+        input[type="date"].enhanced-input,
+        input[type="datetime-local"].enhanced-input,
+        input[type="time"].enhanced-input,
+        input[type="month"].enhanced-input,
+        input[type="color"].enhanced-input,
+        input[type="file"].enhanced-input {
+            min-height: 48px;
+        }
+        
+        /* Textarea styling */
+        textarea.enhanced-input {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        /* Select dropdown styling */
+        select.enhanced-input {
+            min-height: 48px;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+        
+        /* Radio and checkbox group containers */
+        .radio-checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .radio-checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-height: 48px;
+        }
+        
+        .radio-checkbox-item:hover {
+            background: #e3f2fd;
+            border-color: #1976d2;
+        }
+        
+        .radio-checkbox-item input[type="radio"],
+        .radio-checkbox-item input[type="checkbox"] {
+            margin: 0 12px 0 0;
+            transform: scale(1.2);
+            accent-color: #1976d2;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .radio-checkbox-item label {
+            margin: 0;
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        
+        .radio-checkbox-item input:checked + label {
+            color: #1976d2;
+            font-weight: 600;
+        }
+        
+        /* Rating scales */
+        .rating-scale-container {
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+        
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .scale-options {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .scale-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 40px;
+            padding: 8px;
+            cursor: pointer;
+        }
+        
+        .scale-option input[type="radio"] {
+            margin: 0 0 8px 0;
+            transform: scale(1.3);
+            accent-color: #1976d2;
+        }
+        
+        .scale-option span {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        /* Star rating enhanced */
+        .star-rating-enhanced {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+        
+        .star-enhanced {
+            font-size: 28px;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        
+        .star-enhanced:hover,
+        .star-enhanced.selected {
+            color: #ffd700;
+            transform: scale(1.1);
+        }
+        
+        .star-enhanced:focus {
+            outline: 2px solid #1976d2;
+            outline-offset: 2px;
+        }
+        
+        /* Input groups for currency, percentage */
+        .input-group-enhanced {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+        }
+        
+        .input-group-enhanced .enhanced-input {
+            border-radius: 6px 0 0 6px;
+            border-right: none;
+        }
+        
+        .input-group-text-enhanced {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: #e9ecef;
+            border: 2px solid #e9ecef;
+            border-left: none;
+            border-radius: 0 6px 6px 0;
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+        }
+        
+        .input-group-enhanced:focus-within .input-group-text-enhanced {
+            border-color: #1976d2;
+        }
+        
+        /* File upload styling */
+        input[type="file"].enhanced-input {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        
+        input[type="file"].enhanced-input::-webkit-file-upload-button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin-right: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        input[type="file"].enhanced-input::-webkit-file-upload-button:hover {
+            background: #1565c0;
+        }
+        
+        /* Color input styling */
+        input[type="color"].enhanced-input {
+            width: 80px;
+            height: 48px;
+            padding: 4px;
+            cursor: pointer;
+        }
+        
+        /* Signature pad */
+        .signature-container {
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            padding: 16px;
+            background: #fff;
+            margin-top: 8px;
+        }
+        
+        .signature-canvas {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: #fff;
+            width: 100%;
+            max-width: 500px;
+            height: 200px;
+        }
+        
+        .signature-controls {
+            margin-top: 12px;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .signature-clear-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s ease;
+        }
+        
+        .signature-clear-btn:hover {
+            background: #5a6268;
+        }
+        
+        /* Coordinates input */
+        .coordinates-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .coordinates-btn {
+            grid-column: 1 / -1;
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 8px;
+            transition: background 0.2s ease;
+        }
+        
+        .coordinates-btn:hover {
+            background: #1565c0;
+        }
+        
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            .radio-checkbox-group {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .radio-checkbox-item {
+                padding: 16px;
+                min-height: 52px;
+            }
+            
+            .scale-options {
+                gap: 4px;
+            }
+            
+            .scale-option {
+                min-width: 36px;
+                padding: 6px;
+            }
+            
+            .star-enhanced {
+                font-size: 24px;
+                padding: 6px;
+            }
+            
+            .coordinates-container {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .form-field-container {
+                padding: 12px;
+                margin-bottom: 16px;
+            }
+            
+            .enhanced-input {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 14px 16px;
+            }
+            
+            .radio-checkbox-item {
+                padding: 14px;
+                min-height: 56px;
+            }
+            
+            .scale-options {
+                gap: 2px;
+            }
+            
+            .scale-option {
+                min-width: 32px;
+                padding: 4px;
+            }
+            
+            .star-enhanced {
+                font-size: 20px;
+                padding: 4px;
+            }
+        }
+
+        /* Toast notification styles */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 10000;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateX(300px);
+            transition: all 0.3s ease;
+            font-size: 14px;
+            min-width: 250px;
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast-notification.error {
+            background: #dc3545;
+        }
+
+        /* Improved styling for left sidebar controls */
+        .card-body input[type="text"],
+        .card-body textarea,
+        .card-body input[type="color"],
+        .card-body input[type="file"],
+        .card-body select {
+            width: 100% !important;
+            padding: 10px 12px !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            color: #495057 !important;
+            background-color: #fff !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 6px !important;
+            margin-bottom: 12px !important;
+            box-sizing: border-box;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .card-body input[type="text"]:focus,
+        .card-body textarea:focus,
+        .card-body select:focus {
+            border-color: #80bdff !important;
+            outline: 0 !important;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+        }
+
+        .card-body textarea {
+            min-height: 80px !important;
+            resize: vertical;
+        }
+
+        .card-body label {
+            font-weight: 600 !important;
+            color: #344767 !important;
+            font-size: 14px !important;
+            margin-bottom: 6px !important;
+            display: block;
+        }
+
+        .card-body .checkbox-group label {
+            font-weight: 500 !important;
+            font-size: 14px !important;
+            display: flex !important;
+            align-items: center;
+        }
+
+        .card-body .checkbox-group input[type="checkbox"] {
+            margin-right: 8px !important;
+            width: auto !important;
+            margin-bottom: 0 !important;
+        }
+
+        .card-body .char-counter {
+            font-size: 12px !important;
+            color: #6c757d !important;
+            margin-top: -8px !important;
+            margin-bottom: 12px !important;
+        }
+
+        .card-body .setting-group {
+            margin-bottom: 20px !important;
+        }
+
+        .card-body .filter-group {
+            margin-bottom: 15px !important;
+        }
+
+        .card-body .accordion-header {
+            background-color: #f8f9fa !important;
+            border: 1px solid #dee2e6 !important;
+            color: #495057 !important;
+            font-weight: 600 !important;
+            padding: 12px 15px !important;
+            font-size: 14px !important;
+        }
+
+        .card-body .accordion-content {
+            border: 1px solid #dee2e6 !important;
+            border-top: none !important;
+            padding: 15px !important;
+            background-color: #fff !important;
+        }
+
+        /* Prevent horizontal scrolling and ensure static layout */
+        body {
+            overflow-x: hidden !important;
+        }
+        
+        .container-fluid {
+            overflow-x: hidden !important;
+            max-width: 100% !important;
+        }
+        
+        .row {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            max-width: 100% !important;
+        }
+        
+        .col-lg-5, .col-lg-7 {
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+            max-width: 100% !important;
+        }
+        
+        .card {
+            max-width: 100% !important;
+            word-wrap: break-word !important;
+        }
+        
+        .card-body {
+            overflow-x: hidden !important;
+        }
+        
+        /* Ensure form content doesn't overflow */
+        .preview-container {
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+        }
+        
+        /* Align content with navbar - use default Argon positioning */
+        .main-content {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        
+        /* Only affect the main content container, not navbar */
+        .main-content .container-fluid {
+            padding-left: 16rem !important;
+            padding-right: 1rem !important;
+            transition: padding-left 0.3s ease;
+        }
+        
+        /* Responsive behavior for sidebar collapse */
+        .g-sidenav-hidden .main-content .container-fluid {
+            padding-left: 1rem !important;
+        }
+        
+        /* Ensure smooth transitions for sidebar collapse */
+        body.g-sidenav-show .main-content {
+            transition: margin-left 0.3s ease;
+        }
+        
+        body.g-sidenav-hidden .main-content {
+            transition: margin-left 0.3s ease;
+        }
+        
+        @media (max-width: 1199.98px) {
+            .main-content .container-fluid {
+                padding-left: 1rem !important;
+            }
+        }
+        
+        .card {
+            border: 1px solid #e9ecef !important;
+            border-radius: 10px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            margin-left: 1rem !important;
+            margin-right: 1rem !important;
+        }
+        
+        /* Let Argon handle the sidebar positioning naturally */
+        
+        /* Ensure preview area doesn't overflow */
+        #previewImagesDisplay {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        
+        /* Handle wide content gracefully */
+        * {
+            box-sizing: border-box !important;
+        }
+        
+        .form-control, textarea, input, select {
+            max-width: 100% !important;
+        }
+        
+        /* Dynamic Images Preview Styles */
+        .preview-images-container {
+            background: #f8f9fa;
+        }
+        
+        #previewImagesDisplay, #configPreviewImages {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 60px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9f9f9;
+            visibility: visible !important;
+            width: 100%;
+        }
+        
+        #previewImagesDisplay:empty::before {
+            content: "Upload images to see them here";
+            color: #999;
+            font-style: italic;
+        }
+        
+        #configPreviewImages:empty::before {
+            content: "Upload images to see them here";
+            color: #999;
+            font-style: italic;
+        }
+        
+        #previewImagesDisplay.horizontal, #configPreviewImages.horizontal {
+            flex-direction: row;
+        }
+        
+        #previewImagesDisplay.vertical, #configPreviewImages.vertical {
+            flex-direction: column;
+        }
+        
+        #previewImagesDisplay.center, #configPreviewImages.center {
+            justify-content: center;
+        }
+        
+        #previewImagesDisplay.left-right, #configPreviewImages.left-right {
+            justify-content: space-between;
+        }
+        
+        .preview-image-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dynamic-image-field {
+            background: #fafafa;
+        }
+        
+        .dynamic-image-field h5 {
+            font-size: 14px;
+            font-weight: 600;
+        }
     </style>
 </head>
-<body>
-    <div class="main-content">
-        <div class="container preview-container" id="form-content">
+<body class="g-sidenav-show bg-gray-100">
+    <?php include 'components/aside.php'; ?>
+    
+    <main class="main-content position-relative border-radius-lg">
+        <?php include 'components/navbar.php'; ?>
+        
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-cog me-2"></i>Preview Settings</h4>
+                        </div>
+                        <div class="card-body" style="max-height: 80vh; overflow-y: auto;">
+                            <div class="accordion-item">
+                                <button class="accordion-header">Branding & Appearance <i class="fas fa-chevron-down"></i></button>
+                                <div class="accordion-content">
+                                    
+                                    <!-- Dynamic Images Section -->
+                                    <div class="setting-group">
+                                        <h4 style="margin-bottom: 15px; color: #2c3e50;">
+                                            <i class="fas fa-images" style="margin-right: 8px;"></i>
+                                            Dynamic Images
+                                        </h4>
+                                        
+                                        <div class="checkbox-group mb-3">
+                                            <label>
+                                                <input type="checkbox" id="toggle-dynamic-images" checked> Show Dynamic Images
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="imageCount" class="form-label">Number of Images</label>
+                                            <select class="form-control" id="imageCount" onchange="updateImageFields()">
+                                                <option value="0" selected>No Images</option>
+                                                <option value="1">1 Image</option>
+                                                <option value="2">2 Images</option>
+                                                <option value="3">3 Images</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="imageLayout" class="form-label">Image Layout</label>
+                                            <select class="form-control" id="imageLayout">
+                                                <option value="horizontal">Horizontal (side by side)</option>
+                                                <option value="vertical">Vertical (stacked)</option>
+                                                <option value="center">Center aligned</option>
+                                                <option value="left-right">Left and Right aligned</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Dynamic Image Fields -->
+                                        <div id="imageFieldsContainer">
+                                            <!-- Will be populated by JavaScript -->
+                                        </div>
+                                        
+                                        <!-- Preview Images Container -->
+                                        <div class="preview-images-container" id="previewImagesContainer" style="margin-top: 20px; padding: 15px; border: 2px dashed #ddd; border-radius: 8px; text-align: center; display: none;">
+                                            <h5 style="color: #666; margin-bottom: 10px;">Image Preview</h5>
+                                            <div id="configPreviewImages" class="horizontal">
+                                                <!-- Preview images will appear here -->
+                                            </div>
+                                        </div>
+                                    </div>
 
-            <div class="header-section" id="logo-section">
-                <div class="logo-container">
-                  <img id="moh-logo" src="<?php echo htmlspecialchars($surveySettings['logo_path'] ?? ''); ?>" alt="Ministry of Health Logo">
+                                    <div class="setting-group">
+                                        <h4>Flag Bar Colors:</h4>
+                                        <label for="flag-black-color-picker">First Strip Color:</label>
+                                        <input type="color" id="flag-black-color-picker" value="#000000">
+                                        <label for="flag-yellow-color-picker">Second Strip Color:</label>
+                                        <input type="color" id="flag-yellow-color-picker" value="#FCD116">
+                                        <label for="flag-red-color-picker">Third Strip Color:</label>
+                                        <input type="color" id="flag-red-color-picker" value="#D21034">
+                                        <div class="checkbox-group">
+                                            <label>
+                                               <input type="checkbox" id="toggle-flag-bar" <?php echo $surveySettings['show_flag_bar'] ? 'checked' : ''; ?>> Show Color Bar
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <button class="accordion-header">Survey Content <i class="fas fa-chevron-down"></i></button>
+                                <div class="accordion-content">
+                                    <div class="setting-group">
+                                        <label for="edit-title">Survey Title:</label>
+                                        <input type="text" id="edit-title" value="<?php echo htmlspecialchars($surveySettings['title_text'] ?? ''); ?>">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-title" <?php echo $surveySettings['show_title'] ? 'checked' : ''; ?>> Show Title
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="setting-group">
+                                        <label for="edit-subheading">Survey Subheading:</label>
+                                        <textarea id="edit-subheading" rows="4" maxlength="1000"><?php echo htmlspecialchars($surveySettings['subheading_text'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.'); ?></textarea>
+                                        <div class="char-counter">
+                                            <span id="subheading-counter">0</span>/1000 characters
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-subheading" <?php echo $surveySettings['show_subheading'] ? 'checked' : ''; ?>> Show Subheading
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="setting-group" id="rating-instructions-control-group">
+                                        <label for="edit-rating-instruction-1">Rating Instruction 1:</label>
+                                        <textarea id="edit-rating-instruction-1" rows="2" maxlength="500"><?php echo htmlspecialchars($translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.'); ?></textarea>
+                                        <div class="char-counter">
+                                            <span id="rating1-counter">0</span>/500 characters
+                                        </div>
+                                        <label for="edit-rating-instruction-2">Rating Instruction 2:</label>
+                                        <textarea id="edit-rating-instruction-2" rows="2" maxlength="500"><?php echo htmlspecialchars($translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent'); ?></textarea>
+                                        <div class="char-counter">
+                                            <span id="rating2-counter">0</span>/500 characters
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-rating-instructions" <?php echo $surveySettings['show_rating_instructions'] ? 'checked' : ''; ?>> Show Rating Instructions
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <button class="accordion-header">Form Sections Visibility <i class="fas fa-chevron-down"></i></button>
+                                <div class="accordion-content">
+                                    <div class="setting-group" id="toggle-facility-section-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-facility-section" <?php echo $surveySettings['show_facility_section'] ? 'checked' : ''; ?>> Show Facility Section
+                                            </label>
+                                        </div>
+                                        <div class="filter-group" id="instance-key-filter-group">
+                                            <label for="control-instance-key-select">Filter by Instance:</label>
+                                            <select id="control-instance-key-select">
+                                                <option value="">All Instances</option>
+                                                <?php foreach ($instanceKeys as $key): ?>
+                                                    <option value="<?php echo htmlspecialchars($key); ?>" <?php echo (isset($surveySettings['selected_instance_key']) && $surveySettings['selected_instance_key'] == $key) ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($key); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group" id="hierarchy-level-filter-group">
+                                            <label for="control-hierarchy-level-select">Filter by Level:</label>
+                                            <select id="control-hierarchy-level-select">
+                                                <option value="">All Levels</option>
+                                                <?php foreach ($hierarchyLevels as $levelInt => $levelName): ?>
+                                                    <option value="<?php echo htmlspecialchars($levelInt); ?>" <?php echo (isset($surveySettings['selected_hierarchy_level']) && $surveySettings['selected_hierarchy_level'] == $levelInt) ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($levelName); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="setting-group" id="toggle-submit-button-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-submit-button" <?php echo $surveySettings['show_submit_button'] ? 'checked' : ''; ?>> Show Submit Button
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <button class="accordion-header">Share Page Settings <i class="fas fa-chevron-down"></i></button>
+                                <div class="accordion-content">
+                                    <div class="setting-group">
+                                        <label for="edit-logo-url">Logo URL (for Share Page):</label>
+                                        <input type="text" id="edit-logo-url" value="<?php echo htmlspecialchars($surveySettings['logo_path'] ?? 'asets/asets/img/loog.jpg'); ?>" readonly>
+                                        <div class="checkbox-group">
+                                            <label>
+                                               <input type="checkbox" id="toggle-logo-url" <?php echo $surveySettings['show_logo'] ? 'checked' : ''; ?>> Show Logo on Share Page
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label for="edit-republic-title-share">Republic Title (Share Page):</label>
+                                        <input type="text" id="edit-republic-title-share" value="<?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? 'THE REPUBLIC OF UGANDA'); ?>">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-republic-title-share" <?php echo $surveySettings['show_republic_title_share'] ? 'checked' : ''; ?>> Show Republic Title
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label for="edit-ministry-subtitle-share">Ministry Subtitle (Share Page):</label>
+                                        <input type="text" id="edit-ministry-subtitle-share" value="<?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? 'MINISTRY OF HEALTH'); ?>">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-ministry-subtitle-share" <?php echo $surveySettings['show_ministry_subtitle_share'] ? 'checked' : ''; ?>> Show Ministry Subtitle
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label for="edit-qr-instructions-share">QR Instructions Text (Share Page):</label>
+                                        <textarea id="edit-qr-instructions-share" rows="3" maxlength="500"><?php echo htmlspecialchars($surveySettings['qr_instructions_text'] ?? ''); ?></textarea>
+                                        <div class="char-counter">
+                                            <span id="qr-counter">0</span>/500 characters
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-qr-instructions-share" <?php echo $surveySettings['show_qr_instructions_share'] ? 'checked' : ''; ?>> Show QR Instructions
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label for="edit-footer-note-share">Footer Note Text (Share Page):</label>
+                                        <textarea id="edit-footer-note-share" rows="2" maxlength="500"><?php echo htmlspecialchars($surveySettings['footer_note_text'] ?? 'Thank you for helping us improve our services.'); ?></textarea>
+                                        <div class="char-counter">
+                                            <span id="footer-counter">0</span>/500 characters
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-footer-note-share" <?php echo $surveySettings['show_footer_note_share'] ? 'checked' : ''; ?>> Show Footer Note
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <button class="accordion-header">Question Numbering <i class="fas fa-chevron-down"></i></button>
+                                <div class="accordion-content">
+                                    <div class="setting-group">
+                                        <div class="checkbox-group">
+                                            <label>
+                                                <input type="checkbox" id="toggle-numbering" <?php echo ($surveySettings['show_numbering'] ?? true) ? 'checked' : ''; ?>> Show Question Numbers
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="setting-group">
+                                        <label for="numbering-style">Numbering Style:</label>
+                                        <select id="numbering-style">
+                                            <option value="numeric" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'numeric' ? 'selected' : ''; ?>>Numeric (1, 2, 3...)</option>
+                                            <option value="alphabetic_lower" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'alphabetic_lower' ? 'selected' : ''; ?>>Lowercase Letters (a, b, c...)</option>
+                                            <option value="alphabetic_upper" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'alphabetic_upper' ? 'selected' : ''; ?>>Uppercase Letters (A, B, C...)</option>
+                                            <option value="roman_lower" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'roman_lower' ? 'selected' : ''; ?>>Lowercase Roman (i, ii, iii...)</option>
+                                            <option value="roman_upper" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'roman_upper' ? 'selected' : ''; ?>>Uppercase Roman (I, II, III...)</option>
+                                            <option value="none" <?php echo ($surveySettings['numbering_style'] ?? 'numeric') == 'none' ? 'selected' : ''; ?>>No Numbering</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <button onclick="window.savePreviewSettings()" class="btn btn-success w-100 btn-sm">
+                                        <i class="fas fa-save me-1"></i>Save Settings
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button onclick="window.resetPreviewSettings()" class="btn btn-secondary w-100 btn-sm">
+                                        <i class="fas fa-undo me-1"></i>Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-tools me-2"></i>Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="../../s/<?= $surveyId ?>" class="btn btn-primary" target="_blank">
+                                    <i class="fas fa-external-link-alt me-2"></i>Open Form
+                                </a>
+                                <button onclick="copyShareLink()" class="btn btn-info">
+                                    <i class="fas fa-link me-2"></i>Copy Share Link
+                                </button>
+                                <a href="../../share/s/<?= $surveyId ?>" class="btn btn-success">
+                                    <i class="fas fa-share me-2"></i>Share Page
+                                </a>
+                                <hr class="my-2">
+                                <a href="survey.php" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Surveys
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-             <div class="title hidden-element" id="republic-title"><?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? ''); ?></div>
-            <div class="subtitle hidden-element" id="ministry-subtitle"><?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? ''); ?></div>
+                
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0"><?php echo htmlspecialchars($defaultSurveyTitle); ?> - Preview</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="container preview-container" id="form-content">
+            <div class="header-section" id="logo-section">
+                <!-- Dynamic Images Preview Section -->
+                <div class="dynamic-images-container horizontal" id="previewImagesDisplay" style="margin: 20px 0;">
+                    <!-- Images will be displayed here via JavaScript -->
+                </div>
+                <div class="title hidden-element" id="republic-title"><?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? ''); ?></div>
+                <div class="subtitle hidden-element" id="ministry-subtitle"><?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? ''); ?></div>
             </div>
 
             <div class="flag-bar" id="flag-bar">
@@ -559,548 +1566,215 @@ try {
             </div>
 
             <?php if ($survey['type'] === 'local'): ?>
-                <div class="location-row" id="location-row-general">
-                    <div class="form-group">
-                        <label for="serviceUnit" data-translate="service_unit"><?php echo $translations['service_unit'] ?? 'Service Unit'; ?>:</label>
-                        <select id="serviceUnit" name="serviceUnit" required>
-                            <option value="">none selected</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="sex" data-translate="sex"><?php echo $translations['sex'] ?? 'Sex'; ?>:</label>
-                        <select id="sex" name="sex">
-                            <option value="" disabled selected>none selected</option>
-                            <option value="Male" data-translate="male"><?php echo $translations['male'] ?? 'Male'; ?></option>
-                            <option value="Female" data-translate="female"><?php echo $translations['female'] ?? 'Female'; ?></option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="location-row" id="location-row-period-age">
-                    <div class="reporting-period-container">
-                        <label for="reporting_period" data-translate="reporting_period"><?php echo $translations['reporting_period'] ?? 'Reporting Period'; ?></label>
-                        <input
-                            type="date"
-                            id="reporting_period"
-                            name="reporting_period"
-                            placeholder="Select Reporting Period"
-                            required
-                            min="2010-01-01"
-                            max="2030-12-31"
-                        >
-                        <span class="placeholder-text">Click to select reporting period</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="age" data-translate="age"><?php echo $translations['age'] ?? 'Age'; ?>:</label>
-                        <input type="number" id="age" name="age" min="10" max="99">
-                    </div>
-                </div>
-
-                <div class="radio-group" id="ownership-section">
-                   <label class="radio-label" data-translate="ownership"><?php echo $translations['ownership'] ?? 'Ownership'; ?></label>
-                    <div class="radio-options" id="ownership-options">
-                        </div>
-                </div>
-
             <p id="rating-instruction-1" data-translate="rating_instruction"><?php echo htmlspecialchars($surveySettings['rating_instruction1_text'] ?? ''); ?></p>
-          <p id="rating-instruction-2" data-translate="rating_scale" style="color: red; font-size: 14px; font-style: italic;"><?php echo htmlspecialchars($surveySettings['rating_instruction2_text'] ?? ''); ?></p>
+          <p id="rating-instruction-2" data-translate="rating_scale" style="color: red; font-size: 14px; font-style: italic."><?php echo htmlspecialchars($surveySettings['rating_instruction2_text'] ?? ''); ?></p>
 
             <?php endif; ?>
 
-            <?php foreach ($questionsArray as $index => $question): ?>
-                <div class="form-group">
-                    <div class="radio-label">
-                        <span class="question-number"><?php echo ($index + 1) . '.'; ?></span>
-                        <?php echo htmlspecialchars($question['label']); ?>
-                    </div>
-
-                    <?php if ($question['question_type'] == 'radio'): ?>
-                        <div class="radio-options" style="display: flex; flex-wrap: wrap; gap: 12px;">
-                            <?php foreach ($question['options'] as $option): ?>
-                                <div class="radio-option" style="flex: 1 1 220px; min-width: 180px;">
-                                    <input type="radio"
-                                           id="option_<?php echo $question['id']; ?>_<?php echo $option['id']; ?>"
-                                           name="question_<?php echo $question['id']; ?>"
-                                           value="<?php echo htmlspecialchars($option['option_value']); ?>">
-                                    <label for="option_<?php echo $question['id']; ?>_<?php echo $option['id']; ?>">
-                                        <?php echo htmlspecialchars($option['option_value']); ?>
-                                    </label>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php elseif ($question['question_type'] == 'checkbox'): ?>
-                        <div class="checkbox-options" style="display: flex; flex-wrap: wrap; gap: 12px;">
-                            <?php foreach ($question['options'] as $option): ?>
-                                <div class="checkbox-option" style="flex: 1 1 220px; min-width: 180px;">
-                                    <input type="checkbox"
-                                           id="option_<?php echo $question['id']; ?>_<?php echo $option['id']; ?>"
-                                           name="question_<?php echo $question['id']; ?>[]"
-                                           value="<?php echo htmlspecialchars($option['option_value']); ?>">
-                                    <label for="option_<?php echo $question['id']; ?>_<?php echo $option['id']; ?>">
-                                        <?php echo htmlspecialchars($option['option_value']); ?>
-                                    </label>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php elseif ($question['question_type'] == 'select'): ?>
-                        <select class="form-control" name="question_<?php echo $question['id']; ?>">
-                            <option value="">Select an option</option>
-                            <?php foreach ($question['options'] as $option): ?>
-                                <option value="<?php echo htmlspecialchars($option['option_value']); ?>">
-                                    <?php echo htmlspecialchars($option['option_value']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    <?php elseif ($question['question_type'] == 'text'): ?>
-                        <input type="text"
-                               class="form-control"
-                               name="question_<?php echo $question['id']; ?>">
-                    <?php elseif ($question['question_type'] == 'textarea'): ?>
-                        <textarea class="form-control"
-                                  name="question_<?php echo $question['id']; ?>"
-                                  rows="3"></textarea>
-
-
-                 <?php elseif ($question['question_type'] == 'rating'): ?>
-    <div class="star-rating"
-         data-question-id="<?php echo $question['id']; ?>"
-         data-required="<?php echo $question['is_required'] ? 'true' : 'false'; ?>">
-        <?php
-        $maxStars = count($question['options']);
-        for ($i = 1; $i <= $maxStars; $i++): ?>
-            <div class="star-container">
-                <div class="star-number"><?php echo $i; ?></div>
-                <span class="star"
-                      data-value="<?php echo $i; ?>"
-                      aria-label="<?php echo $i; ?> star"
-                      tabindex="0">&#9733;</span>
-            </div>
-        <?php endfor; ?>
-        <input type="hidden"
-               name="question_<?php echo $question['id']; ?>"
-               id="star-rating-input-<?php echo $question['id']; ?>"
-               value=""
-               <?php echo $question['is_required'] ? 'required' : ''; ?>>
-    </div>
-<?php endif; ?>
-
-                </div>
-            <?php endforeach; ?>
+            <?php 
+            // Use the new survey renderer with skip logic support
+            echo renderSurveyForm($surveyId, $pdo, [
+                'form_id' => 'survey_preview_form',
+                'form_class' => 'survey-form preview-form',
+                'include_skip_logic' => true,
+                'show_required_indicator' => true
+            ]);
+            ?>
 
             <button type="submit" id="submit-button-preview">Submit</button>
         </div>
-
-        <div class="control-panel">
-            <h3>Preview Settings</h3>
-
-            <div class="accordion-item">
-                <button class="accordion-header">Branding & Appearance <i class="fas fa-chevron-down"></i></button>
-                <div class="accordion-content">
-                    <div class="setting-group">
-                        <label for="logo-upload">Upload Logo:</label>
-                        <input type="file" id="logo-upload" accept="image/*">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-logo" <?php echo $surveySettings['show_logo'] ? 'checked' : ''; ?>> Show Logo
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <h4>Flag Bar Colors:</h4>
-                        <label for="flag-black-color-picker">First Strip Color:</label>
-                        <input type="color" id="flag-black-color-picker" value="#000000">
-                        <label for="flag-yellow-color-picker">Second Strip Color:</label>
-                        <input type="color" id="flag-yellow-color-picker" value="#FCD116">
-                        <label for="flag-red-color-picker">Third Strip Color:</label>
-                        <input type="color" id="flag-red-color-picker" value="#D21034">
-                        <div class="checkbox-group">
-                            <label>
-                               <input type="checkbox" id="toggle-flag-bar" <?php echo $surveySettings['show_flag_bar'] ? 'checked' : ''; ?>> Show Color Bar
-                            </label>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="accordion-item">
-                <button class="accordion-header">Survey Content <i class="fas fa-chevron-down"></i></button>
-                <div class="accordion-content">
-
-                          <div class="setting-group">
-                            <label for="edit-title">Survey Title:</label><input type="text" id="edit-title" value="<?php echo htmlspecialchars($surveySettings['title_text'] ?? ''); ?>">
-                            <div class="checkbox-group">
-                                <label>
-                                    <input type="checkbox" id="toggle-title" <?php echo $surveySettings['show_title'] ? 'checked' : ''; ?>> Show Title
-                                </label>
-                            </div>
-                        </div>
-
-                    <div class="setting-group">
-                        <label for="edit-subheading">Survey Subheading:</label>
-                        <textarea id="edit-subheading" rows="4"><?php echo htmlspecialchars($surveySettings['subheading_text'] ?? 'This tool is used to obtain clients\' feedback about their experience with the services and promote quality improvement, accountability, and transparency within the healthcare system.'); ?></textarea>
-
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-subheading" <?php echo $surveySettings['show_subheading'] ? 'checked' : ''; ?>> Show Subheading
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="setting-group" id="rating-instructions-control-group">
-                        <label for="edit-rating-instruction-1">Rating Instruction 1:</label>
-                        <textarea id="edit-rating-instruction-1" rows="2"><?php echo htmlspecialchars($translations['rating_instruction'] ?? '1. Please rate each of the following parameters according to your experience today on a scale of 1 to 4.'); ?></textarea>
-                        <label for="edit-rating-instruction-2">Rating Instruction 2:</label>
-                        <textarea id="edit-rating-instruction-2" rows="2"><?php echo htmlspecialchars($translations['rating_scale'] ?? 'where \'0\' means Poor, \'1\' Fair, \'2\' Good and \'3\' Excellent'); ?></textarea>
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-rating-instructions" <?php echo $surveySettings['show_rating_instructions'] ? 'checked' : ''; ?>> Show Rating Instructions
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item" id="form-sections-accordion-item">
-                <button class="accordion-header">Form Sections Visibility <i class="fas fa-chevron-down"></i></button>
-                <div class="accordion-content">
-                    <div class="setting-group" id="toggle-facility-section-group">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-facility-section" <?php echo $surveySettings['show_facility_section'] ? 'checked' : ''; ?>> Show Facility Section
-                            </label>
-                        </div>
-                        <div class="filter-group" id="instance-key-filter-group">
-                            <label for="control-instance-key-select">Filter by Instance:</label>
-                            <select id="control-instance-key-select">
-                                <option value="">All Instances</option>
-                                <?php foreach ($instanceKeys as $key): ?>
-                                    <option value="<?php echo htmlspecialchars($key); ?>" <?php echo (isset($surveySettings['selected_instance_key']) && $surveySettings['selected_instance_key'] == $key) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($key); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="filter-group" id="hierarchy-level-filter-group">
-                            <label for="control-hierarchy-level-select">Filter by Level:</label>
-                            <select id="control-hierarchy-level-select">
-                                <option value="">All Levels</option>
-                                <?php foreach ($hierarchyLevels as $levelInt => $levelName): ?>
-                                    <option value="<?php echo htmlspecialchars($levelInt); ?>" <?php echo (isset($surveySettings['selected_hierarchy_level']) && $surveySettings['selected_hierarchy_level'] == $levelInt) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($levelName); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        </div>
-
-                    <div class="setting-group" id="toggle-location-row-general-group">
-                        <div class="checkbox-group">
-                            <label>
-                               <input type="checkbox" id="toggle-location-row-general" <?php echo $surveySettings['show_location_row_general'] ? 'checked' : ''; ?>> Show Service Unit/Sex
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="setting-group" id="toggle-location-row-period-age-group">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-location-row-period-age" <?php echo $surveySettings['show_location_row_period_age'] ? 'checked' : ''; ?>> Show Reporting Period/Age
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="setting-group" id="toggle-ownership-section-group">
-                        <div class="checkbox-group">
-                            <label>
-                               <input type="checkbox" id="toggle-ownership-section" <?php echo $surveySettings['show_ownership_section'] ? 'checked' : ''; ?>> Show Ownership
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="setting-group" id="toggle-submit-button-group">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-submit-button" <?php echo $surveySettings['show_submit_button'] ? 'checked' : ''; ?>> Show Submit Button
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item">
-                <button class="accordion-header">Share Page Settings <i class="fas fa-chevron-down"></i></button>
-                <div class="accordion-content">
-                    <div class="setting-group">
-                        <label for="edit-logo-url">Logo URL (for Share Page):</label>
-                      <input type="text" id="edit-logo-url" value="<?php echo htmlspecialchars($surveySettings['logo_path'] ?? 'asets/asets/img/loog.jpg'); ?>" readonly>
-                                           <div class="checkbox-group">
-                            <label>
-                               <input type="checkbox" id="toggle-logo-url" <?php echo $surveySettings['show_logo'] ? 'checked' : ''; ?>> Show Logo on Share Page
-                            </label>
-                        </div>
-                    </div>
-                    <div class="setting-group">
-                        <label for="edit-republic-title-share">Republic Title (Share Page):</label>
-                       <input type="text" id="edit-republic-title-share" value="<?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? 'THE REPUBLIC OF UGANDA'); ?>">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-republic-title-share" <?php echo $surveySettings['show_republic_title_share'] ? 'checked' : ''; ?>> Show Republic Title
-                            </label>
-                        </div>
-                    </div>
-                    <div class="setting-group">
-                        <label for="edit-ministry-subtitle-share">Ministry Subtitle (Share Page):</label>
-                       <input type="text" id="edit-ministry-subtitle-share" value="<?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? 'MINISTRY OF HEALTH'); ?>">
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-ministry-subtitle-share" <?php echo $surveySettings['show_ministry_subtitle_share'] ? 'checked' : ''; ?>> Show Ministry Subtitle
-                            </label>
-                        </div>
-                    </div>
-                    <div class="setting-group">
-                        <label for="edit-qr-instructions-share">QR Instructions Text (Share Page):</label>
-                        <textarea id="edit-qr-instructions-share" rows="3"><?php echo htmlspecialchars($surveySettings['qr_instructions_text'] ?? ''); ?></textarea>
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-qr-instructions-share" <?php echo $surveySettings['show_qr_instructions_share'] ? 'checked' : ''; ?>> Show QR Instructions
-                            </label>
-                        </div>
-                    </div>
-                    <div class="setting-group">
-                        <label for="edit-footer-note-share">Footer Note Text (Share Page):</label>
-                       <textarea id="edit-footer-note-share" rows="2"><?php echo htmlspecialchars($surveySettings['footer_note_text'] ?? 'Thank you for helping us improve our services.'); ?></textarea>
-
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="toggle-footer-note-share" <?php echo $surveySettings['show_footer_note_share'] ? 'checked' : ''; ?>> Show Footer Note
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <hr> <button onclick="savePreviewSettings()">Save Preview Settings</button>
-          <button onclick="resetPreviewSettings()">Reset Preview</button>
         </div>
-    </div>
-
-    <div class="bottom-controls">
-        <button onclick="window.location.href='update_form?survey_id=<?php echo $surveyId; ?>'" class="action-button">
-            <i class="fas fa-arrow-left"></i> Back
-        </button>
-        <button id="share-btn" class="action-button">
-            <i class="fas fa-share"></i> Share
-        </button>
-        <button onclick="window.location.href='survey_page.php?survey_id=<?php echo $surveyId; ?>'" class="action-button">
-            <i class="fas fa-rocket"></i> Generate
-        </button>
-    </div>
+        
+    </main>
 
 <script>
-    const surveyType = "<?php echo $survey['type']; ?>";
-    const surveyId = "<?php echo $surveyId; ?>";
+    // --- 1. Global Functions (must be outside of DOMContentLoaded) ---
+    // These functions are now available immediately for the onclick attributes in the HTML.
+
+    const surveyType = "<?php echo htmlspecialchars($survey['type']); ?>";
+    const surveyId = "<?php echo intval($surveyId); ?>";
     const hierarchyLevelMap = <?php echo json_encode($hierarchyLevels); ?>;
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // --- 1. DOM Element References ---
-        const logoImg = document.getElementById('moh-logo');
-        const logoUpload = document.getElementById('logo-upload');
-        const toggleLogo = document.getElementById('toggle-logo');
-        const logoSection = document.getElementById('logo-section');
+    // Helper function for toast notifications
+    function showToast(message, type = 'success') {
+        // Use the new toast notification style
+        const existingToasts = document.querySelectorAll('.toast-notification');
+        existingToasts.forEach(toast => toast.remove());
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification' + (type === 'error' ? ' error' : '');
+        toast.textContent = message;
 
+        document.body.appendChild(toast);
+        
+        // Force reflow and add show class
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+        
+        // Hide and remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Function to copy share link to clipboard
+    function copyShareLink() {
+        const scheme = window.location.protocol;
+        const host = window.location.host;
+        const shareUrl = `${scheme}//${host}/share/s/${surveyId}`;
+        
+        console.log('Attempting to copy URL:', shareUrl); // Debug log
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(shareUrl).then(function() {
+                console.log('Successfully copied to clipboard'); // Debug log
+                showToast('✅ Share link copied to clipboard!', 'success');
+            }, function(err) {
+                console.error('Clipboard API failed:', err);
+                fallbackCopyTextToClipboard(shareUrl);
+            });
+        } else {
+            console.log('Clipboard API not available, using fallback'); // Debug log
+            fallbackCopyTextToClipboard(shareUrl);
+        }
+    }
+
+    function fallbackCopyTextToClipboard(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            console.log('Fallback copy result:', successful); // Debug log
+            if (successful) {
+                showToast('✅ Share link copied to clipboard!', 'success');
+            } else {
+                showToast('❌ Failed to copy share link', 'error');
+            }
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+            showToast('❌ Failed to copy share link', 'error');
+        }
+
+        document.body.removeChild(textArea);
+    }
+    
+    // Function to handle saving settings
+    window.savePreviewSettings = async function() {
+        console.log('savePreviewSettings called');
+
+        // Check if dynamic images toggle exists
+        const toggleDynamicImages = document.getElementById('toggle-dynamic-images');
+        if (!toggleDynamicImages) {
+            console.error('Required elements not found');
+            showToast('Error: Page not fully loaded', 'error');
+            return;
+        }
+
+        // Collect settings (your existing logic)
         const flagBlackColorPicker = document.getElementById('flag-black-color-picker');
-        const flagYellowColorPicker = document = document.getElementById('flag-yellow-color-picker');
-        const flagRedColorPicker = document.getElementById('flag-red-color');
-        const flagBlackElement = document.getElementById('flag-black-color');
-        const flagYellowElement = document.getElementById('flag-yellow-color');
-        const flagRedElement = document.getElementById('flag-red-color');
+        const flagYellowColorPicker = document.getElementById('flag-yellow-color-picker');
+        const flagRedColorPicker = document.getElementById('flag-red-color-picker');
         const toggleFlagBar = document.getElementById('toggle-flag-bar');
-        const flagBarElement = document.getElementById('flag-bar');
-
         const editTitle = document.getElementById('edit-title');
-        const surveyTitle = document.getElementById('survey-title');
         const toggleTitle = document.getElementById('toggle-title');
-
         const editSubheading = document.getElementById('edit-subheading');
-        const surveySubheading = document.getElementById('survey-subheading');
         const toggleSubheading = document.getElementById('toggle-subheading');
-
-        const editRatingInstruction1 = document.getElementById('edit-rating-instruction-1');
-        const ratingInstruction1 = document.getElementById('rating-instruction-1');
-        const editRatingInstruction2 = document.getElementById('edit-rating-instruction-2');
-        const ratingInstruction2 = document.getElementById('rating-instruction-2');
-        const toggleRatingInstructions = document.getElementById('toggle-rating-instructions');
-        const ratingInstructionsControlGroup = document.getElementById('rating-instructions-control-group');
-
-        const formSectionsAccordionItem = document.getElementById('form-sections-accordion-item');
-        const toggleFacilitySection = document.getElementById('toggle-facility-section');
-        const facilitySection = document.getElementById('facility-section');
-
-        // Facility Filter Elements
-        const instanceKeyFilterGroup = document.getElementById('instance-key-filter-group');
-        const hierarchyLevelFilterGroup = document.getElementById('hierarchy-level-filter-group');
-        const controlInstanceKeySelect = document.getElementById('control-instance-key-select');
-        const controlHierarchyLevelSelect = document.getElementById('control-hierarchy-level-select');
-        const facilitySearchInput = document.getElementById('facility-search');
-        const facilityResultsDiv = document.getElementById('facility-results');
-        const pathDisplay = document.getElementById('path-display');
-        const facilityIdInput = document.getElementById('facility_id');
-        const hierarchyDataInput = document.getElementById('hierarchy_data');
-
-        const toggleLocationRowGeneral = document.getElementById('toggle-location-row-general');
-        const locationRowGeneral = document.getElementById('location-row-general');
-
-        const toggleLocationRowPeriodAge = document.getElementById('toggle-location-row-period-age');
-        const locationRowPeriodAge = document.getElementById('location-row-period-age');
-
-        const toggleOwnershipSection = document.getElementById('toggle-ownership-section');
-        const ownershipSection = document.getElementById('ownership-section');
-
         const toggleSubmitButton = document.getElementById('toggle-submit-button');
-        const submitButtonPreview = document.getElementById('submit-button-preview');
-
-        const logoUrlInput = document.getElementById('edit-logo-url');
-        const toggleLogoUrl = document.getElementById('toggle-logo-url');
-        const republicTitleElement = document.getElementById('republic-title');
+        const editRatingInstruction1 = document.getElementById('edit-rating-instruction-1');
+        const editRatingInstruction2 = document.getElementById('edit-rating-instruction-2');
+        const toggleRatingInstructions = document.getElementById('toggle-rating-instructions');
+        const toggleFacilitySection = document.getElementById('toggle-facility-section');
         const editRepublicTitleShare = document.getElementById('edit-republic-title-share');
         const toggleRepublicTitleShare = document.getElementById('toggle-republic-title-share');
-
-        const ministrySubtitleElement = document.getElementById('ministry-subtitle');
         const editMinistrySubtitleShare = document.getElementById('edit-ministry-subtitle-share');
         const toggleMinistrySubtitleShare = document.getElementById('toggle-ministry-subtitle-share');
-
         const editQrInstructionsShare = document.getElementById('edit-qr-instructions-share');
-        const toggleQrInstructionsShare = document.getElementById('toggle-qr-instructions-share'); // Fixed here
-
+        const toggleQrInstructionsShare = document.getElementById('toggle-qr-instructions-share');
         const editFooterNoteShare = document.getElementById('edit-footer-note-share');
         const toggleFooterNoteShare = document.getElementById('toggle-footer-note-share');
+        const controlInstanceKeySelect = document.getElementById('control-instance-key-select');
+        const controlHierarchyLevelSelect = document.getElementById('control-hierarchy-level-select');
+        const toggleNumbering = document.getElementById('toggle-numbering');
+        const numberingStyle = document.getElementById('numbering-style');
 
-
-        // --- 2. Helper Functions ---
-        function showToast(message, type = 'success') {
-            let toast = document.createElement('div');
-            toast.textContent = message;
-            toast.style.position = 'fixed';
-            toast.style.bottom = '180px';
-            toast.style.left = '50%';
-            toast.style.transform = 'translateX(-50%)';
-            toast.style.background = type === 'success' ? 'green' : 'red';
-            toast.style.color = '#fff';
-            toast.style.padding = '12px 28px';
-            toast.style.borderRadius = '6px';
-            toast.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-            toast.style.fontSize = '16px';
-            toast.style.zIndex = '2000';
-            toast.style.opacity = '0';
-            toast.style.transition = 'opacity 0.3s';
-
-            document.body.appendChild(toast);
-            setTimeout(() => { toast.style.opacity = '1'; }, 10);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => { document.body.removeChild(toast); }, 400);
-            }, type === 'success' ? 1800 : 3000);
-        }
-
-        // --- 3. Core Logic Functions ---
-
-       /* --- Replace your applyTypeSpecificControls function with this: --- */
-        function applyTypeSpecificControls() {
-            if (surveyType === 'dhis2') {
-                // Show the Form Sections Visibility accordion
-                if (formSectionsAccordionItem) formSectionsAccordionItem.classList.remove('hidden-element');
-
-                // Hide only the specific toggles/groups
-                const locationRowGeneralGroup = document.getElementById('toggle-location-row-general-group');
-                const locationRowPeriodAgeGroup = document.getElementById('toggle-location-row-period-age-group');
-                const ownershipSectionGroup = document.getElementById('toggle-ownership-section-group');
-                const submitButtonGroup = document.getElementById('toggle-submit-button-group');
-
-                if (locationRowGeneralGroup) locationRowGeneralGroup.classList.add('hidden-element');
-                if (locationRowPeriodAgeGroup) locationRowPeriodAgeGroup.classList.add('hidden-element');
-                if (ownershipSectionGroup) ownershipSectionGroup.classList.add('hidden-element');
-                if (submitButtonGroup) submitButtonGroup.classList.add('hidden-element');
-
-                // Show the facility section and its filters (do NOT hide them)
-                if (facilitySection) facilitySection.classList.remove('hidden-element');
-                if (instanceKeyFilterGroup) instanceKeyFilterGroup.style.display = 'block';
-                if (hierarchyLevelFilterGroup) hierarchyLevelFilterGroup.style.display = 'block';
-
-                // Optionally, hide the rating instructions group if you want
-                if (ratingInstructionsControlGroup) ratingInstructionsControlGroup.classList.add('hidden-element');
-
-                // Hide the actual form sections in the preview as well
-                if (locationRowGeneral) locationRowGeneral.classList.add('hidden-element');
-                if (locationRowPeriodAge) locationRowPeriodAge.classList.add('hidden-element');
-                if (ownershipSection) ownershipSection.classList.add('hidden-element');
-                if (ratingInstruction1) ratingInstruction1.classList.add('hidden-element');
-                if (ratingInstruction2) ratingInstruction2.classList.add('hidden-element');
-
-            } else if (surveyType === 'local') {
-                // Show everything for local
-                if (formSectionsAccordionItem) formSectionsAccordionItem.classList.remove('hidden-element');
-                if (ratingInstructionsControlGroup) ratingInstructionsControlGroup.classList.remove('hidden-element');
-
-                // Show all setting groups
-                const locationRowGeneralGroup = document.getElementById('toggle-location-row-general-group');
-                const locationRowPeriodAgeGroup = document.getElementById('toggle-location-row-period-age-group');
-                const ownershipSectionGroup = document.getElementById('toggle-ownership-section-group');
-                const submitButtonGroup = document.getElementById('toggle-submit-button-group');
-
-                if (locationRowGeneralGroup) locationRowGeneralGroup.classList.remove('hidden-element');
-                if (locationRowPeriodAgeGroup) locationRowPeriodAgeGroup.classList.remove('hidden-element');
-                if (ownershipSectionGroup) ownershipSectionGroup.classList.remove('hidden-element');
-                if (submitButtonGroup) submitButtonGroup.classList.remove('hidden-element');
-
-                // Show facility section and filters
-                if (facilitySection) facilitySection.classList.remove('hidden-element');
-                if (instanceKeyFilterGroup) instanceKeyFilterGroup.style.display = 'block';
-                if (hierarchyLevelFilterGroup) hierarchyLevelFilterGroup.style.display = 'block';
+        // Collect dynamic images data
+        const imageCountEl = document.getElementById('imageCount');
+        const imageLayoutEl = document.getElementById('imageLayout');
+        const dynamicImages = [];
+        
+        if (imageCountEl && imageLayoutEl) {
+            const imageCount = parseInt(imageCountEl.value) || 0;
+            for (let i = 1; i <= imageCount; i++) {
+                const imageData = window[`imageData${i}`];
+                if (imageData) {
+                    const widthEl = document.getElementById(`imageWidth${i}`);
+                    const heightEl = document.getElementById(`imageHeight${i}`);
+                    const altTextEl = document.getElementById(`imageAlt${i}`);
+                    const positionEl = document.getElementById(`imagePosition${i}`);
+                    
+                    dynamicImages.push({
+                        imageData: imageData,
+                        width: widthEl ? parseInt(widthEl.value) : 100,
+                        height: heightEl ? parseInt(heightEl.value) : 80,
+                        altText: altTextEl ? altTextEl.value : `Image ${i}`,
+                        position: positionEl ? positionEl.value : 'center'
+                    });
+                }
             }
         }
-   window.savePreviewSettings = async function() {
-        // ... (your existing savePreviewSettings logic) ...
+
         const settings = {
             surveyId: surveyId,
-            logoSrc: logoImg.src,
-            showLogo: toggleLogo.checked,
-            flagBlackColor: flagBlackColorPicker.value,
-            flagYellowColor: flagYellowColorPicker.value, // Make sure this element is correctly referenced above
-            flagRedColor: flagRedColorPicker.value,
-            showFlagBar: toggleFlagBar.checked,
-            titleText: editTitle.value,
-            showTitle: toggleTitle.checked,
-            subheadingText: editSubheading.value,
-            showSubheading: toggleSubheading.checked,
-            showSubmitButton: toggleSubmitButton.checked,
-
+            showDynamicImages: toggleDynamicImages.checked,
+            flagBlackColor: flagBlackColorPicker ? flagBlackColorPicker.value : '#000000',
+            flagYellowColor: flagYellowColorPicker ? flagYellowColorPicker.value : '#FCD116',
+            flagRedColor: flagRedColorPicker ? flagRedColorPicker.value : '#D21034',
+            showFlagBar: toggleFlagBar ? toggleFlagBar.checked : false,
+            titleText: editTitle ? editTitle.value : '',
+            showTitle: toggleTitle ? toggleTitle.checked : false,
+            subheadingText: editSubheading ? editSubheading.value : '',
+            showSubheading: toggleSubheading ? toggleSubheading.checked : false,
+            showSubmitButton: toggleSubmitButton ? toggleSubmitButton.checked : false,
             ratingInstruction1Text: editRatingInstruction1 ? editRatingInstruction1.value : '',
             ratingInstruction2Text: editRatingInstruction2 ? editRatingInstruction2.value : '',
             showRatingInstructions: toggleRatingInstructions ? toggleRatingInstructions.checked : false,
-            
             showFacilitySection: surveyType === 'dhis2' || (toggleFacilitySection ? toggleFacilitySection.checked : false),
-            
-            showLocationRowGeneral: toggleLocationRowGeneral ? toggleLocationRowGeneral.checked : false,
-            showLocationRowPeriodAge: toggleLocationRowPeriodAge ? toggleLocationRowPeriodAge.checked : false,
-            showOwnershipSection: toggleOwnershipSection ? toggleOwnershipSection.checked : false,
-
-            republicTitleText: editRepublicTitleShare.value,
-            showRepublicTitleShare: toggleRepublicTitleShare.checked,
-            ministrySubtitleText: editMinistrySubtitleShare.value,
-            showMinistrySubtitleShare: toggleMinistrySubtitleShare.checked,
-            qrInstructionsText: editQrInstructionsShare.value,
-            showQrInstructionsShare: toggleQrInstructionsShare.checked,
-            footerNoteText: editFooterNoteShare.value,
-            showFooterNoteShare: toggleFooterNoteShare.checked,
-
+            republicTitleText: editRepublicTitleShare ? editRepublicTitleShare.value : '',
+            showRepublicTitleShare: toggleRepublicTitleShare ? toggleRepublicTitleShare.checked : false,
+            ministrySubtitleText: editMinistrySubtitleShare ? editMinistrySubtitleShare.value : '',
+            showMinistrySubtitleShare: toggleMinistrySubtitleShare ? toggleMinistrySubtitleShare.checked : false,
+            qrInstructionsText: editQrInstructionsShare ? editQrInstructionsShare.value : '',
+            showQrInstructionsShare: toggleQrInstructionsShare ? toggleQrInstructionsShare.checked : false,
+            footerNoteText: editFooterNoteShare ? editFooterNoteShare.value : '',
+            showFooterNoteShare: toggleFooterNoteShare ? toggleFooterNoteShare.checked : false,
             selectedInstanceKey: controlInstanceKeySelect ? controlInstanceKeySelect.value : null,
             selectedHierarchyLevel: controlHierarchyLevelSelect ? (controlHierarchyLevelSelect.value === '' ? null : parseInt(controlHierarchyLevelSelect.value, 10)) : null,
+            showNumbering: toggleNumbering ? toggleNumbering.checked : true,
+            numberingStyle: numberingStyle ? numberingStyle.value : 'numeric',
+            dynamicImages: dynamicImages,
+            imageLayout: imageLayoutEl ? imageLayoutEl.value : 'horizontal'
         };
 
         try {
+            console.log('Attempting to save settings:', settings);
             const response = await fetch('save_survey_settings.php', {
                 method: 'POST',
                 headers: {
@@ -1110,21 +1784,27 @@ try {
                 body: JSON.stringify(settings)
             });
 
-            const data = await response.json();
+            console.log('Response status:', response.status);
 
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to save settings due to a server error.');
+                const errorText = await response.text();
+                console.error('Server response error:', errorText);
+                throw new Error(`Server error (${response.status}): ${errorText}`);
             }
 
-            showToast(data.message, 'success');
+            const data = await response.json();
+            console.log('Save response:', data);
 
+            showToast(data.message || 'Settings saved successfully', 'success');
         } catch (error) {
             console.error('Error saving settings:', error);
             showToast(error.message || 'An unexpected error occurred while saving.', 'error');
+            throw error; // Re-throw the error to be caught by the caller, e.g., the share button
         }
     };
-
-         window.resetPreviewSettings = async function() {
+    
+    // Function to handle resetting settings
+    window.resetPreviewSettings = async function() {
         if (!confirm('Are you sure you want to reset all preview settings to their default values? This cannot be undone.')) {
             return;
         }
@@ -1149,73 +1829,212 @@ try {
             setTimeout(() => {
                 location.reload();
             }, 1000);
-
         } catch (error) {
             console.error('Error resetting settings:', error);
             showToast(error.message || 'An unexpected error occurred while resetting.', 'error');
         }
     };
+    
+    // Function for testing the save process
+    window.testSaveFunction = async function() {
+        console.log('Test function called');
+        
+        const testData = {
+            surveyId: surveyId,
+            titleText: 'Test Title',
+            showTitle: true,
+            showNumbering: true,
+            numberingStyle: 'numeric'
+        };
+        
+        try {
+            console.log('Sending test data:', testData);
+            const response = await fetch('save_survey_settings.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(testData)
+            });
+            
+            const responseText = await response.text();
+            console.log('Test response text:', responseText);
+            
+            try {
+                const responseData = JSON.parse(responseText);
+                showToast('Test: ' + responseData.message, responseData.status === 'success' ? 'success' : 'error');
+            } catch (parseError) {
+                console.error('Failed to parse test response as JSON:', parseError);
+                showToast('Test failed: Invalid JSON response', 'error');
+            }
+        } catch (error) {
+            console.error('Test function error:', error);
+            showToast('Test failed: ' + error.message, 'error');
+        }
+    };
 
-        let currentFilteredLocations = []; // This will hold locations filtered by Instance and Level
 
-        // Renamed function for clarity: fetches locations based on current filters
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- 2. DOM Element References (rest of your code) ---
+        const flagBlackColorPicker = document.getElementById('flag-black-color-picker');
+        const flagYellowColorPicker = document.getElementById('flag-yellow-color-picker');
+        const flagRedColorPicker = document.getElementById('flag-red-color-picker');
+        const flagBlackElement = document.getElementById('flag-black-color');
+        const flagYellowElement = document.getElementById('flag-yellow-color');
+        const flagRedElement = document.getElementById('flag-red-color');
+        const toggleFlagBar = document.getElementById('toggle-flag-bar');
+        const flagBarElement = document.getElementById('flag-bar');
+        const editTitle = document.getElementById('edit-title');
+        const surveyTitle = document.getElementById('survey-title');
+        const toggleTitle = document.getElementById('toggle-title');
+        const editSubheading = document.getElementById('edit-subheading');
+        const surveySubheading = document.getElementById('survey-subheading');
+        const toggleSubheading = document.getElementById('toggle-subheading');
+        const editRatingInstruction1 = document.getElementById('edit-rating-instruction-1');
+        const ratingInstruction1 = document.getElementById('rating-instruction-1');
+        const editRatingInstruction2 = document.getElementById('edit-rating-instruction-2');
+        const ratingInstruction2 = document.getElementById('rating-instruction-2');
+        const toggleRatingInstructions = document.getElementById('toggle-rating-instructions');
+        const ratingInstructionsControlGroup = document.getElementById('rating-instructions-control-group');
+        const formSectionsAccordionItem = document.getElementById('form-sections-accordion-item');
+        const toggleFacilitySection = document.getElementById('toggle-facility-section');
+        const facilitySection = document.getElementById('facility-section');
+        const instanceKeyFilterGroup = document.getElementById('instance-key-filter-group');
+        const hierarchyLevelFilterGroup = document.getElementById('hierarchy-level-filter-group');
+        const controlInstanceKeySelect = document.getElementById('control-instance-key-select');
+        const controlHierarchyLevelSelect = document.getElementById('control-hierarchy-level-select');
+        const facilitySearchInput = document.getElementById('facility-search');
+        const facilityResultsDiv = document.getElementById('facility-results');
+        const pathDisplay = document.getElementById('path-display');
+        const facilityIdInput = document.getElementById('facility_id');
+        const hierarchyDataInput = document.getElementById('hierarchy_data');
+        const toggleSubmitButton = document.getElementById('toggle-submit-button');
+        const submitButtonPreview = document.getElementById('submit-button-preview');
+        const republicTitleElement = document.getElementById('republic-title');
+        const editRepublicTitleShare = document.getElementById('edit-republic-title-share');
+        const toggleRepublicTitleShare = document.getElementById('toggle-republic-title-share');
+        const ministrySubtitleElement = document.getElementById('ministry-subtitle');
+        const editMinistrySubtitleShare = document.getElementById('edit-ministry-subtitle-share');
+        const toggleMinistrySubtitleShare = document.getElementById('toggle-ministry-subtitle-share');
+        const editQrInstructionsShare = document.getElementById('edit-qr-instructions-share');
+        const toggleQrInstructionsShare = document.getElementById('toggle-qr-instructions-share');
+        const editFooterNoteShare = document.getElementById('edit-footer-note-share');
+        const toggleFooterNoteShare = document.getElementById('toggle-footer-note-share');
+        const toggleNumbering = document.getElementById('toggle-numbering');
+        const numberingStyle = document.getElementById('numbering-style');
+        
+        // --- 3. Helper Functions (that rely on DOM elements) ---
+
+        function updateCharacterCounter(textareaId, counterId, maxLength) {
+            const textarea = document.getElementById(textareaId);
+            const counter = document.getElementById(counterId);
+            const counterDiv = counter.parentElement;
+            
+            if (textarea && counter) {
+                const currentLength = textarea.value.length;
+                counter.textContent = currentLength;
+                
+                counterDiv.classList.remove('warning', 'danger');
+                if (currentLength > maxLength * 0.9) {
+                    counterDiv.classList.add('danger');
+                } else if (currentLength > maxLength * 0.8) {
+                    counterDiv.classList.add('warning');
+                }
+            }
+        }
+        
+        function setupCharacterCounters() {
+            const counters = [
+                { textarea: 'edit-subheading', counter: 'subheading-counter', maxLength: 1000 },
+                { textarea: 'edit-rating-instruction-1', counter: 'rating1-counter', maxLength: 500 },
+                { textarea: 'edit-rating-instruction-2', counter: 'rating2-counter', maxLength: 500 },
+                { textarea: 'edit-qr-instructions-share', counter: 'qr-counter', maxLength: 500 },
+                { textarea: 'edit-footer-note-share', counter: 'footer-counter', maxLength: 500 }
+            ];
+            
+            counters.forEach(({ textarea, counter, maxLength }) => {
+                const textareaElement = document.getElementById(textarea);
+                if (textareaElement) {
+                    updateCharacterCounter(textarea, counter, maxLength);
+                    textareaElement.addEventListener('input', () => {
+                        updateCharacterCounter(textarea, counter, maxLength);
+                    });
+                }
+            });
+        }
+        
+        function applyTypeSpecificControls() {
+            if (surveyType === 'dhis2') {
+                if (formSectionsAccordionItem) formSectionsAccordionItem.classList.remove('hidden-element');
+                const submitButtonGroup = document.getElementById('toggle-submit-button-group');
+                if (submitButtonGroup) submitButtonGroup.classList.add('hidden-element');
+                if (facilitySection) facilitySection.classList.remove('hidden-element');
+                if (instanceKeyFilterGroup) instanceKeyFilterGroup.style.display = 'block';
+                if (hierarchyLevelFilterGroup) hierarchyLevelFilterGroup.style.display = 'block';
+                if (ratingInstructionsControlGroup) ratingInstructionsControlGroup.classList.add('hidden-element');
+                if (ratingInstruction1) ratingInstruction1.classList.add('hidden-element');
+                if (ratingInstruction2) ratingInstruction2.classList.add('hidden-element');
+            } else if (surveyType === 'local') {
+                if (formSectionsAccordionItem) formSectionsAccordionItem.classList.remove('hidden-element');
+                if (ratingInstructionsControlGroup) ratingInstructionsControlGroup.classList.remove('hidden-element');
+                const submitButtonGroup = document.getElementById('toggle-submit-button-group');
+                if (submitButtonGroup) submitButtonGroup.classList.remove('hidden-element');
+                if (facilitySection) facilitySection.classList.remove('hidden-element');
+                if (instanceKeyFilterGroup) instanceKeyFilterGroup.style.display = 'block';
+                if (hierarchyLevelFilterGroup) hierarchyLevelFilterGroup.style.display = 'block';
+            }
+        }
+
+        let currentFilteredLocations = [];
+
         async function updateLocationsBasedOnFilters() {
             const instanceKey = controlInstanceKeySelect.value;
             const hierarchyLevel = controlHierarchyLevelSelect.value;
-
-            // Clear previous display elements
             facilitySearchInput.value = '';
             facilityResultsDiv.innerHTML = '';
-            facilityResultsDiv.style.display = 'none'; // Hide dropdown
+            facilityResultsDiv.style.display = 'none';
             facilityIdInput.value = '';
             pathDisplay.textContent = '';
             hierarchyDataInput.value = '';
 
             if (!instanceKey || !hierarchyLevel) {
-                currentFilteredLocations = []; // Clear data if filters are not fully set
-                facilitySearchInput.disabled = true; // Disable search input
-                // Display the prompt immediately in the results div if filters are not selected
+                currentFilteredLocations = [];
+                if (facilitySearchInput) facilitySearchInput.disabled = true;
                 filterAndDisplaySearchResults('');
-                return; // Do not proceed with fetch
+                return;
             }
 
-            // Both filters are selected, enable input and fetch data
-            facilitySearchInput.disabled = false;
+            if (facilitySearchInput) facilitySearchInput.disabled = false;
             try {
                 const params = new URLSearchParams();
                 params.append('instance_key', instanceKey);
                 params.append('hierarchylevel', hierarchyLevel);
-
                 const response = await fetch(`get_locations.php?${params.toString()}`);
                 if (!response.ok) {
-                    // Check for a non-200 status code explicitly
-                    const errorText = await response.text(); // Get response body
+                    const errorText = await response.text();
                     throw new Error(`Network response was not ok (${response.status}): ${errorText}`);
                 }
                 const responseData = await response.json();
-
-                if (responseData.error) { // Check if the PHP script returned an application-level error
+                if (responseData.error) {
                     throw new Error(`Server Error: ${responseData.error}`);
                 }
-
-                currentFilteredLocations = responseData; // Update the master list
-                filterAndDisplaySearchResults(''); // Display all loaded locations (empty search term)
+                currentFilteredLocations = responseData;
+                filterAndDisplaySearchResults('');
             } catch (error) {
                 console.error('Error fetching locations:', error);
-                facilityResultsDiv.innerHTML = `<div style="padding: 8px; color: red;">${error.message || 'Error loading locations from server.'}</div>`;
-                facilityResultsDiv.style.display = 'block'; // Show error message
-                facilitySearchInput.disabled = true; // Disable on error
+                if (facilityResultsDiv) facilityResultsDiv.innerHTML = `<div style="padding: 8px; color: red;">${error.message || 'Error loading locations from server.'}</div>`;
+                if (facilityResultsDiv) facilityResultsDiv.style.display = 'block';
+                if (facilitySearchInput) facilitySearchInput.disabled = true;
             }
         }
 
         async function fetchLocationPath(locationId) {
-            if (!locationId) {
-                return '';
-            }
+            if (!locationId) return '';
             try {
                 const response = await fetch(`get_location_path.php?id=${locationId}`);
                 if (!response.ok) {
-                     const errorText = await response.text();
+                    const errorText = await response.text();
                     throw new Error(`Network response was not ok (${response.status}): ${errorText}`);
                 }
                 const data = await response.json();
@@ -1225,17 +2044,16 @@ try {
                 return data.path || '';
             } catch (error) {
                 console.error('Error fetching location path:', error);
-                // Displaying this error might be too disruptive for a path, so just log
                 return '';
             }
         }
 
         function filterAndDisplaySearchResults(searchTerm) {
-            facilityResultsDiv.innerHTML = ''; // Always clear previous results
-            facilityResultsDiv.style.display = 'block'; // Ensure dropdown area is visible for messages/results
+            if (facilityResultsDiv) facilityResultsDiv.innerHTML = '';
+            if (facilityResultsDiv) facilityResultsDiv.style.display = 'block';
 
-            if (facilitySearchInput.disabled) {
-                facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">Select an Instance and Level to load locations.</div>';
+            if (facilitySearchInput && facilitySearchInput.disabled) {
+                if (facilityResultsDiv) facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">Select an Instance and Level to load locations.</div>';
                 return;
             }
 
@@ -1253,77 +2071,98 @@ try {
                     div.dataset.path = location.path;
                     div.dataset.hierarchylevel = location.hierarchylevel;
                     div.dataset.instancekey = location.instance_key;
-                    facilityResultsDiv.appendChild(div);
+                    if (facilityResultsDiv) facilityResultsDiv.appendChild(div);
                 });
             } else {
-                if (searchTerm.length > 0) {
-                    facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No matching locations found for your search.</div>';
-                } else {
-                    // This case means filters are selected, but no locations were returned by the server
-                    // or currentFilteredLocations is empty for some other reason (e.g., specific filter combo yields no results)
-                    facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No locations available for selected filters.</div>';
+                if (facilityResultsDiv) {
+                    if (searchTerm.length > 0) {
+                        facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No matching locations found for your search.</div>';
+                    } else {
+                        facilityResultsDiv.innerHTML = '<div style="padding: 8px; color: #888;">No locations available for selected filters.</div>';
+                    }
                 }
             }
         }
+        
+        function updateQuestionNumberingPreview() {
+            const toggleElement = document.getElementById('toggle-numbering');
+            const styleElement = document.getElementById('numbering-style');
+            if (!toggleElement || !styleElement) return;
 
-        // --- 4. Event Listeners for Live Preview Updates ---
-
-        logoUpload.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    logoImg.src = e.target.result;
-                    logoUrlInput.value = e.target.result;
-                };
-                reader.readAsDataURL(file);
+            const showNumbering = toggleElement.checked;
+            const numberingStyle = styleElement.value;
+            const questionNumbers = document.querySelectorAll('.question-number');
+            
+            questionNumbers.forEach(function(numberSpan, index) {
+                if (showNumbering && numberingStyle !== 'none') {
+                    let displayNumber = '';
+                    const questionIndex = index + 1;
+                    switch (numberingStyle) {
+                        case 'alphabetic_lower': displayNumber = String.fromCharCode(96 + questionIndex) + '.'; break;
+                        case 'alphabetic_upper': displayNumber = String.fromCharCode(64 + questionIndex) + '.'; break;
+                        case 'roman_lower': displayNumber = toRoman(questionIndex).toLowerCase() + '.'; break;
+                        case 'roman_upper': displayNumber = toRoman(questionIndex) + '.'; break;
+                        case 'numeric':
+                        default: displayNumber = questionIndex + '.'; break;
+                    }
+                    numberSpan.textContent = displayNumber;
+                    numberSpan.style.display = 'inline';
+                } else {
+                    numberSpan.style.display = 'none';
+                }
+            });
+        }
+        
+        function toRoman(num) {
+            const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+            const symbols = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
+            let result = '';
+            for (let i = 0; i < values.length; i++) {
+                while (num >= values[i]) {
+                    result += symbols[i];
+                    num -= values[i];
+                }
             }
-        });
+            return result;
+        }
 
-        toggleLogo.addEventListener('change', function() {
-            logoSection.classList.toggle('hidden-element', !this.checked);
-            if (toggleLogoUrl) toggleLogoUrl.checked = this.checked;
-        });
-        if (toggleLogoUrl) {
-            toggleLogoUrl.addEventListener('change', function() {
-                if (toggleLogo) toggleLogo.checked = this.checked;
-                logoSection.classList.toggle('hidden-element', !this.checked);
+        // --- 4. Event Listeners ---
+        // All event listeners now safely inside DOMContentLoaded where the elements exist.
+
+
+        if (flagBlackColorPicker && flagBlackElement) flagBlackColorPicker.addEventListener('input', function() { flagBlackElement.style.backgroundColor = this.value; });
+        if (flagYellowColorPicker && flagYellowElement) flagYellowColorPicker.addEventListener('input', function() { flagYellowElement.style.backgroundColor = this.value; });
+        if (flagRedColorPicker && flagRedElement) flagRedColorPicker.addEventListener('input', function() { flagRedElement.style.backgroundColor = this.value; });
+        if (toggleFlagBar && flagBarElement) toggleFlagBar.addEventListener('change', function() { flagBarElement.classList.toggle('hidden-element', !this.checked); });
+
+        if (editTitle && surveyTitle && toggleTitle) {
+            editTitle.addEventListener('input', function() { surveyTitle.textContent = this.value; });
+            toggleTitle.addEventListener('change', function() { surveyTitle.classList.toggle('hidden-element', !this.checked); });
+        }
+
+        if (editSubheading && surveySubheading && toggleSubheading) {
+            editSubheading.addEventListener('input', function() { surveySubheading.textContent = this.value; });
+            toggleSubheading.addEventListener('change', function() { surveySubheading.classList.toggle('hidden-element', !this.checked); });
+        }
+        
+        if (surveyType === 'local' && editRatingInstruction1 && ratingInstruction1 && editRatingInstruction2 && ratingInstruction2 && toggleRatingInstructions) {
+            editRatingInstruction1.addEventListener('input', function() { ratingInstruction1.textContent = this.value; });
+            editRatingInstruction2.addEventListener('input', function() { ratingInstruction2.textContent = this.value; });
+            toggleRatingInstructions.addEventListener('change', function() {
+                ratingInstruction1.classList.toggle('hidden-element', !this.checked);
+                ratingInstruction2.classList.toggle('hidden-element', !this.checked);
             });
         }
 
-        flagBlackColorPicker.addEventListener('input', function() { flagBlackElement.style.backgroundColor = this.value; });
-        // FIX: Corrected typo for flagYellowColorPicker
-        flagYellowColorPicker.addEventListener('input', function() { flagYellowElement.style.backgroundColor = this.value; });
-        flagRedColorPicker.addEventListener('input', function() { flagRedElement.style.backgroundColor = this.value; });
-        toggleFlagBar.addEventListener('change', function() { flagBarElement.classList.toggle('hidden-element', !this.checked); });
-
-        editTitle.addEventListener('input', function() { surveyTitle.textContent = this.value; });
-        toggleTitle.addEventListener('change', function() { surveyTitle.classList.toggle('hidden-element', !this.checked); });
-
-        editSubheading.addEventListener('input', function() { surveySubheading.textContent = this.value; });
-        toggleSubheading.addEventListener('change', function() { surveySubheading.classList.toggle('hidden-element', !this.checked); });
-
-        if (surveyType === 'local') {
-            if (editRatingInstruction1) editRatingInstruction1.addEventListener('input', function() { ratingInstruction1.textContent = this.value; });
-            if (editRatingInstruction2) editRatingInstruction2.addEventListener('input', function() { ratingInstruction2.textContent = this.value; });
-            if (toggleRatingInstructions) toggleRatingInstructions.addEventListener('change', function() {
-                if (ratingInstruction1) ratingInstruction1.classList.toggle('hidden-element', !this.checked);
-                if (ratingInstruction2) ratingInstruction2.classList.toggle('hidden-element', !this.checked);
-            });
-        }
-
-         if (surveyType === 'local' || surveyType === 'dhis2') {
+        if ((surveyType === 'local' || surveyType === 'dhis2') && toggleFacilitySection && facilitySection && instanceKeyFilterGroup && hierarchyLevelFilterGroup) {
             toggleFacilitySection.addEventListener('change', function() {
                 const isChecked = this.checked;
-                if (facilitySection) facilitySection.classList.toggle('hidden-element', !isChecked);
-
-                if (instanceKeyFilterGroup) instanceKeyFilterGroup.style.display = isChecked ? 'block' : 'none';
-                if (hierarchyLevelFilterGroup) hierarchyLevelFilterGroup.style.display = isChecked ? 'block' : 'none';
-
+                facilitySection.classList.toggle('hidden-element', !isChecked);
+                instanceKeyFilterGroup.style.display = isChecked ? 'block' : 'none';
+                hierarchyLevelFilterGroup.style.display = isChecked ? 'block' : 'none';
                 if (isChecked) {
-                    updateLocationsBasedOnFilters(); // Re-evaluate and load based on current dropdowns
+                    updateLocationsBasedOnFilters();
                 } else {
-                    // Clear and disable search input when section is hidden
                     facilitySearchInput.value = '';
                     facilityResultsDiv.innerHTML = '';
                     facilityResultsDiv.style.display = 'none';
@@ -1334,59 +2173,165 @@ try {
                 }
             });
 
-            controlInstanceKeySelect.addEventListener('change', function() {
-                updateLocationsBasedOnFilters(); // Trigger re-fetch and update
-            });
-
-            controlHierarchyLevelSelect.addEventListener('change', function() {
-                updateLocationsBasedOnFilters(); // Trigger re-fetch and update
-            });
-
-            facilitySearchInput.addEventListener('input', function() {
-                filterAndDisplaySearchResults(this.value); // Filter the already loaded list
-            });
-
-            // Hide dropdown if clicking outside search input or results
+            if (controlInstanceKeySelect) controlInstanceKeySelect.addEventListener('change', updateLocationsBasedOnFilters);
+            if (controlHierarchyLevelSelect) controlHierarchyLevelSelect.addEventListener('change', updateLocationsBasedOnFilters);
+            if (facilitySearchInput) facilitySearchInput.addEventListener('input', function() { filterAndDisplaySearchResults(this.value); });
+            
             document.addEventListener('click', function(event) {
-                if (!facilitySearchInput.contains(event.target) && !facilityResultsDiv.contains(event.target)) {
+                if (facilitySearchInput && !facilitySearchInput.contains(event.target) && facilityResultsDiv && !facilityResultsDiv.contains(event.target)) {
                     facilityResultsDiv.style.display = 'none';
                 }
             });
 
-            // When user focuses on the facility search input
-            facilitySearchInput.addEventListener('focus', function() {
-                filterAndDisplaySearchResults(this.value); // Show results or prompt
+            if (facilitySearchInput) facilitySearchInput.addEventListener('focus', function() {
+                filterAndDisplaySearchResults(this.value);
             });
 
-            facilityResultsDiv.addEventListener('click', async function(event) {
+            if (facilityResultsDiv) facilityResultsDiv.addEventListener('click', async function(event) {
                 const target = event.target;
                 if (target.classList.contains('dropdown-item')) {
                     const locationId = target.dataset.id;
-
                     facilitySearchInput.value = target.textContent;
                     facilityIdInput.value = locationId;
-
                     const humanReadablePath = await fetchLocationPath(locationId);
                     pathDisplay.textContent = humanReadablePath;
                     hierarchyDataInput.value = humanReadablePath;
-
                     facilityResultsDiv.style.display = 'none';
                 }
             });
-
-            if (toggleLocationRowGeneral) toggleLocationRowGeneral.addEventListener('change', function() { if (locationRowGeneral) locationRowGeneral.classList.toggle('hidden-element', !this.checked); });
-            if (toggleLocationRowPeriodAge) toggleLocationRowPeriodAge.addEventListener('change', function() { if (locationRowPeriodAge) locationRowPeriodAge.classList.toggle('hidden-element', !this.checked); });
-            if (toggleOwnershipSection) toggleOwnershipSection.addEventListener('change', function() { if (ownershipSection) ownershipSection.classList.toggle('hidden-element', !this.checked); });
         }
 
-        toggleSubmitButton.addEventListener('change', function() { submitButtonPreview.classList.toggle('hidden-element', !this.checked); });
+        if (toggleSubmitButton && submitButtonPreview) toggleSubmitButton.addEventListener('change', function() { submitButtonPreview.classList.toggle('hidden-element', !this.checked); });
+        if (editRepublicTitleShare && republicTitleElement && toggleRepublicTitleShare) {
+            editRepublicTitleShare.addEventListener('input', function() { republicTitleElement.textContent = this.value; });
+            toggleRepublicTitleShare.addEventListener('change', function() { republicTitleElement.classList.toggle('hidden-element', !this.checked); });
+        }
+        if (editMinistrySubtitleShare && ministrySubtitleElement && toggleMinistrySubtitleShare) {
+            editMinistrySubtitleShare.addEventListener('input', function() { ministrySubtitleElement.textContent = this.value; });
+            toggleMinistrySubtitleShare.addEventListener('change', function() { ministrySubtitleElement.classList.toggle('hidden-element', !this.checked); });
+        }
+        
+        const shareBtn = document.getElementById('share-btn');
+        if (shareBtn) {
+            shareBtn.addEventListener('click', async function() {
+                try {
+                    console.log('Share button clicked');
+                    await window.savePreviewSettings();
+                    console.log('Redirecting to share page');
+                    window.location.href = `/share/s/${surveyId}`;
+                } catch (error) {
+                    console.error('Share button error:', error);
+                    showToast('Error occurred while sharing: ' + error.message, 'error');
+                }
+            });
+        } else {
+            console.error('Share button not found in DOM');
+        }
 
-        editRepublicTitleShare.addEventListener('input', function() { republicTitleElement.textContent = this.value; });
-        toggleRepublicTitleShare.addEventListener('change', function() { republicTitleElement.classList.toggle('hidden-element', !this.checked); });
-        editMinistrySubtitleShare.addEventListener('input', function() { ministrySubtitleElement.textContent = this.value; });
-        toggleMinistrySubtitleShare.addEventListener('change', function() { ministrySubtitleElement.classList.toggle('hidden-element', !this.checked); });
+        if (toggleNumbering && numberingStyle) {
+            toggleNumbering.addEventListener('change', updateQuestionNumberingPreview);
+            numberingStyle.addEventListener('change', updateQuestionNumberingPreview);
+        }
 
-        // --- 5. Accordion Logic ---
+        // --- 5. Initial Setup Call ---
+        // Moved the loadPreviewSettings call to the end of DOMContentLoaded
+        window.loadPreviewSettings = function() {
+            const toggleDynamicImages = document.getElementById('toggle-dynamic-images');
+            if (!toggleDynamicImages) {
+                console.error("Critical DOM elements not found on page load. Load Preview Settings aborted.");
+                return;
+            }
+            
+            // Set dynamic images visibility (default to true if not set)
+            toggleDynamicImages.checked = <?php echo !empty($surveySettings['show_dynamic_images']) ? 'true' : 'true'; ?>;
+
+            flagBlackColorPicker.value = <?php echo json_encode($surveySettings['flag_black_color'] ?? '#000000'); ?>;
+            flagYellowColorPicker.value = <?php echo json_encode($surveySettings['flag_yellow_color'] ?? '#FCD116'); ?>;
+            flagRedColorPicker.value = <?php echo json_encode($surveySettings['flag_red_color'] ?? '#D21034'); ?>;
+            flagBlackElement.style.backgroundColor = flagBlackColorPicker.value;
+            flagYellowElement.style.backgroundColor = flagYellowColorPicker.value;
+            flagRedElement.style.backgroundColor = flagRedColorPicker.value;
+            toggleFlagBar.checked = <?php echo $surveySettings['show_flag_bar'] ? 'true' : 'false'; ?>;
+            flagBarElement.classList.toggle('hidden-element', !toggleFlagBar.checked);
+
+            editTitle.value = <?php echo json_encode($surveySettings['title_text'] ?? ''); ?>;
+            surveyTitle.textContent = editTitle.value;
+            toggleTitle.checked = <?php echo $surveySettings['show_title'] ? 'true' : 'false'; ?>;
+            surveyTitle.classList.toggle('hidden-element', !toggleTitle.checked);
+
+            editSubheading.value = <?php echo json_encode($surveySettings['subheading_text'] ?? ''); ?>;
+            surveySubheading.textContent = editSubheading.value;
+            toggleSubheading.checked = <?php echo $surveySettings['show_subheading'] ? 'true' : 'false'; ?>;
+            surveySubheading.classList.toggle('hidden-element', !toggleSubheading.checked);
+            
+            if (surveyType === 'local') {
+                if (editRatingInstruction1) editRatingInstruction1.value = <?php echo json_encode($surveySettings['rating_instruction1_text'] ?? ''); ?>;
+                if (ratingInstruction1) ratingInstruction1.textContent = editRatingInstruction1.value;
+                if (editRatingInstruction2) editRatingInstruction2.value = <?php echo json_encode($surveySettings['rating_instruction2_text'] ?? ''); ?>;
+                if (ratingInstruction2) ratingInstruction2.textContent = editRatingInstruction2.value;
+                if (toggleRatingInstructions) toggleRatingInstructions.checked = <?php echo $surveySettings['show_rating_instructions'] ? 'true' : 'false'; ?>;
+                if (ratingInstruction1) ratingInstruction1.classList.toggle('hidden-element', !toggleRatingInstructions.checked);
+                if (ratingInstruction2) ratingInstruction2.classList.toggle('hidden-element', !toggleRatingInstructions.checked);
+
+                if (toggleFacilitySection) toggleFacilitySection.checked = <?php echo $surveySettings['show_facility_section'] ? 'true' : 'false'; ?>;
+                if (facilitySection) facilitySection.classList.toggle('hidden-element', !toggleFacilitySection.checked);
+
+                if (controlInstanceKeySelect) controlInstanceKeySelect.value = <?php echo json_encode($surveySettings['selected_instance_key'] ?? ''); ?>;
+                if (controlHierarchyLevelSelect) controlHierarchyLevelSelect.value = <?php echo json_encode($surveySettings['selected_hierarchy_level'] ?? ''); ?>;
+
+                if (toggleFacilitySection.checked) {
+                    if (instanceKeyFilterGroup) instanceKeyFilterGroup.style.display = 'block';
+                    if (hierarchyLevelFilterGroup) hierarchyLevelFilterGroup.style.display = 'block';
+                    updateLocationsBasedOnFilters();
+                } else {
+                    if (instanceKeyFilterGroup) instanceKeyFilterGroup.style.display = 'none';
+                    if (hierarchyLevelFilterGroup) hierarchyLevelFilterGroup.style.display = 'none';
+                    if (facilitySearchInput) facilitySearchInput.disabled = true;
+                }
+            }
+
+            if (toggleSubmitButton && submitButtonPreview) {
+                toggleSubmitButton.checked = <?php echo $surveySettings['show_submit_button'] ? 'true' : 'false'; ?>;
+                submitButtonPreview.classList.toggle('hidden-element', !toggleSubmitButton.checked);
+            }
+
+            if (editRepublicTitleShare && republicTitleElement && toggleRepublicTitleShare) {
+                editRepublicTitleShare.value = <?php echo json_encode($surveySettings['republic_title_text'] ?? ''); ?>;
+                republicTitleElement.textContent = editRepublicTitleShare.value;
+                toggleRepublicTitleShare.checked = <?php echo $surveySettings['show_republic_title_share'] ? 'true' : 'false'; ?>;
+                republicTitleElement.classList.toggle('hidden-element', !toggleRepublicTitleShare.checked);
+            }
+
+            if (editMinistrySubtitleShare && ministrySubtitleElement && toggleMinistrySubtitleShare) {
+                editMinistrySubtitleShare.value = <?php echo json_encode($surveySettings['ministry_subtitle_text'] ?? ''); ?>;
+                ministrySubtitleElement.textContent = editMinistrySubtitleShare.value;
+                toggleMinistrySubtitleShare.checked = <?php echo $surveySettings['show_ministry_subtitle_share'] ? 'true' : 'false'; ?>;
+                ministrySubtitleElement.classList.toggle('hidden-element', !toggleMinistrySubtitleShare.checked);
+            }
+            
+            if (editQrInstructionsShare && toggleQrInstructionsShare) {
+                editQrInstructionsShare.value = <?php echo json_encode($surveySettings['qr_instructions_text'] ?? ''); ?>;
+                toggleQrInstructionsShare.checked = <?php echo $surveySettings['show_qr_instructions_share'] ? 'true' : 'false'; ?>;
+            }
+
+            if (editFooterNoteShare && toggleFooterNoteShare) {
+                editFooterNoteShare.value = <?php echo json_encode($surveySettings['footer_note_text'] ?? ''); ?>;
+                toggleFooterNoteShare.checked = <?php echo $surveySettings['show_footer_note_share'] ? 'true' : 'false'; ?>;
+            }
+
+            if (document.getElementById('toggle-numbering') && document.getElementById('numbering-style')) {
+                updateQuestionNumberingPreview();
+            }
+        };
+
+        // Call the initial load function after all elements and event listeners are set up.
+        window.loadPreviewSettings();
+
+        // This is crucial for the dropdown logic to work on page load.
+        applyTypeSpecificControls(); 
+        setupCharacterCounters();
+
+        // Accordion Logic
         const accordionHeaders = document.querySelectorAll('.accordion-header');
         accordionHeaders.forEach(header => {
             header.addEventListener('click', function() {
@@ -1411,104 +2356,264 @@ try {
             });
         });
 
-        // --- 6. Initial Setup & Share Button ---
-
-        applyTypeSpecificControls(); // Call first to set initial visibility
-
-        window.loadPreviewSettings = function() {
-            // Restore actual current values from PHP-rendered DOM
-            logoImg.src = "<?php echo htmlspecialchars($surveySettings['logo_path'] ?? ''); ?>";
-            toggleLogo.checked = <?php echo $surveySettings['show_logo'] ? 'true' : 'false'; ?>;
-            logoSection.classList.toggle('hidden-element', !toggleLogo.checked);
-
-            flagBlackColorPicker.value = "<?php echo htmlspecialchars($surveySettings['flag_black_color'] ?? '#000000'); ?>";
-            flagYellowColorPicker.value = "<?php echo htmlspecialchars($surveySettings['flag_yellow_color'] ?? '#FCD116'); ?>";
-            flagRedColorPicker.value = "<?php echo htmlspecialchars($surveySettings['flag_red_color'] ?? '#D21034'); ?>";
-            flagBlackElement.style.backgroundColor = flagBlackColorPicker.value;
-            flagYellowElement.style.backgroundColor = flagYellowColorPicker.value;
-            flagRedElement.style.backgroundColor = flagRedColorPicker.value;
-            toggleFlagBar.checked = <?php echo $surveySettings['show_flag_bar'] ? 'true' : 'false'; ?>;
-            flagBarElement.classList.toggle('hidden-element', !toggleFlagBar.checked);
-
-            editTitle.value = "<?php echo htmlspecialchars($surveySettings['title_text'] ?? ''); ?>";
-            surveyTitle.textContent = editTitle.value;
-            toggleTitle.checked = <?php echo $surveySettings['show_title'] ? 'true' : 'false'; ?>;
-            surveyTitle.classList.toggle('hidden-element', !toggleTitle.checked);
-
-            editSubheading.value = "<?php echo htmlspecialchars($surveySettings['subheading_text'] ?? ''); ?>";
-            surveySubheading.textContent = editSubheading.value;
-            toggleSubheading.checked = <?php echo $surveySettings['show_subheading'] ? 'true' : 'false'; ?>;
-            surveySubheading.classList.toggle('hidden-element', !toggleSubheading.checked);
-
-            if (surveyType === 'local') {
-                if (editRatingInstruction1) editRatingInstruction1.value = "<?php echo htmlspecialchars($surveySettings['rating_instruction1_text'] ?? ''); ?>";
-                if (ratingInstruction1) ratingInstruction1.textContent = editRatingInstruction1 ? editRatingInstruction1.value : '';
-                if (editRatingInstruction2) editRatingInstruction2.value = "<?php echo htmlspecialchars($surveySettings['rating_instruction2_text'] ?? ''); ?>";
-                if (ratingInstruction2) ratingInstruction2.textContent = editRatingInstruction2 ? editRatingInstruction2.value : '';
-                if (toggleRatingInstructions) toggleRatingInstructions.checked = <?php echo $surveySettings['show_rating_instructions'] ? 'true' : 'false'; ?>;
-                if (ratingInstruction1) ratingInstruction1.classList.toggle('hidden-element', !toggleRatingInstructions.checked);
-                if (ratingInstruction2) ratingInstruction2.classList.toggle('hidden-element', !toggleRatingInstructions.checked);
-
-                if (toggleFacilitySection) toggleFacilitySection.checked = <?php echo $surveySettings['show_facility_section'] ? 'true' : 'false'; ?>;
-                if (facilitySection) facilitySection.classList.toggle('hidden-element', !toggleFacilitySection.checked);
-
-                // Set initial values for filter dropdowns from surveySettings
-                controlInstanceKeySelect.value = "<?php echo htmlspecialchars($surveySettings['selected_instance_key'] ?? ''); ?>";
-                controlHierarchyLevelSelect.value = "<?php echo htmlspecialchars($surveySettings['selected_hierarchy_level'] ?? ''); ?>";
-
-                // Ensure filter groups visibility matches the facility section toggle
-                if (toggleFacilitySection.checked) {
-                    if (instanceKeyFilterGroup) instanceKeyFilterGroup.style.display = 'block';
-                    if (hierarchyLevelFilterGroup) hierarchyLevelFilterGroup.style.display = 'block';
-
-                    // This is the primary function to call on load to manage search input state and data
-                    updateLocationsBasedOnFilters();
-                } else {
-                    if (instanceKeyFilterGroup) instanceKeyFilterGroup.style.display = 'none';
-                    if (hierarchyLevelFilterGroup) hierarchyLevelFilterGroup.style.display = 'none';
-                    facilitySearchInput.disabled = true; // Ensure disabled if section is hidden
-                }
-
-                if (toggleLocationRowGeneral) toggleLocationRowGeneral.checked = <?php echo $surveySettings['show_location_row_general'] ? 'true' : 'false'; ?>;
-                if (locationRowGeneral) locationRowGeneral.classList.toggle('hidden-element', !toggleLocationRowGeneral.checked);
-
-                if (toggleLocationRowPeriodAge) toggleLocationRowPeriodAge.checked = <?php echo $surveySettings['show_location_row_period_age'] ? 'true' : 'false'; ?>;
-                if (locationRowPeriodAge) locationRowPeriodAge.classList.toggle('hidden-element', !toggleLocationRowPeriodAge.checked);
-
-                if (toggleOwnershipSection) toggleOwnershipSection.checked = <?php echo $surveySettings['show_ownership_section'] ? 'true' : 'false'; ?>;
-                if (ownershipSection) ownershipSection.classList.toggle('hidden-element', !toggleOwnershipSection.checked);
+    });
+    
+    // Dynamic Images Functions
+    function updateImageFields() {
+        const imageCount = document.getElementById('imageCount').value;
+        const container = document.getElementById('imageFieldsContainer');
+        const previewContainer = document.getElementById('previewImagesContainer');
+        
+        // Clear existing fields
+        container.innerHTML = '';
+        
+        if (imageCount > 0) {
+            previewContainer.style.display = 'block';
+            for (let i = 1; i <= imageCount; i++) {
+                const fieldHTML = `
+                    <div class="dynamic-image-field" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+                        <h5 style="color: #2c3e50; margin-bottom: 10px;">Image ${i}</h5>
+                        
+                        <div class="mb-2">
+                            <label for="imageUpload${i}" class="form-label">Upload Image:</label>
+                            <input type="file" id="imageUpload${i}" accept="image/*" onchange="handleImageUpload(${i})" class="form-control">
+                        </div>
+                        
+                        <div class="mb-2">
+                            <label for="imageAlt${i}" class="form-label">Alt Text:</label>
+                            <input type="text" id="imageAlt${i}" placeholder="Description of image ${i}" class="form-control">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="imageWidth${i}" class="form-label">Width (px):</label>
+                                <input type="number" id="imageWidth${i}" value="100" min="50" max="500" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="imageHeight${i}" class="form-label">Height (px):</label>
+                                <input type="number" id="imageHeight${i}" value="80" min="50" max="500" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="imagePosition${i}" class="form-label">Position:</label>
+                                <select id="imagePosition${i}" class="form-control">
+                                    <option value="left">Left</option>
+                                    <option value="center" selected>Center</option>
+                                    <option value="right">Right</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', fieldHTML);
             }
-
-            toggleSubmitButton.checked = <?php echo $surveySettings['show_submit_button'] ? 'true' : 'false'; ?>;
-            submitButtonPreview.classList.toggle('hidden-element', !toggleSubmitButton.checked);
-
-            editRepublicTitleShare.value = "<?php echo htmlspecialchars($surveySettings['republic_title_text'] ?? ''); ?>";
-            republicTitleElement.textContent = editRepublicTitleShare.value;
-            toggleRepublicTitleShare.checked = <?php echo $surveySettings['show_republic_title_share'] ? 'true' : 'false'; ?>;
-            republicTitleElement.classList.toggle('hidden-element', !toggleRepublicTitleShare.checked);
-
-            editMinistrySubtitleShare.value = "<?php echo htmlspecialchars($surveySettings['ministry_subtitle_text'] ?? ''); ?>";
-            ministrySubtitleElement.textContent = editMinistrySubtitleShare.value;
-            toggleMinistrySubtitleShare.checked = <?php echo $surveySettings['show_ministry_subtitle_share'] ? 'true' : 'false'; ?>;
-            ministrySubtitleElement.classList.toggle('hidden-element', !toggleMinistrySubtitleShare.checked);
-
-            editQrInstructionsShare.value = "<?php echo htmlspecialchars($surveySettings['qr_instructions_text'] ?? ''); ?>";
-            toggleQrInstructionsShare.checked = <?php echo $surveySettings['show_qr_instructions_share'] ? 'true' : 'false'; ?>;
-
-            editFooterNoteShare.value = "<?php echo htmlspecialchars($surveySettings['footer_note_text'] ?? ''); ?>";
-            toggleFooterNoteShare.checked = <?php echo $surveySettings['show_footer_note_share'] ? 'true' : 'false'; ?>;
-        };
-
-        window.loadPreviewSettings(); // Call on initial load
-
-        document.getElementById('share-btn').addEventListener('click', async function() {
-            await window.savePreviewSettings();
-            const surveyUrl = window.location.origin + '/fbs/admin/survey_page.php?survey_id=' + surveyId;
-            window.location.href = `share_page.php?survey_id=${surveyId}&url=${encodeURIComponent(surveyUrl)}`;
+        } else {
+            previewContainer.style.display = 'none';
+        }
+        
+        updatePreviewImages();
+    }
+    
+    function handleImageUpload(imageNumber) {
+        const fileInput = document.getElementById(`imageUpload${imageNumber}`);
+        const file = fileInput.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Store the image data for later use
+                window[`imageData${imageNumber}`] = e.target.result;
+                updatePreviewImages();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    function updatePreviewImages() {
+        const imageCount = document.getElementById('imageCount')?.value || 0;
+        const layout = document.getElementById('imageLayout')?.value || 'horizontal';
+        const previewDisplay = document.getElementById('previewImagesDisplay');
+        const configPreview = document.getElementById('configPreviewImages');
+        const toggleDynamicImages = document.getElementById('toggle-dynamic-images');
+        
+        if (!previewDisplay) {
+            console.error('Preview display element not found');
+            return;
+        }
+        
+        // Check visibility toggle
+        if (toggleDynamicImages && !toggleDynamicImages.checked) {
+            previewDisplay.style.display = 'none';
+            if (configPreview) configPreview.style.display = 'none';
+            return;
+        } else {
+            previewDisplay.style.display = 'block';
+            if (configPreview) configPreview.style.display = 'flex';
+        }
+        
+        // Update layout class for both preview areas
+        previewDisplay.className = 'dynamic-images-container ' + layout;
+        if (configPreview) {
+            configPreview.className = layout;
+        }
+        
+        // Clear existing previews
+        previewDisplay.innerHTML = '';
+        if (configPreview) configPreview.innerHTML = '';
+        
+        console.log('Updating preview with', imageCount, 'images');
+        
+        if (imageCount > 0) {
+            let imagesAdded = 0;
+            for (let i = 1; i <= imageCount; i++) {
+                const imageData = window[`imageData${i}`];
+                console.log(`Checking image ${i}:`, imageData ? 'has data' : 'no data');
+                if (imageData) {
+                    const width = document.getElementById(`imageWidth${i}`)?.value || 100;
+                    const height = document.getElementById(`imageHeight${i}`)?.value || 80;
+                    const altText = document.getElementById(`imageAlt${i}`)?.value || `Image ${i}`;
+                    
+                    const imgElement = document.createElement('div');
+                    imgElement.className = 'preview-image-item';
+                    imgElement.innerHTML = `
+                        <img src="${imageData}" 
+                             alt="${altText}" 
+                             style="width: ${width}px; height: ${height}px; object-fit: contain; margin: 5px; border: 1px solid #ddd; border-radius: 4px;"
+                             title="${altText}">
+                    `;
+                    previewDisplay.appendChild(imgElement);
+                    imagesAdded++;
+                    console.log(`Added image ${i} to preview`);
+                }
+            }
+            console.log(`Total images added to preview: ${imagesAdded}`);
+        } else {
+            console.log('No images to display (imageCount = 0)');
+        }
+    }
+    
+    // Add event listener for layout changes
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageLayoutSelect = document.getElementById('imageLayout');
+        if (imageLayoutSelect) {
+            imageLayoutSelect.addEventListener('change', updatePreviewImages);
+        }
+        
+        // Add event listener for dynamic images toggle
+        const toggleDynamicImages = document.getElementById('toggle-dynamic-images');
+        if (toggleDynamicImages) {
+            toggleDynamicImages.addEventListener('change', updatePreviewImages);
+        }
+        
+        // Load saved dynamic images from database
+        const savedImages = <?php echo json_encode($savedDynamicImages); ?>;
+        const savedLayout = <?php echo json_encode($savedImageLayout); ?>;
+        
+        console.log('Loading saved images:', savedImages);
+        console.log('Number of saved images:', savedImages ? savedImages.length : 0);
+        console.log('Image layout:', savedLayout);
+        
+        if (savedImages && savedImages.length > 0) {
+            // Set the image count
+            const imageCountSelect = document.getElementById('imageCount');
+            if (imageCountSelect) {
+                imageCountSelect.value = savedImages.length;
+                updateImageFields(); // This creates the input fields
+            }
+            
+            // Set the layout
+            const imageLayoutSelect = document.getElementById('imageLayout');
+            if (imageLayoutSelect) {
+                imageLayoutSelect.value = savedLayout;
+            }
+            
+            // Load the image data after a short delay to ensure fields are created
+            setTimeout(() => {
+                savedImages.forEach((image, index) => {
+                    const imageNumber = index + 1;
+                    
+                    // Set form field values
+                    const altField = document.getElementById(`imageAlt${imageNumber}`);
+                    const widthField = document.getElementById(`imageWidth${imageNumber}`);
+                    const heightField = document.getElementById(`imageHeight${imageNumber}`);
+                    const positionField = document.getElementById(`imagePosition${imageNumber}`);
+                    
+                    if (altField) altField.value = image.alt_text || '';
+                    if (widthField) widthField.value = image.width || 100;
+                    if (heightField) heightField.value = image.height || 80;
+                    if (positionField) positionField.value = image.position || 'center';
+                    
+                    // Load the actual image and store it in memory
+                    if (image.path) {
+                        // The path is stored as "asets/img/filename", we need "/fbs/admin/asets/img/filename"
+                        const fullImagePath = '/fbs/admin/' + image.path;
+                        console.log(`Loading saved image ${imageNumber} from:`, fullImagePath);
+                        console.log('Original path from database:', image.path);
+                        
+                        // Convert the server image back to base64 for preview
+                        fetch(fullImagePath)
+                            .then(response => {
+                                console.log(`Response status for image ${imageNumber}:`, response.status);
+                                if (!response.ok) {
+                                    throw new Error(`HTTP ${response.status}`);
+                                }
+                                return response.blob();
+                            })
+                            .then(blob => {
+                                console.log(`Got blob for image ${imageNumber}, size:`, blob.size);
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    window[`imageData${imageNumber}`] = e.target.result;
+                                    console.log(`Loaded image ${imageNumber} into memory, data length:`, e.target.result.length);
+                                    updatePreviewImages();
+                                };
+                                reader.readAsDataURL(blob);
+                            })
+                            .catch(error => {
+                                console.error(`Failed to load saved image ${imageNumber} from ${fullImagePath}:`, error);
+                            });
+                    }
+                });
+            }, 100);
+        }
+        
+        // Initial call to setup the preview
+        console.log('DOM loaded, calling updatePreviewImages');
+        
+        
+        updatePreviewImages();
+        
+        // Handle sidebar toggle functionality
+        const sidebarToggle = document.querySelector('[data-bs-toggle="sidenav"]');
+        const body = document.body;
+        
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                // Toggle the sidebar visibility class
+                body.classList.toggle('g-sidenav-hidden');
+                
+                // Force a small delay to ensure CSS transitions work
+                setTimeout(() => {
+                    // Trigger any layout recalculations if needed
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
+            });
+        }
+        
+        // Also handle any existing Argon sidebar toggles
+        document.querySelectorAll('.sidenav-toggler').forEach(toggler => {
+            toggler.addEventListener('click', function() {
+                body.classList.toggle('g-sidenav-hidden');
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
+            });
         });
     });
 </script>
 
-<script defer src="survey_page.js"></script>
+    <script src="argon-dashboard-master/assets/js/core/popper.min.js"></script>
+    <script src="argon-dashboard-master/assets/js/core/bootstrap.min.js"></script>
+    <script src="argon-dashboard-master/assets/js/plugins/perfect-scrollbar.min.js"></script>
+    <script src="argon-dashboard-master/assets/js/plugins/smooth-scrollbar.min.js"></script>
 </body>
 </html>

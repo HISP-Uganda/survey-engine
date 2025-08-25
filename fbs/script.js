@@ -145,39 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
     new FacilitySearch();
 });
 
-// Fetch service units on page load
-document.addEventListener('DOMContentLoaded', function () {
-    fetch('get_service_units.php')
-        .then(response => response.json())
-        .then(data => {
-            const serviceUnitSelect = document.getElementById('serviceUnit');
-            serviceUnitSelect.innerHTML = '<option value="">none selected</option>'; // Reset options
-            data.forEach(unit => {
-                serviceUnitSelect.innerHTML += `<option value="${unit.id}">${unit.name}</option>`;
-            });
-        })
-        .catch(error => console.error('Error fetching service units:', error));
-});
-
-
-
-// Fetch ownership options on page load
-document.addEventListener('DOMContentLoaded', function () {
-    fetch('get_ownership_options.php')
-        .then(response => response.json())
-        .then(data => {
-            const ownershipOptionsDiv = document.getElementById('ownership-options');
-            data.forEach(option => {
-                ownershipOptionsDiv.innerHTML += `
-                    <label class="radio-option">
-                        <input type="radio" name="ownership" value="${option.id}" class="radio" data-translate="${option.name.toLowerCase()}"/>
-                        <span>${option.name}</span>
-                    </label>
-                `;
-            });
-        })
-        .catch(error => console.error('Error fetching ownership options:', error));
-});
+// Service units and ownership options are now loaded directly within survey pages
+// These fetch calls have been removed as the referenced files no longer exist
 
 // Form validation
 function validateForm() {
@@ -233,35 +202,4 @@ function toggleDemographics() {
     return true;
 }
 
-document.getElementById('languageSelect').addEventListener('change', function () {
-    const selectedLanguage = this.value;
-
-    // Fetch translations for the selected language
-    fetch(`get_translations.php?language=${selectedLanguage}`)
-        .then(response => response.json())
-        .then(translations => {
-            // Update question labels
-            document.querySelectorAll('.question-label').forEach(label => {
-                const questionId = label.dataset.questionId;
-                if (translations.questions[questionId]) {
-                    label.textContent = translations.questions[questionId];
-                }
-            });
-
-            // Update option labels
-            document.querySelectorAll('.option-label').forEach(label => {
-                const optionId = label.dataset.optionId;
-                if (translations.options[optionId]) {
-                    label.textContent = translations.options[optionId];
-                }
-            });
-
-            // Update default text (e.g., headings, buttons)
-            document.querySelectorAll('[data-translate]').forEach(element => {
-                const key = element.dataset.translate;
-                if (translations.defaultText[key]) {
-                    element.textContent = translations.defaultText[key];
-                }
-            });
-        });
-});
+// Translation functionality has been moved to translations.js with proper error handling

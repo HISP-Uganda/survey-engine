@@ -5,14 +5,14 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Ensure the PDO connection is available
-require_once 'connect.php'; // This should provide $pdo
+require_once __DIR__ . '/../connect.php'; // This should provide $pdo
 if (!isset($pdo)) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Database connection failed: Central PDO object not found. Please check connect.php.']);
     exit();
 }
 
-require_once 'dhis2/dhis2_shared.php'; // Ensure this provides dhis2_get() and dhis2_post()
+require_once __DIR__ . '/dhis2_shared.php'; // Ensure this provides dhis2_get() and dhis2_post()
 
 class DHIS2SubmissionHandler {
     private $pdo;
@@ -63,7 +63,7 @@ class DHIS2SubmissionHandler {
             $this->datasetUID = null;
         }
 
-        $this->loadSystemFieldMappings(); // Load mappings for fields like age, sex, etc.
+        $this->loadSystemFieldMappings(); // Load mappings for system fields
 
         error_log("Fully initialized DHIS2 Handler - Instance: {$this->instance}, Program: {$this->programUID}, Dataset: {$this->datasetUID}, Type: {$this->programType}, TE Type: {$this->trackedEntityTypeUID}");
     }
@@ -131,7 +131,7 @@ class DHIS2SubmissionHandler {
     }
 
     /**
-     * Loads system field mappings (e.g., for ownership, service_unit, age, sex).
+     * Loads system field mappings for available system fields.
      * ASSUMPTION: dhis2_system_field_mapping table has columns for dhis2_dataelement_id, dhis2_attribute_id, dhis2_option_set_id.
      */
     private function loadSystemFieldMappings(): void {
@@ -148,7 +148,7 @@ class DHIS2SubmissionHandler {
 
     /**
      * Retrieves the DHIS2 UID for a given local field name and type (data_element or attribute).
-     * @param string $fieldName The local field name (e.g., 'age', 'ownership').
+     * @param string $fieldName The local field name.
      * @param string $dhis2FieldType 'data_element' or 'attribute'.
      * @return string|null The DHIS2 UID or null if not found.
      */
@@ -181,7 +181,7 @@ class DHIS2SubmissionHandler {
     public function processSubmission(int $submissionId): array {
     if (!$this->isReadyForSubmission()) {
         $message = 'DHIS2 handler not configured for submission (missing instance or program UID).';
-        $this->markAsSubmitted($submissionId, 'SKIPPED', null, null, $message); // Log skipped attempts
+        $this->markAsSubmitted($submissionId, 'FAILED', null, null, $message); // Log skipped attempts as FAILED
         return ['success' => false, 'message' => $message];
     }
 
@@ -239,6 +239,7 @@ class DHIS2SubmissionHandler {
      * @param int $submissionId
      */
      private function markAsSubmitted(int $submissionId, string $status, ?array $payload = null, ?array $dhis2Response = null, ?string $dhis2Message = null): void {
+        try {
             // Prepare JSON data for storage
             $payloadJson = $payload ? json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null;
             $dhis2ResponseJson = $dhis2Response ? json_encode($dhis2Response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null;
@@ -252,7 +253,7 @@ class DHIS2SubmissionHandler {
                     dhis2_response = VALUES(dhis2_response),
                     dhis2_message = VALUES(dhis2_message),
                     submitted_at = NOW(),
-                    retries = retries + 1 -- Increment retries on update
+                    retries = retries + 1
             ");
 
             $stmt->execute([
@@ -263,42 +264,71 @@ class DHIS2SubmissionHandler {
                 $dhis2Message
             ]);
             error_log("Submission ID $submissionId marked as $status in dhis2_submission_log. Message: " . ($dhis2Message ?? 'N/A'));
+        } catch (PDOException $e) {
+            error_log("Failed to log DHIS2 submission for submission ID $submissionId: " . $e->getMessage());
+            error_log("Attempted status: $status, message: " . ($dhis2Message ?? 'N/A'));
         }
-
-    /**
-     * Generates a consistent unique UID for tracker entities/events/enrollments
-     * based on local submission ID.
-     * @param int $submissionId
-     * @return string 11-character UID
-     */
-    private function generateUniqueTrackerEventOrEnrollmentUID(int $submissionId): string {
-        // Use a consistent string for hashing to ensure idempotency for the same submission
-        $baseString = $submissionId . '-' . $this->surveyId . '-' . $this->programUID . '-' . $this->programType;
-        return substr(md5($baseString), 0, 11);
     }
 
     /**
-     * Fetches submission main data (location, ownership, service unit, period, age, sex).
+     * Generates a consistent unique UID for tracker entities/events/enrollments
+     * based on local submission ID. Uses DHIS2 standard 11-character UID format.
+     * @param mixed $identifier The identifier to generate UID from
+     * @return string 11-character DHIS2-compliant UID
+     */
+    private function generateUniqueTrackerEventOrEnrollmentUID($identifier): string {
+        // Create a deterministic UID that follows DHIS2 conventions
+        // DHIS2 UIDs: 11 characters, alphanumeric, first character must be a letter
+        $baseString = $identifier . '-' . $this->surveyId . '-' . ($this->programUID ?? $this->datasetUID) . '-' . $this->programType;
+        $hash = md5($baseString);
+        
+        // Ensure first character is a letter (DHIS2 requirement)
+        $firstChar = chr(ord('A') + (hexdec($hash[0]) % 26));
+        
+        // Get alphanumeric characters from hash
+        $alphanumeric = '';
+        for ($i = 1; $i < strlen($hash) && strlen($alphanumeric) < 10; $i++) {
+            $char = $hash[$i];
+            if (ctype_alnum($char) && $char !== '0' && $char !== 'O') { // Avoid confusing characters
+                $alphanumeric .= strtoupper($char);
+            }
+        }
+        
+        // If we don't have enough characters, pad with numbers
+        $remaining = str_pad($alphanumeric, 10, '123456789', STR_PAD_RIGHT);
+        $remaining = substr($remaining, 0, 10);
+        
+        $uid = $firstChar . $remaining;
+        
+        // Ensure exactly 11 characters and valid format
+        $uid = substr($uid, 0, 11);
+        if (strlen($uid) < 11) {
+            $uid = str_pad($uid, 11, '1');
+        }
+        
+        error_log("Generated UID for identifier '$identifier': $uid");
+        return $uid;
+    }
+
+    /**
+     * Fetches submission main data (location and survey info).
      * @param int $submissionId
      * @return array|null
      */
     private function getSubmissionData(int $submissionId): ?array {
         $stmt = $this->pdo->prepare("
             SELECT
-                s.id, s.location_id, s.ownership_id, s.service_unit_id,
-                s.period, s.age, s.sex, s.created,
-                l.uid as location_uid,
-                o.name as ownership_name,
-                su.name as service_unit_name
+                s.id, s.uid, s.location_id, s.survey_id, s.created,
+                l.uid as location_uid
             FROM submission s
             LEFT JOIN location l ON s.location_id = l.id
-            LEFT JOIN owner o ON s.ownership_id = o.id
-            LEFT JOIN service_unit su ON s.service_unit_id = su.id
             WHERE s.id = ?
         ");
         $stmt->execute([$submissionId]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($data) {
+            // Add a default period based on created date since period column doesn't exist
+            $data['period'] = date('Y-m-d', strtotime($data['created']));
             error_log("Fetched submission data: " . json_encode($data, JSON_PRETTY_PRINT));
         } else {
             error_log("No submission data found for ID: $submissionId");
@@ -345,8 +375,8 @@ class DHIS2SubmissionHandler {
 
         switch ($this->programType) {
             case 'event':
-                $dataValues = $this->prepareProgramStageDataElements($submissionData, $responses, 'event');
-                return $this->prepareEventPayload($submissionData, $dataValues, $uniqueUID, $eventDate);
+                $dataValuesByStage = $this->prepareProgramStageDataElements($submissionData, $responses, 'event');
+                return $this->prepareEventPayload($submissionData, $dataValuesByStage, $uniqueUID, $eventDate);
 
             case 'tracker':
                 $trackedEntityAttributes = $this->prepareTrackedEntityAttributes($submissionData, $responses);
@@ -354,8 +384,13 @@ class DHIS2SubmissionHandler {
                 return $this->prepareTrackerPayload($submissionData, $trackedEntityAttributes, $programStageDataValues, $uniqueUID, $eventDate);
 
             case 'dataset':
-                $dataValues = $this->prepareProgramStageDataElements($submissionData, $responses, 'dataset'); // Using this for general data elements
-                return $this->prepareDatasetPayload($submissionData, $dataValues, $eventDate); // 'eventDate' is used for 'period' here
+                $dataValuesByStage = $this->prepareProgramStageDataElements($submissionData, $responses, 'dataset'); // Using this for general data elements
+                // For datasets, flatten all data values into a single array
+                $allDataValues = [];
+                foreach ($dataValuesByStage as $stageId => $dataValues) {
+                    $allDataValues = array_merge($allDataValues, $dataValues);
+                }
+                return $this->prepareDatasetPayload($submissionData, $allDataValues, $eventDate); // 'eventDate' is used for 'period' here
 
             default:
                 throw new Exception("Unsupported program type encountered: {$this->programType}");
@@ -368,57 +403,21 @@ class DHIS2SubmissionHandler {
      * @param array $submissionData
      * @param array $responses All local submission responses.
      * @param string $context 'event', 'tracker', or 'dataset' to guide system field mapping.
-     * @return array DHIS2 Data Values array.
+     * @return array DHIS2 Data Values array grouped by program stage.
      */
     private function prepareProgramStageDataElements(array $submissionData, array $responses, string $context): array {
-        $dataValues = [];
+        $dataValuesByStage = [];
 
         // 1. Add system fields mapped as Data Elements
-        // Adjust these to reflect how your 'dhis2_system_field_mapping' distinguishes DEs.
-        // For simplicity, I'm assuming 'ownership', 'service_unit', 'age', 'sex', 'period'
-        // can all be data elements if mapped appropriately.
-
-        // Ownership
-        $ownershipDE = $this->getMappedUID('ownership', 'data_element');
-        if (!empty($submissionData['ownership_name']) && $ownershipDE) {
-            $ownershipCode = $this->getOptionCode($submissionData['ownership_name'], $this->getMappedOptionSetId('ownership'));
-            if ($ownershipCode) {
-                $dataValues[] = ['dataElement' => $ownershipDE, 'value' => $ownershipCode];
-                error_log("Added system field (DE) 'ownership': {$submissionData['ownership_name']} -> $ownershipCode (DE: $ownershipDE)");
-            } else { error_log("WARNING: Option code not found for system field 'ownership' value '{$submissionData['ownership_name']}'."); }
-        }
-
-        // Service Unit
-        $serviceUnitDE = $this->getMappedUID('service_unit', 'data_element');
-        if (!empty($submissionData['service_unit_name']) && $serviceUnitDE) {
-            $serviceUnitCode = $this->getOptionCode($submissionData['service_unit_name'], $this->getMappedOptionSetId('service_unit'));
-            if ($serviceUnitCode) {
-                $dataValues[] = ['dataElement' => $serviceUnitDE, 'value' => $serviceUnitCode];
-                error_log("Added system field (DE) 'service_unit': {$submissionData['service_unit_name']} -> $serviceUnitCode (DE: $serviceUnitDE)");
-            } else { error_log("WARNING: Option code not found for system field 'service_unit' value '{$submissionData['service_unit_name']}'."); }
-        }
-
-        // Age
-        $ageDE = $this->getMappedUID('age', 'data_element');
-        if (!empty($submissionData['age']) && $ageDE) {
-            $dataValues[] = ['dataElement' => $ageDE, 'value' => (string)$submissionData['age']];
-            error_log("Added system field (DE) 'age': {$submissionData['age']} (DE: $ageDE)");
-        }
-
-        // Sex
-        $sexDE = $this->getMappedUID('sex', 'data_element');
-        if (!empty($submissionData['sex']) && $sexDE) {
-            $sexCode = $this->getOptionCode($submissionData['sex'], $this->getMappedOptionSetId('sex'));
-            if ($sexCode) {
-                $dataValues[] = ['dataElement' => $sexDE, 'value' => $sexCode];
-                error_log("Added system field (DE) 'sex': {$submissionData['sex']} -> $sexCode (DE: $sexDE)");
-            } else { error_log("WARNING: Option code not found for system field 'sex' value '{$submissionData['sex']}'."); }
-        }
+        // Note: Previously used demographic fields (ownership, service_unit, age, sex) have been removed
+        // from the database schema and are no longer processed here.
 
         // Period (if needed as a data element, though often part of event metadata)
         $periodDE = $this->getMappedUID('period', 'data_element');
         if (!empty($submissionData['period']) && $periodDE) {
-            $dataValues[] = ['dataElement' => $periodDE, 'value' => $submissionData['period']];
+            // For system fields, use the first program stage as default
+            $defaultStage = $this->getFirstProgramStageUID();
+            $dataValuesByStage[$defaultStage][] = ['dataElement' => $periodDE, 'value' => $submissionData['period']];
             error_log("Added system field (DE) 'period': {$submissionData['period']} (DE: $periodDE)");
         }
 
@@ -428,7 +427,7 @@ class DHIS2SubmissionHandler {
         if (!empty($questionIds)) {
             $placeholders = implode(',', array_fill(0, count($questionIds), '?'));
             $stmt = $this->pdo->prepare("
-                SELECT qm.question_id, qm.dhis2_dataelement_id, qm.dhis2_option_set_id
+                SELECT qm.question_id, qm.dhis2_dataelement_id, qm.dhis2_option_set_id, qm.dhis2_program_stage_id
                 FROM question_dhis2_mapping qm
                 WHERE qm.question_id IN ($placeholders)
                   AND qm.dhis2_dataelement_id IS NOT NULL
@@ -458,14 +457,15 @@ class DHIS2SubmissionHandler {
                     }
                 }
 
-                $dataValues[] = [
+                $programStage = $mapping['dhis2_program_stage_id'] ?? $this->getFirstProgramStageUID();
+                $dataValuesByStage[$programStage][] = [
                     'dataElement' => $mapping['dhis2_dataelement_id'],
                     'value' => (string)$valueToSubmit
                 ];
-                error_log("Mapped question (DE) $questionId: '$responseValue' -> '$valueToSubmit' (DE: {$mapping['dhis2_dataelement_id']})");
+                error_log("Mapped question (DE) $questionId: '$responseValue' -> '$valueToSubmit' (DE: {$mapping['dhis2_dataelement_id']}, Stage: $programStage)");
             }
         }
-        return $dataValues;
+        return $dataValuesByStage;
     }
 
     /**
@@ -479,45 +479,8 @@ class DHIS2SubmissionHandler {
         $attributes = [];
 
         // 1. Add system fields mapped as Tracked Entity Attributes
-        // Assuming your 'dhis2_system_field_mapping' table can map fields to dhis2_attribute_id.
-        // For example, if 'age' and 'sex' are TEAs.
-
-        // Ownership (as TEA, if applicable)
-        $ownershipTEA = $this->getMappedUID('ownership', 'attribute');
-        if (!empty($submissionData['ownership_name']) && $ownershipTEA) {
-            $ownershipCode = $this->getOptionCode($submissionData['ownership_name'], $this->getMappedOptionSetId('ownership'));
-            if ($ownershipCode) {
-                $attributes[] = ['attribute' => $ownershipTEA, 'value' => $ownershipCode];
-                error_log("Added system field (TEA) 'ownership': {$submissionData['ownership_name']} -> $ownershipCode (TEA: $ownershipTEA)");
-            }
-        }
-
-        // Service Unit (as TEA, if applicable)
-        $serviceUnitTEA = $this->getMappedUID('service_unit', 'attribute');
-        if (!empty($submissionData['service_unit_name']) && $serviceUnitTEA) {
-            $serviceUnitCode = $this->getOptionCode($submissionData['service_unit_name'], $this->getMappedOptionSetId('service_unit'));
-            if ($serviceUnitCode) {
-                $attributes[] = ['attribute' => $serviceUnitTEA, 'value' => $serviceUnitCode];
-                error_log("Added system field (TEA) 'service_unit': {$submissionData['service_unit_name']} -> $serviceUnitCode (TEA: $serviceUnitTEA)");
-            }
-        }
-
-        // Age (as TEA, if applicable)
-        $ageTEA = $this->getMappedUID('age', 'attribute');
-        if (!empty($submissionData['age']) && $ageTEA) {
-            $attributes[] = ['attribute' => $ageTEA, 'value' => (string)$submissionData['age']];
-            error_log("Added system field (TEA) 'age': {$submissionData['age']} (TEA: $ageTEA)");
-        }
-
-        // Sex (as TEA, if applicable)
-        $sexTEA = $this->getMappedUID('sex', 'attribute');
-        if (!empty($submissionData['sex']) && $sexTEA) {
-            $sexCode = $this->getOptionCode($submissionData['sex'], $this->getMappedOptionSetId('sex'));
-            if ($sexCode) {
-                $attributes[] = ['attribute' => $sexTEA, 'value' => $sexCode];
-                error_log("Added system field (TEA) 'sex': {$submissionData['sex']} -> $sexCode (TEA: $sexTEA)");
-            }
-        }
+        // Note: Previously used demographic fields (ownership, service_unit, age, sex) have been removed
+        // from the database schema and are no longer processed here.
 
         // 2. Add local question responses mapped to DHIS2 Tracked Entity Attributes
         // ASSUMPTION: question_dhis2_mapping has `dhis2_attribute_id` and `dhis2_option_set_id` for TEAs
@@ -565,78 +528,123 @@ class DHIS2SubmissionHandler {
     }
 
     /**
-     * Prepares the payload for an DHIS2 Event Program.
+     * Prepares the payload for an DHIS2 Event Program using modern tracker API.
      * @param array $submissionData
-     * @param array $dataValues Data elements for the event.
-     * @param string $eventUID Unique UID for the event.
+     * @param array $dataValuesByStage Data elements grouped by program stage.
+     * @param string $baseEventUID Base UID for events.
      * @param string $eventDate Date of the event.
-     * @return array
+     * @return array Modern DHIS2 tracker API payload
      */
-    private function prepareEventPayload(array $submissionData, array $dataValues, string $eventUID, string $eventDate): array {
+    private function prepareEventPayload(array $submissionData, array $dataValuesByStage, string $baseEventUID, string $eventDate): array {
+        $events = [];
+        $eventCounter = 1;
+        
+        foreach ($dataValuesByStage as $programStageId => $dataValues) {
+            if (empty($dataValues)) continue;
+            
+            $eventUID = $eventCounter === 1 ? $baseEventUID : $this->generateUniqueTrackerEventOrEnrollmentUID($submissionData['id'] . '_Event_' . $eventCounter);
+            
+            $events[] = [
+                'event' => $eventUID,
+                'orgUnit' => $submissionData['location_uid'],
+                'program' => $this->programUID,
+                'programStage' => $programStageId,
+                'occurredAt' => $eventDate,
+                'scheduledAt' => $eventDate,
+                'status' => 'COMPLETED',
+                'completedAt' => date('Y-m-d\TH:i:s.000'),
+                'storedBy' => 'FBS_System',
+                'dataValues' => array_map(function($dv) {
+                    return [
+                        'dataElement' => $dv['dataElement'],
+                        'value' => (string)$dv['value'],
+                        'providedElsewhere' => false
+                    ];
+                }, $dataValues)
+            ];
+            
+            error_log("Created event for program stage: $programStageId with " . count($dataValues) . " data values");
+            $eventCounter++;
+        }
+        
         return [
-            'events' => [
-                [
-                    'event' => $eventUID, // This is event ID
-                    'orgUnit' => $submissionData['location_uid'],
-                    'program' => $this->programUID,
-                    'eventDate' => $eventDate,
-                    'occurredAt' => $eventDate, // DHIS2 prefers occurredAt for events
-                    'status' => 'COMPLETED',
-                    'dataValues' => $dataValues,
-                    'storedBy' => 'LocalSystem' // Optional: Indicate who stored it
-                ]
-            ]
+            'events' => $events
         ];
     }
 
     /**
-     * Prepares the payload for a DHIS2 Tracker Program.
+     * Prepares the payload for a DHIS2 Tracker Program using modern tracker API.
      * @param array $submissionData
      * @param array $trackedEntityAttributes Attributes for the TEI.
      * @param array $programStageDataValues Data elements for the program stage event.
      * @param string $enrollmentUID Unique UID for the enrollment.
      * @param string $eventDate Date of the event/enrollment.
-     * @return array
+     * @return array Modern DHIS2 tracker API payload
      * @throws Exception If tracked entity type UID is missing.
      */
-    private function prepareTrackerPayload(array $submissionData, array $trackedEntityAttributes, array $programStageDataValues, string $enrollmentUID, string $eventDate): array {
+    private function prepareTrackerPayload(array $submissionData, array $trackedEntityAttributes, array $programStageDataValuesByStage, string $enrollmentUID, string $eventDate): array {
         if (empty($this->trackedEntityTypeUID)) {
             error_log("ERROR: Tracked Entity Type UID is not set for tracker program {$this->programUID}. Cannot create payload.");
             throw new Exception("Tracked Entity Type UID missing for tracker program.");
         }
 
-        // Generate consistent UIDs for TEI and event within the enrollment
-        $trackedEntityInstanceUID = $this->generateUniqueTrackerEventOrEnrollmentUID($submissionData['id'] . '_TEI'); // Separate UID for TEI
-        $eventUID = $this->generateUniqueTrackerEventOrEnrollmentUID($submissionData['id'] . '_Event'); // Separate UID for event
+        // Generate consistent UIDs for TEI
+        $trackedEntityUID = $this->generateUniqueTrackerEventOrEnrollmentUID($submissionData['id'] . '_TEI');
 
+        // Create events for each program stage that has data
+        $events = [];
+        $eventCounter = 1;
+        
+        foreach ($programStageDataValuesByStage as $programStageId => $dataValues) {
+            if (empty($dataValues)) continue;
+            
+            $eventUID = $this->generateUniqueTrackerEventOrEnrollmentUID($submissionData['id'] . '_Event_' . $eventCounter);
+            
+            $events[] = [
+                'event' => $eventUID,
+                'program' => $this->programUID,
+                'programStage' => $programStageId,
+                'orgUnit' => $submissionData['location_uid'],
+                'occurredAt' => $eventDate,
+                'scheduledAt' => $eventDate,
+                'status' => 'COMPLETED',
+                'completedAt' => date('Y-m-d\TH:i:s.000'),
+                'storedBy' => 'FBS_System',
+                'dataValues' => array_map(function($dv) {
+                    return [
+                        'dataElement' => $dv['dataElement'],
+                        'value' => (string)$dv['value'],
+                        'providedElsewhere' => false
+                    ];
+                }, $dataValues)
+            ];
+            
+            error_log("Created event for program stage: $programStageId with " . count($dataValues) . " data values");
+            $eventCounter++;
+        }
+
+        // Modern tracker API payload structure
         return [
-            'trackedEntityInstances' => [
+            'trackedEntities' => [
                 [
-                    'trackedEntityInstance' => $trackedEntityInstanceUID,
-                    'trackedEntityType' => $this->trackedEntityTypeUID, // Dynamic TE type UID
+                    'trackedEntity' => $trackedEntityUID,
+                    'trackedEntityType' => $this->trackedEntityTypeUID,
                     'orgUnit' => $submissionData['location_uid'],
-                    'attributes' => $trackedEntityAttributes, // TRACKED ENTITY ATTRIBUTES GO HERE
-
+                    'attributes' => array_map(function($attr) {
+                        return [
+                            'attribute' => $attr['attribute'],
+                            'value' => (string)$attr['value']
+                        ];
+                    }, $trackedEntityAttributes),
                     'enrollments' => [
                         [
-                            'enrollment' => $enrollmentUID, // This is the enrollment ID
+                            'enrollment' => $enrollmentUID,
                             'program' => $this->programUID,
                             'orgUnit' => $submissionData['location_uid'],
-                            'enrollmentDate' => $eventDate,
-                            'incidentDate' => $eventDate,
+                            'enrolledAt' => $eventDate,
+                            'occurredAt' => $eventDate,
                             'status' => 'COMPLETED',
-                            'events' => [
-                                [
-                                    'event' => $eventUID, // This is the event ID for the program stage
-                                    'program' => $this->programUID,
-                                    'programStage' => $this->getProgramStageUID(), // Gets the default/first program stage
-                                    'orgUnit' => $submissionData['location_uid'],
-                                    'eventDate' => $eventDate,
-                                    'status' => 'COMPLETED',
-                                    'dataValues' => $programStageDataValues, // PROGRAM STAGE DATA ELEMENTS GO HERE
-                                    'storedBy' => 'LocalSystem'
-                                ]
-                            ]
+                            'events' => $events
                         ]
                     ]
                 ]
@@ -651,6 +659,16 @@ class DHIS2SubmissionHandler {
      * @throws Exception If no program stage is found.
      */
     private function getProgramStageUID(): string {
+        return $this->getFirstProgramStageUID();
+    }
+
+    /**
+     * Retrieves the UID of the first program stage for the current program.
+     * Caches the result.
+     * @return string The program stage UID.
+     * @throws Exception If no program stage is found.
+     */
+    private function getFirstProgramStageUID(): string {
         static $programStageCache = [];
         if (isset($programStageCache[$this->programUID])) {
             return $programStageCache[$this->programUID];
@@ -879,6 +897,24 @@ class DHIS2SubmissionHandler {
             return $row['dhis2_option_code'];
         }
 
+        // Try trimmed lookup as additional fallback for whitespace issues
+        $trimmedValue = trim($localValue);
+        if ($trimmedValue !== $localValue) {
+            $stmt = $this->pdo->prepare("
+                SELECT dhis2_option_code
+                FROM dhis2_option_set_mapping
+                WHERE TRIM(local_value) = ? AND dhis2_option_set_id = ?
+            ");
+            $stmt->execute([$trimmedValue, $optionSetId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($row) {
+                error_log("WARNING: Whitespace-trimmed match for '$localValue' -> '$trimmedValue' found in option set '$optionSetId'. Consider cleaning data.");
+                $optionCodeCache[$optionSetId][$localValue] = $row['dhis2_option_code'];
+                return $row['dhis2_option_code'];
+            }
+        }
+
         error_log("WARNING: No DHIS2 option code found for local value '$localValue' in option set '$optionSetId'.");
         $optionCodeCache[$optionSetId][$localValue] = null; // Cache null to avoid repeated lookups
         return null;
@@ -904,33 +940,18 @@ class DHIS2SubmissionHandler {
         error_log("Raw DHIS2 Response for {$endpoint}: " . json_encode($response, JSON_PRETTY_PRINT));
 
         if ($this->isSuccessfulResponse($response)) {
+            // Check if this is an async job response
+            if (isset($response['response']['id']) && isset($response['message']) && strpos($response['message'], 'job added') !== false) {
+                $jobId = $response['response']['id'];
+                $message = "Successfully submitted to DHIS2. Job ID: $jobId (processing asynchronously)";
+                return ['success' => true, 'message' => $message, 'dhis2_raw_response' => $response, 'job_id' => $jobId];
+            }
+            
             return ['success' => true, 'message' => 'Successfully submitted to DHIS2.', 'dhis2_raw_response' => $response];
         }
 
-        // Attempt to extract specific error messages from DHIS2 response
-        $errorMessage = "Unknown DHIS2 submission error.";
-        // ... (existing error extraction logic remains) ...
-        if (isset($response['response'])) {
-             $status = $response['response']['status'] ?? '';
-             $description = $response['response']['description'] ?? '';
-             $conflicts = $response['response']['conflicts'] ?? [];
-             $message = $response['message'] ?? '';
-
-             if ($status === 'ERROR') {
-                 if (!empty($description)) $errorMessage = "DHIS2 Error: " . $description;
-                 if (!empty($conflicts)) {
-                     $conflictDetails = [];
-                     foreach ($conflicts as $conflict) {
-                         $conflictDetails[] = "{$conflict['object']} '{$conflict['value']}' - {$conflict['property']}";
-                     }
-                     $errorMessage .= " Conflicts: " . implode('; ', $conflictDetails);
-                 }
-             } elseif (!empty($message)) {
-                 $errorMessage = "DHIS2 API Message: " . $message;
-             }
-         } else if (isset($response['message'])) {
-              $errorMessage = "DHIS2 API Message: " . $response['message'];
-         }
+        // Enhanced error message extraction for modern tracker API
+        $errorMessage = $this->extractDHIS2ErrorMessage($response);
 
 
         // Check for "already exists" specifically
@@ -952,16 +973,19 @@ class DHIS2SubmissionHandler {
 
     /**
      * Determines the correct DHIS2 API endpoint based on the program type.
+     * Uses modern DHIS2 API endpoints (v2.37+).
      * @return string The API endpoint.
      */
     private function getAPIEndpoint(): string {
         switch ($this->programType) {
             case 'event':
-                return '/api/events';
+                // Use synchronous mode with detailed validation reporting
+                return '/api/tracker?async=false&importReportMode=FULL&validationMode=FULL&importStrategy=CREATE_AND_UPDATE';
             case 'tracker':
-                return '/api/trackedEntityInstances';
+                // Use synchronous mode with detailed validation reporting  
+                return '/api/tracker?async=false&importReportMode=FULL&validationMode=FULL&importStrategy=CREATE_AND_UPDATE';
             case 'dataset':
-                return '/api/dataValueSets';
+                return '/api/dataValueSets'; // Dataset endpoint remains the same
             default:
                 throw new Exception("Cannot determine API endpoint for unknown program type: {$this->programType}");
         }
@@ -969,42 +993,154 @@ class DHIS2SubmissionHandler {
 
     /**
      * Checks if the DHIS2 API response indicates success.
+     * Updated for modern tracker API (v2.37+) response format.
      * @param array $response The decoded JSON response from DHIS2.
      * @return bool True if successful, false otherwise.
      */
     private function isSuccessfulResponse(array $response): bool {
-        // HTTP status code check
+        // Check HTTP status code first
         if (isset($response['httpStatusCode']) && ($response['httpStatusCode'] === 200 || $response['httpStatusCode'] === 201)) {
-            // Further checks based on content for 200/201
-            if ($this->programType === 'event' || $this->programType === 'dataset') {
-                return (isset($response['status']) && $response['status'] === 'SUCCESS');
-            } elseif ($this->programType === 'tracker') {
-                // For tracker, check importSummaries for success
-                if (isset($response['response']['importSummaries'])) {
-                    foreach ($response['response']['importSummaries'] as $summary) {
-                        if (isset($summary['status']) && $summary['status'] === 'SUCCESS') {
-                            return true; // At least one successful import summary
+            
+            // Modern tracker API response format
+            if ($this->programType === 'event' || $this->programType === 'tracker') {
+                // Check for modern tracker API success indicators
+                if (isset($response['status']) && $response['status'] === 'OK') {
+                    return true;
+                }
+                
+                // Check bundle report for detailed status
+                if (isset($response['bundleReport'])) {
+                    $bundleReport = $response['bundleReport'];
+                    
+                    // Check overall status
+                    if (isset($bundleReport['status']) && $bundleReport['status'] === 'OK') {
+                        return true;
+                    }
+                    
+                    // Check type reports for specific entity types
+                    if (isset($bundleReport['typeReportMap'])) {
+                        foreach ($bundleReport['typeReportMap'] as $entityType => $typeReport) {
+                            if (isset($typeReport['stats'])) {
+                                $stats = $typeReport['stats'];
+                                $successful = ($stats['created'] ?? 0) + ($stats['updated'] ?? 0) + ($stats['ignored'] ?? 0);
+                                if ($successful > 0 && ($stats['invalid'] ?? 0) === 0) {
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
+            } elseif ($this->programType === 'dataset') {
+                // Dataset API response format (unchanged)
+                return (isset($response['status']) && $response['status'] === 'SUCCESS');
             }
         }
-        // Fallback for cases where DHIS2 might return 200 but an internal error status
-        if (isset($response['status']) && $response['status'] === 'SUCCESS') return true;
+        
+        // Modern async job response (tracker API)
+        if (isset($response['status']) && $response['status'] === 'OK' && 
+            isset($response['message']) && strpos($response['message'], 'job added') !== false) {
+            return true; // Async job submitted successfully
+        }
+        
+        // Legacy response format fallback
+        if (isset($response['status']) && ($response['status'] === 'SUCCESS' || $response['status'] === 'OK')) {
+            return true;
+        }
 
-        // For tracker/dataValueSets, sometimes 'response' and 'importCount' are present
+        // Legacy tracker response format
+        if (isset($response['response']['importSummaries'])) {
+            foreach ($response['response']['importSummaries'] as $summary) {
+                if (isset($summary['status']) && $summary['status'] === 'SUCCESS') {
+                    return true;
+                }
+            }
+        }
+
+        // Legacy import count format
         if (isset($response['response']['importCount'])) {
             $summary = $response['response']['importCount'];
-            if (($summary['imported'] ?? 0) > 0 || ($summary['updated'] ?? 0) > 0 || ($summary['ignored'] ?? 0) > 0) {
-                 // If ignored > 0 might mean duplicates, which is a success for idempotency
-                 // Be careful here, "ignored" can also mean validation failure
-                if (isset($response['response']['status']) && $response['response']['status'] === 'SUCCESS') {
-                    return true; // Overall success
-                }
+            if (($summary['imported'] ?? 0) > 0 || ($summary['updated'] ?? 0) > 0) {
+                return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Extracts error messages from DHIS2 API responses.
+     * Handles both modern tracker API and legacy response formats.
+     * @param array $response The DHIS2 API response
+     * @return string The extracted error message
+     */
+    private function extractDHIS2ErrorMessage(array $response): string {
+        // Modern tracker API error format
+        if (isset($response['bundleReport'])) {
+            $bundleReport = $response['bundleReport'];
+            
+            // Check for validation errors
+            if (isset($bundleReport['typeReportMap'])) {
+                $errorDetails = [];
+                foreach ($bundleReport['typeReportMap'] as $entityType => $typeReport) {
+                    if (isset($typeReport['objectReports'])) {
+                        foreach ($typeReport['objectReports'] as $objectReport) {
+                            if (isset($objectReport['errorReports']) && !empty($objectReport['errorReports'])) {
+                                foreach ($objectReport['errorReports'] as $errorReport) {
+                                    $errorDetails[] = "{$entityType}: {$errorReport['message']} (Code: {$errorReport['errorCode']})";
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!empty($errorDetails)) {
+                    return "DHIS2 Validation Errors: " . implode('; ', $errorDetails);
+                }
+            }
+            
+            // Check bundle status
+            if (isset($bundleReport['status']) && $bundleReport['status'] === 'ERROR') {
+                return "DHIS2 Bundle Error: " . ($response['message'] ?? 'Unknown bundle error');
+            }
+        }
+        
+        // Legacy error format handling
+        if (isset($response['response'])) {
+            $status = $response['response']['status'] ?? '';
+            $description = $response['response']['description'] ?? '';
+            $conflicts = $response['response']['conflicts'] ?? [];
+            $message = $response['message'] ?? '';
+
+            if ($status === 'ERROR') {
+                if (!empty($description)) {
+                    $errorMessage = "DHIS2 Error: " . $description;
+                } else {
+                    $errorMessage = "DHIS2 API Error";
+                }
+                
+                if (!empty($conflicts)) {
+                    $conflictDetails = [];
+                    foreach ($conflicts as $conflict) {
+                        $conflictDetails[] = "{$conflict['object']} '{$conflict['value']}' - {$conflict['property']}";
+                    }
+                    $errorMessage .= " Conflicts: " . implode('; ', $conflictDetails);
+                }
+                return $errorMessage;
+            } elseif (!empty($message)) {
+                return "DHIS2 API Message: " . $message;
+            }
+        }
+        
+        // Direct message check
+        if (isset($response['message'])) {
+            return "DHIS2 API Message: " . $response['message'];
+        }
+        
+        // Check for HTTP error information
+        if (isset($response['httpStatus']) && $response['httpStatus'] !== 200) {
+            return "DHIS2 HTTP Error {$response['httpStatus']}: " . ($response['httpStatusCode'] ?? 'Unknown HTTP error');
+        }
+        
+        return "Unknown DHIS2 submission error. Check logs for raw response.";
     }
 }
 ?>

@@ -6,8 +6,22 @@ if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit();
 }
+require_once 'includes/session_timeout.php';
 
 require 'connect.php'; // Ensures $pdo is available
+
+// Helper function to check if current user can delete
+function canUserDelete() {
+    if (!isset($_SESSION['admin_role_name']) && !isset($_SESSION['admin_role_id'])) {
+        return false;
+    }
+    
+    // Super users can delete - check by role name or role ID
+    $roleName = $_SESSION['admin_role_name'] ?? '';
+    $roleId = $_SESSION['admin_role_id'] ?? 0;
+    
+    return ($roleName === 'super_user' || $roleName === 'admin' || $roleId == 1);
+}
 
 $surveyId = $_GET['survey_id'] ?? null;
 $submissions = [];
@@ -17,9 +31,27 @@ $surveyName = '';
 $startDateParam = $_GET['start_date'] ?? '';
 $endDateParam = $_GET['end_date'] ?? '';
 
-// Fetch all surveys if no survey_id is provided
+// Fetch all surveys if no survey_id is provided - with submission counts
 if (!$surveyId) {
-    $surveys = $pdo->query("SELECT id, name FROM survey")->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    $surveys = $pdo->query("
+        SELECT 
+            s.id, 
+            s.name, 
+            (COALESCE(COUNT(DISTINCT sub.id), 0) + COALESCE(COUNT(DISTINCT ts.id), 0)) AS submission_count,
+            GREATEST(COALESCE(MAX(sub.created), '1970-01-01'), COALESCE(MAX(ts.submitted_at), '1970-01-01')) AS last_submission,
+            COUNT(DISTINCT sub.id) as regular_count,
+            COUNT(DISTINCT ts.id) as tracker_count
+        FROM 
+            survey s 
+        LEFT JOIN 
+            submission sub ON s.id = sub.survey_id 
+        LEFT JOIN 
+            tracker_submissions ts ON s.id = ts.survey_id
+        GROUP BY 
+            s.id, s.name
+        ORDER BY 
+            s.name ASC
+    ")->fetchAll(PDO::FETCH_ASSOC) ?: [];
 } else {
     // Fetch submissions for the selected survey
     $sortBy = $_GET['sort'] ?? 'created_desc';
@@ -35,43 +67,75 @@ if (!$surveyId) {
     $orderBy = $validSortOptions[$sortBy] ?? 's.created DESC';
 
     try {
+        // First get regular submissions
         $sql = "
             SELECT
                 s.id,
                 s.uid,
-                s.age,
-                s.sex,
-                s.period,
-                su.name AS service_unit_name,
                 l.name AS location_name,
-                o.name AS ownership_name,
                 s.created,
-                COUNT(sr.id) AS response_count
+                COUNT(sr.id) AS response_count,
+                'regular' as submission_type
             FROM submission s
             LEFT JOIN submission_response sr ON s.id = sr.submission_id
-            LEFT JOIN service_unit su ON s.service_unit_id = su.id
             LEFT JOIN location l ON s.location_id = l.id
-            LEFT JOIN owner o ON s.ownership_id = o.id
             WHERE s.survey_id = :survey_id
         ";
         
         $params = ['survey_id' => $surveyId];
 
-        // Add date filtering to SQL query for displayed submissions
+        // Add date filtering for regular submissions
         if (!empty($startDateParam)) {
             $sql .= " AND s.created >= :start_date";
-            $params['start_date'] = $startDateParam . ' 00:00:00'; // Start of the day
+            $params['start_date'] = $startDateParam . ' 00:00:00';
         }
         if (!empty($endDateParam)) {
             $sql .= " AND s.created <= :end_date";
-            $params['end_date'] = $endDateParam . ' 23:59:59';   // End of the day
+            $params['end_date'] = $endDateParam . ' 23:59:59';
         }
 
-        $sql .= " GROUP BY s.id, su.name, l.name, o.name ORDER BY $orderBy";
+        $sql .= " GROUP BY s.id, s.uid, l.name, s.created";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $submissions = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        
+        // Now get tracker submissions for the same survey
+        $trackerSql = "
+            SELECT
+                ts.id,
+                ts.uid,
+                ts.selected_facility_name AS location_name,
+                ts.submitted_at as created,
+                1 AS response_count,
+                'tracker' as submission_type
+            FROM tracker_submissions ts
+            WHERE ts.survey_id = :survey_id_tracker
+        ";
+        
+        $trackerParams = ['survey_id_tracker' => $surveyId];
+        
+        // Add date filtering for tracker submissions  
+        if (!empty($startDateParam)) {
+            $trackerSql .= " AND ts.submitted_at >= :start_date_tracker";
+            $trackerParams['start_date_tracker'] = $startDateParam . ' 00:00:00';
+        }
+        if (!empty($endDateParam)) {
+            $trackerSql .= " AND ts.submitted_at <= :end_date_tracker";
+            $trackerParams['end_date_tracker'] = $endDateParam . ' 23:59:59';
+        }
+        
+        $trackerStmt = $pdo->prepare($trackerSql);
+        $trackerStmt->execute($trackerParams);
+        $trackerSubmissions = $trackerStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        
+        // Combine both arrays
+        $submissions = array_merge($submissions, $trackerSubmissions);
+        
+        // Sort by created date (most recent first)
+        usort($submissions, function($a, $b) {
+            return strtotime($b['created']) - strtotime($a['created']);
+        });
 
         // Fetch survey name
         $survey = $pdo->prepare("SELECT name FROM survey WHERE id = :survey_id");
@@ -88,7 +152,8 @@ if (!$surveyId) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Survey Submissions</title>
-    <link rel="icon" href="argon-dashboard-master/assets/img/brand/favicon.png" type="image/png">
+       <link rel="icon" type="image/png" href="argon-dashboard-master/assets/img/webhook-icon.png">
+
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/nucleo-icons.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/nucleo-svg.css" rel="stylesheet">
@@ -103,80 +168,86 @@ if (!$surveyId) {
             position: relative;
             background-color: #f8f9fa !important; /* A light, clean background */
         }
-        /* Page Title Section - Kept from previous theme for consistency as a header */
+        /* Page Title Section - Simplified neutral design */
         .page-title-section {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); /* Dark header */
+            background: #ffffff;
+            color: #2d3748;
             padding: 1rem 1.5rem;
             margin-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
         }
         .page-title-section .breadcrumb-link {
-            color: #ffd700 !important; /* Gold text for breadcrumbs */
+            color: #4a5568 !important;
             font-weight: 600;
         }
         .page-title-section .breadcrumb-item.active {
-            color: #fff !important; /* White active breadcrumb */
+            color: #2d3748 !important;
             font-weight: 700;
         }
         .page-title-section .breadcrumb-item a i {
-            color: #ffd700 !important; /* Gold icon */
+            color: #4a5568 !important;
         }
         .page-title-section .navbar-title {
-            color: #fff !important; /* White text for page title */
-            text-shadow: 0 1px 8px #1e3c72, 0 0 2px #ffd700; /* Subtle glow */
+            color: #2d3748 !important;
+            text-shadow: none;
         }
 
-        /* Card Styling - Clean White Theme */
+        /* Card Styling - Simplified neutral design */
         .card {
-            background-color: #ffffff !important; /* Pure white card background */
-            border-radius: 12px !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important; /* Pronounced but soft shadow */
-            border: none !important; /* Remove default card border */
-            color: #212529 !important; /* Dark text for card content */
+            background-color: #ffffff !important;
+            border-radius: 8px !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #2d3748 !important;
         }
         .card-header {
-            background-color: #ffffff !important; /* White header background */
-            padding: 1.5rem !important;
-            border-bottom: 1px solid #e9ecef !important; /* Light border */
+            background-color: #ffffff !important;
+            padding: 1.25rem !important;
+            border-bottom: 1px solid #e2e8f0 !important;
         }
         .card-header h4, .card-header p {
             color: #344767 !important; /* Darker text for headers */
         }
 
-        /* Buttons - Clean, Non-Gradient, White-Theme Friendly */
+        /* Buttons - Simplified neutral design */
         .btn {
-            border-radius: 8px !important;
+            border-radius: 6px !important;
             font-weight: 600 !important;
-            transition: all 0.2s ease-in-out !important;
+            font-size: 0.875rem !important;
+            padding: 0.5rem 1rem !important;
+            transition: none !important;
         }
-        /* Default outline style */
         .btn-outline-primary {
-            color: #007bff !important;
-            border-color: #007bff !important;
+            color: #4a5568 !important;
+            border-color: #4a5568 !important;
             background-color: transparent !important;
         }
         .btn-outline-primary:hover {
             color: #fff !important;
-            background-color: #007bff !important;
+            background-color: #4a5568 !important;
+            transform: none !important;
         }
         .btn-outline-info {
-            color: #17a2b8 !important;
-            border-color: #17a2b8 !important;
+            color: #4a5568 !important;
+            border-color: #4a5568 !important;
             background-color: transparent !important;
         }
         .btn-outline-info:hover {
             color: #fff !important;
-            background-color: #17a2b8 !important;
+            background-color: #4a5568 !important;
+            transform: none !important;
         }
         .btn-outline-success {
-            color: #28a745 !important;
-            border-color: #28a745 !important;
+            color: #4a5568 !important;
+            border-color: #4a5568 !important;
             background-color: transparent !important;
         }
         .btn-outline-success:hover {
             color: #fff !important;
-            background-color: #28a745 !important;
+            background-color: #4a5568 !important;
+            transform: none !important;
         }
         .btn-outline-danger {
             color: #dc3545 !important;
@@ -186,149 +257,267 @@ if (!$surveyId) {
         .btn-outline-danger:hover {
             color: #fff !important;
             background-color: #dc3545 !important;
+            transform: none !important;
         }
-        .btn-outline-secondary { /* For Back button */
-            color: #6c757d !important;
-            border-color: #6c757d !important;
+        .btn-outline-secondary {
+            color: #718096 !important;
+            border-color: #718096 !important;
             background-color: transparent !important;
         }
         .btn-outline-secondary:hover {
             color: #fff !important;
-            background-color: #6c757d !important;
+            background-color: #718096 !important;
+            transform: none !important;
         }
 
-        /* Override Argon's specific gradient buttons to be flat/outline */
+        /* Override Argon's gradient buttons to be neutral */
         .btn.bg-gradient-secondary, 
         .btn.bg-gradient-info, 
         .btn.bg-gradient-success {
             background-image: none !important;
-            /* Revert to solid colors for clarity on purpose */
-            background-color: #6c757d !important; /* Default secondary */
-            border-color: #6c757d !important;
+            background-color: #4a5568 !important;
+            border-color: #4a5568 !important;
             color: #fff !important;
         }
         .btn.bg-gradient-info {
-            background-color: #17a2b8 !important; /* Info blue */
-            border-color: #17a2b8 !important;
+            background-color: #4a5568 !important;
+            border-color: #4a5568 !important;
         }
         .btn.bg-gradient-success {
-            background-color: #28a745 !important; /* Success green */
-            border-color: #28a745 !important;
+            background-color: #4a5568 !important;
+            border-color: #4a5568 !important;
         }
 
 
-        /* Survey List Cards (card-blog) */
-        .card-blog { 
-            background-color: #f8f9fa !important; /* Slightly off-white for distinction */
-            border: 1px solid #dee2e6 !important; /* Light border */
-            box-shadow: none !important;
-            transition: all 0.3s ease;
-        }
-        .card-blog:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
-        }
-        .card-blog .text-gradient.text-primary {
-            background-image: linear-gradient(195deg, #42424a 0%, #1a1a1a 100%) !important; /* Dark gradient for headings */
-            -webkit-text-fill-color: transparent;
-            -webkit-background-clip: text;
-        }
-        .card-blog h5 {
-            color: #212529 !important; /* Ensure heading text is dark */
+        /* Survey List Cards - Simplified static design */
+        .survey-card { 
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            transition: none;
+            min-height: 180px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 6px !important;
         }
         
-        /* Table Styling */
+        .survey-card::before {
+            display: none;
+        }
+        
+        .survey-card:hover {
+            transform: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        .survey-card:hover::before {
+            opacity: 0;
+        }
+        
+        .survey-card .card-body {
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            padding: 0.75rem !important;
+        }
+        
+        .survey-card .bg-light {
+            background: #f8f9fa !important;
+            border: 1px solid #e2e8f0;
+            transition: none;
+        }
+        
+        .survey-card:hover .bg-light {
+            background: #f8f9fa !important;
+            border-color: #e2e8f0;
+        }
+        
+        /* Button improvements - simplified */
+        .survey-card .btn {
+            transition: none;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+        
+        .survey-card .btn-primary {
+            background: #4a5568;
+            border: 1px solid #4a5568;
+            box-shadow: none;
+        }
+        
+        .survey-card .btn-primary:hover {
+            background: #2d3748;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .survey-card .btn-outline-info {
+            border-color: #4a5568;
+            color: #4a5568;
+            background: transparent;
+        }
+        
+        .survey-card .btn-outline-info:hover {
+            background: #4a5568;
+            border-color: #4a5568;
+            color: white;
+            transform: none;
+        }
+        
+        /* Icon styling - simplified */
+        .survey-card .icon-shape {
+            background: #4a5568 !important;
+            transition: none;
+        }
+        
+        .survey-card:hover .icon-shape {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Grid improvements - reduced spacing */
+        .row.g-4 {
+            margin: 0 -8px;
+        }
+        
+        .row.g-4 > * {
+            padding: 0 8px;
+            margin-bottom: 16px;
+        }
+        
+        /* Responsive adjustments - minimal sizes */
+        @media (max-width: 1199px) {
+            .survey-card {
+                min-height: 170px;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .survey-card {
+                min-height: 160px;
+            }
+            
+            .survey-card .card-body {
+                min-height: 120px;
+                padding: 0.625rem !important;
+            }
+        }
+        .survey-card .text-gradient.text-primary {
+            background-image: none !important;
+            -webkit-text-fill-color: initial;
+            -webkit-background-clip: initial;
+            color: #2d3748 !important;
+        }
+        .survey-card h5 {
+            color: #2d3748 !important;
+            font-size: 1rem !important;
+        }
+        .card-blog .text-gradient.text-primary {
+            background-image: none !important;
+            -webkit-text-fill-color: initial;
+            -webkit-background-clip: initial;
+            color: #2d3748 !important;
+        }
+        .card-blog h5 {
+            color: #2d3748 !important;
+        }
+        
+        /* Table Styling - simplified */
         .table-responsive {
-            border-radius: 12px;
+            border-radius: 8px;
             overflow: hidden;
-            border: 1px solid #e9ecef; /* Subtle border for the whole table container */
+            border: 1px solid #e2e8f0;
         }
         .table {
             color: #212529 !important; /* Dark text for table content */
         }
         .table thead th {
             font-size: 0.75rem;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
             text-transform: uppercase;
-            background-color: #e9ecef !important; /* Light gray header background */
-            color: #6c757d !important; /* Muted dark text for headers */
+            background-color: #f8f9fa !important;
+            color: #718096 !important;
             font-weight: 700 !important;
-            border-bottom: 1px solid #dee2e6 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            padding: 0.875rem !important;
         }
         .table tbody tr {
-            background-color: #fff !important; /* White row background */
-            transition: all 0.2s ease;
+            background-color: #fff !important;
+            transition: none;
         }
         .table tbody tr:hover {
-            background-color: #f2f2f2 !important; /* Lighter gray on hover */
+            background-color: #f8f9fa !important;
         }
         .table td, .table th {
-            padding: 12px 15px !important; /* More padding for cells */
+            padding: 0.75rem !important;
         }
-        .table p { /* For text within cells */
-            color: #212529 !important;
+        .table p {
+            color: #2d3748 !important;
         }
         .table small {
-            color: #6c757d !important;
+            color: #718096 !important;
         }
 
-        /* Badge in table */
+        /* Badge in table - simplified */
         .badge.bg-gradient-success {
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important; /* Green gradient */
+            background: #4a5568 !important;
             color: #fff;
         }
         .btn-link .fas {
-            font-size: 1.1rem; /* Slightly larger icons for actions */
+            font-size: 1rem;
         }
         .btn-link .text-info {
-            color: #17a2b8 !important; /* Standard Bootstrap info color */
+            color: #4a5568 !important;
         }
         .btn-link .text-danger {
-            color: #dc3545 !important; /* Standard Bootstrap danger color */
+            color: #dc3545 !important;
         }
 
-        /* Empty state */
+        /* Empty state - simplified */
         .empty-state {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 60px; /* More padding */
+            padding: 3rem;
             text-align: center;
-            color: #6c757d !important; /* Muted text */
+            color: #718096 !important;
         }
         .empty-state i {
-            font-size: 4rem; /* Larger icon */
-            margin-bottom: 1.5rem;
-            color: #adb5bd; /* Light muted color for icon */
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #cbd5e0;
         }
         .empty-state h5 {
-            color: #343a40 !important; /* Darker heading */
+            color: #2d3748 !important;
             margin-bottom: 0.5rem;
-        }
-        .empty-state p {
             font-size: 1.1rem;
         }
+        .empty-state p {
+            font-size: 1rem;
+        }
 
-        /* Dropdown menus for sort/download */
+        /* Dropdown menus - simplified */
         .dropdown-menu {
-            border-radius: 8px !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            border-radius: 6px !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
             background-color: #fff !important;
-            border: none !important;
+            border: 1px solid #e2e8f0 !important;
             padding: 0.5rem 0;
         }
         .dropdown-item {
-            color: #212529 !important;
+            color: #2d3748 !important;
             font-weight: 500 !important;
-            padding: 0.75rem 1.5rem !important;
+            padding: 0.625rem 1.25rem !important;
+            font-size: 0.875rem !important;
         }
         .dropdown-item:hover {
             background-color: #f8f9fa !important;
-            color: #007bff !important;
+            color: #4a5568 !important;
         }
         .dropdown-divider {
-            border-top-color: #e9ecef !important;
+            border-top-color: #e2e8f0 !important;
         }
 
         /* SweetAlert2 custom styling for download modal */
@@ -364,30 +553,58 @@ if (!$surveyId) {
             color: #fff !important;
         }
 
-        /* Custom period filter group */
+        /* Custom period filter group - simplified */
         .period-filter-group .form-control {
-            border-color: #ced4da;
-            padding: 0.5rem 0.75rem; /* Adjust padding for date inputs */
-            height: auto; /* Allow height to adjust based on content */
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            height: auto;
+            font-size: 0.875rem;
         }
         .period-filter-group .form-control:focus {
-            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
-            border-color: #80bdff;
+            box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.1);
+            border-color: #4a5568;
         }
         .period-filter-group label {
-            color: #344767;
+            color: #2d3748;
             font-weight: 600;
             margin-bottom: 0.5rem;
+            font-size: 0.875rem;
         }
         .period-filter-group .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
+            background-color: #4a5568;
+            border-color: #4a5568;
             color: #fff;
         }
         .period-filter-group .btn-secondary:hover {
-            background-color: #5a6268;
-            border-color: #545b62;
+            background-color: #2d3748;
+            border-color: #2d3748;
         }
+        .header-container-light {
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .breadcrumb-link-light {
+        color: #4a5568 !important;
+        font-weight: 600;
+        text-decoration: none;
+        transition: none;
+    }
+    .breadcrumb-link-light:hover {
+        color: #2d3748 !important;
+    }
+    .breadcrumb-item-active-light {
+        color: #2d3748 !important;
+        font-weight: 700;
+    }
+    .navbar-title-light {
+        color: #2d3748;
+        text-shadow: none;
+    }
     </style>
 </head>
 <body class="g-sidenav-show bg-gray-100">
@@ -395,26 +612,20 @@ if (!$surveyId) {
 
     <div class="main-content position-relative border-radius-lg">
        
-        
-        <div class="d-flex align-items-center flex-grow-1 page-title-section">
-            <nav aria-label="breadcrumb" class="flex-grow-1">
-                <ol class="breadcrumb mb-0 navbar-breadcrumb" style="background: transparent;">
-                    <li class="breadcrumb-item">
-                        <a href="main" class="breadcrumb-link">
-                            <i class="fas fa-home me-1"></i>Home
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active navbar-breadcrumb-active" aria-current="page">
-                        Survey Submissions
-                    </li>
-                </ol>
-                <h5 class="navbar-title mb-0">
-                    Survey Submissions
-                </h5>
-            </nav>
-        </div>
-        
+      <?php include 'components/navbar.php'; ?>
+    
         <div class="container-fluid py-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a class="breadcrumb-link-light" href="main">Dashboard</a>     
+                        </li>
+                        <li class="breadcrumb-item active breadcrumb-item-active-light" aria-current="page">
+                            Analyze Submissions
+                        </li>
+                    </ol>
+                </nav>
+                
             <div class="row">
                 <div class="col-12">
                     <?php if (!$surveyId): ?>
@@ -434,20 +645,60 @@ if (!$surveyId) {
                                         <p class="text-muted">There are no surveys available to display.</p>
                                     </div>
                                 <?php else: ?>
-                                    <div class="row p-4">
+                                    <div class="row p-4 g-4">
                                         <?php foreach ($surveys as $survey): ?>
-                                            <div class="col-xl-3 col-md-6 mb-xl-4 mb-4">
-                                                <div class="card card-blog card-plain">
-                                                    <div class="card-body p-3">
-                                                        <div class="d-flex flex-column">
-                                                            <h5 class="mb-1 text-gradient text-primary">
+                                            <div class="col-lg-4 col-md-6 col-sm-12">
+                                                <div class="card survey-card h-100" style="border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); transition: all 0.3s ease; border-radius: 16px; overflow: hidden;">
+                                                    <div class="card-body p-4 d-flex flex-column h-100">
+                                                        <!-- Icon Section -->
+                                                        <div class="text-center mb-2">
+                                                            <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md mx-auto" 
+                                                                 style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                                                                <i class="fas fa-poll text-xs text-white"></i>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <!-- Title Section -->
+                                                        <div class="text-center mb-2 flex-grow-0">
+                                                            <h5 class="font-weight-bolder mb-1 text-primary" style="font-size: 0.85rem; line-height: 1.1; min-height: 1.5rem; display: flex; align-items: center; justify-content: center;">
                                                                 <?php echo htmlspecialchars($survey['name']); ?>
                                                             </h5>
-                                                            <a href="records.php?survey_id=<?php echo $survey['id']; ?>" 
-                                                               class="btn btn-outline-primary btn-sm mt-3">
-                                                                View Submissions
-                                                                <i class="fas fa-arrow-right ms-1"></i>
-                                                            </a>
+                                                            <p class="text-xs text-muted mb-0" style="font-size: 0.65rem;">ID: #<?php echo $survey['id']; ?></p>
+                                                        </div>
+                                                        
+                                                        <!-- Stats Section -->
+                                                        <div class="text-center mb-2 flex-grow-1 d-flex flex-column justify-content-center">
+                                                            <div class="bg-light rounded-lg p-1 mb-1">
+                                                                <span class="text-2xl font-weight-bolder text-success d-block" style="font-size: 1.25rem;">
+                                                                    <?php echo number_format($survey['submission_count']); ?>
+                                                                </span>
+                                                                <span class="text-xs text-muted" style="font-size: 0.65rem;">Total</span>
+                                                            </div>
+                                                            
+                                                            <?php if ($survey['last_submission']): ?>
+                                                                <div class="text-center">
+                                                                    <small class="text-muted d-flex align-items-center justify-content-center" style="font-size: 0.6rem;">
+                                                                        <i class="fas fa-clock me-1" style="font-size: 0.55rem;"></i>
+                                                                        <?php echo date('M j', strtotime($survey['last_submission'])); ?>
+                                                                    </small>
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        
+                                                        <!-- Buttons Section - Fixed at bottom -->
+                                                        <div class="mt-auto pt-1">
+                                                            <div class="d-flex gap-1">
+                                                                <a href="records.php?survey_id=<?php echo $survey['id']; ?>" 
+                                                                   class="btn btn-primary btn-sm flex-fill" 
+                                                                   style="border-radius: 4px; font-weight: 600; font-size: 0.65rem; padding: 0.25rem; white-space: nowrap;">
+                                                                    <i class="fas fa-list me-1" style="font-size: 0.6rem;"></i>Records
+                                                                </a>
+                                                                <a href="survey_dashboard.php?survey_id=<?php echo $survey['id']; ?>" 
+                                                                   class="btn btn-outline-info btn-sm flex-fill" 
+                                                                   style="border-radius: 4px; font-weight: 600; font-size: 0.65rem; padding: 0.25rem; white-space: nowrap;">
+                                                                    <i class="fas fa-chart-line me-1" style="font-size: 0.6rem;"></i>Dashboard
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -533,13 +784,9 @@ if (!$surveyId) {
                                                 <tr>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">UID</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Age</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Sex</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Period</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Service Unit</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Location</th>
-                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ownership</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Responses</th>
+                                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Created</th>
                                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
                                                 </tr>
@@ -554,25 +801,15 @@ if (!$surveyId) {
                                                             <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['uid']); ?></p>
                                                         </td>
                                                         <td>
-                                                            <p class="text-xs font-weight-bold mb-0"><?php echo $submission['age'] ?? 'N/A'; ?></p>
-                                                        </td>
-                                                        <td>
-                                                            <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['sex'] ?? 'N/A'); ?></p>
-                                                        </td>
-                                                        <td>
-                                                            <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['period'] ?? 'N/A'); ?></p>
-                                                        </td>
-                                                        <td>
-                                                            <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['service_unit_name'] ?? 'N/A'); ?></p>
-                                                        </td>
-                                                        <td>
                                                             <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['location_name'] ?? 'N/A'); ?></p>
                                                         </td>
                                                         <td>
-                                                            <p class="text-xs font-weight-bold mb-0"><?php echo htmlspecialchars($submission['ownership_name'] ?? 'N/A'); ?></p>
+                                                            <span class="badge badge-sm bg-gradient-success"><?php echo $submission['response_count']; ?></span>
                                                         </td>
                                                         <td>
-                                                            <span class="badge badge-sm bg-gradient-success"><?php echo $submission['response_count']; ?></span>
+                                                            <span class="badge badge-sm <?php echo $submission['submission_type'] === 'tracker' ? 'bg-gradient-info' : 'bg-gradient-primary'; ?> text-white">
+                                                                <?php echo strtoupper($submission['submission_type']); ?>
+                                                            </span>
                                                         </td>
                                                         <td>
                                                             <p class="text-xs font-weight-bold mb-0"><?php echo date('M d, Y', strtotime($submission['created'])); ?></p>
@@ -581,9 +818,11 @@ if (!$surveyId) {
                                                             <button class="btn btn-link text-dark px-2 mb-0" onclick="viewSubmission(<?php echo $submission['id']; ?>)">
                                                                 <i class="fas fa-eye text-info me-2"></i>
                                                             </button>
+                                                            <?php if (canUserDelete()): ?>
                                                             <button class="btn btn-link text-dark px-2 mb-0" onclick="deleteSubmission(<?php echo $submission['id']; ?>)">
                                                                 <i class="fas fa-trash-alt text-danger me-2"></i>
                                                             </button>
+                                                            <?php endif; ?>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>
@@ -654,29 +893,47 @@ if (!$surveyId) {
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: `id=${submissionId}&action=delete`
+                        body: `id=${submissionId}`
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire(
-                                'Deleted!',
-                                'The submission has been deleted.',
-                                'success'
-                            ).then(() => location.reload());
-                        } else {
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        console.log('Response headers:', response.headers);
+                        return response.text();
+                    })
+                    .then(text => {
+                        console.log('Raw response:', text);
+                        try {
+                            const data = JSON.parse(text);
+                            console.log('Parsed data:', data);
+                            if (data.success) {
+                                const nextId = data.next_submission_id || 'N/A';
+                                Swal.fire(
+                                    'Deleted!',
+                                    `Submission deleted successfully! Next submission ID will be: ${nextId}`,
+                                    'success'
+                                ).then(() => location.reload());
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    data.message || 'Failed to delete submission.',
+                                    'error'
+                                );
+                            }
+                        } catch (e) {
+                            console.error('JSON parse error:', e);
+                            console.error('Response text:', text);
                             Swal.fire(
                                 'Error!',
-                                data.message || 'Failed to delete submission.',
+                                'Invalid response from server.',
                                 'error'
                             );
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
+                        console.error('Fetch error:', error);
                         Swal.fire(
                             'Error!',
-                            'An error occurred while deleting the submission.',
+                            'Network error occurred while deleting the submission.',
                             'error'
                         );
                     });

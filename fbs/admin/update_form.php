@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit();
 }
-
+require_once 'includes/session_timeout.php';
 require 'connect.php';
 
 // IMPORTANT: This file assumes a working database connection via 'connect.php'.
@@ -158,7 +158,7 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle; ?></title>
-    <link rel="icon" href="argon-dashboard-master/assets/img/brand/favicon.png" type="image/png">
+    <link rel="icon" type="image/png" href="argon-dashboard-master/assets/img/webhook-icon.png">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/nucleo-icons.css" rel="stylesheet" />
     <link href="argon-dashboard-master/assets/css/nucleo-svg.css" rel="stylesheet" />
@@ -274,13 +274,14 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
         .question-label {
             font-weight: 500;
             color: #344767;
-            flex-grow: 1; /* Allow label to expand */
+            flex-grow: 1;
+            font-size: 0.875rem;
         }
         .question-item .text-muted.small {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #6c757d !important;
-            margin-top: 0.25rem; /* Space below main label */
-            display: block; /* Force to new line */
+            margin-top: 0.25rem;
+            display: block;
         }
         .question-number { /* For selected questions */
             font-weight: 700;
@@ -342,6 +343,155 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
             border-radius: 8px;
             border: 1px dashed #dee2e6;
         }
+
+        /* Enhanced Modern Design Elements */
+        
+        /* Improved Button Styling */
+        .btn {
+            border-radius: 10px !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            border: none;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #6ab7ff 0%, #0770c1 100%);
+        }
+        
+        /* Enhanced Question Item with Gradient Border */
+        .question-item {
+            position: relative;
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid transparent;
+            background-clip: padding-box;
+        }
+        
+        .question-item:before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #74b9ff);
+            border-radius: 8px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .question-item:hover:before {
+            opacity: 0.1;
+        }
+        
+        /* Improved Search Input */
+        .search-container .form-control {
+            border-radius: 25px !important;
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .search-container .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: #ffffff;
+        }
+        
+        /* Simplified Question Number */
+        .question-number {
+            background: #6c757d;
+            color: white;
+            border-radius: 4px;
+            width: 24px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        
+        /* Simplified Drag Handle */
+        .drag-handle {
+            color: #adb5bd;
+            padding: 4px 8px;
+            cursor: grab;
+        }
+        
+        .drag-handle:hover {
+            color: #495057;
+        }
+        
+        /* Simplified Card Headers */
+        .card-header h3 {
+            color: #344767;
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 0;
+        }
+        
+        /* Simplified Questions Panel Container */
+        .questions-panel-container {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+        }
+        
+        /* Simplified Scrollbar */
+        .questions-panel-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .questions-panel-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .questions-panel-container::-webkit-scrollbar-thumb {
+            background: #6c757d;
+            border-radius: 3px;
+        }
+        
+        /* Simplified Page Title */
+        .page-title-section {
+            background: #ffffff;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .page-title-section .breadcrumb-link,
+        .page-title-section .breadcrumb-item.active {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+        
+        .page-title-section .breadcrumb-item a i {
+            color: #74b9ff !important;
+        }
+        
+        .page-title-section .navbar-title {
+            color: white !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 <body class="g-sidenav-show bg-gray-100">
@@ -350,7 +500,7 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
     <div class="main-content position-relative border-radius-lg">
         <?php include 'components/navbar.php'; ?>
 
-        <div class="d-flex align-items-center flex-grow-1 page-title-section">
+        <!-- <div class="d-flex align-items-center flex-grow-1 page-title-section">
             <nav aria-label="breadcrumb" class="flex-grow-1">
                 <ol class="breadcrumb mb-0 navbar-breadcrumb" style="background: transparent;">
                     <li class="breadcrumb-item">
@@ -366,7 +516,7 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
                     Update Survey Form: <?php echo htmlspecialchars($survey['name']); ?>
                 </h5>
             </nav>
-        </div>
+        </div> -->
         
         <div class="container-fluid py-4">
             <div class="row mb-4">
@@ -457,8 +607,8 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
                                     <div id="selected-questions">
                                         <?php foreach ($linkedQuestions as $index => $question): ?>
                                         <div id="selected-question-<?php echo $question['id']; ?>" 
-                                            class="question-item p-2 mb-2 d-flex justify-content-between align-items-center">
-                                            <div class="drag-handle me-2"><i class="fas fa-grip-lines"></i></div>
+                                            class="question-item">
+                                            <div class="drag-handle"><i class="fas fa-grip-lines"></i></div>
                                             <div class="flex-grow-1">
                                                 <span class="question-number"><?php echo $question['position'] ?? ($index + 1); ?>.</span>
                                                 <span class="question-label"><?php echo htmlspecialchars($question['label']); ?></span>
@@ -476,16 +626,16 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
                                     </div>
                                     
                                     <?php if (empty($linkedQuestions)): ?>
-                                    <div id="no-questions-message" class="text-center text-muted py-4">
-                                        <i class="fas fa-info-circle fa-2x mb-2"></i>
-                                        <p>No questions have been added to this survey yet. Add questions from the available list.</p>
+                                    <div id="no-questions-message" class="text-center text-muted">
+                                        <i class="fas fa-info-circle mb-2" style="font-size: 1.5rem;"></i>
+                                        <p style="margin-bottom: 0; font-size: 0.875rem;">No questions have been added to this survey yet. Add questions from the available list.</p>
                                     </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                             <div class="card-footer">
                                 <button type="submit" name="update_form" class="btn btn-success w-100">
-                                    <i class="fas fa-save me-2"></i> Save Survey Questions
+                                    <i class="fas fa-save me-1"></i> Save Survey Questions
                                 </button>
                             </div>
                         </div>
@@ -699,7 +849,7 @@ $pageTitle = "Update Survey Form: " . htmlspecialchars($survey['name']);
                     
                     // Redirect to preview_form.php with survey_id
                     const surveyId = document.querySelector('input[name="survey_id"]').value;
-                    window.location.href = `preview_form?survey_id=${surveyId}`;
+                    window.location.href = `preview_form.php?survey_id=${surveyId}`;
                 } else {
                     showAlert('danger', data.message);
                 }

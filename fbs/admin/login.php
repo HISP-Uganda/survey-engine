@@ -14,6 +14,12 @@ if (isset($_SESSION['success_message'])) {
     unset($_SESSION['success_message']); // Clear the message after displaying it
 }
 
+// Check for timeout message
+$timeout_message = "";
+if (isset($_GET['timeout']) && $_GET['timeout'] == '1') {
+    $timeout_message = "Your session has expired due to inactivity. Please login again.";
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim(htmlspecialchars($_POST['username'])); // Sanitize input
     $password = $_POST['password']; // Password not htmlspecialchars'd here as it's for verification
@@ -25,17 +31,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Please enter both username and password.";
     } else {
         try {
-            // Fetch admin user from the database by username
-            $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE username = ?");
+            // Fetch admin user with role information from the database by username
+            $stmt = $pdo->prepare("
+                SELECT au.*, ur.name as role_name, ur.display_name as role_display_name
+                FROM admin_users au 
+                LEFT JOIN user_roles ur ON au.role_id = ur.id 
+                WHERE au.username = ? AND au.status = 1
+            ");
             $stmt->execute([$username]);
             $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($admin && password_verify($password, $admin['password'])) {
-                // Login successful
+                // Login successful - store all necessary session data including role info
                 $_SESSION['admin_logged_in'] = true;
+                $_SESSION['admin_id'] = $admin['id'];
                 $_SESSION['admin_username'] = $admin['username'];
-                header("Location: main"); // Redirect to your admin dashboard/main page
+                $_SESSION['admin_email'] = $admin['email'];
+                $_SESSION['admin_role_id'] = $admin['role_id'];
+                $_SESSION['admin_role_name'] = $admin['role_name'];
+                $_SESSION['admin_role_display'] = $admin['role_display_name'];
+                $_SESSION['last_activity'] = time(); // Initialize session timeout tracking
+                
+                // Update last login time in database (if column exists)
+                try {
+                    $update_stmt = $pdo->prepare("UPDATE admin_users SET updated = NOW() WHERE id = ?");
+                    $update_stmt->execute([$admin['id']]);
+                } catch (PDOException $e) {
+                    // Ignore if update fails - not critical for login
+                }
+                
+                header("Location: main.php"); // Redirect to your admin dashboard/main page
                 exit();
+            } elseif ($admin && !$admin['status']) {
+                // Account deactivated
+                $error = "Your account has been deactivated. Please contact an administrator.";
             } else {
                 // Login failed - invalid credentials
                 $error = "Invalid username or password.";
@@ -432,10 +461,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </button>
                 </form>
 
-                <div class="auth-links">
+                <!-- <div class="auth-links">
                     <p style="color: var(--text-muted); margin-bottom: 8px;">Don't have an account?</p>
                     <a href="register.php">Create an account here</a>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

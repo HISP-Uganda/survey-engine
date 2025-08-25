@@ -5,12 +5,18 @@ if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit();
 }
-
+require_once 'includes/session_timeout.php';
 require 'connect.php';
 require 'dhis2/dhis2_shared.php';
 
-$activeTab = $_GET['tab'] ?? 'view';
+$activeTab = $_GET['tab'] ?? '';
 $message = [];
+
+// Restrict access to config tab for super users and admins only
+if ($activeTab == 'config' && (!isset($_SESSION['admin_role_id']) || !in_array($_SESSION['admin_role_id'], [1, 2]))) {
+    $activeTab = 'view'; // Redirect to default tab
+    $message = ['type' => 'error', 'text' => 'Access denied. DHIS2 Configuration is only accessible to Super Administrators and Administrators.'];
+}
 
 // Optional: Preload any data or messages for all tabs here
 
@@ -20,271 +26,445 @@ $message = [];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Locations</title>
-    <link rel="icon" href="argon-dashboard-master/assets/img/brand/favicon.png" type="image/png">
+    <title>Admin - Settings</title>
+    <link rel="icon" type="image/png" href="argon-dashboard-master/assets/img/webhook-icon.png">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/nucleo-icons.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/nucleo-svg.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/argon-dashboard.css" rel="stylesheet">
     <link href="argon-dashboard-master/assets/css/sweetalert2.min.css" rel="stylesheet">
+    <link href="dhis2/settings.css" rel="stylesheet">
     <style>
-        /* Base styles from sync_monitor.php (optional, include if these are used elsewhere) */
+        #settings-body .brand-img {
+            display: none;
+        }
         
-        .metric-value {
-            font-size: 2.2rem;
-            font-weight: 700;
-            line-height: 1;
-            display: block;
+        /* Profile avatar styling */
+        .profile-avatar {
+            transition: opacity 0.3s ease-in-out;
         }
-        .metric-label {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-        .metric-errors .metric-value {
-            color: #dc3545;
-        }
-        .status-badge {
-            font-size: 1rem;
-            padding: 0.5em 0.8em;
-        }
-        .progress-bar {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        .sync-message {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border-radius: 0.375rem;
-            border: 1px solid #e9ecef;
-        }
-        .card-header .icon-with-text {
-            display: flex;
-            align-items: center;
-        }
-        .card-header .icon-with-text i {
-            margin-right: 0.5rem;
+        
+        /* Hide tab content initially to prevent flicker */
+        .tab-content {
+            min-height: 200px;
         }
 
-        /* --- FUTURISTIC DESIGN STYLES START HERE --- */
+        /* Base Neutral Color Scheme */
+        :root {
+            --neutral-50: #f9fafb;
+            --neutral-100: #f3f4f6;
+            --neutral-200: #e5e7eb;
+            --neutral-300: #d1d5db;
+            --neutral-400: #9ca3af;
+            --neutral-500: #6b7280;
+            --neutral-600: #4b5563;
+            --neutral-700: #374151;
+            --neutral-800: #1f2937;
+            --neutral-900: #111827;
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --success-600: #16a34a;
+            --danger-600: #dc2626;
+        }
 
-        /* Overall Darker Background */
+        /* Overall Clean Background */
         body.bg-gray-100 {
-            background-color: #bfbfbf !important; /* Dark blue/black background */
+            background-color: var(--neutral-50) !important;
         }
 
-        /* Main Content Area */
+        /* Main Content Area - Reduced Padding */
         .main-content {
-            background-color: #bfbfbf; /* Slightly lighter dark for content area */
+            background-color: var(--neutral-50);
         }
+        
         .container-fluid.py-4 {
-            background-color: #bfbfbf; /* Ensure content background matches */
-            border-radius: 1rem;
-            padding: 2rem !important; /* More padding */
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3); /* Inner shadow for depth */
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            padding: 1.5rem !important;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
         }
 
-        /* Text Colors for Dark Background */
-        .container-fluid h4, .container-fluid h5, .container-fluid h6,
-        .container-fluid p, .container-fluid label, .container-fluid strong, .container-fluid small {
-            color: #e2e8f0; /* Light gray text for readability */
+        /* Typography - Consistent with Aside */
+        .container-fluid h1, .container-fluid h2, .container-fluid h3 {
+            font-size: 1.25rem !important;
+            font-weight: 600 !important;
+            color: var(--neutral-800) !important;
+            margin-bottom: 0.75rem !important;
         }
+        
+        .container-fluid h4, .container-fluid h5, .container-fluid h6 {
+            font-size: 1.125rem !important;
+            font-weight: 500 !important;
+            color: var(--neutral-700) !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .container-fluid p, .container-fluid label, .container-fluid span {
+            font-size: 0.875rem !important;
+            color: var(--neutral-600) !important;
+            line-height: 1.4 !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .container-fluid small {
+            font-size: 0.75rem !important;
+            color: var(--neutral-500) !important;
+        }
+        
         .text-muted {
-            color: #94a3b8 !important; /* Muted text slightly lighter */
-        }
-        .breadcrumb-link, .breadcrumb-item.active {
-            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for breadcrumbs */
+            color: var(--neutral-500) !important;
         }
 
-        /* Page Title Section */
-        .navbar-title {
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7), 0 0 5px #ffd700; /* More pronounced glow for title */
+        /* Breadcrumb - Cleaner */
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-link-light {
+            color: var(--neutral-500) !important;
+            font-size: 0.875rem !important;
+            font-weight: 400 !important;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-link-light:hover {
+            color: var(--neutral-700) !important;
+        }
+        
+        .breadcrumb-item-active-light {
+            color: var(--neutral-800) !important;
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
         }
 
-        /* Tab Navigation Wrapper (the container for the pills) */
+        /* Vertical Tab Navigation - Compact and Neutral */
         .nav-wrapper {
-            background: rgba(15, 23, 42, 0.7); /* Dark semi-transparent background */
-            backdrop-filter: blur(5px); /* Frosted glass effect */
-            border-radius: 1rem; /* Rounded corners */
-            padding: 0.75rem; /* Padding inside the wrapper */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 215, 0, 0.1); /* Subtle glow effect */
-            display: flex; /* Use flexbox for centering */
-            justify-content: center; /* Center the pills */
-            margin-bottom: 2rem; /* Space below the nav wrapper */
+            background: #ffffff;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--neutral-200);
+        }
+
+        .nav-pills {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.25rem;
         }
 
         .nav-pills .nav-item {
-            margin: 0 0.5rem; /* Space between individual pills */
-        }
-
-        /* Default Tab Link Style */
-        .nav-pills .nav-link {
-            color: #e2e8f0; /* Light text for inactive tabs */
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem; /* More rounded pill shape */
-            transition: all 0.3s ease; /* Smooth transitions for all states */
-            background: transparent; /* Default transparent background */
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
-            position: relative;
-            overflow: hidden; /* For shimmer effect */
-        }
-
-        /* Tab Link Hover State */
-        .nav-pills .nav-link:hover {
-            color: #fff;
-            background: rgba(30, 41, 59, 0.5); /* Slightly darker on hover */
-            border-color: rgba(255, 215, 0, 0.3); /* Yellowish hover border */
-            transform: translateY(-2px); /* Slight lift effect on hover */
-        }
-
-        /* Active Tab Link Style */
-        .nav-pills .nav-link.active {
-            color: #0f172a !important; /* Dark text for active tab */
-            background: linear-gradient(45deg, #ffd700, #ffdb58) !important; /* Gold gradient for active */
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4), 0 0 10px rgba(255, 215, 0, 0.6) !important; /* Stronger glow */
-            border-color: #ffd700 !important; /* Solid gold border */
-            font-weight: 700;
-            transform: scale(1.02); /* Slightly larger */
-            z-index: 1; /* Bring active tab to front */
-        }
-
-        /* Optional: Subtle shimmering effect on active tab */
-        .nav-pills .nav-link.active::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
+            margin: 0;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: all 0.8s ease;
-        }
-        .nav-pills .nav-link.active:hover::before {
-            left: 100%; /* Shimmer slides across */
         }
 
-        /* Tab Content Area */
+        /* Tab Links - Consistent with Aside Styling */
+        .nav-pills .nav-link {
+            color: var(--neutral-600);
+            font-size: 0.875rem !important;
+            font-weight: 400;
+            padding: 0.625rem 0.875rem !important;
+            border-radius: 0.375rem;
+            transition: all 0.15s ease-in-out;
+            background: transparent;
+            border: none;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin: 0;
+        }
+
+        .nav-pills .nav-link:hover {
+            color: var(--neutral-800);
+            background: var(--neutral-100);
+            text-decoration: none;
+        }
+
+        .nav-pills .nav-link.active {
+            color: #ffffff !important;
+            background: var(--primary-600) !important;
+            font-weight: 500 !important;
+            text-decoration: none;
+        }
+
+        .nav-pills .nav-link i {
+            margin-right: 0.5rem;
+            width: 1rem;
+            text-align: center;
+            flex-shrink: 0;
+            font-size: 0.875rem;
+        }
+
+        /* Dividers */
+        .nav-wrapper hr {
+            border: none;
+            height: 1px;
+            background-color: var(--neutral-200);
+            margin: 0.75rem 0;
+        }
+
+        /* Tab Content Area - Reduced Padding */
         .tab-content {
-            background-color: #1a202c; /* Dark background for tab content */
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            padding: 1.5rem !important;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--neutral-200);
         }
 
-        /* Adjustments for elements within tabs (like forms, tables, cards) */
-        .form-select, .form-control {
-            background-color: #2d3748 !important; /* Darker input fields */
-            color: #e2e8f0 !important;
-            border: 1px solid #4a5568 !important;
+        /* Tab Headers - Consistent Sizing */
+        .tab-header h3 {
+            font-size: 1.25rem !important;
+            font-weight: 600 !important;
+            color: var(--neutral-800) !important;
+            margin-bottom: 0.5rem !important;
         }
-        .form-select:focus, .form-control:focus {
-            border-color: #ffd700 !important; /* Gold focus border */
-            box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25) !important; /* Gold glow on focus */
+        
+        .tab-header p {
+            font-size: 0.875rem !important;
+            color: var(--neutral-500) !important;
+            margin-bottom: 1rem !important;
         }
+
+        /* Form Controls */
+        .form-select, .form-control, .form-control-sm {
+            background-color: #ffffff !important;
+            color: var(--neutral-700) !important;
+            border: 1px solid var(--neutral-300) !important;
+            font-size: 0.875rem !important;
+            padding: 0.5rem 0.75rem !important;
+            border-radius: 0.375rem !important;
+        }
+        
+        .form-select:focus, .form-control:focus, .form-control-sm:focus {
+            border-color: var(--primary-600) !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1) !important;
+            outline: none !important;
+        }
+
+        /* Labels */
+        .form-label, label {
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            color: var(--neutral-700) !important;
+            margin-bottom: 0.375rem !important;
+        }
+
+        /* Cards - Minimal Style */
         .card {
-            background-color: #2d3748 !important;
-            border: 1px solid #4a5568 !important;
-            color: #e2e8f0 !important;
+            background-color: #ffffff !important;
+            border: 1px solid var(--neutral-200) !important;
+            border-radius: 0.5rem !important;
+            box-shadow: none !important;
+            margin-bottom: 1rem !important;
         }
-        .card-header, .table-secondary {
-            background-color: #1a202c !important; /* Darker header for cards/tables */
-            color: #e2e8f0 !important;
+        
+        .card-header {
+            background-color: var(--neutral-50) !important;
+            color: var(--neutral-800) !important;
+            border-bottom: 1px solid var(--neutral-200) !important;
+            padding: 1rem !important;
+            font-size: 1rem !important;
+            font-weight: 500 !important;
         }
-        .table-striped > tbody > tr:nth-of-type(odd) > * {
-            background-color: #2a3340 !important; /* Darker stripes for tables */
+        
+        .card-body {
+            padding: 1rem !important;
         }
+
+        /* Tables */
         .table {
-            color: #e2e8f0 !important; /* Light text for table content */
+            color: var(--neutral-700) !important;
+            font-size: 0.875rem !important;
         }
+        
         .table thead th {
-            border-bottom: 1px solid #4a5568 !important; /* Darker header border */
+            background-color: var(--neutral-50) !important;
+            color: var(--neutral-800) !important;
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--neutral-300) !important;
+            padding: 0.75rem !important;
         }
-        .table tbody tr {
-            border-bottom: 1px solid #3b4556 !important; /* Darker row separator */
+        
+        .table tbody td {
+            padding: 0.75rem !important;
+            border-bottom: 1px solid var(--neutral-200) !important;
+        }
+        
+        .table-striped > tbody > tr:nth-of-type(odd) > * {
+            background-color: var(--neutral-50) !important;
         }
 
-        /* Button Styling to Fit Theme */
+        /* Buttons - Neutral and Consistent */
+        .btn {
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+            border: none !important;
+            transition: all 0.15s ease-in-out;
+        }
+        
+        .btn-sm {
+            font-size: 0.75rem !important;
+            padding: 0.375rem 0.75rem !important;
+        }
+        
         .btn-primary {
-            background-color: #ffd700 !important; /* Gold primary button */
-            border-color: #ffd700 !important;
-            color: #0f172a !important; /* Dark text on gold */
+            background-color: var(--primary-600) !important;
+            color: #ffffff !important;
         }
+        
         .btn-primary:hover {
-            background-color: #ffdb58 !important;
-            border-color: #ffdb58 !important;
-            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+            background-color: var(--primary-700) !important;
         }
-        .btn-success { /* Green for success actions like 'Load Location Table' */
-            background-color: #28a745 !important;
-            border-color: #28a745 !important;
-            color: #fff !important;
+        
+        .btn-success {
+            background-color: var(--success-600) !important;
+            color: #ffffff !important;
         }
-        .btn-success:hover {
-            background-color: #218838 !important;
-            border-color: #1e7e34 !important;
+        
+        .btn-danger {
+            background-color: var(--danger-600) !important;
+            color: #ffffff !important;
         }
-        .btn-danger { /* Red for error/delete actions */
-            background-color: #dc3545 !important;
-            border-color: #dc3545 !important;
-            color: #fff !important;
-        }
-        .btn-danger:hover {
-            background-color: #c82333 !important;
-            border-color: #bd2130 !important;
-        }
-        .btn-outline-secondary { /* For disabled/secondary buttons */
-            border-color: #6c757d !important;
-            color: #6c757d !important;
+        
+        .btn-secondary, .btn-outline-secondary {
+            background-color: var(--neutral-500) !important;
+            color: #ffffff !important;
+            border: 1px solid var(--neutral-500) !important;
         }
 
-        /* --- FUTURISTIC DESIGN STYLES END HERE --- */
+        /* Alert Messages */
+        .alert {
+            font-size: 0.875rem !important;
+            padding: 0.75rem 1rem !important;
+            border-radius: 0.375rem !important;
+            border: 1px solid !important;
+            margin-bottom: 1rem !important;
+        }
+
+        /* Status Badges */
+        .status-badge, .badge {
+            font-size: 0.75rem !important;
+            font-weight: 500 !important;
+            padding: 0.25rem 0.5rem !important;
+            border-radius: 0.25rem !important;
+        }
+
+        /* Code Blocks - Payload Checker */
+        .code-block {
+            background-color: var(--neutral-100) !important;
+            border: 1px solid var(--neutral-200) !important;
+            color: var(--neutral-800) !important;
+            font-size: 0.75rem !important;
+            padding: 0.75rem !important;
+            border-radius: 0.375rem !important;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+        }
+
+        /* Remove Excessive Margins */
+        .mb-4, .mb-3 {
+            margin-bottom: 1rem !important;
+        }
+        
+        .mt-4, .mt-3 {
+            margin-top: 1rem !important;
+        }
+        
+        .py-4, .py-3 {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
     </style>
 </head>
-<body class="g-sidenav-show bg-gray-100">
+<body class="g-sidenav-show bg-gray-100" id="settings-body">
     <?php include 'components/aside.php'; ?>
 
     <div class="main-content position-relative border-radius-lg">
-     
+         <?php include 'components/navbar.php'; ?>
+      
+        <div class="container-fluid py-4">
+            
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a class="breadcrumb-link-light" href="main.php">Dashboard</a>     
+                        </li>
+                        <li class="breadcrumb-item active breadcrumb-item-active-light" aria-current="page">
+                            Settings Panel
+                        </li>
+                    </ol>
+                </nav>
 
-        <div class="d-flex align-items-center flex-grow-1 py-3 px-2" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
-            <nav aria-label="breadcrumb" class="flex-grow-1">
-                <ol class="breadcrumb mb-1 navbar-breadcrumb" style="background: transparent;">
-                    <li class="breadcrumb-item">
-                        <a href="main" class="breadcrumb-link" style="color: #ffd700; font-weight: 600;">
-                            <i class="fas fa-home me-1" style="color: #ffd700;"></i>Home
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="nav-wrapper">
+                        <ul class="nav nav-pills flex-column" id="tabs-text" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'view') ? 'active' : '' ?>" href="?tab=view">
+                            <i class="fas fa-sitemap me-2"></i>Org-Unit Viewer
                         </a>
                     </li>
-                    <li class="breadcrumb-item active navbar-breadcrumb-active" aria-current="page" style="color: #fff; font-weight: 700;">
-                        <?= htmlspecialchars($pageTitle ?? 'Settings') ?>
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'load') ? 'active' : '' ?>" href="?tab=load">
+                            <i class="fas fa-download me-2"></i>Org-Unit Importer
+                        </a>
                     </li>
-                </ol>
-                <h4 class="navbar-title mb-0 mt-1" style="color: #fff; text-shadow: 0 1px 8px #1e3c72, 0 0 2px #ffd700; font-weight: 700;">
-                    <?= htmlspecialchars($pageTitle ?? 'Settings') ?>
-                </h4>
-            </nav>
-        </div>
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'new') ? 'active' : '' ?>" href="?tab=new">
+                            <i class="fas fa-search me-2"></i>DHIS2-Programs-Fetcher
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'questions') ? 'active' : '' ?>" href="?tab=questions">
+                            <i class="fas fa-link me-2"></i>Mapping-Interface
+                        </a>
+                    </li>
+                        </ul>
+                        
+                        <hr class="horizontal light my-3">
+                        
+                        <ul class="nav nav-pills flex-column" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'profile') ? 'active' : '' ?>" href="?tab=profile">
+                            <i class="fas fa-user-circle me-2"></i>Profile Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'users') ? 'active' : '' ?>" href="?tab=users">
+                            <i class="fas fa-users-cog me-2"></i>User Management
+                        </a>
+                    </li>
+                    <?php if (isset($_SESSION['admin_role_id']) && in_array($_SESSION['admin_role_id'], [1, 2])): ?>
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'config') ? 'active' : '' ?>" href="?tab=config">
+                            <i class="fas fa-cogs me-2"></i>DHIS2 Configuration
+                        </a>
+                    </li>
+                    <?php endif; ?>
+                    <li class="nav-item">
+                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'payload_checker') ? 'active' : '' ?>" href="?tab=payload_checker">
+                            <i class="fas fa-bug me-2"></i>Payload Checker
+                        </a>
+                    </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-9">
 
-        <div class="container-fluid py-4">
-            <div class="nav-wrapper">
-                <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="tabs-text" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'view') ? 'active' : '' ?>" href="?tab=view">Org-Unit Viewer</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'load') ? 'active' : '' ?>" href="?tab=load">Org-Unit Importer</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'new') ? 'active' : '' ?>" href="?tab=new">DHIS2-Programs-Fetcher</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link mb-sm-3 mb-md-0 <?= ($activeTab == 'questions') ? 'active' : '' ?>" href="?tab=questions">Mapping-Interface</a>
-                    </li>
-                </ul>
-            </div>
+
+
+
+                
 
             <?php if (!empty($message)) : ?>
                 <div class="alert alert-<?= $message['type'] == 'success' ? 'success' : 'danger' ?> mt-4">
@@ -292,7 +472,7 @@ $message = [];
                 </div>
             <?php endif; ?>
 
-            <div class="tab-content mt-3">
+                    <div class="tab-content">
                 <?php
                 // Only include the active tab's content for better performance and clarity
                 switch ($activeTab) {
@@ -308,12 +488,30 @@ $message = [];
                     case 'questions':
                         include 'dhis2/questions.php';
                         break;
+                    case 'profile':
+                        include 'settings/profile_tab.php';
+                        break;
+                    case 'users':
+                        include 'settings/users_tab.php';
+                        break;
+                    case 'config':
+                        include 'settings/config_tab.php';
+                        break;
+                    case 'payload_checker':
+                        include 'settings/payload_checker_tab.php';
+                        break;
                     default:
-                        // Optional: show a "not found" or default message
-                        echo '<div class="alert alert-warning">Tab not found.</div>';
+                        // Welcome message when no tab is selected
+                        echo '<div class="text-center py-5">';
+                        echo '<i class="fas fa-cog fa-3x text-muted mb-3"></i>';
+                        echo '<h3 class="text-dark mb-2">Admin Settings</h3>';
+                        echo '<p class="text-muted">Select a tab from the sidebar to manage your system settings.</p>';
+                        echo '</div>';
                         break;
                 }
                 ?>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -321,14 +519,33 @@ $message = [];
  
 
     <!-- Core JS Files -->
-    <script src="argon-dashboard-master/assets/js/core/popper.min.js"></script>
-    <script src="argon-dashboard-master/assets/js/core/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="argon-dashboard-master/assets/js/plugins/perfect-scrollbar.min.js"></script>
     <script src="argon-dashboard-master/assets/js/plugins/smooth-scrollbar.min.js"></script>
     <script src="argon-dashboard-master/assets/js/plugins/sweetalert2.all.min.js"></script>
-    <script src="argon-dashboard-master/assets/js/argon-dashboard.js"></script>
     <script>
+    window.addEventListener('load', function() {
+        const logo = document.querySelector('.brand-img');
+        if (logo) {
+            logo.style.display = 'block';
+        }
+    });
     // Place any global JS here, or keep per-tab scripts inside their respective PHP includes!
+    
+    // Ensure clean navigation behavior
+    document.addEventListener('DOMContentLoaded', function() {
+        // Make HR elements completely non-interactive
+        const hrElements = document.querySelectorAll('.nav-wrapper hr');
+        hrElements.forEach(function(hr) {
+            hr.style.pointerEvents = 'none';
+            hr.style.cursor = 'default';
+            hr.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            });
+        });
+    });
     </script>
 </body>
 </html>

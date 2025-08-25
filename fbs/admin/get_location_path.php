@@ -60,7 +60,7 @@ try {
 
     $fullPath = getFullPathNames($pdo, $locationId);
 
-    echo json_encode(['path' => $fullPath]);
+    echo json_encode(['success' => true, 'path' => $fullPath]);
 
 } catch (PDOException $e) {
     error_log("Error fetching location full path: " . $e->getMessage());
