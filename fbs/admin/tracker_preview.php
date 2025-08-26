@@ -1573,8 +1573,14 @@ if (!empty($programStages)) {
         let groupCounter = 0;
         let draggedItem = null;
         let questionGroupings = {}; // Store groupings per stage
+        let groupingsLoaded = false; // Prevent multiple loading
 
         async function loadGroupingsFromDatabase() {
+            if (groupingsLoaded) {
+                console.log('🚫 Groupings already loaded, skipping...');
+                return;
+            }
+            
             const surveyId = <?= json_encode($surveyId) ?>;
             
             try {
@@ -1613,6 +1619,10 @@ if (!empty($programStages)) {
                     setTimeout(() => {
                         initializeDragAndDrop();
                     }, 200);
+                    
+                    // Mark as loaded to prevent duplicate calls
+                    groupingsLoaded = true;
+                    console.log('✅ Groupings loaded and flag set');
                     
                 } else if (result.success) {
                     console.log('No existing groupings found in database');
@@ -1665,6 +1675,12 @@ if (!empty($programStages)) {
                 }
                 
                 console.log(`🎯 Found ${availableQuestions.length} available questions for "${groupName}" in stage ${stageId}`);
+                
+                // Debug: Show current DOM question IDs vs database question IDs
+                const currentDomIds = availableQuestions.map(q => q.getAttribute('data-question-id'));
+                const databaseIds = questions.map(q => q.questionId);
+                console.log(`📋 Database expects: ${databaseIds.slice(0,3).join(', ')}${databaseIds.length > 3 ? '...' : ''} (${databaseIds.length} total)`);
+                console.log(`🌐 DOM has: ${currentDomIds.slice(0,3).join(', ')}${currentDomIds.length > 3 ? '...' : ''} (${currentDomIds.length} total)`);
                 
                 // Simple proportional distribution approach
                 // Since question IDs are outdated, just distribute the right number of questions
@@ -2092,8 +2108,8 @@ if (!empty($programStages)) {
                         groupingMode = true;
                         const groupingModeText = document.getElementById('groupingModeText');
                         const groupingInterface = document.getElementById('groupingInterface');
-                        const normalViews = document.querySelectorAll('.normal-view');
-                        const groupingViews = document.querySelectorAll('.grouping-view');
+                        const normalViews = document.querySelectorAll('.stage-normal-view');
+                        const groupingViews = document.querySelectorAll('.stage-grouping-view');
                         
                         if (groupingModeText) groupingModeText.textContent = 'Disable Grouping';
                         if (groupingInterface) groupingInterface.style.display = 'block';
