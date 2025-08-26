@@ -121,6 +121,26 @@ if (!$trackerProgram) {
     $offlineMode = false;
 }
 
+// Fetch local questions for search functionality
+$localQuestions = [];
+try {
+    $questionsStmt = $pdo->prepare("
+        SELECT q.id, q.question_text, q.input_type, q.dhis2_dataelement_id, q.required,
+               qdm.dhis2_program_stage_id, qdm.dhis2_dataelement_id as mapped_element_id
+        FROM question q 
+        LEFT JOIN survey_question sq ON q.id = sq.question_id
+        LEFT JOIN question_dhis2_mapping qdm ON q.id = qdm.question_id
+        WHERE sq.survey_id = ? AND q.dhis2_dataelement_id IS NOT NULL
+        ORDER BY sq.position ASC
+    ");
+    $questionsStmt->execute([$surveyId]);
+    $localQuestions = $questionsStmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    error_log("Loaded " . count($localQuestions) . " local questions for survey " . $surveyId);
+} catch (PDOException $e) {
+    error_log("Error fetching local questions: " . $e->getMessage());
+}
+
 // Get tracker settings from dedicated tables
 $surveySettings = [];
 $dynamicImages = [];
@@ -606,20 +626,22 @@ if (!empty($programStages)) {
         }
 
         .available-question-item {
-            background: white;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
             border: 1px solid #e3e6f0;
-            border-radius: 6px;
-            padding: 8px 12px;
-            margin-bottom: 8px;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
         }
 
         .available-question-item:hover {
-            background: #e3f2fd;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f0f8ff 100%);
             border-color: #2196f3;
-            transform: translateX(3px);
+            transform: translateX(4px) translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33,150,243,0.15);
         }
 
         .available-question-item.hidden {
@@ -627,10 +649,12 @@ if (!empty($programStages)) {
         }
 
         .available-question-text {
-            font-size: 13px;
-            color: #495057;
-            margin-bottom: 4px;
-            font-weight: 500;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 6px;
+            font-weight: 600;
+            line-height: 1.4;
+            padding-right: 30px;
         }
 
         .available-question-meta {
@@ -639,15 +663,119 @@ if (!empty($programStages)) {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-top: 4px;
         }
 
         .available-question-type {
-            background: #e9ecef;
-            padding: 2px 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3px 8px;
             border-radius: 12px;
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 1px 3px rgba(102,126,234,0.3);
+        }
+
+        .question-id-badge {
+            background: #f1f3f4;
+            color: #5f6368;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .available-question-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .question-type-icon {
+            font-size: 16px;
+            line-height: 1;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+
+        /* Question type specific styling */
+        .available-question-item.type-boolean {
+            border-left: 4px solid #28a745;
+        }
+
+        .available-question-item.type-number {
+            border-left: 4px solid #17a2b8;
+        }
+
+        .available-question-item.type-date,
+        .available-question-item.type-datetime {
+            border-left: 4px solid #fd7e14;
+        }
+
+        .available-question-item.type-email,
+        .available-question-item.type-phone,
+        .available-question-item.type-url {
+            border-left: 4px solid #6f42c1;
+        }
+
+        .available-question-item.type-file {
+            border-left: 4px solid #e83e8c;
+        }
+
+        .available-question-item.type-text {
+            border-left: 4px solid #6c757d;
+        }
+
+        .current-group-info {
+            font-size: 10px;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 2px;
+            padding: 2px 4px;
+            background: #f8f9fa;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .add-to-group-btn.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #6c757d !important;
+        }
+
+        .add-to-group-btn.disabled:hover {
+            background: #6c757d !important;
+        }
+
+        /* Pulse animation for the grouping button */
+        .pulse-button {
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+            }
+        }
+
+        /* Remove pulse when grouping is enabled */
+        .grouping-enabled .pulse-button {
+            animation: none;
+            box-shadow: none;
         }
 
         .add-to-group-btn {
@@ -1123,14 +1251,14 @@ if (!empty($programStages)) {
                                 <i class="fas fa-list-check text-success"></i>
                                 Program Stages
                             </h4>
-                            <button class="btn btn-outline-primary btn-sm" onclick="toggleGroupingMode()">
-                                <i class="fas fa-layer-group me-1"></i>
-                                <span id="groupingModeText">Enable Grouping</span>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="toggleGroupingMode()" id="groupingToggleBtn">
+                                <i class="fas fa-list me-1"></i>
+                                <span id="groupingModeText">Simple View</span>
                             </button>
                         </div>
-                        <p class="text-muted mb-3">These are the different stages/visits in this program. Click "Enable Grouping" to create custom question groups and drag questions between them.</p>
+                        <p class="text-muted mb-3">These are the different stages/visits in this program. Create custom question groups and drag questions between them.</p>
                         
-                        <div id="groupingInterface" style="display: none;">
+                        <div id="groupingInterface">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle me-2"></i>
                                 <strong>Grouping Mode:</strong> Create custom groups and drag questions into them. Groups will appear as separate sections in the form.
@@ -1274,6 +1402,8 @@ if (!empty($programStages)) {
     <script type="application/json" id="programData">
         <?= json_encode([
             'program' => $trackerProgram,
+            'localQuestions' => $localQuestions,
+            'offlineMode' => $offlineMode ?? false,
             'surveySettings' => array_merge($surveySettings, [
                 'survey_id' => $surveyId
             ])
@@ -1439,12 +1569,18 @@ if (!empty($programStages)) {
         }
 
         // Question Grouping Functionality
-        let groupingMode = false;
+        let groupingMode = true;
         let groupCounter = 0;
         let draggedItem = null;
         let questionGroupings = {}; // Store groupings per stage
+        let groupingsLoaded = false; // Prevent multiple loading
 
         async function loadGroupingsFromDatabase() {
+            if (groupingsLoaded) {
+                console.log('🚫 Groupings already loaded, skipping...');
+                return;
+            }
+            
             const surveyId = <?= json_encode($surveyId) ?>;
             
             try {
@@ -1459,7 +1595,10 @@ if (!empty($programStages)) {
                         const stageGroups = result.groupings[stageId];
                         const stageContainer = document.querySelector(`[data-stage-id="${stageId}"]`);
                         
-                        if (!stageContainer) return;
+                        if (!stageContainer) {
+                            console.warn(`❌ Stage container not found for stage: ${stageId}`);
+                            return;
+                        }
                         
                         const groupingView = stageContainer.querySelector('.stage-grouping-view');
                         
@@ -1481,14 +1620,21 @@ if (!empty($programStages)) {
                         initializeDragAndDrop();
                     }, 200);
                     
+                    // Mark as loaded to prevent duplicate calls
+                    groupingsLoaded = true;
+                    console.log('✅ Groupings loaded and flag set');
+                    
                 } else if (result.success) {
                     console.log('No existing groupings found in database');
+                } else {
+                    console.error('❌ Failed to load groupings:', result);
                 }
             } catch (error) {
                 console.error('Error loading groupings from database:', error);
             }
         }
 
+        
         function addGroupToStageFromDB(stageContainer, groupName, questions) {
             // Use existing addGroupToStage function then move questions
             addGroupToStage(stageContainer, groupName);
@@ -1504,17 +1650,106 @@ if (!empty($programStages)) {
                 const placeholder = groupQuestions.querySelector('p');
                 if (placeholder) placeholder.remove();
                 
-                // Move questions to this group
-                questions.forEach(questionData => {
+                let movedCount = 0;
+                const stageId = stageContainer.getAttribute('data-stage-id');
+                
+                // Find all available questions from all groups in this stage (prioritize ungrouped questions)
+                const defaultGroup = stageContainer.querySelector(`[data-group-id="default_${stageId}"] .group-questions`);
+                const allGroups = stageContainer.querySelectorAll('.group-questions');
+                
+                let availableQuestions = [];
+                
+                // First, get questions from the default ungrouped group
+                if (defaultGroup) {
+                    availableQuestions = Array.from(defaultGroup.querySelectorAll('.question-item[data-question-id]'));
+                }
+                
+                // If not enough questions in default group, get from other groups too
+                if (availableQuestions.length < questions.length) {
+                    allGroups.forEach(group => {
+                        if (group !== defaultGroup && group !== groupQuestions) {
+                            const groupQuestionItems = Array.from(group.querySelectorAll('.question-item[data-question-id]'));
+                            availableQuestions.push(...groupQuestionItems);
+                        }
+                    });
+                }
+                
+                console.log(`🎯 Found ${availableQuestions.length} available questions for "${groupName}" in stage ${stageId}`);
+                
+                // Debug: Show current DOM question IDs vs database question IDs
+                const currentDomIds = availableQuestions.map(q => q.getAttribute('data-question-id'));
+                const databaseIds = questions.map(q => q.questionId);
+                console.log(`📋 Database expects: ${databaseIds.slice(0,3).join(', ')}${databaseIds.length > 3 ? '...' : ''} (${databaseIds.length} total)`);
+                console.log(`🌐 DOM has: ${currentDomIds.slice(0,3).join(', ')}${currentDomIds.length > 3 ? '...' : ''} (${currentDomIds.length} total)`);
+                
+                // Simple proportional distribution approach
+                // Since question IDs are outdated, just distribute the right number of questions
+                const questionsNeeded = questions.length;
+                const questionsToAssign = Math.min(questionsNeeded, availableQuestions.length);
+                
+                console.log(`📋 Assigning ${questionsToAssign} questions to "${groupName}" (requested: ${questionsNeeded}, available: ${availableQuestions.length})`);
+                
+                // Try exact ID matches first
+                let exactMatches = 0;
+                for (let i = questions.length - 1; i >= 0; i--) {
+                    const questionData = questions[i];
                     const questionId = questionData.questionId;
-                    const questionItem = document.querySelector(`[data-question-id="${questionId}"]`);
+                    const exactMatch = availableQuestions.find(q => q.getAttribute('data-question-id') === questionId);
                     
-                    if (questionItem) {
-                        // Clone the question for grouping view
-                        const questionClone = questionItem.cloneNode(true);
-                        groupQuestions.appendChild(questionClone);
+                    if (exactMatch) {
+                        const arrayIndex = availableQuestions.indexOf(exactMatch);
+                        availableQuestions.splice(arrayIndex, 1);
+                        
+                        const currentGroup = exactMatch.closest('.group-questions');
+                        exactMatch.remove();
+                        
+                        if (currentGroup && currentGroup.querySelectorAll('.question-item').length === 0 && !currentGroup.querySelector('.text-muted')) {
+                            const emptyMsg = document.createElement('p');
+                            emptyMsg.className = 'text-muted mb-0';
+                            emptyMsg.innerHTML = '<i class="fas fa-mouse-pointer me-2"></i>Drag questions here or use the search panel above to add questions';
+                            currentGroup.appendChild(emptyMsg);
+                        }
+                        
+                        groupQuestions.appendChild(exactMatch);
+                        movedCount++;
+                        exactMatches++;
+                        console.log(`✅ Exact ID match: "${questionId}" moved to "${groupName}"`);
                     }
-                });
+                }
+                
+                // Fill remaining slots with any available questions
+                const remaining = questionsToAssign - exactMatches;
+                if (remaining > 0 && availableQuestions.length > 0) {
+                    console.log(`🔄 Filling ${remaining} remaining slots in "${groupName}" with available questions`);
+                    
+                    for (let i = 0; i < remaining && availableQuestions.length > 0; i++) {
+                        const questionToMove = availableQuestions.shift(); // Take first available
+                        
+                        const currentGroup = questionToMove.closest('.group-questions');
+                        questionToMove.remove();
+                        
+                        if (currentGroup && currentGroup.querySelectorAll('.question-item').length === 0 && !currentGroup.querySelector('.text-muted')) {
+                            const emptyMsg = document.createElement('p');
+                            emptyMsg.className = 'text-muted mb-0';
+                            emptyMsg.innerHTML = '<i class="fas fa-mouse-pointer me-2"></i>Drag questions here or use the search panel above to add questions';
+                            currentGroup.appendChild(emptyMsg);
+                        }
+                        
+                        groupQuestions.appendChild(questionToMove);
+                        movedCount++;
+                        console.log(`🔄 Proportional assignment: "${questionToMove.getAttribute('data-question-id')}" moved to "${groupName}"`);
+                    }
+                }
+                
+                console.log(`✅ Successfully assigned ${movedCount}/${questions.length} questions to "${groupName}"`);
+                
+                // If no questions were assigned, add a helpful message
+                if (movedCount === 0) {
+                    const emptyMsg = document.createElement('p');
+                    emptyMsg.className = 'text-muted mb-0';
+                    emptyMsg.innerHTML = '<i class="fas fa-exclamation-triangle me-2 text-warning"></i>No questions available - all may be assigned to other groups';
+                    groupQuestions.appendChild(emptyMsg);
+                }
             }
         }
 
@@ -1525,8 +1760,13 @@ if (!empty($programStages)) {
             const normalViews = document.querySelectorAll('.stage-normal-view');
             const groupingViews = document.querySelectorAll('.stage-grouping-view');
 
+            const toggleBtn = document.getElementById('groupingToggleBtn');
+            
             if (groupingMode) {
-                groupingModeText.textContent = 'Disable Grouping';
+                // Switch to grouping mode
+                groupingModeText.textContent = 'Simple View';
+                toggleBtn.className = 'btn btn-outline-secondary btn-sm';
+                toggleBtn.querySelector('i').className = 'fas fa-list me-1';
                 groupingInterface.style.display = 'block';
                 normalViews.forEach(view => view.style.display = 'none');
                 groupingViews.forEach(view => view.style.display = 'block');
@@ -1535,16 +1775,12 @@ if (!empty($programStages)) {
                 // Load existing groupings from database
                 loadGroupingsFromDatabase();
                 
-                // Populate available questions for all stages
-                setTimeout(() => {
-                    const stageContainers = document.querySelectorAll('.stage-container');
-                    stageContainers.forEach(container => {
-                        const stageId = container.getAttribute('data-stage-id');
-                        populateAvailableQuestions(stageId);
-                    });
-                }, 500);
+                // Note: Available questions are now populated via search functionality when needed
             } else {
-                groupingModeText.textContent = 'Enable Grouping';
+                // Switch to simple mode
+                groupingModeText.textContent = 'Grouping Mode';
+                toggleBtn.className = 'btn btn-primary btn-sm';
+                toggleBtn.querySelector('i').className = 'fas fa-layer-group me-1';
                 groupingInterface.style.display = 'none';
                 normalViews.forEach(view => view.style.display = 'block');
                 groupingViews.forEach(view => view.style.display = 'none');
@@ -1872,8 +2108,8 @@ if (!empty($programStages)) {
                         groupingMode = true;
                         const groupingModeText = document.getElementById('groupingModeText');
                         const groupingInterface = document.getElementById('groupingInterface');
-                        const normalViews = document.querySelectorAll('.normal-view');
-                        const groupingViews = document.querySelectorAll('.grouping-view');
+                        const normalViews = document.querySelectorAll('.stage-normal-view');
+                        const groupingViews = document.querySelectorAll('.stage-grouping-view');
                         
                         if (groupingModeText) groupingModeText.textContent = 'Disable Grouping';
                         if (groupingInterface) groupingInterface.style.display = 'block';
@@ -1884,20 +2120,15 @@ if (!empty($programStages)) {
                         initializeDragAndDrop();
                         await loadGroupingsFromDatabase();
                         
-                        // Populate available questions
-                        setTimeout(() => {
-                            const stageContainers = document.querySelectorAll('.stage-container');
-                            stageContainers.forEach(container => {
-                                const stageId = container.getAttribute('data-stage-id');
-                                populateAvailableQuestions(stageId);
-                            });
-                        }, 500);
+                        // Note: Available questions are populated via search functionality when needed
                     }
                 }
             } catch (error) {
                 console.error('Error checking for existing groupings:', error);
             }
         }
+
+        // Cleanup function has been removed after successfully completing its task
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', async function() {
@@ -1909,9 +2140,44 @@ if (!empty($programStages)) {
             console.log('Grouping button found:', !!groupingButton);
             console.log('Grouping interface found:', !!groupingInterface);
             
+            // Initialize grouping mode by default
+            initializeGroupingMode();
+            
             // Check if there are existing groupings and show them automatically
             await checkAndLoadExistingGroupings();
+            
+            // Cleanup button has been removed after serving its purpose
         });
+
+        // Cleanup functions removed after successful completion
+
+        // Initialize grouping mode on page load
+        function initializeGroupingMode() {
+            const groupingModeText = document.getElementById('groupingModeText');
+            const groupingInterface = document.getElementById('groupingInterface');
+            const normalViews = document.querySelectorAll('.stage-normal-view');
+            const groupingViews = document.querySelectorAll('.stage-grouping-view');
+            const toggleBtn = document.getElementById('groupingToggleBtn');
+            
+            // Since groupingMode is already set to true, just update the UI
+            if (groupingModeText) groupingModeText.textContent = 'Simple View';
+            if (toggleBtn) {
+                toggleBtn.className = 'btn btn-outline-secondary btn-sm';
+                const icon = toggleBtn.querySelector('i');
+                if (icon) icon.className = 'fas fa-list me-1';
+            }
+            
+            if (groupingInterface) groupingInterface.style.display = 'block';
+            normalViews.forEach(view => view.style.display = 'none');
+            groupingViews.forEach(view => view.style.display = 'block');
+            
+            // Initialize drag and drop
+            setTimeout(() => {
+                initializeDragAndDrop();
+                loadGroupingsFromDatabase();
+                // Note: Available questions are populated via search functionality when needed
+            }, 100);
+        }
 
         // Survey Settings Management Functions
         let settingsMode = false;
@@ -2209,6 +2475,25 @@ if (!empty($programStages)) {
             }
         }
 
+        // Helper function to map local input types to DHIS2 value types
+        function mapInputTypeToValueType(inputType) {
+            const mapping = {
+                'text': 'TEXT',
+                'textarea': 'LONG_TEXT',
+                'number': 'NUMBER',
+                'email': 'EMAIL',
+                'tel': 'PHONE_NUMBER',
+                'date': 'DATE',
+                'datetime': 'DATETIME',
+                'checkbox': 'BOOLEAN',
+                'radio': 'TEXT',
+                'select': 'TEXT',
+                'file': 'FILE_RESOURCE',
+                'url': 'URL'
+            };
+            return mapping[inputType] || 'TEXT';
+        }
+
         // Group-Specific Search and Add Functionality
         function toggleGroupSearch(groupId, stageId) {
             const searchPanel = document.getElementById(`searchPanel_${groupId}`);
@@ -2225,23 +2510,50 @@ if (!empty($programStages)) {
         function populateGroupAvailableQuestions(groupId, stageId) {
             const container = document.getElementById(`groupAvailable_${groupId}`);
             
-            // Check if programData is available
-            if (typeof programData === 'undefined' || !programData || !programData.program) {
-                container.innerHTML = '<div class="no-available-questions">Program data not loaded yet. Please refresh the page.</div>';
-                console.warn('programData not available for stage:', stageId);
+            // Get all questions from the current stage that are already displayed in the main interface
+            const stageContainer = document.querySelector(`[data-stage-id="${stageId}"]`);
+            if (!stageContainer) {
+                container.innerHTML = '<div class="no-available-questions">Stage not found.</div>';
                 return;
             }
             
-            // Get all data elements for this stage from the program data
-            const stages = programData.program.programStages;
-            const currentStage = stages.find(stage => stage.id === stageId);
+            // Find all question items in the main stage display (both grouped and ungrouped)
+            const allQuestionItems = stageContainer.querySelectorAll('.question-item[data-question-id]');
             
-            if (!currentStage || !currentStage.programStageDataElements) {
-                container.innerHTML = '<div class="no-available-questions">No questions available</div>';
+            if (allQuestionItems.length === 0) {
+                container.innerHTML = '<div class="no-available-questions">No questions available in this stage.</div>';
                 return;
             }
-
-            const dataElements = currentStage.programStageDataElements;
+            
+            const dataElements = Array.from(allQuestionItems).map(questionItem => {
+                const questionId = questionItem.getAttribute('data-question-id');
+                const questionText = questionItem.querySelector('.question-name')?.textContent.trim() || 'Untitled Question';
+                const stageId = questionItem.getAttribute('data-stage-id');
+                
+                // Extract value type from the question context or default to TEXT
+                let valueType = 'TEXT';
+                const questionContent = questionItem.textContent.toLowerCase();
+                if (questionContent.includes('number') || questionContent.includes('integer')) {
+                    valueType = 'INTEGER';
+                } else if (questionContent.includes('date')) {
+                    valueType = 'DATE';
+                } else if (questionContent.includes('email')) {
+                    valueType = 'EMAIL';
+                } else if (questionContent.includes('phone')) {
+                    valueType = 'PHONE_NUMBER';
+                } else if (questionContent.includes('boolean') || questionContent.includes('yes/no')) {
+                    valueType = 'BOOLEAN';
+                }
+                
+                return {
+                    dataElement: {
+                        id: questionId,
+                        name: questionText,
+                        displayName: questionText,
+                        valueType: valueType
+                    }
+                };
+            });
             let availableHtml = '';
 
             dataElements.forEach((element, index) => {
@@ -2250,35 +2562,126 @@ if (!empty($programStages)) {
                 const valueType = dataElement.valueType;
                 const elementId = dataElement.id;
 
-                // Check if this question is already assigned to ANY group
-                const isAssigned = document.querySelector(`[data-question-id="${elementId}"]`) !== null;
+                // Show ALL questions - don't filter out assigned ones for group-to-group movement
+                // Check which group this question is currently in (if any)
+                const currentQuestionElement = document.querySelector(`[data-question-id="${elementId}"]`);
+                let currentGroupInfo = '';
+                
+                if (currentQuestionElement) {
+                    const currentGroup = currentQuestionElement.closest('.question-group');
+                    if (currentGroup) {
+                        const currentGroupId = currentGroup.getAttribute('data-group-id');
+                        const currentGroupName = currentGroup.querySelector('.group-title')?.textContent || 'Unnamed Group';
+                        currentGroupInfo = ` (currently in: ${currentGroupName})`;
+                    } else {
+                        currentGroupInfo = ' (ungrouped)';
+                    }
+                }
 
-                if (!isAssigned) {
+                // Determine question type icon and color based on value type
+                let typeIcon = '📝';
+                let typeClass = 'type-text';
+                
+                switch(valueType.toUpperCase()) {
+                    case 'BOOLEAN':
+                        typeIcon = '☑️';
+                        typeClass = 'type-boolean';
+                        break;
+                    case 'INTEGER':
+                    case 'NUMBER':
+                        typeIcon = '🔢';
+                        typeClass = 'type-number';
+                        break;
+                    case 'DATE':
+                        typeIcon = '📅';
+                        typeClass = 'type-date';
+                        break;
+                    case 'DATETIME':
+                        typeIcon = '🕐';
+                        typeClass = 'type-datetime';
+                        break;
+                    case 'EMAIL':
+                        typeIcon = '📧';
+                        typeClass = 'type-email';
+                        break;
+                    case 'PHONE_NUMBER':
+                        typeIcon = '📞';
+                        typeClass = 'type-phone';
+                        break;
+                    case 'URL':
+                        typeIcon = '🔗';
+                        typeClass = 'type-url';
+                        break;
+                    case 'FILE_RESOURCE':
+                        typeIcon = '📎';
+                        typeClass = 'type-file';
+                        break;
+                    default:
+                        typeIcon = '📝';
+                        typeClass = 'type-text';
+                }
+                
+                // Add visual indicator for current group location
+                const isInCurrentGroup = currentGroupInfo.includes(groupId.replace(/^group_/, '').replace(/^default_/, ''));
+                const buttonText = isInCurrentGroup ? 'Already here' : 'Move to this group';
+                const buttonIcon = isInCurrentGroup ? 'fas fa-check' : 'fas fa-arrow-right';
+                const buttonDisabled = isInCurrentGroup ? 'disabled' : '';
+                
+                try {
+                    const safeQuestionText = questionText ? questionText.replace(/"/g, '&quot;').replace(/'/g, '&#39;') : 'Untitled Question';
+                    const safeCurrentGroupInfo = currentGroupInfo || '';
+                    const safeButtonText = buttonText || 'Move to group';
+                    
                     availableHtml += `
-                        <div class="available-question-item" 
+                        <div class="available-question-item ${typeClass}" 
                              data-question-id="${elementId}" 
-                             data-question-text="${questionText}"
+                             data-question-text="${safeQuestionText}"
                              data-value-type="${valueType}">
-                            <div class="available-question-text">${questionText}</div>
+                            <div class="available-question-header">
+                                <span class="question-type-icon">${typeIcon}</span>
+                                <div class="available-question-text">${safeQuestionText.replace(/&quot;/g, '"').replace(/&#39;/g, "'")}</div>
+                            </div>
                             <div class="available-question-meta">
                                 <span class="available-question-type">${valueType}</span>
-                                <span>ID: ${elementId.substring(0, 8)}...</span>
+                                <span class="question-id-badge">${elementId.substring(0, 8)}...</span>
                             </div>
-                            <button class="add-to-group-btn" 
-                                    onclick="addQuestionToSpecificGroup('${groupId}', '${stageId}', '${elementId}', '${questionText}', ${index})"
-                                    title="Add to this group">
-                                <i class="fas fa-plus"></i>
+                            <div class="current-group-info">${safeCurrentGroupInfo}</div>
+                            <button class="add-to-group-btn ${buttonDisabled}" 
+                                    data-group-id="${groupId}"
+                                    data-stage-id="${stageId}"
+                                    data-element-id="${elementId}"
+                                    data-question-text="${safeQuestionText}"
+                                    data-question-index="${index}"
+                                    title="${safeButtonText}" ${buttonDisabled}>
+                                <i class="${buttonIcon}"></i>
                             </button>
                         </div>
                     `;
+                } catch (error) {
+                    console.error('Error generating question HTML:', error, {
+                        questionText, elementId, valueType, index
+                    });
+                    availableHtml += `<div class="available-question-item">Error loading question: ${elementId}</div>`;
                 }
             });
-
-            if (availableHtml === '') {
-                container.innerHTML = '<div class="no-available-questions">All questions have been assigned to groups</div>';
-            } else {
-                container.innerHTML = availableHtml;
-            }
+            
+            // Always show the available questions (no empty check needed)
+            container.innerHTML = availableHtml;
+            
+            // Add event listeners to the buttons (safer than inline onclick)
+            const addButtons = container.querySelectorAll('.add-to-group-btn:not(.disabled)');
+            addButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const groupId = this.getAttribute('data-group-id');
+                    const stageId = this.getAttribute('data-stage-id');
+                    const elementId = this.getAttribute('data-element-id');
+                    const questionText = this.getAttribute('data-question-text')?.replace(/&quot;/g, '"').replace(/&#39;/g, "'") || 'Untitled Question';
+                    const questionIndex = parseInt(this.getAttribute('data-question-index')) || 0;
+                    
+                    moveQuestionToSpecificGroup(groupId, stageId, elementId, questionText, questionIndex);
+                });
+            });
         }
 
         function filterGroupAvailableQuestions(groupId, stageId) {
@@ -2298,6 +2701,89 @@ if (!empty($programStages)) {
                     item.classList.add('hidden');
                 }
             });
+        }
+
+        function moveQuestionToSpecificGroup(groupId, stageId, questionId, questionText, questionIndex) {
+            const targetGroup = document.querySelector(`[data-group-id="${groupId}"]`);
+            
+            if (!targetGroup) {
+                alert('Target group not found!');
+                return;
+            }
+            
+            // Find ALL instances of this question (could be in default group AND other places)
+            const allQuestionInstances = document.querySelectorAll(`[data-question-id="${questionId}"]`);
+            
+            if (allQuestionInstances.length === 0) {
+                alert('Question not found!');
+                return;
+            }
+            
+            // Find the best question instance to move (prefer the one in the default group)
+            let questionToMove = null;
+            let sourceGroup = null;
+            
+            allQuestionInstances.forEach(question => {
+                const currentGroup = question.closest('.question-group');
+                if (currentGroup) {
+                    const currentGroupId = currentGroup.getAttribute('data-group-id');
+                    // Prefer moving from the default/ungrouped group
+                    if (currentGroupId && currentGroupId.startsWith('default_')) {
+                        questionToMove = question;
+                        sourceGroup = currentGroup;
+                    } else if (!questionToMove) {
+                        // If no default group instance, use any available instance
+                        questionToMove = question;
+                        sourceGroup = currentGroup;
+                    }
+                }
+            });
+            
+            if (!questionToMove) {
+                alert('Question not found in any group!');
+                return;
+            }
+            
+            // Remove question from its current location
+            questionToMove.remove();
+            
+            // If the source group is now empty, show empty message
+            if (sourceGroup && sourceGroup.querySelectorAll('.question-item').length === 0) {
+                const emptyMessage = document.createElement('p');
+                emptyMessage.className = 'text-muted mb-0';
+                emptyMessage.innerHTML = '<i class="fas fa-mouse-pointer me-2"></i>Drag questions here or use the search panel above to add questions';
+                sourceGroup.appendChild(emptyMessage);
+            }
+            
+            // Remove empty message from target group if it exists
+            const emptyMessage = targetGroup.querySelector('.text-muted');
+            if (emptyMessage) {
+                emptyMessage.remove();
+            }
+            
+            // Add question to the target group
+            targetGroup.appendChild(questionToMove);
+            
+            // Remove any duplicate instances of this question from other groups to prevent duplication
+            document.querySelectorAll(`[data-question-id="${questionId}"]`).forEach(duplicateQuestion => {
+                if (duplicateQuestion !== questionToMove) {
+                    const duplicateGroup = duplicateQuestion.closest('.question-group');
+                    duplicateQuestion.remove();
+                    
+                    // Add empty message if that group is now empty
+                    if (duplicateGroup && duplicateGroup.querySelectorAll('.question-item').length === 0) {
+                        const emptyMsg = document.createElement('p');
+                        emptyMsg.className = 'text-muted mb-0';
+                        emptyMsg.innerHTML = '<i class="fas fa-mouse-pointer me-2"></i>Drag questions here or use the search panel above to add questions';
+                        duplicateGroup.appendChild(emptyMsg);
+                    }
+                }
+            });
+            
+            // Refresh the search results to update the current group info
+            populateGroupAvailableQuestions(groupId, stageId);
+            
+            showToast(`Question "${questionText}" moved to this group`, 'success');
         }
 
         function addQuestionToSpecificGroup(groupId, stageId, questionId, questionText, questionIndex) {
@@ -2336,6 +2822,24 @@ if (!empty($programStages)) {
             if (emptyMessage) {
                 emptyMessage.remove();
             }
+
+            // Remove any existing instances of this question from other groups (including default group)
+            const existingInstances = document.querySelectorAll(`[data-question-id="${questionId}"]`);
+            existingInstances.forEach(existingQuestion => {
+                const currentGroup = existingQuestion.closest('.question-group');
+                if (currentGroup && currentGroup !== group.closest('.question-group')) {
+                    existingQuestion.remove();
+                    
+                    // Add empty message if that group is now empty
+                    const remainingQuestions = currentGroup.querySelectorAll('.question-item');
+                    if (remainingQuestions.length === 0) {
+                        const emptyMsg = document.createElement('p');
+                        emptyMsg.className = 'text-muted mb-0';
+                        emptyMsg.innerHTML = '<i class="fas fa-mouse-pointer me-2"></i>Drag questions here or use the search panel above to add questions';
+                        currentGroup.appendChild(emptyMsg);
+                    }
+                }
+            });
 
             // Add to group
             groupQuestions.appendChild(questionElement);
@@ -2431,8 +2935,7 @@ if (!empty($programStages)) {
                 group.appendChild(emptyMessage);
             }
 
-            // Refresh available questions to show this question again
-            populateAvailableQuestions(stageId);
+            // Note: Questions are now managed via search functionality
 
             showToast(`Question "${questionText}" removed from group`, 'info');
         }

@@ -7,18 +7,23 @@ require_once 'dhis2/dhis2_submit.php';
 $message = '';  
 $message_type = '';
 
-// Handle Retry Action
+// Handle Retry Action (only for actual failed submissions, not error logs)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['retry_submission_id'])) {
     $submissionIdToRetry = intval($_POST['retry_submission_id']);
     
-    // Determine if this is a regular or tracker submission and get survey ID
-    $stmt = $pdo->prepare("
-        SELECT survey_id, 'regular' as type FROM submission WHERE id = ?
-        UNION 
-        SELECT survey_id, 'tracker' as type FROM tracker_submissions WHERE id = ?
-    ");
-    $stmt->execute([$submissionIdToRetry, $submissionIdToRetry]);
-    $submissionInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Only allow retry of actual submissions (not error logs)
+    if (empty($submissionIdToRetry)) {
+        $message = "Cannot retry: Invalid submission ID";
+        $message_type = 'warning';
+    } else {
+        // Determine if this is a regular or tracker submission and get survey ID
+        $stmt = $pdo->prepare("
+            SELECT survey_id, 'regular' as type FROM submission WHERE id = ?
+            UNION 
+            SELECT survey_id, 'tracker' as type FROM tracker_submissions WHERE id = ?
+        ");
+        $stmt->execute([$submissionIdToRetry, $submissionIdToRetry]);
+        $submissionInfo = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($submissionInfo) {
         $surveyIdForRetry = $submissionInfo['survey_id'];
@@ -58,14 +63,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['retry_submission_id']
         $message = "Error: Original survey ID not found for submission ID: $submissionIdToRetry.";
         $message_type = 'danger';
     }
+    } // End of submission ID validation
 }
 
-// Fetch submission logs
+// Ensure dhis2_error_log table exists before querying
+try {
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS dhis2_error_log (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            survey_id int(11) NOT NULL,
+            error_message TEXT NOT NULL,
+            payload_attempted JSON DEFAULT NULL,
+            location_data JSON DEFAULT NULL,
+            error_occurred_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            ip_address varchar(45) DEFAULT NULL,
+            user_session_id varchar(255) DEFAULT NULL,
+            PRIMARY KEY (id),
+            KEY idx_survey_id (survey_id),
+            KEY idx_occurred_at (error_occurred_at),
+            CONSTRAINT fk_error_survey FOREIGN KEY (survey_id) REFERENCES survey(id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+} catch (Exception $e) {
+    error_log("Failed to create dhis2_error_log table: " . $e->getMessage());
+}
+
+// Fetch submission logs (successes and errors) using separate queries
 $logs = [];
 try {
+    // Get successful submissions first
+    $successLogs = [];
     $stmt = $pdo->prepare("
         SELECT
-            dsl.id as log_id,
+            CONCAT('success_', dsl.id) as log_id,
             dsl.submission_id,
             COALESCE(s.uid, ts.uid) as submission_uid,
             COALESCE(s.created, ts.submitted_at) as submission_date,
@@ -73,7 +103,7 @@ try {
             dsl.payload_sent,
             dsl.dhis2_response,
             dsl.dhis2_message,
-            dsl.submitted_at,
+            dsl.submitted_at as log_date,
             dsl.retries,
             sy.name as survey_name,
             sy.dhis2_program_uid,
@@ -82,7 +112,8 @@ try {
                 WHEN s.id IS NOT NULL THEN 'regular'
                 WHEN ts.id IS NOT NULL THEN 'tracker'
                 ELSE 'unknown'
-            END as submission_type
+            END as submission_type,
+            'success' as log_type
         FROM dhis2_submission_log dsl
         LEFT JOIN submission s ON dsl.submission_id = s.id
         LEFT JOIN tracker_submissions ts ON dsl.submission_id = ts.id
@@ -90,10 +121,48 @@ try {
         WHERE (s.id IS NOT NULL OR ts.id IS NOT NULL)
           AND (sy.dhis2_program_uid IS NOT NULL OR sy.dhis2_instance IS NOT NULL)
         ORDER BY dsl.submitted_at DESC
-        LIMIT 100 -- Limit to last 100 logs for performance
+        LIMIT 50
     ");
     $stmt->execute();
-    $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $successLogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Get error logs
+    $errorLogs = [];
+    $stmt = $pdo->prepare("
+        SELECT
+            CONCAT('error_', del.id) as log_id,
+            NULL as submission_id,
+            NULL as submission_uid,
+            NULL as submission_date,
+            'ERROR' as status,
+            del.payload_attempted as payload_sent,
+            NULL as dhis2_response,
+            del.error_message as dhis2_message,
+            del.error_occurred_at as log_date,
+            0 as retries,
+            sy.name as survey_name,
+            sy.dhis2_program_uid,
+            sy.dhis2_instance,
+            'tracker' as submission_type,
+            'error' as log_type
+        FROM dhis2_error_log del
+        LEFT JOIN survey sy ON del.survey_id = sy.id
+        WHERE sy.dhis2_program_uid IS NOT NULL OR sy.dhis2_instance IS NOT NULL
+        ORDER BY del.error_occurred_at DESC
+        LIMIT 50
+    ");
+    $stmt->execute();
+    $errorLogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Combine and sort by date
+    $logs = array_merge($successLogs, $errorLogs);
+    usort($logs, function($a, $b) {
+        return strtotime($b['log_date']) - strtotime($a['log_date']);
+    });
+    
+    // Limit to 100 total entries
+    $logs = array_slice($logs, 0, 100);
+    
 } catch (Exception $e) {
     $message = "Error fetching submission logs: " . $e->getMessage();
     $message_type = 'danger';
@@ -126,6 +195,7 @@ try {
     }
     .status-SUCCESS { background-color: #10b981; }
     .status-FAILED { background-color: #ef4444; }
+    .status-ERROR { background-color: #dc2626; }
     .status-SKIPPED { background-color: #f59e0b; color: #1f2937; }
     .status-PENDING { background-color: #6b7280; }
     
@@ -296,8 +366,13 @@ try {
                             <td class="px-3">
                                 <div class="d-flex py-1">
                                     <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm text-dark"><?= htmlspecialchars($log['submission_id']) ?></h6>
-                                        <p class="text-xs text-secondary mb-0">UID: <?= htmlspecialchars(substr($log['submission_uid'], 0, 8)) ?>...</p>
+                                        <?php if ($log['log_type'] === 'error'): ?>
+                                            <h6 class="mb-0 text-sm text-danger">Error Log</h6>
+                                            <p class="text-xs text-secondary mb-0">No submission saved</p>
+                                        <?php else: ?>
+                                            <h6 class="mb-0 text-sm text-dark"><?= htmlspecialchars($log['submission_id']) ?></h6>
+                                            <p class="text-xs text-secondary mb-0">UID: <?= htmlspecialchars(substr($log['submission_uid'] ?? '', 0, 8)) ?>...</p>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </td>
@@ -330,7 +405,7 @@ try {
                                 <span class="badge bg-secondary"><?= htmlspecialchars($log['retries']) ?></span>
                             </td>
                             <td>
-                                <p class="text-sm font-weight-bold mb-0 text-dark"><?= date('M d, Y H:i', strtotime($log['submitted_at'])) ?></p>
+                                <p class="text-sm font-weight-bold mb-0 text-dark"><?= date('M d, Y H:i', strtotime($log['log_date'])) ?></p>
                             </td>
                             <td>
                                 <p class="text-sm text-secondary mb-0" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
@@ -353,18 +428,24 @@ try {
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <form method="POST" style="display:inline;">
-                                    <input type="hidden" name="retry_submission_id" value="<?= $log['submission_id'] ?>">
-                                    <?php if ($log['status'] === 'FAILED' || $log['status'] === 'SKIPPED'): ?>
-                                        <button type="submit" class="btn btn-sm btn-warning" title="Retry submission">
-                                            <i class="fas fa-redo me-1"></i>Retry
-                                        </button>
-                                    <?php else: ?>
-                                        <button type="button" class="btn btn-sm btn-secondary" disabled title="Cannot retry successful submissions">
-                                            <i class="fas fa-check me-1"></i>Complete
-                                        </button>
-                                    <?php endif; ?>
-                                </form>
+                                <?php if ($log['log_type'] === 'error'): ?>
+                                    <span class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>Debug Only
+                                    </span>
+                                <?php else: ?>
+                                    <form method="POST" style="display:inline;">
+                                        <input type="hidden" name="retry_submission_id" value="<?= $log['submission_id'] ?>">
+                                        <?php if ($log['status'] === 'FAILED' || $log['status'] === 'SKIPPED'): ?>
+                                            <button type="submit" class="btn btn-sm btn-warning" title="Retry submission">
+                                                <i class="fas fa-redo me-1"></i>Retry
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button" class="btn btn-sm btn-secondary" disabled title="Cannot retry successful submissions">
+                                                <i class="fas fa-check me-1"></i>Complete
+                                            </button>
+                                        <?php endif; ?>
+                                    </form>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>

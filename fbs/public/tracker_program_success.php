@@ -405,14 +405,7 @@ $surveySettings = array_merge($defaultSettings, $surveySettings);
 </head>
 <body>
     <div class="thank-you-container" id="printableArea">
-        <!-- Flag Bar inside container -->
-        <?php if ($surveySettings['show_flag_bar']): ?>
-            <div class="flag-bar">
-                <div class="flag-section" style="background-color: <?= htmlspecialchars($surveySettings['flag_black_color']) ?>;"></div>
-                <div class="flag-section" style="background-color: <?= htmlspecialchars($surveySettings['flag_yellow_color']) ?>;"></div>
-                <div class="flag-section" style="background-color: <?= htmlspecialchars($surveySettings['flag_red_color']) ?>;"></div>
-            </div>
-        <?php endif; ?>
+        
         
         <div class="header-section">
             <!-- Images above title, centered -->
@@ -434,6 +427,14 @@ $surveySettings = array_merge($defaultSettings, $surveySettings);
             <div class="title-section" style="text-align: center;">
                 <h2 style="color: #2c3e50; margin-bottom: 20px;"><?= htmlspecialchars($surveySettings['title_text']) ?></h2>
             </div>
+            <!-- Flag Bar inside container -->
+        <?php if ($surveySettings['show_flag_bar']): ?>
+            <div class="flag-bar">
+                <div class="flag-section" style="background-color: <?= htmlspecialchars($surveySettings['flag_black_color']) ?>;"></div>
+                <div class="flag-section" style="background-color: <?= htmlspecialchars($surveySettings['flag_yellow_color']) ?>;"></div>
+                <div class="flag-section" style="background-color: <?= htmlspecialchars($surveySettings['flag_red_color']) ?>;"></div>
+            </div>
+        <?php endif; ?>
             
             <div class="success-icon">✓</div>
             <h1>Thank You!</h1>
@@ -443,10 +444,10 @@ $surveySettings = array_merge($defaultSettings, $surveySettings);
             </div>
         </div>
         
-        <div class="reference-id">
+        <!-- <div class="reference-id">
             <div>Your Reference ID:</div>
             <strong><?php echo htmlspecialchars($uid); ?></strong>
-        </div>
+        </div> -->
         
         <!-- <div class="action-buttons">
             <button class="action-button" id="viewDetailsBtn">View Submission Details</button>

@@ -457,6 +457,11 @@ class DHIS2SubmissionHandler {
                     }
                 }
 
+                // Handle boolean values properly for DHIS2
+                if (is_bool($valueToSubmit)) {
+                    $valueToSubmit = $valueToSubmit ? 'true' : 'false';
+                }
+
                 $programStage = $mapping['dhis2_program_stage_id'] ?? $this->getFirstProgramStageUID();
                 $dataValuesByStage[$programStage][] = [
                     'dataElement' => $mapping['dhis2_dataelement_id'],
@@ -515,6 +520,11 @@ class DHIS2SubmissionHandler {
                         error_log("WARNING: No option mapping found for question ID $questionId value '$responseValue' in option set '{$mapping['dhis2_option_set_id']}'. Skipping.");
                         continue;
                     }
+                }
+
+                // Handle boolean values properly for DHIS2
+                if (is_bool($valueToSubmit)) {
+                    $valueToSubmit = $valueToSubmit ? 'true' : 'false';
                 }
 
                 $attributes[] = [
