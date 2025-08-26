@@ -444,10 +444,10 @@ $surveySettings = array_merge($defaultSettings, $surveySettings);
             </div>
         </div>
         
-        <div class="reference-id">
+        <!-- <div class="reference-id">
             <div>Your Reference ID:</div>
             <strong><?php echo htmlspecialchars($uid); ?></strong>
-        </div>
+        </div> -->
         
         <!-- <div class="action-buttons">
             <button class="action-button" id="viewDetailsBtn">View Submission Details</button>

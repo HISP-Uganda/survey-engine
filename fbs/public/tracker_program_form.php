@@ -2315,13 +2315,55 @@ if (!empty($programStages)) {
             }
         }
         
-        /* Input validation styles */
-        .form-control:invalid {
+        /* Input validation styles - Only show for specific input types with meaningful content */
+        
+        /* Email validation - only when valid email format is entered */
+        input[type="email"]:invalid:not(:placeholder-shown):not(:focus) {
             border-color: #dc3545;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='M5.8 5.8l.4.4m0 0l.4-.4m-.4.4l-.4.4m.4-.4l.4-.4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+            padding-right: calc(1.5em + 0.75rem);
         }
         
-        .form-control:valid {
+        input[type="email"]:valid:not(:placeholder-shown):not(:focus) {
             border-color: #198754;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+            padding-right: calc(1.5em + 0.75rem);
+        }
+        
+        /* Phone number validation - only when proper length is reached */
+        input[type="tel"]:invalid:not(:placeholder-shown):not(:focus) {
+            border-color: #dc3545;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='M5.8 5.8l.4.4m0 0l.4-.4m-.4.4l-.4.4m.4-.4l.4-.4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+            padding-right: calc(1.5em + 0.75rem);
+        }
+        
+        /* Only show green tick for phone when it has 12 digits */
+        input[type="tel"]:valid:not(:placeholder-shown):not(:focus) {
+            border-color: #198754;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+            padding-right: calc(1.5em + 0.75rem);
+        }
+        
+        /* General form validation - subtle border color only for other inputs */
+        .form-control:invalid:not(:placeholder-shown):not(:focus):not([type="email"]):not([type="tel"]) {
+            border-color: #ffc107; /* Yellow for general validation warnings */
+        }
+        
+        /* No icons for general text inputs - just subtle green border when valid */
+        .form-control:valid:not(:placeholder-shown):not(:focus):not([type="email"]):not([type="tel"]) {
+            border-color: #28a745;
         }
         
         /* Textarea resize */
@@ -4260,9 +4302,22 @@ if (!empty($programStages)) {
                     switch (attribute.valueType) {
                         case 'TEXT':
                             inputElement = document.createElement('input');
-                            inputElement.type = 'text';
-                            inputElement.className = 'form-control';
-                            inputElement.placeholder = '........................';
+                            const questionText = (attribute.displayName || attribute.name || '').toLowerCase();
+                            if (questionText.includes('year') || questionText.includes('age')) {
+                                inputElement.type = 'number';
+                                inputElement.className = 'form-control';
+                                inputElement.placeholder = 'Enter years...';
+                                inputElement.min = '0';
+                                inputElement.max = '150';
+                                inputElement.title = 'Enter numbers only (0-150 years)';
+                                inputElement.addEventListener('input', function() {
+                                    this.value = this.value.replace(/[^0-9]/g, '');
+                                });
+                            } else {
+                                inputElement.type = 'text';
+                                inputElement.className = 'form-control';
+                                inputElement.placeholder = '........................';
+                            }
                             break;
                         
                     case 'LONG_TEXT':
@@ -4290,26 +4345,47 @@ if (!empty($programStages)) {
                         inputElement = document.createElement('input');
                         inputElement.type = 'date';
                         inputElement.className = 'form-control';
+                        inputElement.max = new Date().toISOString().split('T')[0];
+                        inputElement.value = new Date().toISOString().split('T')[0];
                         break;
                         
                     case 'DATETIME':
                         inputElement = document.createElement('input');
                         inputElement.type = 'datetime-local';
                         inputElement.className = 'form-control';
+                        inputElement.max = new Date().toISOString().slice(0, 16);
+                        inputElement.value = new Date().toISOString().slice(0, 16);
                         break;
                         
                     case 'EMAIL':
                         inputElement = document.createElement('input');
                         inputElement.type = 'email';
                         inputElement.className = 'form-control';
-                        inputElement.placeholder = 'example@domain.com';
+                        inputElement.placeholder = 'user@example.com';
+                        inputElement.pattern = '[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$';
+                        inputElement.title = 'Enter a valid email address (e.g., user@example.com)';
+                        // Add real-time validation feedback
+                        inputElement.addEventListener('input', function() {
+                            const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+                            if (this.value && !emailPattern.test(this.value)) {
+                                this.setCustomValidity('Please enter a valid email address');
+                            } else {
+                                this.setCustomValidity('');
+                            }
+                        });
                         break;
                         
                     case 'PHONE_NUMBER':
                         inputElement = document.createElement('input');
                         inputElement.type = 'tel';
                         inputElement.className = 'form-control';
-                        inputElement.placeholder = '+256xxxxxxxxx';
+                        inputElement.placeholder = '256xxxxxxxxx';
+                        inputElement.pattern = '[0-9]{12}';
+                        inputElement.maxLength = 12;
+                        inputElement.title = 'Enter phone number with country code (12 digits, numbers only)';
+                        inputElement.addEventListener('input', function() {
+                            this.value = this.value.replace(/[^0-9]/g, '');
+                        });
                         break;
                         
                     case 'BOOLEAN':
@@ -5237,8 +5313,20 @@ if (!empty($programStages)) {
 
             switch (dataElement.valueType) {
                 case 'TEXT':
-                    return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" 
-                            placeholder="Enter text..." data-de-id="${dataElement.id}">`;
+                    // Check if this is a years/age field and add number validation
+                    const questionText = (dataElement.displayName || dataElement.name || '').toLowerCase();
+                    if (questionText.includes('year') || questionText.includes('age')) {
+                        return `<input type="number" id="${inputId}" name="${inputId}" class="form-control" 
+                                placeholder="Enter years..." 
+                                min="0" 
+                                max="150"
+                                title="Enter numbers only (0-150 years)"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                data-de-id="${dataElement.id}">`;
+                    } else {
+                        return `<input type="text" id="${inputId}" name="${inputId}" class="form-control" 
+                                placeholder="Enter text..." data-de-id="${dataElement.id}">`;
+                    }
                 
                 case 'LONG_TEXT':
                     return `<textarea id="${inputId}" name="${inputId}" class="form-control" rows="3" 
@@ -5262,11 +5350,13 @@ if (!empty($programStages)) {
                 
                 case 'DATE':
                     return `<input type="date" id="${inputId}" name="${inputId}" class="form-control" 
-                            data-de-id="${dataElement.id}">`;
+                            data-de-id="${dataElement.id}" max="${new Date().toISOString().split('T')[0]}" 
+                            value="${new Date().toISOString().split('T')[0]}">`;
                 
                 case 'DATETIME':
                     return `<input type="datetime-local" id="${inputId}" name="${inputId}" class="form-control" 
-                            data-de-id="${dataElement.id}">`;
+                            data-de-id="${dataElement.id}" max="${new Date().toISOString().slice(0, 16)}" 
+                            value="${new Date().toISOString().slice(0, 16)}">`;
                 
                 case 'TIME':
                     return `<input type="time" id="${inputId}" name="${inputId}" class="form-control" 
@@ -5274,11 +5364,19 @@ if (!empty($programStages)) {
                 
                 case 'EMAIL':
                     return `<input type="email" id="${inputId}" name="${inputId}" class="form-control" 
-                            placeholder="example@domain.com" data-de-id="${dataElement.id}">`;
+                            placeholder="user@example.com" 
+                            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$"
+                            title="Enter a valid email address (e.g., user@example.com)"
+                            data-de-id="${dataElement.id}">`;
                 
                 case 'PHONE_NUMBER':
                     return `<input type="tel" id="${inputId}" name="${inputId}" class="form-control" 
-                            placeholder="+256 xxx xxx xxx" data-de-id="${dataElement.id}">`;
+                            placeholder="256xxxxxxxxx" 
+                            pattern="[0-9]{12}" 
+                            maxlength="12"
+                            title="Enter phone number with country code (12 digits, numbers only)"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            data-de-id="${dataElement.id}">`;
                 
                 case 'URL':
                     return `<input type="url" id="${inputId}" name="${inputId}" class="form-control" 
@@ -5392,11 +5490,11 @@ if (!empty($programStages)) {
                 case 'EMAIL':
                     return 'Enter a valid email address (e.g., user@example.com)';
                 case 'PHONE_NUMBER':
-                    return 'Enter a valid phone number (e.g., +256 xxx xxx xxx)';
+                    return 'Enter a valid phone number (e.g., 256 xxx xxx xxx)';
                 case 'URL':
                     return 'Enter a valid website URL (e.g., https://example.com)';
                 case 'BOOLEAN':
-                    return 'Choose Yes or No';
+                    return 'Check this box if applicable';
                 case 'TRUE_ONLY':
                     return 'Check this box if applicable';
                 case 'FILE_RESOURCE':
@@ -5480,7 +5578,7 @@ if (!empty($programStages)) {
                     Date <span class="required-indicator">*</span>
                 </label>
                 <input type="date" class="form-control event-date" id="eventDate_${stageId}" 
-                       value="${savedEventDate}" required>
+                       value="${savedEventDate}" max="${new Date().toISOString().split('T')[0]}" required>
              <div class="form-help">By default the current date is picked unless modified by user</div>
             `;
             modalContainer.appendChild(eventDateGroup);
