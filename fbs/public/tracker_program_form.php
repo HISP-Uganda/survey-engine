@@ -2782,6 +2782,93 @@ if (!empty($programStages)) {
                 gap: 25px;
             }
         }
+
+        /* Duplicate validation styling */
+        .form-control.checking-duplicate {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23007bff"><circle cx="12" cy="12" r="10" opacity="0.1"/><path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"><animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></path></svg>') !important;
+            background-repeat: no-repeat !important;
+            background-position: right 10px center !important;
+            background-size: 18px 18px !important;
+            padding-right: 40px !important;
+        }
+
+        .form-control.duplicate-error {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+
+        .duplicate-warning {
+            background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-top: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+            color: #991b1b;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.1);
+        }
+
+        .duplicate-warning i {
+            color: #dc2626;
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .duplicate-warning span {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .duplicate-warning small {
+            display: block;
+            opacity: 0.8;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        /* Enhanced error message animations */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Enhanced alert styling */
+        .alert.shadow-lg {
+            border-radius: 12px;
+            border: none;
+        }
+
+        .alert .alert-heading {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .alert .btn-close {
+            padding: 0.5rem;
+            margin: -0.5rem -0.5rem -0.5rem auto;
+        }
     </style>
 
     <!-- Hidden data for JavaScript -->
@@ -3892,6 +3979,81 @@ if (!empty($programStages)) {
             });
         }
 
+        // Function to check for duplicate attribute values in DHIS2
+        async function checkForDuplicateAttribute(attributeId, value, inputElement) {
+            try {
+                // Clear any existing duplicate warnings
+                clearDuplicateWarning(inputElement);
+                
+                // Add loading indicator
+                inputElement.classList.add('checking-duplicate');
+                
+                const response = await fetch(`../admin/dhis2/check_duplicate.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        attribute_id: attributeId,
+                        value: value,
+                        survey_id: programData.surveySettings.id
+                    })
+                });
+
+                const result = await response.json();
+                
+                // Remove loading indicator
+                inputElement.classList.remove('checking-duplicate');
+                
+                if (result.duplicate) {
+                    showDuplicateWarning(inputElement, result.message || 'This value is already registered in the system.');
+                    return true;
+                } else {
+                    clearDuplicateWarning(inputElement);
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error checking for duplicates:', error);
+                inputElement.classList.remove('checking-duplicate');
+                return false;
+            }
+        }
+
+        // Function to show duplicate warning
+        function showDuplicateWarning(inputElement, message) {
+            // Remove existing warning
+            clearDuplicateWarning(inputElement);
+            
+            // Add error styling
+            inputElement.classList.add('duplicate-error');
+            
+            // Create warning message
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'duplicate-warning';
+            warningDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>${message}</span>
+                <small>Please use a different value or contact support if this is correct.</small>
+            `;
+            
+            // Insert warning after the input element
+            const answerArea = inputElement.closest('.answer-area');
+            if (answerArea) {
+                answerArea.appendChild(warningDiv);
+            } else {
+                inputElement.parentNode.insertBefore(warningDiv, inputElement.nextSibling);
+            }
+        }
+
+        // Function to clear duplicate warning
+        function clearDuplicateWarning(inputElement) {
+            inputElement.classList.remove('duplicate-error');
+            const warning = inputElement.closest('.form-group').querySelector('.duplicate-warning');
+            if (warning) {
+                warning.remove();
+            }
+        }
+
         // Function to generate input hints based on question type
         function getInputHint(valueType, attribute) {
             const hints = {
@@ -4059,14 +4221,49 @@ if (!empty($programStages)) {
                 
                 let inputElement;
                 
-                // Create appropriate input based on attribute value type
-                switch (attribute.valueType) {
-                    case 'TEXT':
-                        inputElement = document.createElement('input');
-                        inputElement.type = 'text';
-                        inputElement.className = 'form-control';
-                        inputElement.placeholder = '........................';
-                        break;
+                // Create appropriate input based on attribute - check for option set first
+                if (attribute.optionSet && attribute.optionSet.options && attribute.optionSet.options.length > 0) {
+                    console.log('TEI Attribute with option set:', attribute.name, 'Options count:', attribute.optionSet.options?.length);
+                    console.log('Full TEI optionSet:', attribute.optionSet);
+                    
+                    inputElement = document.createElement('select');
+                    inputElement.className = 'form-control';
+                    
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Select an option...';
+                    defaultOption.disabled = true;
+                    defaultOption.selected = true;
+                    inputElement.appendChild(defaultOption);
+                    
+                    // Add options from the optionSet
+                    if (attribute.optionSet.options && attribute.optionSet.options.length > 0) {
+                        attribute.optionSet.options.forEach(option => {
+                            console.log('Adding TEI option:', option.displayName, 'with code:', option.code);
+                            const optionElement = document.createElement('option');
+                            optionElement.value = option.code;
+                            optionElement.textContent = option.displayName;
+                            inputElement.appendChild(optionElement);
+                        });
+                    } else {
+                        console.log('No pre-loaded TEI options for:', attribute.name);
+                        // Options should be pre-loaded from PHP processing
+                        // If no options available, this will remain an empty select
+                    }
+                    
+                    console.log(`✓ TEI attribute ${attribute.name} has ${inputElement.options.length} options`);
+                    if (inputElement.options.length <= 1) {
+                        console.warn(`⚠️ TEI SELECT element for ${attribute.name} only has ${inputElement.options.length} options!`);
+                    }
+                } else {
+                    // Create appropriate input based on attribute value type
+                    switch (attribute.valueType) {
+                        case 'TEXT':
+                            inputElement = document.createElement('input');
+                            inputElement.type = 'text';
+                            inputElement.className = 'form-control';
+                            inputElement.placeholder = '........................';
+                            break;
                         
                     case 'LONG_TEXT':
                         inputElement = document.createElement('textarea');
@@ -4124,48 +4321,12 @@ if (!empty($programStages)) {
                         break;
                         
                     default:
-                        // Handle option sets or default to text
-                        if (attribute.optionSet) {
-                            console.log('TEI Attribute with option set:', attribute.name, 'Options count:', attribute.optionSet.options?.length);
-                            console.log('Full TEI optionSet:', attribute.optionSet);
-                            
-                            inputElement = document.createElement('select');
-                            inputElement.className = 'form-control';
-                            
-                            const defaultOption = document.createElement('option');
-                            defaultOption.value = '';
-                            defaultOption.textContent = 'Select an option...';
-                            defaultOption.disabled = true;
-                            defaultOption.selected = true;
-                            inputElement.appendChild(defaultOption);
-                            
-                            // First check if options are already in the optionSet (from PHP processing)
-                            if (attribute.optionSet.options && attribute.optionSet.options.length > 0) {
-                                console.log(`✓ Using pre-loaded TEI options (${attribute.optionSet.options.length}) for:`, attribute.name);
-                                attribute.optionSet.options.forEach((option, index) => {
-                                    console.log(`Adding pre-loaded TEI option ${index}:`, option);
-                                    const optionElement = document.createElement('option');
-                                    optionElement.value = option.code || option.value || option.option_value;
-                                    optionElement.textContent = option.displayName || option.name || option.label || option.option_value;
-                                    inputElement.appendChild(optionElement);
-                                });
-                            } else {
-                                // Fallback to API loading
-                                console.log('No pre-loaded TEI options, trying API for:', attribute.name);
-                                await loadOptionSetOptions(inputElement, attribute.optionSet);
-                            }
-                            
-                            console.log(`✓ TEI attribute ${attribute.name} has ${inputElement.options.length} options`);
-                            if (inputElement.options.length <= 1) {
-                                console.warn(`⚠️ TEI SELECT element for ${attribute.name} only has ${inputElement.options.length} options!`);
-                            }
-                        } else {
-                            // Default to text input
-                            inputElement = document.createElement('input');
-                            inputElement.type = 'text';
-                            inputElement.className = 'form-control';
-                        }
+                        // Default to text input for unhandled value types
+                        inputElement = document.createElement('input');
+                        inputElement.type = 'text';
+                        inputElement.className = 'form-control';
                         break;
+                    }
                 }
                 
                 inputElement.id = `tei_${attribute.id}`;
@@ -4190,6 +4351,11 @@ if (!empty($programStages)) {
                 inputElement.addEventListener('change', function() {
                     formData.trackedEntityAttributes[attribute.id] = this.value;
                     console.log('TEI attribute saved:', attribute.id, this.value);
+                    
+                    // Check for duplicates on unique attributes (like phone numbers)
+                    if (attribute.unique && this.value.trim() !== '') {
+                        checkForDuplicateAttribute(attribute.id, this.value.trim(), this);
+                    }
                     
                     // Update step status when TEI attributes change
                     updateAllStepStatuses();
@@ -5830,6 +5996,13 @@ if (!empty($programStages)) {
                 return;
             }
             
+            // Check for duplicate errors before submitting
+            const duplicateErrors = document.querySelectorAll('.duplicate-error');
+            if (duplicateErrors.length > 0) {
+                alert('Please resolve duplicate value errors before submitting. Check the highlighted fields.');
+                return;
+            }
+            
             // Show loading state
             if (loadingSpinner) loadingSpinner.style.display = 'block';
             if (submitBtn) submitBtn.style.display = 'none';
@@ -5856,10 +6029,13 @@ if (!empty($programStages)) {
                 Object.keys(formData.trackedEntityAttributes || {}).forEach(attributeId => {
                     const value = formData.trackedEntityAttributes[attributeId];
                     if (value !== undefined && value !== null && value !== '') {
-                        // Handle file uploads for TEI attributes
+                        // Handle different value types for TEI attributes
                         if (typeof value === 'object' && value.isFile) {
                             // For TEI file attributes, use a different format: tei_attributeId
                             submissionData.form_data.trackedEntityAttributes[attributeId] = `FILE_PLACEHOLDER:tei_${attributeId}`;
+                        } else if (typeof value === 'boolean') {
+                            // Convert boolean values to strings for DHIS2
+                            submissionData.form_data.trackedEntityAttributes[attributeId] = value ? 'true' : 'false';
                         } else {
                             submissionData.form_data.trackedEntityAttributes[attributeId] = value;
                         }
@@ -5893,7 +6069,10 @@ if (!empty($programStages)) {
                                 let finalValue = value;
                                 
                                 // Handle different data types
-                                if (dataElement?.valueType === 'BOOLEAN') {
+                                if (typeof value === 'boolean') {
+                                    // Convert all boolean values to strings for DHIS2
+                                    finalValue = value ? 'true' : 'false';
+                                } else if (dataElement?.valueType === 'BOOLEAN') {
                                     // Convert checkbox values to proper boolean strings
                                     finalValue = (value === true || value === 'true' || value === '1') ? 'true' : 'false';
                                 } else if (typeof value === 'object' && value.isFile) {
@@ -5977,7 +6156,176 @@ if (!empty($programStages)) {
                 console.error('Submission error:', error);
                 if (loadingSpinner) loadingSpinner.style.display = 'none';
                 if (submitBtn) submitBtn.style.display = 'inline-block';
-                showErrorMessage(error.message);
+                
+                // Handle specific DHIS2 errors with better UX
+                handleSubmissionError(error.message);
+            }
+        }
+
+        // Enhanced error handling for DHIS2 submission errors
+        async function handleSubmissionError(errorMessage) {
+            console.log('Handling submission error:', errorMessage);
+            
+            // Check if it's a duplicate error
+            if (errorMessage.includes('Duplicate Entry') || errorMessage.includes('Non-unique attribute value')) {
+                await handleDuplicateError(errorMessage);
+            } else if (errorMessage.includes('value_not_true_only')) {
+                showEnhancedErrorMessage(
+                    'Data Validation Error', 
+                    'Some fields contain invalid values. This is usually a system configuration issue. Please contact support.',
+                    'error',
+                    8000
+                );
+            } else if (errorMessage.includes('cannot be persisted')) {
+                showEnhancedErrorMessage(
+                    'Submission Failed', 
+                    'There was an issue with the participant data. Please check all required fields are completed correctly and try again.',
+                    'error',
+                    8000
+                );
+            } else {
+                // Generic error
+                showEnhancedErrorMessage('Submission Error', errorMessage, 'error', 8000);
+            }
+        }
+
+        // Handle duplicate error specifically
+        async function handleDuplicateError(errorMessage) {
+            // Extract the duplicate value and attribute from error message
+            const duplicateMatch = errorMessage.match(/value `([^`]+)` for attribute `([^`]+)`/);
+            
+            let attributeId = null;
+            let duplicateValue = null;
+            let fieldLabel = 'field';
+            
+            if (duplicateMatch) {
+                duplicateValue = duplicateMatch[1];
+                attributeId = duplicateMatch[2];
+                
+                // Find the field label for better UX
+                const attributeElements = document.querySelectorAll(`[data-attribute-id="${attributeId}"]`);
+                if (attributeElements.length > 0) {
+                    const formGroup = attributeElements[0].closest('.form-group');
+                    const label = formGroup?.querySelector('label');
+                    if (label) {
+                        fieldLabel = label.textContent.trim().replace('*', '');
+                    }
+                }
+            }
+            
+            // Create enhanced duplicate error message
+            let message = 'A participant with this information already exists in the system.';
+            let instructions = 'Please check the highlighted field and use different information, or verify if this participant is already registered.';
+            
+            if (duplicateValue) {
+                if (duplicateValue.includes('+') || /^\d+$/.test(duplicateValue.replace(/[\s\-\(\)]/g, ''))) {
+                    message = `This phone number (${duplicateValue}) is already registered in the system.`;
+                    instructions = 'Please use a different phone number, or check if this participant is already enrolled.';
+                } else if (duplicateValue.includes('@')) {
+                    message = `This email address (${duplicateValue}) is already registered in the system.`;
+                    instructions = 'Please use a different email address, or check if this participant is already enrolled.';
+                } else {
+                    message = `The value "${duplicateValue}" in the ${fieldLabel} field is already registered in the system.`;
+                }
+            }
+            
+            // Show the error message
+            showEnhancedErrorMessage(
+                'Duplicate Participant Found', 
+                `${message}\n\n${instructions}`,
+                'duplicate',
+                0 // Don't auto-hide
+            );
+            
+            // Navigate to participant step and highlight the field
+            await navigateToStep('participant');
+            
+            // Wait a bit for navigation to complete
+            setTimeout(() => {
+                if (attributeId) {
+                    highlightDuplicateField(attributeId, duplicateValue);
+                }
+            }, 500);
+        }
+
+        // Highlight and show error for duplicate field
+        function highlightDuplicateField(attributeId, duplicateValue) {
+            const inputElements = document.querySelectorAll(`[data-attribute-id="${attributeId}"]`);
+            
+            inputElements.forEach(inputElement => {
+                // Add error styling
+                inputElement.classList.add('duplicate-error');
+                
+                // Scroll to the field
+                inputElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                // Show warning message
+                showDuplicateWarning(
+                    inputElement, 
+                    `This value (${duplicateValue}) already exists in the system. Please enter a different value.`
+                );
+                
+                // Focus the field after scrolling
+                setTimeout(() => {
+                    inputElement.focus();
+                    inputElement.select();
+                }, 1000);
+            });
+        }
+
+        // Enhanced error message function
+        function showEnhancedErrorMessage(title, message, type = 'error', duration = 5000) {
+            const alertId = `error-alert-${Date.now()}`;
+            const alert = document.createElement('div');
+            
+            // Style based on error type
+            let bgClass = 'alert-danger';
+            let iconClass = 'fa-exclamation-circle';
+            let borderColor = '#dc3545';
+            
+            if (type === 'duplicate') {
+                bgClass = 'alert-warning';
+                iconClass = 'fa-exclamation-triangle';
+                borderColor = '#ffc107';
+            }
+            
+            alert.id = alertId;
+            alert.className = `alert ${bgClass} position-fixed shadow-lg`;
+            alert.style.cssText = `
+                top: 20px; 
+                right: 20px; 
+                z-index: 4000; 
+                max-width: 420px; 
+                min-width: 350px;
+                border-left: 5px solid ${borderColor};
+                animation: slideInRight 0.3s ease-out;
+            `;
+            
+            alert.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <i class="fas ${iconClass} me-3 mt-1" style="font-size: 1.2em;"></i>
+                    <div class="flex-grow-1">
+                        <h6 class="alert-heading mb-2 fw-bold">${title}</h6>
+                        <div style="white-space: pre-line; line-height: 1.4;">${message}</div>
+                        ${duration === 0 ? '<button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="document.getElementById(\'' + alertId + '\').remove()">Dismiss</button>' : ''}
+                    </div>
+                    ${duration > 0 ? '<button type="button" class="btn-close" onclick="document.getElementById(\'' + alertId + '\').remove()"></button>' : ''}
+                </div>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // Auto-hide after duration (if duration > 0)
+            if (duration > 0) {
+                setTimeout(() => {
+                    if (document.getElementById(alertId)) {
+                        alert.style.animation = 'slideOutRight 0.3s ease-out';
+                        setTimeout(() => alert.remove(), 300);
+                    }
+                }, duration);
             }
         }
 

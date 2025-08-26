@@ -183,14 +183,11 @@ try {
 } catch (Exception $e) {
     error_log("Tracker submission error: " . $e->getMessage());
     
-    // Try to save local submission even on DHIS2 failure
+    // Log error for debugging without saving the submission data
     try {
-        $submissionUID = generateUID();
-        $submissionId = saveTrackerSubmissionLocally($surveyId, $formData, ['error' => $e->getMessage()], $locationData, $submissionUID);
-        // Log failure to payload checker for retry capability
-        logToPayloadChecker($submissionId, 'FAILED', $formData, null, $e->getMessage());
-    } catch (Exception $saveError) {
-        error_log("Failed to save local submission: " . $saveError->getMessage());
+        logDHIS2Error($surveyId, $formData, $locationData, $e->getMessage());
+    } catch (Exception $logError) {
+        error_log("Failed to log DHIS2 error: " . $logError->getMessage());
     }
     
     echo json_encode([
@@ -600,6 +597,51 @@ function saveTrackerSubmissionLocally($surveyId, $formData, $dhis2Response, $loc
     } catch (Exception $e) {
         error_log("Error saving local submission: " . $e->getMessage());
         return null;
+    }
+}
+
+// Function to log DHIS2 errors for debugging (without saving submission data)
+function logDHIS2Error($surveyId, $formData, $locationData, $errorMessage) {
+    global $pdo;
+    
+    try {
+        // Create table if it doesn't exist
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS dhis2_error_log (
+                id int(11) NOT NULL AUTO_INCREMENT,
+                survey_id int(11) NOT NULL,
+                error_message TEXT NOT NULL,
+                payload_attempted JSON DEFAULT NULL,
+                location_data JSON DEFAULT NULL,
+                error_occurred_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                ip_address varchar(45) DEFAULT NULL,
+                user_session_id varchar(255) DEFAULT NULL,
+                PRIMARY KEY (id),
+                KEY idx_survey_id (survey_id),
+                KEY idx_occurred_at (error_occurred_at),
+                CONSTRAINT fk_error_survey FOREIGN KEY (survey_id) REFERENCES survey(id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO dhis2_error_log 
+            (survey_id, error_message, payload_attempted, location_data, ip_address, user_session_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ");
+        
+        $stmt->execute([
+            $surveyId,
+            $errorMessage,
+            json_encode($formData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            json_encode($locationData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+            session_id() ?? 'no_session'
+        ]);
+        
+        error_log("DHIS2 error logged for survey ID: $surveyId");
+        
+    } catch (Exception $e) {
+        error_log("Failed to log DHIS2 error: " . $e->getMessage());
     }
 }
 
