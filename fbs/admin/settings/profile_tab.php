@@ -138,10 +138,13 @@ try {
         border: 1px solid #e2e8f0;
     }
     .profile-avatar {
-        width: 120px;
-        height: 120px;
+        width: 120px !important;
+        height: 120px !important;
         border: 4px solid rgba(59, 130, 246, 0.2);
         border-radius: 50%;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto;
     }
     .stats-card {
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -188,7 +191,7 @@ try {
                 $profileImagePath = "uploads/profile_images/" . $user_data['profile_image'];
             }
             ?>
-            <img src="<?php echo htmlspecialchars($profileImagePath); ?>" alt="Profile" class="profile-avatar mb-4" id="profileImage">
+            <img src="<?php echo htmlspecialchars($profileImagePath); ?>" alt="Profile" class="profile-avatar mb-4" id="profileImage" loading="lazy">
             <h2 class="mb-2"><?php echo htmlspecialchars($user_data['username'] ?? 'Unknown User'); ?></h2>
             <p class="mb-0 text-muted">Administrator</p>
             <p class="text-muted small">Member since <?php echo date('F Y', strtotime($user_data['created_at'] ?? 'now')); ?></p>

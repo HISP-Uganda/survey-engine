@@ -273,7 +273,7 @@ $notificationCount = count($notifications);
                             getUserProfileImage($_SESSION['admin_id'], $pdo) : 
                             "argon-dashboard-master/assets/img/ship.jpg";
                         ?>
-                        <img src="<?php echo htmlspecialchars($profileImagePath); ?>" alt="User" class="avatar-img">
+                        <img src="<?php echo htmlspecialchars($profileImagePath); ?>" alt="User" class="avatar-img" loading="lazy">
                         <div class="avatar-status"></div>
                     </div>
                     <div class="d-none d-lg-flex flex-column text-start">
@@ -285,7 +285,7 @@ $notificationCount = count($notifications);
                 <ul class="dropdown-menu dropdown-menu-end navbar-dropdown" aria-labelledby="userDropdown">
                     <li class="dropdown-header">
                         <div class="d-flex align-items-center">
-                            <img src="argon-dashboard-master/assets/img/ship.jpg" alt="User" class="rounded-circle me-3" style="width: 40px; height: 40px;">
+                            <img src="argon-dashboard-master/assets/img/ship.jpg" alt="User" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;" loading="lazy">
                             <div>
                                 <div class="fw-semibold"><?= $_SESSION['admin_username'] ?? 'Admin' ?></div>
                                 <small class="text-muted">Administrator</small>
@@ -587,11 +587,13 @@ $notificationCount = count($notifications);
     }
     
     .avatar-img {
-        width: 40px;
-        height: 40px;
+        width: 40px !important;
+        height: 40px !important;
         border-radius: 50%;
         border: 2px solid rgba(59, 130, 246, 0.3);
         object-fit: cover;
+        display: block;
+        flex-shrink: 0;
     }
     
     .avatar-status {

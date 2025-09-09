@@ -89,7 +89,7 @@ function fetchFromDHIS2($endpoint, $dhis2Config) {
 }
 
 // Fetch tracker program structure from DHIS2
-$trackerProgram = fetchFromDHIS2("programs/{$survey['dhis2_program_uid']}.json?fields=id,name,description,programType,trackedEntityType,programStages[id,name,description,repeatable,minDaysFromStart,programStageDataElements[dataElement[id,name,displayName,valueType,optionSet[options[code,displayName]]]]],programTrackedEntityAttributes[trackedEntityAttribute[id,name,displayName,valueType,unique,optionSet[options[code,displayName]]],mandatory,displayInList]", $dhis2Config);
+$trackerProgram = fetchFromDHIS2("programs/{$survey['dhis2_program_uid']}.json?fields=id,name,description,programType,trackedEntityType,programStages[id,name,description,repeatable,minDaysFromStart,programStageSections[id,name,sortOrder,dataElements[id,name,displayName,valueType,optionSet[options[code,displayName]]]],programStageDataElements[dataElement[id,name,displayName,valueType,optionSet[options[code,displayName]]]]],programTrackedEntityAttributes[trackedEntityAttribute[id,name,displayName,valueType,unique,optionSet[options[code,displayName]]],mandatory,displayInList]", $dhis2Config);
 
 // Check if we failed to fetch DHIS2 data (offline scenario)
 if (!$trackerProgram) {
@@ -106,7 +106,8 @@ if (!$trackerProgram) {
                 'name' => 'Program Stage (Offline)',
                 'description' => 'This is a simplified preview in offline mode',
                 'repeatable' => false,
-                'programStageDataElements' => []
+                'programStageDataElements' => [],
+                'programStageSections' => []
             ]
         ]
     ];
@@ -905,7 +906,16 @@ if (!empty($programStages)) {
                         <?php 
                         $totalElements = 0;
                         foreach ($programStages as $stage) {
-                            $totalElements += count($stage['programStageDataElements']);
+                            // Count data elements from sections if available, otherwise from programStageDataElements
+                            if (isset($stage['programStageSections']) && is_array($stage['programStageSections'])) {
+                                foreach ($stage['programStageSections'] as $section) {
+                                    if (isset($section['dataElements']) && is_array($section['dataElements'])) {
+                                        $totalElements += count($section['dataElements']);
+                                    }
+                                }
+                            } elseif (isset($stage['programStageDataElements']) && is_array($stage['programStageDataElements'])) {
+                                $totalElements += count($stage['programStageDataElements']);
+                            }
                         }
                         echo $totalElements;
                         ?>
@@ -1251,30 +1261,22 @@ if (!empty($programStages)) {
                                 <i class="fas fa-list-check text-success"></i>
                                 Program Stages
                             </h4>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="toggleGroupingMode()" id="groupingToggleBtn">
-                                <i class="fas fa-list me-1"></i>
-                                <span id="groupingModeText">Simple View</span>
-                            </button>
                         </div>
-                        <p class="text-muted mb-3">These are the different stages/visits in this program. Create custom question groups and drag questions between them.</p>
-                        
-                        <div id="groupingInterface">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Grouping Mode:</strong> Create custom groups and drag questions into them. Groups will appear as separate sections in the form.
-                            </div>
-                            <div class="mb-3">
-                                <button class="btn btn-success btn-sm" onclick="createNewGroup()">
-                                    <i class="fas fa-plus me-1"></i>Create New Group
-                                </button>
-                                <button class="btn btn-primary btn-sm ms-2" onclick="saveGrouping()">
-                                    <i class="fas fa-save me-1"></i>Save Grouping
-                                </button>
-                                <button class="btn btn-secondary btn-sm ms-2" onclick="resetGrouping()">
-                                    <i class="fas fa-undo me-1"></i>Reset
-                                </button>
-                            </div>
+                        <!-- <div class="alert alert-warning mb-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Custom Grouping Removed:</strong> Question grouping is now handled by DHIS2's native program stage sections. 
+                            Configure sections in DHIS2 to organize questions into logical groups.
                         </div>
+                        <div class="alert alert-light">
+                            <h6><i class="fas fa-cogs me-2"></i>How to Configure Sections in DHIS2:</h6>
+                            <ol class="mb-0">
+                                <li>Open your DHIS2 instance → Maintenance → Program</li>
+                                <li>Edit your program → Program Stages → Select a stage</li>
+                                <li>Create Program Stage Sections and assign data elements to sections</li>
+                                <li>Set section names and ordering</li>
+                                <li>Save changes - they will automatically appear in the tracker form</li>
+                            </ol>
+                        </div> -->
 
                         <?php foreach ($programStages as $stageIndex => $stage): ?>
                             <div class="stage-container mb-4" data-stage-id="<?= $stage['id'] ?>">
@@ -1286,32 +1288,83 @@ if (!empty($programStages)) {
                                                 <span class="repeatable-badge">Repeatable</span>
                                             <?php endif; ?>
                                         </span>
-                                        <span class="stage-info"><?= count($stage['programStageDataElements']) ?> fields</span>
+                                        <span class="stage-info">
+                                            <?php 
+                                            $fieldCount = 0;
+                                            if (isset($stage['programStageSections']) && is_array($stage['programStageSections'])) {
+                                                foreach ($stage['programStageSections'] as $section) {
+                                                    if (isset($section['dataElements']) && is_array($section['dataElements'])) {
+                                                        $fieldCount += count($section['dataElements']);
+                                                    }
+                                                }
+                                            } elseif (isset($stage['programStageDataElements']) && is_array($stage['programStageDataElements'])) {
+                                                $fieldCount = count($stage['programStageDataElements']);
+                                            }
+                                            echo $fieldCount;
+                                            ?> fields
+                                        </span>
                                     </div>
                                     <?php if (!empty($stage['description'])): ?>
                                         <p class="text-muted mb-3" style="font-size: 14px;"><?= htmlspecialchars($stage['description']) ?></p>
                                     <?php endif; ?>
                                 </div>
 
-                                <!-- Normal View -->
+                                <!-- Normal View - Updated for Sections -->
                                 <div class="stage-normal-view">
-                                    <div class="row g-2">
-                                        <?php foreach ($stage['programStageDataElements'] as $deIndex => $deConfig): ?>
-                                            <?php $de = $deConfig['dataElement']; ?>
-                                            <div class="col-md-6">
-                                                <small class="text-muted d-block">
-                                                    <i class="fas fa-arrow-right me-1"></i>
-                                                    <?php 
-                                                    $cleanName = $de['name'];
-                                                    // Remove common prefixes like PM_, HEI_, etc.
-                                                    $cleanName = preg_replace('/^[A-Z]+_/', '', $cleanName);
-                                                    echo htmlspecialchars($cleanName);
-                                                    ?>
-                                                    <span style="color: #999;">(<?= htmlspecialchars($de['valueType']) ?>)</span>
-                                                </small>
-                                            </div>
+                                    <?php if (isset($stage['programStageSections']) && !empty($stage['programStageSections'])): ?>
+                                        <?php 
+                                        $sections = $stage['programStageSections'];
+                                        usort($sections, function($a, $b) { return ($a['sortOrder'] ?? 0) - ($b['sortOrder'] ?? 0); });
+                                        ?>
+                                        <?php foreach ($sections as $section): ?>
+                                            <?php if (isset($section['dataElements']) && !empty($section['dataElements'])): ?>
+                                                <div class="mb-3">
+                                                    <h6 class="text-primary mb-2">
+                                                        <i class="fas fa-folder me-1"></i><?= htmlspecialchars($section['name']) ?>
+                                                    </h6>
+                                                    <div class="row g-2">
+                                                        <?php foreach ($section['dataElements'] as $de): ?>
+                                                            <div class="col-md-6">
+                                                                <small class="text-muted d-block">
+                                                                    <i class="fas fa-arrow-right me-1"></i>
+                                                                    <?php 
+                                                                    $cleanName = $de['name'];
+                                                                    $cleanName = preg_replace('/^[A-Z]+_/', '', $cleanName);
+                                                                    echo htmlspecialchars($cleanName);
+                                                                    ?>
+                                                                    <span style="color: #999;">(<?= htmlspecialchars($de['valueType']) ?>)</span>
+                                                                </small>
+                                                            </div>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
                                         <?php endforeach; ?>
-                                    </div>
+                                    <?php elseif (isset($stage['programStageDataElements']) && !empty($stage['programStageDataElements'])): ?>
+                                        <div class="alert alert-warning mb-2">
+                                            <small><i class="fas fa-exclamation-triangle me-1"></i>Configure sections in DHIS2 to organize these questions</small>
+                                        </div>
+                                        <div class="row g-2">
+                                            <?php foreach ($stage['programStageDataElements'] as $deIndex => $deConfig): ?>
+                                                <?php $de = $deConfig['dataElement']; ?>
+                                                <div class="col-md-6">
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-arrow-right me-1"></i>
+                                                        <?php 
+                                                        $cleanName = $de['name'];
+                                                        $cleanName = preg_replace('/^[A-Z]+_/', '', $cleanName);
+                                                        echo htmlspecialchars($cleanName);
+                                                        ?>
+                                                        <span style="color: #999;">(<?= htmlspecialchars($de['valueType']) ?>)</span>
+                                                    </small>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="alert alert-info mb-2">
+                                            <small><i class="fas fa-info-circle me-1"></i>No questions configured for this stage</small>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
 
                                 <!-- Grouping View -->
@@ -1356,7 +1409,22 @@ if (!empty($programStages)) {
                                         </div>
                                         
                                         <div class="group-questions" data-group="default_<?= $stage['id'] ?>">
-                                            <?php foreach ($stage['programStageDataElements'] as $deIndex => $deConfig): ?>
+                                            <?php 
+                                            // Get all data elements from sections or fallback to programStageDataElements
+                                            $allDataElements = [];
+                                            if (isset($stage['programStageSections']) && !empty($stage['programStageSections'])) {
+                                                foreach ($stage['programStageSections'] as $section) {
+                                                    if (isset($section['dataElements'])) {
+                                                        foreach ($section['dataElements'] as $de) {
+                                                            $allDataElements[] = ['dataElement' => $de];
+                                                        }
+                                                    }
+                                                }
+                                            } elseif (isset($stage['programStageDataElements']) && !empty($stage['programStageDataElements'])) {
+                                                $allDataElements = $stage['programStageDataElements'];
+                                            }
+                                            ?>
+                                            <?php foreach ($allDataElements as $deIndex => $deConfig): ?>
                                                 <?php $de = $deConfig['dataElement']; ?>
                                                 <div class="question-item" draggable="true" 
                                                      data-question-id="<?= $de['id'] ?>" 
@@ -1568,14 +1636,18 @@ if (!empty($programStages)) {
             }, 3000);
         }
 
-        // Question Grouping Functionality
-        let groupingMode = true;
-        let groupCounter = 0;
-        let draggedItem = null;
-        let questionGroupings = {}; // Store groupings per stage
-        let groupingsLoaded = false; // Prevent multiple loading
-
-        async function loadGroupingsFromDatabase() {
+        // Question Grouping Functionality - DISABLED (Using DHIS2 Native Sections)
+        // Custom grouping functionality has been removed - questions are now organized using DHIS2 program stage sections
+        
+        // Custom Grouping Functions - DISABLED
+        // All custom grouping functionality has been replaced with DHIS2 native program stage sections
+        
+        function loadGroupingsFromDatabase() { /* disabled */ }
+        function saveGrouping() { alert('Custom grouping has been removed. Use DHIS2 program stage sections instead.'); }
+        function resetGrouping() { /* disabled */ }
+        function createNewGroup() { alert('Custom grouping has been removed. Use DHIS2 program stage sections instead.'); }
+        function toggleGroupingMode() { /* disabled */ }
+        function initializeDragAndDrop() { /* disabled */ }
             if (groupingsLoaded) {
                 console.log('🚫 Groupings already loaded, skipping...');
                 return;
