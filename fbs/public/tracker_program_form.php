@@ -27,6 +27,11 @@ function showSurveyMessage($title, $message, $type = 'info') {
             $bgClass = 'bg-danger-subtle';
             $textClass = 'text-danger-emphasis';
             break;
+        case 'deadline':
+            $iconClass = 'fa-clock text-white';
+            $bgClass = 'bg-danger';
+            $textClass = 'text-white';
+            break;
         default:
             $iconClass = 'fa-info-circle text-primary';
             $bgClass = 'bg-primary-subtle';
@@ -39,20 +44,21 @@ function showSurveyMessage($title, $message, $type = 'info') {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?= htmlspecialchars($title) ?></title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <style>
             body {
-                background: white;
+                background: #f8f9fa;
                 min-height: 100vh;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             }
             .message-container {
-                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-                border-radius: 20px;
-                border: 1px solid rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
             }
             .message-icon {
-                font-size: 4rem;
-                opacity: 0.8;
+                font-size: 3rem;
+                margin-bottom: 1rem;
             }
         </style>
     </head>
@@ -105,7 +111,7 @@ if (!$survey) {
 if ($survey && $survey['is_active'] == 0) {
     showSurveyMessage("Survey Deadline Reached", 
         "The deadline for this survey has reached. Thank you for your time.", 
-        "info");
+        "deadline");
 }
 
 // Check if this is a DHIS2 tracker program
@@ -168,7 +174,7 @@ function fetchFromDHIS2($endpoint, $dhis2Config) {
 }
 
 // Fetch tracker program structure from DHIS2 with option set IDs
-$trackerProgram = fetchFromDHIS2("programs/{$survey['dhis2_program_uid']}.json?fields=id,name,description,programType,trackedEntityType,programStages[id,name,description,repeatable,minDaysFromStart,programStageDataElements[dataElement[id,name,displayName,valueType,optionSet[id,options[code,displayName]]]]],programTrackedEntityAttributes[trackedEntityAttribute[id,name,displayName,valueType,unique,optionSet[id,options[code,displayName]]],mandatory,displayInList]", $dhis2Config);
+$trackerProgram = fetchFromDHIS2("programs/{$survey['dhis2_program_uid']}.json?fields=id,name,description,programType,trackedEntityType,programStages[id,name,description,repeatable,minDaysFromStart,programStageSections[id,name,sortOrder,dataElements[id,name,displayName,valueType,optionSet[id,options[code,displayName]]]],programStageDataElements[dataElement[id,name,displayName,valueType,optionSet[id,options[code,displayName]]]]],programTrackedEntityAttributes[trackedEntityAttribute[id,name,displayName,valueType,unique,optionSet[id,options[code,displayName]]],mandatory,displayInList]", $dhis2Config);
 
 // Function to get option set values from local database
 function getLocalOptionSetValues($optionSetId) {
@@ -242,51 +248,56 @@ if ($trackerProgram && is_array($trackerProgram)) {
             }, $trackerProgram['programTrackedEntityAttributes']);
         }
 
-        // Enhance Program Stages
+        // Enhance Program Stages with Section-based structure
         if (isset($trackerProgram['programStages'])) {
             $trackerProgram['programStages'] = array_map(function($stage) {
-                if (isset($stage['programStageDataElements'])) {
-                    $stage['programStageDataElements'] = array_map(function($psde) {
-                        if (isset($psde['dataElement']['optionSet'])) {
-                            error_log("Processing DE " . $psde['dataElement']['id'] . " (" . $psde['dataElement']['name'] . ") with option set structure");
-                            
-                            // Try to get option set ID - it might be in different places
-                            $optionSetId = null;
-                            if (isset($psde['dataElement']['optionSet']['id'])) {
-                                $optionSetId = $psde['dataElement']['optionSet']['id'];
-                                error_log("Found option set ID: " . $optionSetId);
-                            } else {
-                                error_log("No option set ID found in optionSet structure for DE: " . $psde['dataElement']['id']);
-                            }
-                            
-                            if ($optionSetId) {
-                                // First try local database
-                                $options = getLocalOptionSetValues($optionSetId);
-                                if (!empty($options)) {
-                                    $psde['dataElement']['optionSet']['options'] = $options;
-                                    error_log("Replaced with " . count($options) . " local options for DE: " . $psde['dataElement']['id']);
-                                } else {
-                                    error_log("No local options found for option set: " . $optionSetId);
+                if (isset($stage['programStageSections'])) {
+                    $stage['programStageSections'] = array_map(function($section) {
+                        if (isset($section['dataElements'])) {
+                            $section['dataElements'] = array_map(function($dataElement) {
+                                if (isset($dataElement['optionSet'])) {
+                                    error_log("Processing DE " . $dataElement['id'] . " (" . $dataElement['name'] . ") with option set structure");
                                     
-                                    // Check if we already have options from DHIS2 API
-                                    if (isset($psde['dataElement']['optionSet']['options']) && !empty($psde['dataElement']['optionSet']['options'])) {
-                                        error_log("Using existing DHIS2 options (" . count($psde['dataElement']['optionSet']['options']) . ") for DE: " . $psde['dataElement']['id']);
+                                    // Try to get option set ID
+                                    $optionSetId = null;
+                                    if (isset($dataElement['optionSet']['id'])) {
+                                        $optionSetId = $dataElement['optionSet']['id'];
+                                        error_log("Found option set ID: " . $optionSetId);
                                     } else {
-                                        // Fallback: fetch from DHIS2 API
-                                        error_log("Attempting to fetch option set from DHIS2 API for: " . $optionSetId);
-                                        $apiOptions = getOptionSetValuesFromAPI($optionSetId, $dhis2Config);
-                                        if (!empty($apiOptions)) {
-                                            $psde['dataElement']['optionSet']['options'] = $apiOptions;
-                                            error_log("Fetched " . count($apiOptions) . " options from DHIS2 API for DE: " . $psde['dataElement']['id']);
+                                        error_log("No option set ID found in optionSet structure for DE: " . $dataElement['id']);
+                                    }
+                                    
+                                    if ($optionSetId) {
+                                        // First try local database
+                                        $options = getLocalOptionSetValues($optionSetId);
+                                        if (!empty($options)) {
+                                            $dataElement['optionSet']['options'] = $options;
+                                            error_log("Replaced with " . count($options) . " local options for DE: " . $dataElement['id']);
                                         } else {
-                                            error_log("No options found anywhere for option set: " . $optionSetId);
+                                            error_log("No local options found for option set: " . $optionSetId);
+                                            
+                                            // Check if we already have options from DHIS2 API
+                                            if (isset($dataElement['optionSet']['options']) && !empty($dataElement['optionSet']['options'])) {
+                                                error_log("Using existing DHIS2 options (" . count($dataElement['optionSet']['options']) . ") for DE: " . $dataElement['id']);
+                                            } else {
+                                                // Fallback: fetch from DHIS2 API
+                                                error_log("Attempting to fetch option set from DHIS2 API for: " . $optionSetId);
+                                                $apiOptions = getOptionSetValuesFromAPI($optionSetId, $dhis2Config);
+                                                if (!empty($apiOptions)) {
+                                                    $dataElement['optionSet']['options'] = $apiOptions;
+                                                    error_log("Fetched " . count($apiOptions) . " options from DHIS2 API for DE: " . $dataElement['id']);
+                                                } else {
+                                                    error_log("No options found anywhere for option set: " . $optionSetId);
+                                                }
+                                            }
                                         }
                                     }
                                 }
-                            }
+                                return $dataElement;
+                            }, $section['dataElements']);
                         }
-                        return $psde;
-                    }, $stage['programStageDataElements']);
+                        return $section;
+                    }, $stage['programStageSections']);
                 }
                 return $stage;
             }, $trackerProgram['programStages']);
@@ -325,7 +336,8 @@ if (!$trackerProgram) {
                 'name' => 'Program Stage (Offline)',
                 'description' => 'Form is in offline mode - limited functionality',
                 'repeatable' => false,
-                'programStageDataElements' => []
+                'programStageDataElements' => [],
+                'programStageSections' => []
             ]
         ]
     ];
@@ -3446,7 +3458,7 @@ if (!empty($programStages)) {
                 </button>
                 <button type="button" class="btn btn-primary" onclick="submitAllData()" id="finalSubmitBtn">
                     <i class="fas fa-paper-plane"></i>
-                    Submit Data
+                    Submit 
                 </button>
             </div>
         </div>
@@ -4473,30 +4485,6 @@ if (!empty($programStages)) {
             }
         }
 
-        // Load question groupings from database
-        async function loadQuestionGroupings() {
-            try {
-                const surveyId = programData?.surveySettings?.id;
-                if (!surveyId) {
-                    console.log('No survey ID available for groupings');
-                    return {};
-                }
-
-                const response = await fetch(`/fbs/admin/api/question_groupings.php?survey_id=${surveyId}`);
-                const result = await response.json();
-                
-                if (result.success && result.groupings) {
-                    console.log('✅ Loaded question groupings from database:', result.groupings);
-                    return result.groupings;
-                } else {
-                    console.log('No groupings found in database, using default display');
-                    return {};
-                }
-            } catch (error) {
-                console.error('Error loading question groupings:', error);
-                return {};
-            }
-        }
 
         // Stage Cards Population for Data Entry
         async function populateStagesCards() {
@@ -4504,9 +4492,6 @@ if (!empty($programStages)) {
             const container = document.getElementById('stagesContainer');
             console.log('Stages container found:', !!container);
             console.log('Program data available:', !!programData);
-
-            // Load question groupings from database
-            const questionGroupings = await loadQuestionGroupings();
             
             if (!container) {
                 console.error('stagesContainer element not found!');
@@ -4624,7 +4609,20 @@ if (!empty($programStages)) {
             const stage = programData.program?.programStages?.find(s => s.id === stageId);
             if (!stage) return '<div class="text-muted small">No data entered</div>';
             
-            const dataElements = stage.programStageDataElements || [];
+            // Get data elements from sections if available, otherwise fall back to programStageDataElements
+            let dataElements = [];
+            if (stage.programStageSections && stage.programStageSections.length > 0) {
+                // Collect all data elements from all sections
+                stage.programStageSections.forEach(section => {
+                    if (section.dataElements) {
+                        section.dataElements.forEach(de => {
+                            dataElements.push({ dataElement: de });
+                        });
+                    }
+                });
+            } else {
+                dataElements = stage.programStageDataElements || [];
+            }
             const filledData = [];
             
             // Get up to 6 filled fields for a more comprehensive summary
@@ -5203,97 +5201,7 @@ if (!empty($programStages)) {
             });
         }
         
-        // Function to load saved groupings from the database/API
-        async function loadSavedGroupings(stageId, dataElements) {
-            try {
-                console.log('Loading saved groupings for stage:', stageId);
-                const surveyId = programData.surveySettings?.id;
-                
-                if (!surveyId) {
-                    console.log('No survey ID available, showing questions without grouping');
-                    // Return questions in a single group without title
-                    return { '': dataElements };
-                }
-                
-                // Use the database-driven API path
-                const apiPath = `/fbs/admin/api/question_groupings.php?survey_id=${surveyId}`;
-                console.log('Loading groupings from:', apiPath);
-                
-                const response = await fetch(apiPath);
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    
-                    if (result.success && result.groupings && result.groupings[stageId]) {
-                        console.log('Found saved groupings for stage:', stageId, result.groupings[stageId]);
-                        
-                        // Convert saved groupings to the format expected by the form
-                        const savedGroups = result.groupings[stageId];
-                        const questionGroups = {};
-                        
-                        // Create a lookup map of data elements by ID
-                        const elementMap = {};
-                        dataElements.forEach(elementConfig => {
-                            elementMap[elementConfig.dataElement.id] = elementConfig;
-                        });
-                        
-                        // Process saved groups - updated for new database format
-                        savedGroups.forEach(group => {
-                            const groupTitle = group.groupName || 'Unnamed Group';
-                            
-                            // Don't show "Ungrouped Questions" as a header
-                            const displayTitle = (groupTitle === 'Ungrouped Questions') ? '' : groupTitle;
-                            questionGroups[displayTitle] = [];
-                            
-                            if (group.questions && Array.isArray(group.questions)) {
-                                group.questions.forEach(questionRef => {
-                                    const elementConfig = elementMap[questionRef.questionId];
-                                    if (elementConfig) {
-                                        questionGroups[displayTitle].push(elementConfig);
-                                    }
-                                });
-                            }
-                        });
-                        
-                        // Add any ungrouped questions to a default group
-                        const groupedQuestionIds = new Set();
-                        Object.values(questionGroups).flat().forEach(element => {
-                            groupedQuestionIds.add(element.dataElement.id);
-                        });
-                        
-                        const ungroupedElements = dataElements.filter(elementConfig => 
-                            !groupedQuestionIds.has(elementConfig.dataElement.id)
-                        );
-                        
-                        if (ungroupedElements.length > 0) {
-                            questionGroups[''] = ungroupedElements; // Empty string = no group header
-                        }
-                        
-                        console.log('✓ Successfully loaded custom groupings:', questionGroups);
-                        return questionGroups;
-                    } else {
-                        console.log(`No custom groupings found for stage ${stageId}`);
-                    }
-                } else {
-                    console.log(`Groupings API returned ${response.status}: ${response.statusText}`);
-                }
-                
-            } catch (error) {
-                console.error('Error loading saved groupings:', error);
-            }
-            
-            // Fallback: show questions without grouping titles
-            console.log('No saved groupings found, showing questions without group titles');
-            return { '': dataElements };
-        }
         
-        // Function to group questions by category based on naming patterns
-        // Use database-driven grouping system
-        function groupQuestionsByCategory(dataElements) {
-            // This function is disabled - only use saved groupings from question_groupings.php
-            console.log('Default grouping function disabled - use database groupings only');
-            return {};
-        }
         
         // Helper function to create question input HTML (like committed version)
         function createQuestionInput(dataElement, inputId, label) {
@@ -5588,14 +5496,30 @@ if (!empty($programStages)) {
             separator.className = 'my-4';
             modalContainer.appendChild(separator);
             
-            // Load saved groupings or fall back to default grouping
+            // Use DHIS2 native sections for question organization
             let questionGroups;
-            try {
-                questionGroups = await loadSavedGroupings(stage.id, stage.programStageDataElements || []);
-            } catch (error) {
-                console.error('Failed to load groupings:', error);
-                // Show questions without grouping
-                questionGroups = { '': stage.programStageDataElements || [] };
+            if (stage.programStageSections && stage.programStageSections.length > 0) {
+                // Use native DHIS2 sections
+                questionGroups = {};
+                stage.programStageSections
+                    .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+                    .forEach(section => {
+                        if (section.dataElements && section.dataElements.length > 0) {
+                            // Wrap dataElements to match expected format
+                            const wrappedElements = section.dataElements.map(de => ({ dataElement: de }));
+                            questionGroups[section.name] = wrappedElements;
+                        }
+                    });
+                console.log('Using DHIS2 native sections:', Object.keys(questionGroups));
+            } else {
+                // Fallback to programStageDataElements if sections are not configured
+                if (stage.programStageDataElements && stage.programStageDataElements.length > 0) {
+                    questionGroups = { '': stage.programStageDataElements };
+                    console.log('No sections configured - using programStageDataElements fallback');
+                } else {
+                    questionGroups = {};
+                    console.warn('No questions found for stage:', stage.id);
+                }
             }
             
             // Create questions with grouping
@@ -5918,7 +5842,22 @@ if (!empty($programStages)) {
                         console.log('Program Stages:', programData.program.programStages.length);
                         programData.program.programStages.forEach((stage, s) => {
                             console.log(`Stage ${s}:`, stage.name);
-                            if (stage.programStageDataElements) {
+                            
+                            // Log sections if available
+                            if (stage.programStageSections && stage.programStageSections.length > 0) {
+                                console.log(`  Sections (${stage.programStageSections.length}):`);
+                                stage.programStageSections.forEach((section, sec) => {
+                                    console.log(`    Section ${sec}: ${section.name} (${section.dataElements?.length || 0} elements)`);
+                                    if (section.dataElements) {
+                                        section.dataElements.forEach((de, d) => {
+                                            if (de.optionSet) {
+                                                console.log(`      DE ${d}:`, de.name, 'has optionSet with', de.optionSet.options?.length, 'options');
+                                            }
+                                        });
+                                    }
+                                });
+                            } else if (stage.programStageDataElements) {
+                                // Fall back to old structure for compatibility
                                 stage.programStageDataElements.forEach((de, d) => {
                                     if (de.dataElement.optionSet) {
                                         console.log(`  DE ${d}:`, de.dataElement.name, 'has optionSet with', de.dataElement.optionSet.options?.length, 'options');

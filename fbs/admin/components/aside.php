@@ -52,7 +52,8 @@ $menuItems = [
             <img src="argon-dashboard-master/assets/img/webhook-icon.png"
              class="navbar-brand-img"
              alt="Survey Engine Logo"
-             style="max-height: 4rem; width: auto; height: 90px;">
+             style="height: 60px; width: auto; max-width: 100%;"
+             loading="lazy">
             <span class="ms-1 font-weight-bold d-block mt-2 text-dark" style="font-size: 1rem;">Admin Panel</span>
         </a>
     </div>
@@ -86,7 +87,9 @@ $menuItems = [
                         ?>
                         <img src="<?php echo htmlspecialchars($profileImagePath); ?>"
                              alt="User"
-                             class="avatar-img rounded-circle border border-2 border-white">
+                             class="avatar-img rounded-circle border border-2 border-white"
+                             style="width: 32px; height: 32px; object-fit: cover;"
+                             loading="lazy">
                     </div>
                     <div class="d-flex flex-column">
                         <span class="fw-bold text-dark"><?= $_SESSION['admin_username'] ?? 'Admin' ?></span>
