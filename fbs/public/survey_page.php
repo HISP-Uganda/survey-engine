@@ -2273,6 +2273,13 @@ unset($option);
                 // Prevent default submission to handle custom validation
                 e.preventDefault();
 
+                // Disable submit button immediately and show loading state
+                const submitButton = document.getElementById('submit-button-final');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Submitting...';
+                }
+
                 // 1. Validate facility section first (if visible and required)
                 const isFacilitySectionVisible = facilitySectionElement && facilitySectionElement.style.display !== 'none';
                 const facilityId = facilityIdInput ? facilityIdInput.value : '';
@@ -2280,6 +2287,11 @@ unset($option);
                 if (isFacilitySectionVisible && facilityIdInput && facilityIdInput.hasAttribute('required') && !facilityId) {
                     showValidationMessage('Please select a location from the dropdown.');
                     if (facilitySearchInput) facilitySearchInput.focus();
+                    // Re-enable button on validation failure
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Submit';
+                    }
                     return; // Stop submission
                 }
 
@@ -2296,16 +2308,27 @@ unset($option);
                                 showValidationMessage('Please answer all required questions before submitting.');
                                 // Optionally, navigate to the page where this question is, and focus
                                 // For simplicity, we just alert/show message here for cross-page issues.
+                                // Re-enable button on validation failure
+                                if (submitButton) {
+                                    submitButton.disabled = false;
+                                    submitButton.textContent = 'Submit';
+                                }
                                 return; // Stop submission
                             }
                         } else if (!input.value.trim()) {
                             showValidationMessage('Please answer all required questions before submitting.');
+                            // Re-enable button on validation failure
+                            if (submitButton) {
+                                submitButton.disabled = false;
+                                submitButton.textContent = 'Submit';
+                            }
                             return; // Stop submission
                         }
                     }
                 }
 
                 // If all validations pass, manually submit the form
+                // Button stays disabled during submission
                 this.submit();
             });
 
