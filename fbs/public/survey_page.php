@@ -1556,9 +1556,9 @@ unset($option);
 
             <div class="facility-section" id="facility-section">
                 <div class="form-group">
-                    <label for="facility-search">Locations:</label>
+                    <label for="facility-search">Schools:</label>
                     <div class="searchable-dropdown">
-                        <input type="text" id="facility-search" placeholder="Type to search locations..." autocomplete="off">
+                        <input type="text" id="facility-search" placeholder="Type to search for school..." autocomplete="off">
                         <div class="dropdown-results" id="facility-results"></div>
                         <input type="hidden" id="facility_id" name="facility_id">
                     </div>
@@ -1763,7 +1763,7 @@ unset($option);
                             <input type="tel"
                                    class="form-control enhanced-input"
                                    name="question_<?php echo $question['id']; ?>"
-                                   placeholder="+1 (555) 123-4567"
+                                   placeholder="256XXXXXXXXX"
                                    <?php echo $question['is_required'] ? 'required' : ''; ?>>
                         </div>
 
